@@ -148,6 +148,7 @@
                 <span style={{ position: 'absolute', left: 12, color: 'var(--text-subtle)', display: 'flex' }}><Icon name="search" size={16} /></span>
                 <input placeholder="Tìm đơn, sản phẩm…" style={{ width: 260, height: 40, paddingLeft: 36, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none' }} />
               </div>
+              <select aria-label="Ngôn ngữ" defaultValue={window.LZI18n.lang} onChange={(e) => window.LZI18n.set(e.target.value)} data-no-i18n="" style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', font: 'var(--type-caption)', color: 'var(--text-body)', padding: '0 6px' }}><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
               <NotifBell />
               <button style={ico} aria-label="Trợ giúp" onClick={() => { window.location.href = '../storefront/index.html?screen=page&id=help-center'; }}><Icon name="circle-help" size={20} /></button>
               <div style={{ width: 1, height: 28, background: 'var(--border-default)', margin: '0 4px' }} />

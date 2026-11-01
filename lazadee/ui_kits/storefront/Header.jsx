@@ -200,7 +200,9 @@
   function LangSelect() {
     const LANGS = [{ id: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' }, { id: 'en', label: 'English', flag: '🇬🇧' }];
     const [open, setOpen] = React.useState(false);
-    const [lang, setLang] = React.useState('vi');
+    const [lang, setLangState] = React.useState(window.LZI18n.lang);
+    const setLang = (next) => { setLangState(next); window.LZI18n.set(next); };
+    React.useEffect(() => { const on = (e) => setLangState(e.detail); window.addEventListener('lz_lang', on); return () => window.removeEventListener('lz_lang', on); }, []);
     const cur = LANGS.find((l) => l.id === lang);
     return (
       <span style={{ position: 'relative' }}>

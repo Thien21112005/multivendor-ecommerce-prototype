@@ -358,7 +358,7 @@
     const provName = prov === 'apple' ? 'Apple' : 'Google';
     const ProvIcon = prov === 'apple' ? AppleLogo : GoogleG;
     // SSO accounts come with no phone / birthday filled in (like Shopee).
-    const [f, setF] = React.useState({ name: USER.name, email: USER.email, phone: isSSO ? '' : USER.phone, gender: isSSO ? '' : USER.gender, dob: isSSO ? '' : '1996-08-12', bio: isSSO ? '' : USER.bio, lang: 'vi' });
+    const [f, setF] = React.useState({ name: USER.name, email: USER.email, phone: isSSO ? '' : USER.phone, gender: isSSO ? '' : USER.gender, dob: isSSO ? '' : '1996-08-12', bio: isSSO ? '' : USER.bio, lang: window.LZI18n.lang });
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
     const [saved, setSaved] = React.useState(false);
     const [emailHint, setEmailHint] = React.useState(false);
@@ -417,7 +417,7 @@
                 {[{ id: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' }, { id: 'en', label: 'English', flag: '🇬🇧' }].map((l) => {
                   const on = f.lang === l.id;
                   return (
-                    <button key={l.id} type="button" onClick={() => set('lang', l.id)} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 16px', borderRadius: 'var(--radius-md)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--orange-700)' : 'var(--text-body)', font: (on ? '600 ' : '500 ') + '14px var(--font-sans)', cursor: 'pointer' }}>
+                    <button key={l.id} type="button" onClick={() => { set('lang', l.id); window.LZI18n.set(l.id); }} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 16px', borderRadius: 'var(--radius-md)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--orange-700)' : 'var(--text-body)', font: (on ? '600 ' : '500 ') + '14px var(--font-sans)', cursor: 'pointer' }}>
                       <span style={{ fontSize: 17 }}>{l.flag}</span>{l.label}
                       {on && <Icon name="check" size={16} style={{ marginLeft: 2 }} />}
                     </button>

@@ -97,6 +97,7 @@
                   {PREVIEW_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
+              <select aria-label="Ngôn ngữ" defaultValue={window.LZI18n.lang} onChange={(e) => window.LZI18n.set(e.target.value)} data-no-i18n="" style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', font: 'var(--type-caption)', color: 'var(--text-body)', padding: '0 6px' }}><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
               <AdminBell onNav={onNav} />
               <button style={ico} aria-label="Tài khoản" onClick={() => onNav('account')}><Icon name="settings" size={20} /></button>
             </div>
