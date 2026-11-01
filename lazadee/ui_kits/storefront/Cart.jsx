@@ -71,7 +71,7 @@
                 <span onClick={() => onShop && onShop(vid)} style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)', cursor: 'pointer' }}>{vendor.name}</span>
                 {vendor.mall && <Badge variant="solid">MALL</Badge>}
                 <button style={chatBtn} onClick={() => onChat && onChat(vid, lines[0])}><Icon name="message-circle" size={14} /> Chat</button>
-                <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Một đơn riêng · Phí ship {formatVND(vendor.ship)}</span>
+                <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Một đơn riêng · {vSel.length && LZ.shipFee(vid, vSel) === 0 ? 'Shop miễn phí vận chuyển' : 'Phí ship ' + formatVND(vendor.ship)}</span>
               </div>
               {lines.map((l) => (
                 <div key={l.key} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderBottom: '1px solid var(--border-subtle)' }}>

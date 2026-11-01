@@ -55,9 +55,9 @@
   ];
 
   const REFUNDS = [
-    { id: 'RFN-0231', order: 'ORD-2412-0035', buyer: 'Vũ Minh Quân', shop: 'Beauty Box', amount: 178000, reason: 'Hàng không đúng mô tả', state: 'OPEN', opened: '2 giờ trước', media: ['skincare', 'cosmetics'] },
-    { id: 'RFN-0230', order: 'ORD-2412-0028', buyer: 'Hoàng Thu Trang', shop: 'Shoe Republic', amount: 320000, reason: 'Giao sai size', state: 'OPEN', opened: '5 giờ trước', media: ['heels'] },
-    { id: 'RFN-0229', order: 'ORD-2412-0021', buyer: 'Bùi Đức Anh', shop: 'TechZone Official', amount: 389000, reason: 'Sản phẩm lỗi', state: 'REFUNDED', opened: 'Hôm qua', media: ['headphones'],
+    { id: 'RFN-0231', order: 'LZD-20260608-000035', buyer: 'Vũ Minh Quân', shop: 'Beauty Box', amount: 178000, reason: 'Hàng không đúng mô tả', state: 'OPEN', opened: '2 giờ trước', media: ['skincare', 'cosmetics'] },
+    { id: 'RFN-0230', order: 'LZD-20260608-000028', buyer: 'Hoàng Thu Trang', shop: 'Shoe Republic', amount: 320000, reason: 'Giao sai size', state: 'OPEN', opened: '5 giờ trước', media: ['heels'] },
+    { id: 'RFN-0229', order: 'LZD-20260608-000021', buyer: 'Bùi Đức Anh', shop: 'TechZone Official', amount: 389000, reason: 'Sản phẩm lỗi', state: 'REFUNDED', opened: 'Hôm qua', media: ['headphones'],
       gateway: { name: 'VNPAY', txnId: 'TXN-8847', gatewayRefundId: 'VNP-RF-20260620-001', amount: 389000, status: 'SUCCESS', createdAt: '20/06/2026 14:32:10' } },
   ];
 
@@ -77,10 +77,10 @@
 
   // Append-only platform ledger (immutable). Every money movement, newest first.
   const LEDGER = [
-    { seq: 100482, ts: '08/06/2026 14:22:07', event: 'ESCROW_IN',      ref: 'ORD-2412-0041', debit: '', credit: 778000, account: 'Escrow Liability' },
-    { seq: 100481, ts: '08/06/2026 14:22:07', event: 'COMMISSION',     ref: 'ORD-2412-0041', debit: 38900, credit: '', account: 'Platform Revenue' },
-    { seq: 100480, ts: '08/06/2026 09:10:55', event: 'ESCROW_IN',      ref: 'ORD-2412-0040', debit: '', credit: 690000, account: 'Escrow Liability' },
-    { seq: 100479, ts: '07/06/2026 18:46:12', event: 'ESCROW_RELEASE', ref: 'ORD-2412-0039', debit: 1245000, credit: '', account: 'Escrow Liability' },
+    { seq: 100482, ts: '08/06/2026 14:22:07', event: 'ESCROW_IN',      ref: 'LZD-20260608-000041', debit: '', credit: 778000, account: 'Escrow Liability' },
+    { seq: 100481, ts: '08/06/2026 14:22:07', event: 'COMMISSION',     ref: 'LZD-20260608-000041', debit: 38900, credit: '', account: 'Platform Revenue' },
+    { seq: 100480, ts: '08/06/2026 09:10:55', event: 'ESCROW_IN',      ref: 'LZD-20260608-000040', debit: '', credit: 690000, account: 'Escrow Liability' },
+    { seq: 100479, ts: '07/06/2026 18:46:12', event: 'ESCROW_RELEASE', ref: 'LZD-20260608-000039', debit: 1245000, credit: '', account: 'Escrow Liability' },
     { seq: 100478, ts: '07/06/2026 18:46:12', event: 'PAYOUT_ACCRUE',  ref: 'WALLET·techzone', debit: '', credit: 1245000, account: 'Seller Payable' },
     { seq: 100477, ts: '06/06/2026 16:30:41', event: 'PAYOUT_SETTLE',  ref: 'PAYOUT-0008', debit: 3400000, credit: '', account: 'Seller Payable' },
     { seq: 100476, ts: '06/06/2026 08:15:33', event: 'REFUND',         ref: 'RFN-0229', debit: 389000, credit: '', account: 'Escrow Liability' },
@@ -166,7 +166,7 @@
   // Append-only audit trail of sensitive actions (immutable). Newest first.
   const AUDIT = [
     { ts: '22/06/2026 09:42:11', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_APPROVED', cat: 'kyc', target: 'KYC-1037 · TravelGear', ip: '113.161.40.12', result: 'OK' },
-    { ts: '22/06/2026 09:15:03', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'ORD-2412-0039 · 1.245.000₫', ip: '10.0.2.7', result: 'OK' },
+    { ts: '22/06/2026 09:15:03', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'LZD-20260608-000039 · 1.245.000₫', ip: '10.0.2.7', result: 'OK' },
     { ts: '22/06/2026 08:51:46', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'PAYOUT_APPROVED', cat: 'finance', target: 'PAYOUT-0012 · 5.000.000₫', ip: '113.161.40.88', result: 'OK' },
     { ts: '22/06/2026 08:33:20', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'yen.dh@lazadee.vn (sai mật khẩu ×3)', ip: '45.119.82.201', result: 'DENIED' },
     { ts: '21/06/2026 22:07:55', actor: 'nghia.vd@lazadee.vn', role: 'Moderator', action: 'REVIEW_HIDDEN', cat: 'moderation', target: 'RV-9910 · ngôn từ phản cảm', ip: '171.244.10.5', result: 'OK' },
@@ -177,7 +177,7 @@
     { ts: '21/06/2026 11:18:33', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'admin@lazadee.vn (tài khoản không tồn tại)', ip: '193.32.126.44', result: 'DENIED' },
     { ts: '21/06/2026 09:00:00', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'STAFF_INVITED', cat: 'security', target: 'support1@lazadee.vn', ip: '113.161.40.12', result: 'OK' },
     { ts: '20/06/2026 20:44:17', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_REJECTED', cat: 'kyc', target: 'KYC-1033 · ảnh giấy tờ mờ', ip: '171.244.10.5', result: 'OK' },
-    { ts: '20/06/2026 15:12:50', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'ORD-2412-0033 · 536.000₫', ip: '10.0.2.7', result: 'OK' },
+    { ts: '20/06/2026 15:12:50', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'LZD-20260608-000033 · 536.000₫', ip: '10.0.2.7', result: 'OK' },
   ];
 
   const DASHBOARD = {

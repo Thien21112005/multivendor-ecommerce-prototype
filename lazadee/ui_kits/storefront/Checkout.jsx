@@ -39,7 +39,7 @@
     const [lazOpen, setLazOpen] = React.useState(false);
     const [shopPicker, setShopPicker] = React.useState(null); // vendorId
     const [notes, setNotes] = React.useState({});
-    const [oos, setOos] = React.useState(new URLSearchParams(location.search).get('oos') === '1'); // simulate ERR_STOCK_UNAVAILABLE
+    const [oos, setOos] = React.useState(new URLSearchParams(location.search).get('oos') === '1'); // simulate LZD-INV-4090
 
     const groups = React.useMemo(() => {
       const m = {}; cart.forEach((l) => { (m[l.vendorId] = m[l.vendorId] || []).push(l); });
@@ -53,6 +53,8 @@
     const { subtotal, shipping, platformDisc, freeshipDisc, shopDisc, xuCap, xuDiscount, total, platformVoucher, freeshipVoucher } = price;
     const coins = (LZ.USER && LZ.USER.coins) || 0;
 
+    const best = LZ.bestVouchers(live);
+    const extra = LZ.priceCart(live, best, false).discountTotal - LZ.priceCart(live, voucherSel, false).discountTotal;
     let orderSeq = 40;
     const canPlace = cart.length > (oos ? 1 : 0) && !placing;
 
@@ -64,8 +66,8 @@
         const orders = groups.filter(([, ls]) => liveLines(ls).length).map(([vid, ls]) => {
           const lines = liveLines(ls);
           const sub = lines.reduce((n, l) => n + l.price * l.qty, 0);
-          const grand = Math.max(0, sub + V[vid].ship - (price.shopByVendor[vid] || 0) - (price.shipCutByVendor[vid] || 0) - lines.reduce((n, l) => n + (price.perLine[l.key] || 0), 0));
-          return { id: 'ORD-2412-00' + (seq++), vendorId: vid, grandTotal: grand };
+          const grand = Math.max(0, sub + LZ.shipFee(vid, lines) - (price.shopByVendor[vid] || 0) - (price.shipCutByVendor[vid] || 0) - lines.reduce((n, l) => n + (price.perLine[l.key] || 0), 0));
+          return { id: 'LZD-20260608-0000' + (seq++), vendorId: vid, grandTotal: grand };
         });
         const result = { sessionId: 'CS-' + Date.now().toString(36).toUpperCase(), orders, price, keys: live.map((l) => l.key), pay };
         setPlacing(false);
@@ -101,11 +103,12 @@
               const vendor = V[vid];
               const liveV = liveLines(lines);
               const vSub = liveV.reduce((n, l) => n + l.price * l.qty, 0);
-              const oid = 'ORD-2412-00' + (orderSeq++);
+              const oid = 'LZD-20260608-0000' + (orderSeq++);
               const platformCut = liveV.reduce((n, l) => n + (price.perLine[l.key] || 0), 0);
               const shopCut = price.shopByVendor[vid] || 0;
               const shipCut = price.shipCutByVendor[vid] || 0;
-              const vTotal = vSub + (liveV.length ? vendor.ship : 0) - shopCut - shipCut - platformCut;
+              const vFee = liveV.length ? LZ.shipFee(vid, liveV) : 0;
+              const vTotal = vSub + vFee - shopCut - shipCut - platformCut;
               return (
                 <div key={vid} style={card}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)', marginBottom: 4 }}>
@@ -125,7 +128,7 @@
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{l.title}</div>
                           <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>Phân loại: {l.variant}</div>
-                          {dead && <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}><StatusBadge status="ERROR" label="ERR_STOCK_UNAVAILABLE" dot={false} /><span style={{ font: 'var(--type-caption)', color: 'var(--red-600)' }}>Sản phẩm vừa hết hàng — đã gỡ khỏi đơn.</span></div>}
+                          {dead && <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}><StatusBadge status="ERROR" label="LZD-INV-4090" dot={false} /><span style={{ font: 'var(--type-caption)', color: 'var(--red-600)' }}>Sản phẩm vừa hết hàng — đã gỡ khỏi đơn.</span></div>}
                         </div>
                         <div style={{ textAlign: 'right', flex: 'none' }}>
                           <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: dead ? 'var(--text-disabled)' : 'var(--text-body)', textDecoration: dead ? 'line-through' : 'none', fontVariantNumeric: 'tabular-nums' }}>{formatVND(l.price)}</div>
@@ -147,7 +150,7 @@
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 12 }}>
                     <Icon name="truck" size={16} style={{ color: 'var(--mint-600)' }} />
-                    <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Giao nhanh · {formatVND(vendor.ship)}{shipCut > 0 && <span style={{ color: 'var(--mint-600)', marginLeft: 6 }}>(Freeship −{formatVND(shipCut)})</span>}</span>
+                    <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Giao nhanh · {vFee === 0 ? 'Shop miễn phí vận chuyển' : formatVND(vFee)}{shipCut > 0 && <span style={{ color: 'var(--mint-600)', marginLeft: 6 }}>(Freeship −{formatVND(shipCut)})</span>}</span>
                     <span style={{ marginLeft: 'auto', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Tổng đơn ({liveV.length} SP): <b style={{ color: 'var(--text-price)', fontSize: 16, fontVariantNumeric: 'tabular-nums' }}>{formatVND(Math.max(0, vTotal))}</b></span>
                   </div>
                 </div>
@@ -172,6 +175,11 @@
                   )}
                 </div>
                 <Icon name="chevron-right" size={20} style={{ color: 'var(--text-muted)' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>
+                {extra > 0
+                  ? <><Icon name="zap" size={14} style={{ color: 'var(--color-primary)' }} /><span>Có bộ mã tiết kiệm thêm {formatVND(extra)}</span><Button size="sm" variant="outline" style={{ marginLeft: 'auto' }} onClick={() => setVoucherSel(best)}>Áp bộ mã tốt nhất</Button></>
+                  : <><Icon name="circle-check" size={14} style={{ color: 'var(--mint-600)' }} /><span>Đang dùng bộ mã giảm nhiều nhất</span></>}
               </div>
             </div>
 

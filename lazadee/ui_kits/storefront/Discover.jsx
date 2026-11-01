@@ -48,7 +48,7 @@
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 18, borderLeft: '4px solid var(--color-primary)', paddingLeft: 14 }}>
           <div>
             <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', margin: 0 }}>Gợi ý hôm nay</h1>
-            <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', margin: '4px 0 0' }}>Sản phẩm được cá nhân hoá dành riêng cho bạn · {TOTAL.toLocaleString('vi-VN')} sản phẩm</p>
+            <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', margin: '4px 0 0' }}>Sản phẩm bán chạy và mới theo danh mục bạn xem gần đây · {TOTAL.toLocaleString('vi-VN')} sản phẩm</p>
           </div>
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-subtle)' }}>Trang {page}/{TOTAL_PAGES}</span>
         </div>

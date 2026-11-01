@@ -57,19 +57,19 @@ function applyTheme(doc, accent, radius) {
 /* ---- PRD journeys guide ---------------------------------------------------- */
 const JOURNEYS = [
   { n: 1, title: 'Tách giỏ đa người bán & thanh toán gộp', surf: 'storefront',
-    desc: 'Một giỏ gồm nhiều shop được tách thành các đơn riêng, gộp thanh toán một lần.', ref: 'FR-ORD-001' },
+    desc: 'Một giỏ gồm nhiều shop được tách thành các đơn riêng, gộp thanh toán một lần.', ref: 'FR-ORD-02, FR-ORD-03' },
   { n: 2, title: 'Mã giảm giá chồng (Sàn + Shop + Freeship)', surf: 'storefront',
-    desc: 'Áp đồng thời 1 voucher Sàn + 1 Shop + 1 Freeship, phân bổ giảm giá theo từng sản phẩm.', ref: 'FR-ORD-003' },
+    desc: 'Áp đồng thời voucher Shop → Sàn → Freeship rồi đến Xu, phân bổ giảm giá theo từng sản phẩm.', ref: 'FR-PRO-04' },
   { n: 3, title: 'Chống bán quá hàng', surf: 'storefront',
-    desc: 'Khoá mềm tồn kho 15 phút khi thanh toán; hết hàng giữa chừng trả về ERR_STOCK_UNAVAILABLE.', ref: 'FR-ORD-002' },
+    desc: 'Khoá mềm tồn kho 15 phút khi thanh toán; hết hàng giữa chừng trả về LZD-INV-4090.', ref: 'FR-ORD-03, NFR-03' },
   { n: 4, title: 'KYC: nộp hồ sơ & duyệt', surf: 'vendor',
-    desc: 'Người bán nộp hồ sơ KYC; Staff/Admin duyệt hoặc từ chối kèm lý do. Chưa VERIFIED thì không đăng bán.', ref: 'FR-VND-001' },
+    desc: 'Người bán nộp hồ sơ KYC; Staff/Admin duyệt hoặc từ chối kèm lý do. Chưa VERIFIED thì không đăng bán.', ref: 'FR-VND-02, FR-VND-03' },
   { n: 5, title: 'Escrow, hoa hồng & payout', surf: 'vendor',
-    desc: 'Tiền giữ tạm trong escrow; khi hoàn tất, sàn trừ hoa hồng và ghi Net vào ví người bán.', ref: 'FR-FIN-001' },
+    desc: 'Tiền giữ tạm trong escrow; khi hoàn tất, sàn trừ hoa hồng và ghi Net vào ví người bán.', ref: 'FR-PAY-03, FR-PAY-05' },
   { n: 6, title: 'Vòng đời đơn hàng', surf: 'vendor',
-    desc: 'PAID → SHIPPED → DELIVERED → COMPLETED. Người bán chuẩn bị hàng, gọi 3PL, in vận đơn.', ref: 'UC-Fulfillment' },
+    desc: 'PAID → CONFIRMED → PREPARING → READY_FOR_PICKUP → DELIVERING → DELIVERED → COMPLETED. Người bán xác nhận, chuẩn bị hàng, gọi 3PL, in vận đơn.', ref: 'UC-LOG-16, UC-LOG-01, UC-LOG-02' },
   { n: 7, title: 'Đổi/trả & phân xử hoàn tiền', surf: 'admin',
-    desc: 'Khách gửi yêu cầu đổi trả kèm bằng chứng; Staff/Admin duyệt, từ chối, hoặc hoàn tiền.', ref: 'UC-Returns' },
+    desc: 'Khách gửi yêu cầu đổi trả kèm bằng chứng; Staff/Admin duyệt, từ chối, hoặc hoàn tiền.', ref: 'UC-SUP-01…04' },
 ];
 
 function App() {

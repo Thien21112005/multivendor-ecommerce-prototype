@@ -90,6 +90,7 @@
   const METHODS = [
     { id: 'vnpay', name: 'Cổng VNPAY', meta: 'Thẻ ATM / QR Code' },
     { id: 'vietqr', name: 'Chuyển khoản VietQR', meta: 'Tự xác nhận qua SePay' },
+    { id: 'cod', name: 'Thanh toán khi nhận hàng (COD)', meta: 'Chờ shop xác nhận' },
   ];
   // Pay again for a waiting order: choose a method, then finish in that method's flow.
   function PayModal({ open, amount, code, initial, onClose, onPaid }) {
@@ -100,12 +101,13 @@
     if (!open) return null;
     const next = () => {
       if (method === 'vietqr') { setStage('qr'); return; }
+      if (method === 'cod') { onPaid(method); return; }
       setBusy(true);
       setTimeout(() => { setBusy(false); onPaid(method); }, 700);
     };
     return (
       <Modal open onClose={onClose} width={480} title={stage === 'qr' ? 'Thanh toán VietQR' : 'Chọn phương thức thanh toán'}
-        footer={stage === 'pick' ? <><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button disabled={busy} onClick={next}>{busy ? 'Đang chuyển tới VNPAY...' : 'Thanh toán ' + fmt(amount)}</Button></> : null}>
+        footer={stage === 'pick' ? <><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button disabled={busy} onClick={next}>{busy ? 'Đang chuyển tới VNPAY...' : method === 'cod' ? 'Xác nhận COD ' + fmt(amount) : 'Thanh toán ' + fmt(amount)}</Button></> : null}>
         {stage === 'qr'
           ? <VietQrPanel amount={amount} code={code} onPaid={() => onPaid('vietqr')} onBack={() => (initial === 'vietqr' ? onClose() : setStage('pick'))} />
           : METHODS.map((m) => (

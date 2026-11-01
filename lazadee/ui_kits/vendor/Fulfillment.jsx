@@ -8,15 +8,15 @@
   const { ghnStatus } = window.LZV;
 
   const ORDERS = [
-    { id: 'ORD-2412-0046', customer: 'Trần Thị Mai', addr: 'Q1, TP.HCM', items: [['Tai nghe ANC Pro 5', 'Đen / Pro', 1, 389000]], total: 414000, status: 'NEW', pay: 'VNPay', note: 'Giao giờ hành chính giúp mình nhé.', at: 46 },
-    { id: 'ORD-2412-0045', customer: 'Đinh Gia Bảo', addr: 'Thủ Đức, TP.HCM', items: [['Bàn phím cơ RGB', 'Blue switch', 1, 459000]], total: 484000, status: 'NEW', pay: 'COD', note: '', at: 45 },
-    { id: 'ORD-2412-0041', customer: 'Trần Thị Mai', addr: 'Q1, TP.HCM', items: [['Tai nghe ANC Pro 5', 'Đen / Pro', 1, 389000], ['Serum Vitamin C', '30ml', 1, 178000]], total: 778000, status: 'CONFIRMED', pay: 'VNPay', note: 'Gói kỹ giúp mình, đồ làm quà.', at: 41 },
-    { id: 'ORD-2412-0040', customer: 'Nguyễn Văn An', addr: 'Cầu Giấy, Hà Nội', items: [['Đồng hồ Watch S2', 'Navy', 1, 690000]], total: 690000, status: 'PREPARING', pay: 'VietQR', note: '', at: 40 },
-    { id: 'ORD-2412-0038', customer: 'Lê Hoàng Phúc', addr: 'Hải Châu, Đà Nẵng', items: [['Bàn phím cơ RGB', 'Đen/Blue', 1, 459000]], total: 459000, status: 'SHIPPED', pay: 'VNPay', ghn: 'transporting', waybill: 'VN931042771', carrier: 'Lazadee Express', note: '', at: 38 },
-    { id: 'ORD-2412-0036', customer: 'Đỗ Minh Khang', addr: 'Biên Hòa, Đồng Nai', items: [['Loa bluetooth mini IPX7', 'Đen', 2, 320000]], total: 640000, status: 'SHIPPED', pay: 'COD', ghn: 'delivering', waybill: 'VN931042698', carrier: 'GHN', note: '', at: 36 },
-    { id: 'ORD-2412-0034', customer: 'Bùi Thu Hằng', addr: 'Ninh Kiều, Cần Thơ', items: [['Webcam Full HD', 'Đen', 1, 540000]], total: 540000, status: 'SHIPPED', pay: 'VNPay', ghn: 'delivery_fail', waybill: 'VN931042544', carrier: 'GHTK', note: '', at: 34 },
-    { id: 'ORD-2412-0039', customer: 'Phạm Thu Hà', addr: 'Q7, TP.HCM', items: [['Máy ảnh Mirrorless X-100', 'Kit 15-45', 1, 1245000]], total: 1245000, status: 'DELIVERED', pay: 'VNPay', ghn: 'delivered', waybill: 'VN931042500', carrier: 'GHN', note: '', at: 39 },
-    { id: 'ORD-2412-0035', customer: 'Vũ Minh Quân', addr: 'Long Biên, Hà Nội', items: [['Sạc nhanh 65W', 'Trắng', 1, 178000]], total: 178000, status: 'CANCELLED', pay: 'VNPay', ghn: 'cancel', note: '', at: 35 },
+    { id: 'LZD-20260608-000046', customer: 'Trần Thị Mai', addr: 'Q1, TP.HCM', items: [['Tai nghe ANC Pro 5', 'Đen / Pro', 1, 389000]], total: 414000, status: 'NEW', pay: 'VNPay', note: 'Giao giờ hành chính giúp mình nhé.', at: 46 },
+    { id: 'LZD-20260608-000045', customer: 'Đinh Gia Bảo', addr: 'Thủ Đức, TP.HCM', items: [['Bàn phím cơ RGB', 'Blue switch', 1, 459000]], total: 484000, status: 'NEW', pay: 'COD', note: '', at: 45 },
+    { id: 'LZD-20260608-000041', customer: 'Trần Thị Mai', addr: 'Q1, TP.HCM', items: [['Tai nghe ANC Pro 5', 'Đen / Pro', 1, 389000], ['Serum Vitamin C', '30ml', 1, 178000]], total: 778000, status: 'CONFIRMED', pay: 'VNPay', note: 'Gói kỹ giúp mình, đồ làm quà.', at: 41 },
+    { id: 'LZD-20260608-000040', customer: 'Nguyễn Văn An', addr: 'Cầu Giấy, Hà Nội', items: [['Đồng hồ Watch S2', 'Navy', 1, 690000]], total: 690000, status: 'PREPARING', pay: 'VietQR', note: '', at: 40 },
+    { id: 'LZD-20260608-000038', customer: 'Lê Hoàng Phúc', addr: 'Hải Châu, Đà Nẵng', items: [['Bàn phím cơ RGB', 'Đen/Blue', 1, 459000]], total: 459000, status: 'SHIPPED', pay: 'VNPay', ghn: 'transporting', waybill: 'VN931042771', carrier: 'Lazadee Express', note: '', at: 38 },
+    { id: 'LZD-20260608-000036', customer: 'Đỗ Minh Khang', addr: 'Biên Hòa, Đồng Nai', items: [['Loa bluetooth mini IPX7', 'Đen', 2, 320000]], total: 640000, status: 'SHIPPED', pay: 'COD', ghn: 'delivering', waybill: 'VN931042698', carrier: 'GHN', note: '', at: 36 },
+    { id: 'LZD-20260608-000034', customer: 'Bùi Thu Hằng', addr: 'Ninh Kiều, Cần Thơ', items: [['Webcam Full HD', 'Đen', 1, 540000]], total: 540000, status: 'SHIPPED', pay: 'VNPay', ghn: 'delivery_fail', waybill: 'VN931042544', carrier: 'GHTK', note: '', at: 34 },
+    { id: 'LZD-20260608-000039', customer: 'Phạm Thu Hà', addr: 'Q7, TP.HCM', items: [['Máy ảnh Mirrorless X-100', 'Kit 15-45', 1, 1245000]], total: 1245000, status: 'DELIVERED', pay: 'VNPay', ghn: 'delivered', waybill: 'VN931042500', carrier: 'GHN', note: '', at: 39 },
+    { id: 'LZD-20260608-000035', customer: 'Vũ Minh Quân', addr: 'Long Biên, Hà Nội', items: [['Sạc nhanh 65W', 'Trắng', 1, 178000]], total: 178000, status: 'CANCELLED', pay: 'VNPay', ghn: 'cancel', note: '', at: 35 },
   ];
   const TABS = [
     { id: 'ALL', label: 'Tất cả' },
@@ -33,9 +33,9 @@
   const QUOTES = [{ carrier: 'GHN', fee: 24000, eta: '2 ngày' }, { carrier: 'GHTK', fee: 22000, eta: '3 ngày' }];
 
   const RETURNS = [
-    { id: 'RFN-0231', order: 'ORD-2412-0029', buyer: 'Hoàng Thu Trang', item: 'Tai nghe ANC Pro 5 · Trắng', amount: 389000, type: 'RETURN_AND_REFUND', reason: 'Hàng sai kích thước/màu sắc', evidence: ['headphones', 'keyboard'], video: 'mo-hop.mp4', due: 'còn 31 giờ', state: 'REQUESTED' },
-    { id: 'RFN-0232', order: 'ORD-2412-0027', buyer: 'Mai Anh Tuấn', item: 'Sạc nhanh 65W · Trắng', amount: 178000, type: 'REFUND_ONLY', reason: 'Hàng bể vỡ do vận chuyển', evidence: ['phone'], video: 'mo-hop.mp4', due: 'còn 12 giờ', state: 'REQUESTED' },
-    { id: 'RFN-0229', order: 'ORD-2412-0021', buyer: 'Bùi Đức Anh', item: 'Loa bluetooth mini IPX7 · Đen', amount: 320000, type: 'RETURN_AND_REFUND', reason: 'Sản phẩm lỗi', evidence: ['speaker'], video: 'mo-hop.mp4', due: 'hàng đang về kho', state: 'AWAITING_RETURN_SHIPMENT' },
+    { id: 'RFN-0231', order: 'LZD-20260608-000029', buyer: 'Hoàng Thu Trang', item: 'Tai nghe ANC Pro 5 · Trắng', amount: 389000, type: 'RETURN_AND_REFUND', reason: 'Hàng sai kích thước/màu sắc', evidence: ['headphones', 'keyboard'], video: 'mo-hop.mp4', due: 'còn 31 giờ', state: 'REQUESTED' },
+    { id: 'RFN-0232', order: 'LZD-20260608-000027', buyer: 'Mai Anh Tuấn', item: 'Sạc nhanh 65W · Trắng', amount: 178000, type: 'REFUND_ONLY', reason: 'Hàng bể vỡ do vận chuyển', evidence: ['phone'], video: 'mo-hop.mp4', due: 'còn 12 giờ', state: 'REQUESTED' },
+    { id: 'RFN-0229', order: 'LZD-20260608-000021', buyer: 'Bùi Đức Anh', item: 'Loa bluetooth mini IPX7 · Đen', amount: 320000, type: 'RETURN_AND_REFUND', reason: 'Sản phẩm lỗi', evidence: ['speaker'], video: 'mo-hop.mp4', due: 'hàng đang về kho', state: 'AWAITING_RETURN_SHIPMENT' },
   ];
   const R_STATE = {
     REQUESTED: ['warning', 'Chờ shop phản hồi'], AWAITING_EVIDENCE: ['neutral', 'Chờ khách bổ sung'], AWAITING_RETURN_SHIPMENT: ['primary', 'Chờ hàng hoàn về'],

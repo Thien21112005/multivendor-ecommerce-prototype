@@ -154,7 +154,7 @@
       pushMine(activeShop, { kind: 'text', text: t });
       setDraft('');
     };
-    const pickImage = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f && activeShop) pushMine(activeShop, { kind: 'image', src: URL.createObjectURL(f) }); };
+    const pickImage = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f && f.size > 5 * 1048576) { window.dispatchEvent(new CustomEvent('show_toast', { detail: { message: 'Ảnh tối đa 5MB', type: 'error' } })); return; } if (f && activeShop) pushMine(activeShop, { kind: 'image', src: URL.createObjectURL(f) }); };
     const shopOrders = activeShop ? window.LZ.ORDERS.filter((o) => o.vendorId === activeShop) : [];
 
     const s = activeShop ? shop(activeShop) : null;

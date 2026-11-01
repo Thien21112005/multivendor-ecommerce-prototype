@@ -65,21 +65,21 @@
       if (!c) return;
       const v = LZ.VOUCHERS.find((x) => x.code === c && (mode === 'shop' ? x.vendorId === vendorId : x.kind !== 'shop'));
       if (!v || v.status !== 'active') { toast('Mã voucher không tồn tại hoặc đã hết hạn.', 'error'); return; }
-      if (!LZ.voucherCheck(v, lines).ok) { toast('Mã voucher chưa đủ điều kiện áp dụng cho đơn hàng này.', 'error'); return; }
+      if (!LZ.voucherCheck(v, lines, selected).ok) { toast('Mã voucher chưa đủ điều kiện áp dụng cho đơn hàng này.', 'error'); return; }
       if (!isOn(v)) pick(v);
       setCode('');
       toast('Áp dụng mã voucher thành công!');
     };
 
     const chosen = [platform, freeship, shop].filter(Boolean).map((id) => LZ.VOUCHERS.find((v) => v.id === id)).filter(Boolean);
-    const saving = chosen.filter((v) => v.kind !== 'freeship').reduce((n, v) => n + LZ.voucherDiscount(v, lines), 0);
+    const saving = chosen.filter((v) => v.kind !== 'freeship').reduce((n, v) => n + LZ.voucherDiscount(v, lines, selected), 0);
     const hasFreeship = chosen.some((v) => v.kind === 'freeship');
 
     const Section = ({ head, list }) => list.length === 0 ? null : (
       <div style={{ marginBottom: 20 }}>
         <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 10 }}>{head}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {list.map((v) => { const c = LZ.voucherCheck(v, lines); return <Ticket key={v.id} v={v} on={isOn(v)} ok={c.ok} reason={c.reason} onPick={pick} />; })}
+          {list.map((v) => { const c = LZ.voucherCheck(v, lines, selected); return <Ticket key={v.id} v={v} on={isOn(v)} ok={c.ok} reason={c.reason} onPick={pick} />; })}
         </div>
       </div>
     );

@@ -26,11 +26,12 @@
     const [mall, setMall] = React.useState(false);
     const [free, setFree] = React.useState(false);
     const [rate, setRate] = React.useState(0);
+    const [brand, setBrand] = React.useState(null);
     const [page, setPage] = React.useState(1);
 
-    const clearAll = () => { setSub(null); setBand(null); setRange({ min: '', max: '' }); setMall(false); setFree(false); setRate(0); };
+    const clearAll = () => { setSub(null); setBand(null); setRange({ min: '', max: '' }); setMall(false); setFree(false); setRate(0); setBrand(null); };
     React.useEffect(() => { clearAll(); setPage(1); }, [categoryName]);
-    React.useEffect(() => { setPage(1); }, [sub, band, range.min, range.max, mall, free, rate, sort]);
+    React.useEffect(() => { setPage(1); }, [sub, band, range.min, range.max, mall, free, rate, sort, brand]);
 
     const b = BANDS.find((x) => x.id === band);
     const min = range.min !== '' ? +range.min : b ? b.min : 0;
@@ -38,6 +39,8 @@
 
     let list = LZ.productsOfCategory(categoryName, sub);
     list = list.filter((p) => p.price >= min && p.price <= max);
+    const brands = Array.from(new Set(list.map((p) => p.brand)));
+    if (brand) list = list.filter((p) => p.brand === brand);
     if (mall) list = list.filter((p) => p.mall || LZ.V[p.v].mall);
     if (free) list = list.filter((p) => p.freeship);
     if (rate) list = list.filter((p) => p.rating >= rate);
@@ -88,6 +91,9 @@
             <Group title="Nơi bán & dịch vụ">
               <Checkbox checked={mall} onChange={() => setMall(!mall)}>Lazadee Mall</Checkbox>
               <Checkbox checked={free} onChange={() => setFree(!free)}>Freeship</Checkbox>
+            </Group>
+            <Group title="Thương hiệu">
+              {brands.map((x) => <label key={x} style={fRow}><input type="radio" name="brand" checked={brand === x} onChange={() => setBrand(x)} style={{ accentColor: 'var(--color-primary)' }} />{x}</label>)}
             </Group>
             <Group title="Khoảng giá">
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

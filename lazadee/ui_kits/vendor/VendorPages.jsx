@@ -391,7 +391,7 @@
     const [vacOpen, setVacOpen] = React.useState(false);
     const [vacUntil, setVacUntil] = React.useState('');
     const [vacMsg, setVacMsg] = React.useState('Shop đang tạm nghỉ, sẽ trả lời bạn khi mở lại nhé!');
-    const [pendingOrders, setPendingOrders] = React.useState(['ORD-2412-0046', 'ORD-2412-0045']);
+    const [pendingOrders, setPendingOrders] = React.useState(['LZD-20260608-000046', 'LZD-20260608-000045']);
     const [ghnId, setGhnId] = React.useState('GHN-884120');
     const [bankStep, setBankStep] = React.useState('form');
     const [bankOtp, setBankOtp] = React.useState('');

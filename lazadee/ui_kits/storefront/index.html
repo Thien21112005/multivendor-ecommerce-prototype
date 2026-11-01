@@ -57,7 +57,13 @@ function App() {
   const [shopId, setShopId] = React.useState(qp('shop') || 'techzone');
   const [searchScope, setSearchScope] = React.useState(qp('scope') || 'all');
   const [searchShopId, setSearchShopId] = React.useState(qp('shop') || null);
-  const [cart, setCart] = React.useState(() => seedCart());
+  const [mergedGuest] = React.useState(() => readGuestCart().length);
+  const [cart, setCart] = React.useState(() => {
+    const guest = readGuestCart();
+    if (qp('guest') === '1') return guest;
+    localStorage.removeItem(GUEST_KEY);
+    return mergeCart(seedCart(), guest);
+  });
   const [query, setQuery] = React.useState(qp('q') || '');
   const [acctView, setAcctView] = React.useState(qp('view') || null);
   const [pageId, setPageId] = React.useState(qp('id') || 'help-center');
@@ -71,8 +77,8 @@ function App() {
   const [buyNowKey, setBuyNowKey] = React.useState(null);
   const [checkoutKeys, setCheckoutKeys] = React.useState(null);
   const [receipt, setReceipt] = React.useState(null);
-  // one voucher of each tier pre-applied so the 3-layer stack is visible from the first view
-  const [voucherSel, setVoucherSel] = React.useState({ platform: 'v1', freeship: 'v2', shop: { techzone: 'v3' } });
+  // the system suggests the largest discount; the buyer can change it in the voucher picker
+  const [voucherSel, setVoucherSel] = React.useState(() => window.LZ.bestVouchers(seedCart()));
   const [useXu, setUseXu] = React.useState(false);
   window.LZ.loggedIn = loggedIn;
 
@@ -101,6 +107,10 @@ function App() {
     window.addEventListener('lz_open_product', onOpenProduct);
     return () => { window.removeEventListener('show_toast', onToast); window.removeEventListener('popstate', onPop); window.removeEventListener('lz_require_login', onLoginNeeded); window.removeEventListener('lz_open_product', onOpenProduct); };
   }, []);
+
+  // A guest's cart lives in this browser for 30 days and joins the account cart after login.
+  React.useEffect(() => { if (!loggedIn) writeGuestCart(cart); }, [cart, loggedIn]);
+  React.useEffect(() => { if (loggedIn && mergedGuest) showToast('Đã gộp giỏ hàng tạm vào tài khoản của bạn'); }, []);
 
   // Keep the current screen in the URL so reload and browser back work.
   React.useEffect(() => {
@@ -134,11 +144,12 @@ function App() {
     showToast('Sản phẩm đã được thêm vào Giỏ hàng');
   };
   const buyAgain = (items) => {
-    items.forEach((it) => {
+    const open = items.filter((it) => !window.LZ.V[window.LZ.byId(it.productId).v].vacation);
+    open.forEach((it) => {
       const p = window.LZ.byId(it.productId);
       addToCart({ key: it.productId + '|' + it.variant, productId: it.productId, vendorId: p.v, title: it.title, img: it.img, price: it.price, original: p.original, variant: it.variant, qty: it.qty, stock: 50 });
     });
-    showToast('Đã thêm các sản phẩm vào giỏ hàng');
+    showToast(open.length < items.length ? 'Đã thêm sản phẩm còn bán, bỏ qua sản phẩm của shop đang tạm nghỉ' : 'Đã thêm các sản phẩm vào giỏ hàng');
     go('cart');
   };
   const chat = (vendorId, product, order) => {
@@ -163,9 +174,9 @@ function App() {
   if (screen === 'home') body = <window.LZHome onOpen={open} onMore={() => go('discover')} onCategory={openCategory} />;
   else if (screen === 'discover') body = <window.LZDiscover initialPage={2} onOpen={open} onHome={() => go('home')} />;
   else if (screen === 'product') body = <window.LZProductDetail id={productId} loggedIn={loggedIn} onRequireLogin={requireLogin} onOpen={open} onAdd={addToCart} onGoCart={(key) => { setBuyNowKey(key); go('cart'); }} onShop={openShop} onCategory={openCategory} onHome={() => go('home')} onChat={chat} />;
-  else if (screen === 'cart') body = <window.LZCart cart={cart} setCart={setCart} voucherSel={voucherSel} setVoucherSel={setVoucherSel} useXu={useXu} setUseXu={setUseXu} buyNowKey={buyNowKey} clearBuyNow={() => setBuyNowKey(null)} onCheckout={(keys) => { setCheckoutKeys(keys); go('checkout'); }} onContinue={() => go('home')} onOpen={open} onShop={openShop} onChat={chat} />;
+  else if (screen === 'cart' || (screen === 'checkout' && !loggedIn)) body = <window.LZCart cart={cart} setCart={setCart} voucherSel={voucherSel} setVoucherSel={setVoucherSel} useXu={useXu} setUseXu={setUseXu} buyNowKey={buyNowKey} clearBuyNow={() => setBuyNowKey(null)} onCheckout={(keys) => { if (!loggedIn) { requireLogin(); return; } setCheckoutKeys(keys); go('checkout'); }} onContinue={() => go('home')} onOpen={open} onShop={openShop} onChat={chat} />;
   else if (screen === 'checkout') body = <window.LZCheckout cart={checkoutLines} voucherSel={voucherSel} setVoucherSel={setVoucherSel} useXu={useXu} setUseXu={setUseXu} onPlaced={(r) => { setReceipt(r); setCart((c) => c.filter((l) => !r.keys.includes(l.key))); go('done'); }} onFailed={() => go('payfail')} onBack={() => go('cart')} />;
-  else if (screen === 'done') body = <OrderDone receipt={receipt} onHome={() => go('home')} onOrders={() => goAccount('orders')} onTrack={(id) => track(window.LZ.orderById(id) ? id : 'ORD-2412-0044')} />;
+  else if (screen === 'done') body = <OrderDone receipt={receipt} onHome={() => go('home')} onOrders={() => goAccount('orders')} onTrack={(id) => track(window.LZ.orderById(id) ? id : 'LZD-20260608-000044')} />;
   else if (screen === 'payfail') body = <PaymentFailed onRetry={() => go('checkout')} onCart={() => go('cart')} onHome={() => go('home')} />;
   else if (screen === 'account') body = <window.LZAccount initialView={acctView} pendingNotif={pendingNotif} onClearPendingNotif={() => setPendingNotif(null)} reviewedIds={reviewedIds} onTrack={track} onOpen={open} onReview={review} onBuyAgain={buyAgain} onChat={chat} onShop={openShop} onGo={go} onViewChange={setAcctView} onLogout={logout} />;
   else if (screen === 'tracking') body = <window.LZOrderTracking orderId={trackId} onBack={() => goAccount('orders')} onReview={review} onChat={chat} onBuyAgain={buyAgain} />;
@@ -181,7 +192,7 @@ function App() {
       <main style={{ flex: 1 }}>{body}</main>
       <Footer onNavPage={(id) => go('page', id)} />
       <window.LZChatWidget />
-      <window.LZReviewModal open={!!reviewOrder} order={reviewOrder} onClose={() => setReviewOrder(null)} onSubmitted={() => { setReviewedIds((r) => [...r, reviewOrder.id]); setReviewOrder(null); showToast('Cảm ơn bạn đã đánh giá sản phẩm!'); }} />
+      <window.LZReviewModal open={!!reviewOrder} order={reviewOrder} onClose={() => setReviewOrder(null)} onSubmitted={(bonus) => { setReviewedIds((r) => [...r, reviewOrder.id]); setReviewOrder(null); showToast(bonus ? 'Cảm ơn bạn đã đánh giá! Bạn được tặng ' + bonus + ' Xu' : 'Cảm ơn bạn đã đánh giá sản phẩm!'); }} />
       {toast && (
         <div role="status" style={{ position: 'fixed', top: 32, right: 32, zIndex: 9999, display: 'flex', alignItems: 'center', gap: 12, background: '#fff', color: 'var(--text-strong)', padding: '14px 24px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,.15)', border: '1px solid var(--border-default)', animation: 'lzSlideDown .25s var(--ease-out)' }}>
           <Icon name={toast.type === 'error' ? 'circle-alert' : 'info'} size={22} style={{ color: toast.type === 'error' ? 'var(--red-500)' : 'var(--color-primary)' }} />
@@ -213,7 +224,7 @@ function LoginPrompt({ onClose, onLogin }) {
 // Receipt after a successful checkout: one row per shop + totals. Opened directly it shows a sample.
 const SAMPLE_RECEIPT = {
   sessionId: 'CS-8F21A',
-  orders: [{ id: 'ORD-2412-0044', vendorId: 'techzone', grandTotal: 813000 }, { id: 'ORD-2412-0041', vendorId: 'beauty', grandTotal: 399000 }],
+  orders: [{ id: 'LZD-20260608-000044', vendorId: 'techzone', grandTotal: 813000 }, { id: 'LZD-20260608-000041', vendorId: 'beauty', grandTotal: 399000 }],
   price: { subtotal: 1261000, shipping: 41000, platformDisc: 60000, freeshipDisc: 30000, shopDisc: 0, xuDiscount: 0, total: 1212000 },
 };
 function OrderDone({ receipt, onHome, onOrders, onTrack }) {
@@ -278,7 +289,7 @@ function PaymentFailed({ onRetry, onCart, onHome }) {
       <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Thanh toán thất bại</h1>
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><StatusBadge status="ERROR" label="PAYMENT_FAILED" /></div>
       <p style={{ color: 'var(--text-muted)', marginBottom: 6 }}>Cổng thanh toán không thể xử lý giao dịch (thẻ bị từ chối hoặc hết thời gian chờ). <b>Bạn chưa bị trừ tiền.</b></p>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Đơn hàng <span className="code">ORD-2412-0045</span> đang ở trạng thái <b>PENDING_PAYMENT</b>.</p>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Đơn hàng <span className="code">LZD-20260608-000045</span> đang ở trạng thái <b>PENDING_PAYMENT</b>.</p>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '10px 16px', font: 'var(--type-body-sm)', marginBottom: 28 }}>
         <I name="lock" size={16} /> Tồn kho vẫn được giữ thêm <b>13:54</b> — hãy thử lại trước khi hết hạn để không mất hàng.
       </div>
@@ -315,6 +326,28 @@ function Footer({ onNavPage }) {
       <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '16px 24px', textAlign: 'center', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>© 2026 Lazadee. Demo design-system recreation. Giá hiển thị bằng VND (₫).</div>
     </footer>
   );
+}
+
+const GUEST_KEY = 'lz_guest_cart';
+const GUEST_TTL = 30 * 24 * 3600 * 1000;
+function readGuestCart() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(GUEST_KEY));
+    return saved && Date.now() - saved.at < GUEST_TTL ? saved.lines : [];
+  } catch (e) { return []; }
+}
+function writeGuestCart(lines) {
+  try { localStorage.setItem(GUEST_KEY, JSON.stringify({ at: Date.now(), lines })); } catch (e) { /* preview only */ }
+}
+// Same SKU adds up, capped at stock.
+function mergeCart(base, extra) {
+  const out = base.map((l) => ({ ...l }));
+  extra.forEach((l) => {
+    const hit = out.find((x) => x.key === l.key);
+    if (hit) hit.qty = Math.min(hit.qty + l.qty, hit.stock || Infinity);
+    else out.push(l);
+  });
+  return out;
 }
 
 function seedCart() {

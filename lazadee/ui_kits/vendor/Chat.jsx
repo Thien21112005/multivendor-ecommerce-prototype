@@ -11,7 +11,7 @@
     { id: 't3', name: 'Lê Hoàng Phúc', last: '[Hình ảnh]', unread: 0, online: true, time: 'Hôm qua' },
   ];
 
-  const ORDERS_OF = { t1: ['ORD-2412-0041', 'ORD-2412-0046'], t2: ['ORD-2412-0040'], t3: ['ORD-2412-0038'] };
+  const ORDERS_OF = { t1: ['LZD-20260608-000041', 'LZD-20260608-000046'], t2: ['LZD-20260608-000040'], t3: ['LZD-20260608-000038'] };
   const SEED_OTHER = { t2: [{ from: 'them', kind: 'text', text: 'Đã nhận hàng, cảm ơn shop!', st: 'seen' }], t3: [{ from: 'them', kind: 'image', img: 'keyboard' }, { from: 'me', kind: 'text', text: 'Dạ shop xem rồi ạ, để shop kiểm tra giúp bạn.', st: 'seen' }] };
   const MSGS = [
     { from: 'them', kind: 'text', text: 'Chào shop, tai nghe ANC Pro 5 còn hàng màu đen không ạ?' },

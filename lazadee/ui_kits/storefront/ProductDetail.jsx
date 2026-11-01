@@ -21,7 +21,7 @@
     { id: 'r3', name: 'Lê Hoàng', when: '2026-05-15', rating: 5, variant: 'Đen / Tiêu chuẩn', text: 'Chống ồn tốt, đeo êm tai. Đáng tiền!', imgs: ['speaker'], anon: true },
     { id: 'r4', name: 'Phạm An', when: '2026-05-02', rating: 3, variant: 'Trắng / Tiêu chuẩn', text: 'Dùng tạm ổn, kết nối đôi lúc chập chờn. Shop hỗ trợ đổi hàng nhanh.' },
   ];
-  const REPORT_REASONS = ['Spam / chuyển hướng giao dịch', 'Ngôn từ thô tục, xúc phạm', 'Nội dung không liên quan sản phẩm'];
+  const REPORT_REASONS = ['Spam / chuyển hướng giao dịch', 'Ngôn từ thô tục, xúc phạm', 'Mua giả, không phải người mua thật'];
   const R_FILTERS = [
     { id: 'all', label: 'Tất cả', test: () => true },
     { id: '5', label: '5 Sao', test: (r) => r.rating === 5 },
@@ -80,6 +80,7 @@
         <Modal open={reportOpen} onClose={() => setReportOpen(false)} width={440} title="Báo cáo đánh giá"
           footer={<><Button variant="ghost" onClick={() => setReportOpen(false)}>Huỷ</Button><Button variant="danger" onClick={() => { setReported(true); setReportOpen(false); toast('Đã gửi báo cáo tới bộ phận kiểm duyệt'); }}>Gửi báo cáo</Button></>}>
           <Select label="Lý do" value={why} onChange={(e) => setWhy(e.target.value)}>{REPORT_REASONS.map((x) => <option key={x}>{x}</option>)}</Select>
+          <textarea aria-label="Ghi chú" placeholder="Ghi chú thêm (không bắt buộc)" rows={2} style={{ width: '100%', marginTop: 10, padding: '8px 12px', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
         </Modal>
       </div>
     );
@@ -108,7 +109,9 @@
     const [color, setColor] = React.useState(null);
     const [size, setSize] = React.useState(null);
     const [qty, setQty] = React.useState(1);
-    const [follow, setFollow] = React.useState(false);
+    const [follow, setFollow] = React.useState(() => window.LZ.FOLLOWS.includes(p.v));
+    const [unfollowOpen, setUnfollowOpen] = React.useState(false);
+    const requireThen = (fn) => () => { if (!loggedIn) { onRequireLogin(); return; } fn(); };
     const [lightbox, setLightbox] = React.useState(false);
     const [rFilter, setRFilter] = React.useState('all');
     const [, forceWish] = React.useState(0);
@@ -151,7 +154,6 @@
       return { key: p.id + '|' + c.label + '/' + s.label, productId: p.id, vendorId: p.v, title: p.title, img: p.img, price, original: p.original, variant: c.label + ' / ' + s.label, qty, stock };
     };
     const add = () => {
-      if (!loggedIn) { onRequireLogin(); return null; }
       if (flashOut) { toast('LZD-INV-4091: Đã hết suất Flash Sale', 'error'); return null; }
       const l = line(); if (l) onAdd(l); return l;
     };
@@ -263,7 +265,7 @@
             <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>{vendor.followers} người theo dõi · {vendor.location} · Đánh giá shop {vendor.rating}★</div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant={follow ? 'subtle' : 'secondary'} iconLeft={follow ? 'check' : 'plus'} onClick={() => setFollow(!follow)}>{follow ? 'Đang theo dõi' : 'Theo dõi'}</Button>
+            <Button variant={follow ? 'subtle' : 'secondary'} iconLeft={follow ? 'check' : 'plus'} onClick={requireThen(() => (follow ? setUnfollowOpen(true) : setFollow(true)))}>{follow ? 'Đang theo dõi' : 'Theo dõi'}</Button>
             <Button variant="ghost" iconLeft="message-circle" onClick={() => onChat && onChat(p.v, p)}>Chat ngay</Button>
             <Button variant="ghost" iconLeft="store" onClick={() => onShop && onShop(p.v)}>Xem shop</Button>
           </div>
@@ -300,6 +302,10 @@
           ))}
         </div>
         {similar.length === 0 && <div style={{ padding: '24px 0', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có sản phẩm tương tự.</div>}
+        <Modal open={unfollowOpen} onClose={() => setUnfollowOpen(false)} title="Hủy theo dõi Shop?"
+          footer={<><Button variant="ghost" onClick={() => setUnfollowOpen(false)}>Không</Button><Button variant="danger" onClick={() => { setFollow(false); setUnfollowOpen(false); }}>Hủy theo dõi</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn sẽ không nhận được khuyến mãi từ <b>{vendor.name}</b> nữa.</div>
+        </Modal>
         {lightbox && <Lightbox images={gallery} start={active} onClose={() => setLightbox(false)} />}
       </div>
     );
@@ -310,7 +316,8 @@
     const sub = LZ.subCategoriesOf(p.cat).find((s) => LZ.productsOfCategory(p.cat, s).some((x) => x.id === p.id));
     const SPECS = [
       { key: 'Danh Mục', type: 'breadcrumb', crumbs: sub ? [p.cat, sub] : [p.cat] },
-      { key: 'Thương hiệu', value: vendor.name, type: 'link', onClick: () => onShop && onShop(p.v) },
+      { key: 'Thương hiệu', value: p.brand },
+      { key: 'Shop', value: vendor.name, type: 'link', onClick: () => onShop && onShop(p.v) },
       { key: 'Chất liệu', value: 'Nhựa ABS + Polycarbonate' },
       { key: 'Loại kết nối', value: 'Bluetooth 5.3, USB-C' },
       { key: 'Tính năng', value: 'Chống ồn chủ động (ANC), Xuyên âm' },

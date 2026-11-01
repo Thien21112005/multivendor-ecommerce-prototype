@@ -36,6 +36,9 @@
     const [minMax, setMinMax] = React.useState({ min: '', max: '' });
     const [mallOnly, setMallOnly] = React.useState(false);
     const [freeOnly, setFreeOnly] = React.useState(false);
+    const [voucherOnly, setVoucherOnly] = React.useState(false);
+    const [places, setPlaces] = React.useState([]);
+    const [attrs, setAttrs] = React.useState([]);
     const [rating, setRating] = React.useState(0);
 
     const base = inShop ? productsOfVendor(shopId) : PRODUCTS;
@@ -43,8 +46,11 @@
 
     let res = base.filter((p) => !q || (p.title + ' ' + p.cat).toLowerCase().includes(q));
     if (cats.length) res = res.filter((p) => cats.includes(p.cat));
-    if (brands.length) res = res.filter((p) => brands.includes(V[p.v].name));
-    if (mallOnly) res = res.filter((p) => p.mall || V[p.v].mall);
+    if (brands.length) res = res.filter((p) => brands.includes(p.brand));
+    if (places.length) res = res.filter((p) => places.includes(p.location));
+    if (voucherOnly) res = res.filter((p) => window.LZ.VOUCHERS.some((x) => x.vendorId === p.v && x.status === 'active'));
+    if (attrs.length) res = res.filter((p) => attrs.includes(p.attr));
+    if (mallOnly) res = res.filter((p) => p.mall || V[p.v].mall || p.brandVerified);
     if (freeOnly) res = res.filter((p) => p.freeship);
     if (rating) res = res.filter((p) => p.rating >= rating);
     const activeBand = PRICE_BANDS.find((b) => b.id === band);
@@ -58,8 +64,11 @@
 
     const toggleCat = (c) => setCats((s) => s.includes(c) ? s.filter((x) => x !== c) : [...s, c]);
     const toggleBrand = (b) => setBrands((s) => (s.includes(b) ? s.filter((x) => x !== b) : [...s, b]));
-    const brandList = Array.from(new Set(base.map((p) => V[p.v].name)));
-    const clearAll = () => { setBrands([]); setCats([]); setBand(null); setMinMax({ min: '', max: '' }); setMallOnly(false); setFreeOnly(false); setRating(0); };
+    const brandList = Array.from(new Set(base.map((p) => p.brand)));
+    const placeList = Array.from(new Set(base.map((p) => p.location)));
+    const toggleIn = (setter) => (x) => setter((s) => (s.includes(x) ? s.filter((y) => y !== x) : [...s, x]));
+    const attrFilter = cats.length === 1 ? window.LZ.ATTR_FILTERS[cats[0]] : null;
+    const clearAll = () => { setBrands([]); setCats([]); setBand(null); setMinMax({ min: '', max: '' }); setMallOnly(false); setFreeOnly(false); setRating(0); setVoucherOnly(false); setPlaces([]); setAttrs([]); };
     const activeChips = [
       ...cats.map((c) => ({ k: 'cat:' + c, label: c, clear: () => toggleCat(c) })),
       ...brands.map((b) => ({ k: 'brand:' + b, label: b, clear: () => toggleBrand(b) })),
@@ -114,6 +123,14 @@
               ))}
             </FilterGroup>}
 
+            {attrFilter && <FilterGroup title={attrFilter.name}>
+              {attrFilter.values.map((a) => <label key={a} style={fRow}><Checkbox checked={attrs.includes(a)} onChange={() => toggleIn(setAttrs)(a)} /><span>{a}</span></label>)}
+            </FilterGroup>}
+
+            {!inShop && <FilterGroup title="Nơi bán">
+              {placeList.map((a) => <label key={a} style={fRow}><Checkbox checked={places.includes(a)} onChange={() => toggleIn(setPlaces)(a)} /><span>{a}</span></label>)}
+            </FilterGroup>}
+
             <FilterGroup title="Khoảng giá">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <input value={minMax.min} onChange={(e) => { setMinMax((s) => ({ ...s, min: e.target.value.replace(/\D/g, '') })); setBand(null); }} placeholder="TỪ" style={priceInput} />
@@ -136,6 +153,7 @@
             <FilterGroup title="Dịch vụ & khác">
               <label style={fRow}><Checkbox checked={mallOnly} onChange={() => setMallOnly(!mallOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Badge variant="solid">MALL</Badge> Chính hãng</span></label>
               <label style={fRow}><Checkbox checked={freeOnly} onChange={() => setFreeOnly(!freeOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="truck" size={14} style={{ color: 'var(--mint-600)' }} /> Miễn phí vận chuyển</span></label>
+              <label style={fRow}><Checkbox checked={voucherOnly} onChange={() => setVoucherOnly(!voucherOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="ticket" size={14} style={{ color: 'var(--color-primary)' }} /> Shop có voucher</span></label>
             </FilterGroup>
 
             <Button block variant="outline" iconLeft="refresh-cw" onClick={clearAll} style={{ marginTop: 6 }}>Xoá tất cả</Button>
