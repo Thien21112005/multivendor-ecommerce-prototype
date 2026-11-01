@@ -14,7 +14,7 @@
   const OCR = {
     low: { status: ['success', 'Đạt'], checks: [['QR Code', true], ['Quốc huy', true], ['MRZ', true], ['Vân tay', true], ['Khớp khuôn mặt', true]], errors: [] },
     medium: { status: ['warning', 'Đạt một phần'], checks: [['QR Code', true], ['Quốc huy', true], ['MRZ', false], ['Vân tay', true], ['Khớp khuôn mặt', true]], errors: ['MRZ mờ, không đọc được 2 ký tự cuối.'] },
-    high: { status: ['danger', 'Không đạt'], checks: [['QR Code', false], ['Quốc huy', true], ['MRZ', false], ['Vân tay', false], ['Khớp khuôn mặt', false]], errors: ['Không đọc được QR trên CCCD.', 'Độ khớp khuôn mặt 41% (yêu cầu ≥ 80%).'] },
+    high: { status: ['danger', 'Không đạt'], checks: [['QR Code', false], ['Quốc huy', true], ['MRZ', false], ['Vân tay', false], ['Khớp khuôn mặt', false]], errors: ['Không đọc được QR trên CCCD.', 'Độ khớp khuôn mặt 41% (yêu cầu ≥ 85%).'] },
   };
 
   function DocViewer({ label, onClose }) {

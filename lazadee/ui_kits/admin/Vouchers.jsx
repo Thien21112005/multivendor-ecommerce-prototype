@@ -31,11 +31,12 @@
     return (
       <div style={{ maxWidth: 1180 }}>
         {/* KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
           <Kpi icon="ticket" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Voucher đang chạy" value={list.filter((v) => v.status === 'ACTIVE').length} />
           <Kpi icon="chart-column" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lượt dùng hệ thống" value={usedTotal.toLocaleString('vi-VN')} />
           <Kpi icon="receipt" tone={{ bg: 'var(--amber-50, #FEF3E2)', fg: 'var(--amber-600, #C77700)' }} label="Tổng giảm giá đã dùng" value="456.800.000₫" />
           <Kpi icon="calendar" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Voucher sắp ra mắt" value={list.filter((v) => v.status === 'SCHEDULED').length} />
+          <Kpi icon="banknote" tone={{ bg: 'var(--gray-100)', fg: 'var(--gray-600)' }} label="Ngân sách còn lại" value="543.200.000₫" />
         </div>
 
         {/* tabs + action */}
@@ -72,8 +73,9 @@
                     <td style={td}><Badge variant={st.variant}>{st.label}</Badge></td>
                     <td style={{ ...td, textAlign: 'right' }}>
                       {v.status === 'ENDED'
-                        ? <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button size="sm" variant="ghost" onClick={() => setModal({ ...v, _dup: true })}>Nhân bản</Button><Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setDel(v)}>Xoá</Button></div>
+                        ? <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button size="sm" variant="ghost" onClick={() => setModal({ ...v, _dup: true })}>Nhân bản</Button>{v.used === 0 && <Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setDel(v)}>Xoá</Button>}</div>
                         : <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                            <Button size="sm" variant="ghost" onClick={() => setModal({ ...v, _dup: true })}>Nhân bản</Button>
                             <Button size="sm" variant="ghost" onClick={() => setModal(v)}>Sửa</Button>
                             <Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setConfirm(v)}>{v.status === 'SCHEDULED' ? 'Huỷ' : 'Tắt'}</Button>
                           </div>}
@@ -114,7 +116,8 @@
     const KINDS = [['percent', 'Giảm %', 'percent'], ['fixed', 'Giảm ₫', 'banknote'], ['freeship', 'Freeship', 'truck']];
     const submit = () => {
       const e = {};
-      if (!/^[A-Z0-9]{4,12}$/.test(f.code)) e.code = 'Mã 4–12 ký tự, chỉ chữ HOA và số';
+      if (!/^[A-Z0-9]{6,12}$/.test(f.code)) e.code = 'Mã 6–12 ký tự, chỉ chữ HOA và số';
+      if (f.start && !editing && f.start < new Date().toISOString().slice(0, 10)) e.end = 'Ngày bắt đầu không được ở quá khứ';
       if (!f.name.trim()) e.name = 'Vui lòng nhập tên chương trình';
       if (f.kind !== 'freeship') { if (!f.value || Number(f.value) <= 0) e.value = 'Giá trị phải > 0'; else if (f.kind === 'percent' && Number(f.value) > 100) e.value = 'Phần trăm ≤ 100'; }
       if (!f.total || Number(f.total) <= 0) e.total = 'Số lượng phải > 0';
@@ -134,7 +137,7 @@
               <button onClick={() => set('code', genCode())} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name="refresh-cw" size={13} />Tự tạo</button>
             </div>
             <Input value={f.code} onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="VD: LAZADEE50" error={err.code} />
-            {!err.code && <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 5 }}>4–12 ký tự, chỉ chữ HOA và số.</div>}
+            {!err.code && <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 5 }}>6–12 ký tự, chỉ chữ HOA và số.</div>}
           </div>
           <div>
             <label style={lab}>Loại giảm giá</label>
@@ -171,6 +174,7 @@
             <div style={{ flex: 1 }}><Select label="Phạm vi" value={f.scope === 'cat' ? 'Danh mục cụ thể' : 'Toàn sàn'} onChange={(e) => set('scope', e.target.value === 'Toàn sàn' ? 'all' : 'cat')}><option>Toàn sàn</option><option>Danh mục cụ thể</option></Select></div>
             <div style={{ flex: 1 }}><Select label="Nhà tài trợ" value={f.sponsor} onChange={(e) => set('sponsor', e.target.value)}><option>Lazadee</option><option>Co-sponsor với Shop</option></Select></div>
           </div>
+          {f.sponsor !== 'Lazadee' && <Input label="Tỷ lệ sàn tài trợ (%)" value={f.share || ''} onChange={(e) => set('share', e.target.value.replace(/\D/g, '').slice(0, 3))} iconRight="percent" placeholder="50" />}
           {f.scope === 'cat'
             ? <Select label="Danh mục được áp dụng" value={f.scopeCat} onChange={(e) => set('scopeCat', e.target.value)}>{['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé'].map((c) => <option key={c}>{c}</option>)}</Select>
             : <Select label="Ngoại trừ (Không áp dụng giảm giá)" value={f.exclude} onChange={(e) => set('exclude', e.target.value)}>{['Không loại trừ', 'Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé'].map((c) => <option key={c}>{c}</option>)}</Select>}

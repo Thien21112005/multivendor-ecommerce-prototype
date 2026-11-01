@@ -28,6 +28,7 @@
   const T_VARIANT = { ALL: 'primary', SELLER: 'warning', BUYER: 'mint', SPECIFIC: 'neutral' };
   const FILTER = { 'Tất cả đối tượng': null, 'Chỉ Vendor': 'SELLER', 'Chỉ Customer': 'BUYER', 'Người dùng cụ thể': 'SPECIFIC' };
   const PAGE = 5;
+  const REACH = { ALL: 248300, BUYER: 120400, SELLER: 3120 };
   const short = (n) => (n < 1000 ? String(n) : n < 1e6 ? '~' + (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : '~' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M');
 
   function Stat({ icon, tone, label, value }) {
@@ -64,7 +65,10 @@
     };
     const send = () => {
       if (form.id) setRows((rs) => rs.map((n) => (n.id === form.id ? { ...n, ...form } : n)));
-      else setRows((rs) => [{ ...form, id: 'PN-' + (1049 + rs.length), by: 'Admin (1)', at: 'Vừa xong', reads: 0, reach: 0 }, ...rs]);
+      else {
+        const reach = form.target === 'SPECIFIC' ? (form.emails || '').split(',').filter((x) => x.trim()).length : REACH[form.target];
+        setRows((rs) => [{ ...form, id: 'PN-' + (1049 + rs.length), by: 'Admin (1)', at: form.sendAt ? form.sendAt.replace('T', ' ') : 'Vừa xong', scheduled: !!form.sendAt, reads: 0, reach }, ...rs]);
+      }
       setConfirm(false); setForm(null); setPage(1);
     };
 
@@ -91,7 +95,7 @@
 
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
-            <thead><tr style={{ font: '600 12px var(--font-sans)', color: 'var(--text-muted)', textAlign: 'left', background: 'var(--gray-25)' }}><th style={c}>Mã TB</th><th style={c}>Thông báo</th><th style={c}>Ảnh</th><th style={c}>Đối tượng nhận</th><th style={c}>Người gửi</th><th style={c}>Thời gian gửi</th><th style={{ ...c, textAlign: 'right' }}>Lượt đọc</th></tr></thead>
+            <thead><tr style={{ font: '600 12px var(--font-sans)', color: 'var(--text-muted)', textAlign: 'left', background: 'var(--gray-25)' }}><th style={c}>Mã TB</th><th style={c}>Thông báo</th><th style={c}>Ảnh</th><th style={c}>Đối tượng nhận</th><th style={c}>Người gửi</th><th style={c}>Thời gian gửi</th><th style={{ ...c, textAlign: 'right' }}>Đã đọc</th></tr></thead>
             <tbody>
               {shown.length === 0 && <tr><td colSpan="7" style={{ padding: 40, textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Chưa có thông báo nào.</td></tr>}
               {shown.map((n) => (
@@ -102,7 +106,7 @@
                   <td style={c}><Badge variant={T_VARIANT[n.target]}>{TARGET[n.target]}</Badge></td>
                   <td style={c}>{n.by}</td>
                   <td style={{ ...c, color: 'var(--text-muted)' }}>{n.at}</td>
-                  <td style={{ ...c, textAlign: 'right' }}>{n.reads.toLocaleString('vi-VN')}</td>
+                  <td style={{ ...c, textAlign: 'right' }}>{n.scheduled ? <Badge variant="primary">Đã hẹn giờ</Badge> : <>{n.reads.toLocaleString('vi-VN')} <span style={{ color: 'var(--text-muted)' }}>({n.reach ? Math.round(n.reads / n.reach * 100) : 0}%)</span></>}</td>
                 </tr>
               ))}
             </tbody>
@@ -124,6 +128,7 @@
             <div style={{ display: 'flex', gap: 24 }}>
               <div><div style={lab2}>Đối tượng</div><Badge variant={T_VARIANT[detail.target]}>{TARGET[detail.target]}</Badge></div>
               <div><div style={lab2}>Thời gian gửi</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{detail.at}</div></div>
+              <div><div style={lab2}>Đã đọc / đã gửi</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{detail.reads.toLocaleString('vi-VN')} / {detail.reach.toLocaleString('vi-VN')} ({detail.reach ? Math.round(detail.reads / detail.reach * 100) : 0}%)</div></div>
             </div>
             {detail.image && <img src={detail.image} alt="" style={{ width: '100%', borderRadius: 'var(--radius-md)' }} />}
             <div><div style={lab2}>Nội dung</div><div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: detail.content }} /></div>
@@ -131,7 +136,7 @@
         </Modal>
 
         <Modal open={!!form} onClose={() => setForm(null)} width={560} title={form && form.id ? 'Sửa thông báo toàn sàn' : 'Tạo thông báo toàn sàn (Broadcast)'}
-          footer={form && <><Button variant="ghost" onClick={() => setForm(null)}>Hủy</Button><Button iconLeft="send" disabled={!form.title.trim() || !plain(form.content) || (form.target === 'SPECIFIC' && !(form.emails || '').trim())} onClick={() => setConfirm(true)}>{form.id ? 'Cập nhật' : 'Phát thông báo'}</Button></>}>
+          footer={form && <><Button variant="ghost" onClick={() => setForm(null)}>Hủy</Button><Button iconLeft="send" disabled={!form.title.trim() || !plain(form.content) || (form.target === 'SPECIFIC' && !(form.emails || '').trim())} onClick={() => setConfirm(true)}>{form.id ? 'Cập nhật' : form.sendAt ? 'Lưu & hẹn giờ' : 'Phát thông báo'}</Button></>}>
           {form && <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={lab}>Đối tượng nhận (Target Audience)</label>
@@ -151,6 +156,10 @@
               <label style={lab}>Nội dung chi tiết</label>
               <RichBox key={form.id || 'new'} value={form.content} onChange={(v) => setForm((x) => ({ ...x, content: v }))} />
             </div>
+            {!form.id && <div>
+              <label style={lab}>Hẹn giờ phát (không bắt buộc)</label>
+              <input type="datetime-local" aria-label="Hẹn giờ phát" value={form.sendAt || ''} onChange={(e) => setForm({ ...form, sendAt: e.target.value })} style={{ display: 'block', marginTop: 6, height: 42, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '0 10px', font: 'var(--type-body-sm)', outline: 'none' }} />
+            </div>}
           </div>}
         </Modal>
 

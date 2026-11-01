@@ -15,6 +15,7 @@
     PUBLISHED: ['success', 'circle-check', 'Đã duyệt'],
     REJECTED: ['danger', 'ban', 'Từ chối'],
   };
+  const REJECT_REASONS = ['Thiếu chứng nhận an toàn', 'Vi phạm chính sách', 'Ảnh sản phẩm không đạt', 'Mô tả sai / gây hiểu lầm', 'Giá bất hợp lý', 'Hàng cấm / hạn chế'];
   const TABS = { PENDING: ['PENDING_APPROVAL', 'FLAGGED', 'REQUEUED'], PUBLISHED: ['PUBLISHED'], REJECTED: ['REJECTED'] };
 
   function Toast({ text }) {
@@ -23,11 +24,12 @@
 
   function Detail({ p, onBack, onDecide }) {
     const [note, setNote] = React.useState('');
-    const [noteErr, setNoteErr] = React.useState(false);
+    const [reason, setReason] = React.useState(REJECT_REASONS[0]);
     const [confirm, setConfirm] = React.useState(null); // PUBLISHED | REJECTED
     const [doc, setDoc] = React.useState(null);
     const [zoom, setZoom] = React.useState(null);
-    const askReject = () => { if (!note.trim()) { setNoteErr(true); return; } setConfirm('REJECTED'); };
+    const rejectText = reason + (note.trim() ? ': ' + note.trim() : '');
+    const askReject = () => setConfirm('REJECTED');
     const st = STATE[p.state];
     const aiRejected = p.state === 'REJECTED' && !p.moderator;
     return (
@@ -41,6 +43,14 @@
           <span style={{ marginLeft: 'auto' }}><Badge variant={st[0]} icon={st[1]}>{st[2]}</Badge></span>
         </div>
 
+        {p.ai && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', marginBottom: 12, borderRadius: 'var(--radius-md)', background: '#fff', boxShadow: 'var(--shadow-sm)', font: 'var(--type-body-sm)', color: 'var(--text-body)', flexWrap: 'wrap' }}>
+            <Icon name="cpu" size={18} style={{ color: 'var(--blue-600)' }} />
+            <b>Gemini:</b> <span className="code">{p.ai.decision}</span>
+            <span>· Điểm rủi ro <b style={{ color: p.ai.risk >= 85 ? 'var(--red-600)' : p.ai.risk >= 30 ? 'var(--amber-600)' : 'var(--mint-600)' }}>{p.ai.risk}/100</b></span>
+            {p.ai.violations.length > 0 ? p.ai.violations.map((v) => <Badge key={v} variant="danger">{v}</Badge>) : <span style={{ color: 'var(--text-muted)' }}>· Không phát hiện vi phạm</span>}
+          </div>
+        )}
         {p.aiReason && (
           <div style={{ display: 'flex', gap: 14, padding: 16, marginBottom: 16, borderRadius: 'var(--radius-md)', background: p.state === 'REJECTED' ? 'var(--red-50, #FDECEA)' : 'var(--amber-50)', border: '1px solid ' + (p.state === 'REJECTED' ? 'var(--red-300, #F3B0A8)' : 'var(--gold-400)') }}>
             <Icon name={aiRejected ? 'cpu' : 'triangle-alert'} size={22} style={{ color: p.state === 'REJECTED' ? 'var(--red-600)' : 'var(--amber-600)', flex: 'none' }} />
@@ -91,8 +101,11 @@
         {/* sticky decision bar */}
         <div style={{ position: 'sticky', bottom: 0, display: 'flex', alignItems: 'flex-end', gap: 10, marginTop: 16, padding: '14px 18px', background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 6 }}>Nhận xét / Lý do từ chối <span style={{ color: 'var(--red-600)' }}>*</span></label>
-            <input value={note} onChange={(e) => { setNote(e.target.value); setNoteErr(false); }} placeholder="Nhập lý do vi phạm nếu bạn định từ chối..." style={{ width: '100%', height: 40, padding: '0 12px', border: '1.5px solid ' + (noteErr ? 'var(--red-500)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none', boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 6 }}>Lý do nếu từ chối</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ width: 240, flex: 'none' }}><Select value={reason} onChange={(e) => setReason(e.target.value)}>{REJECT_REASONS.map((r) => <option key={r}>{r}</option>)}</Select></div>
+              <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ghi chú thêm cho người bán..." style={{ flex: 1, minWidth: 0, height: 44, padding: '0 12px', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none', boxSizing: 'border-box' }} />
+            </div>
           </div>
           {p.state !== 'REJECTED' && <Button variant="danger" iconLeft="ban" onClick={askReject}>Từ chối</Button>}
           {p.state !== 'PUBLISHED' && <Button iconLeft="circle-check" onClick={() => setConfirm('PUBLISHED')}>Duyệt lên sàn</Button>}
@@ -100,8 +113,8 @@
         </div>
 
         <Modal open={!!confirm} onClose={() => setConfirm(null)} width={420} title={confirm === 'PUBLISHED' ? 'Xác nhận duyệt sản phẩm' : 'Xác nhận từ chối sản phẩm'}
-          footer={<><Button variant="ghost" onClick={() => setConfirm(null)}>Hủy</Button><Button variant={confirm === 'PUBLISHED' ? 'primary' : 'danger'} onClick={() => onDecide(p, confirm, note)}>{confirm === 'PUBLISHED' ? 'Duyệt lên sàn' : 'Từ chối'}</Button></>}>
-          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc chắn muốn {confirm === 'PUBLISHED' ? 'duyệt' : 'từ chối'} sản phẩm này không?{confirm === 'REJECTED' && <div style={{ marginTop: 8, color: 'var(--text-muted)' }}>Lý do: {note}</div>}</div>
+          footer={<><Button variant="ghost" onClick={() => setConfirm(null)}>Hủy</Button><Button variant={confirm === 'PUBLISHED' ? 'primary' : 'danger'} onClick={() => onDecide(p, confirm, rejectText)}>{confirm === 'PUBLISHED' ? 'Duyệt lên sàn' : 'Từ chối'}</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc chắn muốn {confirm === 'PUBLISHED' ? 'duyệt' : 'từ chối'} sản phẩm này không?{confirm === 'REJECTED' && <div style={{ marginTop: 8, color: 'var(--text-muted)' }}>Lý do: {rejectText}</div>}</div>
         </Modal>
         <Modal open={!!doc} onClose={() => setDoc(null)} width={640} title="Trình xem tài liệu" footer={<Button onClick={() => setDoc(null)}>Đóng</Button>}>
           <div style={{ display: 'grid', placeItems: 'center', gap: 10, height: 320, background: 'var(--surface-sunken)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)' }}>
@@ -146,7 +159,8 @@
 
     if (open) return <><Detail p={open} onBack={() => setOpenId(null)} onDecide={decide} /><Toast text={toast} /></>;
 
-    const shown = tab === 'CONFIG' ? [] : rows.filter((p) => inTab(p, tab)).filter((p) => (p.name + ' ' + p.vendor + ' ' + p.id).toLowerCase().includes(q.trim().toLowerCase()));
+    // flagged products lead the queue
+    const shown = tab === 'CONFIG' ? [] : rows.filter((p) => inTab(p, tab)).filter((p) => (p.name + ' ' + p.vendor + ' ' + p.id).toLowerCase().includes(q.trim().toLowerCase())).sort((a, b) => (b.state === 'FLAGGED') - (a.state === 'FLAGGED'));
     const Tab = ({ id, icon, label }) => {
       const on = tab === id;
       const n = id === 'CONFIG' ? 0 : rows.filter((p) => inTab(p, id)).length;

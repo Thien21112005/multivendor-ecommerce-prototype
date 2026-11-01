@@ -11,7 +11,7 @@
   const today = () => new Date().toISOString().slice(0, 10);
   const stateOf = (b) => (!b.on ? 'OFF' : b.endsAt < today() ? 'ENDED' : b.startsAt > today() ? 'SCHEDULED' : 'LIVE');
   const ST = { LIVE: ['success', 'Đang hiển thị'], SCHEDULED: ['primary', 'Đã lên lịch'], ENDED: ['neutral', 'Đã kết thúc'], OFF: ['danger', 'Đã tắt'] };
-  const EMPTY = { title: '', image: '', link: '/?screen=category&cat=Điện tử', position: 'HOME_TOP_CAROUSEL', category: 'Điện tử', order: 1, startsAt: '', endsAt: '', on: true };
+  const EMPTY = { title: '', image: '', imageMobile: '', link: '/?screen=category&cat=Điện tử', position: 'HOME_TOP_CAROUSEL', category: 'Điện tử', order: 1, startsAt: '', endsAt: '', on: true };
 
   function Banners() {
     const [rows, setRows] = React.useState(load);
@@ -19,16 +19,17 @@
     const [form, setForm] = React.useState(null);
     const [err, setErr] = React.useState({});
     const fileRef = React.useRef(null);
+    const mobileRef = React.useRef(null);
     const update = (next) => { setRows(next); persist(next); };
     const list = rows.filter((b) => pos === 'all' || b.position === pos).sort((a, b) => a.order - b.order);
     const liveAt = (p, except) => rows.filter((b) => b.position === p && b.id !== except && stateOf(b) === 'LIVE').length;
 
-    const pick = (e) => {
+    const pick = (field) => (e) => {
       const f = e.target.files[0]; e.target.value = '';
       if (!f) return;
       if (f.size > 1024 * 1024) { setErr((x) => ({ ...x, image: 'Ảnh tối đa 1MB để lưu được trong bản mock' })); return; }
       const r = new FileReader();
-      r.onload = () => { setForm((x) => ({ ...x, image: r.result })); setErr((x) => ({ ...x, image: null })); };
+      r.onload = () => { setForm((x) => ({ ...x, [field]: r.result })); setErr((x) => ({ ...x, image: null })); };
       r.readAsDataURL(f);
     };
     const save = () => {
@@ -38,6 +39,7 @@
       if (!form.link.startsWith('/')) e.link = 'Liên kết đích phải thuộc miền của sàn';
       if (!form.startsAt || !form.endsAt) e.date = 'Chọn thời gian hiển thị';
       else if (form.endsAt <= form.startsAt) e.date = 'Ngày kết thúc phải sau ngày bắt đầu';
+      if (form.position === 'CATEGORY_TOP' && !form.category) e.position = 'Chọn danh mục cho banner này';
       if (liveAt(form.position, form.id) >= 8) e.position = 'Vị trí này đã đủ 8 banner đang hiển thị';
       setErr(e);
       if (Object.keys(e).length) return;
@@ -90,8 +92,13 @@
               <div onClick={() => fileRef.current.click()} style={{ marginTop: 6, height: 110, border: '1.5px dashed ' + (err.image ? 'var(--red-500)' : 'var(--border-strong)'), borderRadius: 'var(--radius-md)', background: 'var(--gray-25)', cursor: 'pointer', display: 'grid', placeItems: 'center', overflow: 'hidden', color: 'var(--text-muted)' }}>
                 {form.image ? <img src={form.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, font: 'var(--type-body-sm)' }}><Icon name="upload" size={18} />Bấm để chọn ảnh</span>}
               </div>
-              <input ref={fileRef} type="file" hidden accept="image/*" onChange={pick} />
+              <input ref={fileRef} type="file" hidden accept="image/*" onChange={pick('image')} />
               {err.image && <Err text={err.image} />}
+              <input ref={mobileRef} type="file" hidden accept="image/*" onChange={pick('imageMobile')} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+                <Button size="sm" variant="outline" iconLeft="upload" onClick={() => mobileRef.current.click()}>{form.imageMobile ? 'Đổi ảnh mobile' : 'Thêm ảnh mobile (không bắt buộc)'}</Button>
+                {form.imageMobile && <img src={form.imageMobile} alt="" width="48" height="48" style={{ objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />}
+              </div>
             </div>
             <Input label="Liên kết đích" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} error={err.link} placeholder="/?screen=category&cat=..." />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

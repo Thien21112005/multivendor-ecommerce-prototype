@@ -117,6 +117,10 @@
     ] },
   ];
 
+  // third level of the tree
+  const LEAVES = { 'Điện thoại & Phụ kiện': ['Điện thoại', 'Ốp lưng & Bao da', 'Sạc & Cáp'], 'Máy tính & Laptop': ['Laptop', 'Bàn phím', 'Chuột'], 'Âm thanh & Tai nghe': ['Tai nghe Bluetooth', 'Loa Bluetooth'], 'Camera & Máy quay': ['Mirrorless', 'Action cam'], 'Thời trang Nam': ['Áo thun', 'Quần jeans'], 'Thời trang Nữ': ['Đầm & Váy', 'Áo kiểu'], 'Giày dép': ['Sneaker', 'Sandal'], 'Chăm sóc da': ['Serum', 'Kem chống nắng'], 'Trang điểm': ['Son', 'Phấn'], 'Nội thất': ['Bàn', 'Ghế', 'Đèn'], 'Đồ dùng nhà bếp': ['Nồi & Chảo', 'Dao & Thớt'] };
+  TREE.forEach((t) => t.subs.forEach((s) => { s.leaves = LEAVES[s.name] || []; }));
+
   const PENDING = [
     { name: 'Thú cưng (Pet)', by: 'PetWorld VN', date: '08/06', parent: '— (danh mục gốc mới)' },
     { name: 'Đồ chơi mô hình', by: 'GundamStore', date: '07/06', parent: 'Mẹ & Bé' },
@@ -128,6 +132,7 @@
     const [pending, setPending] = React.useState(PENDING);
     const [catModal, setCatModal] = React.useState(null); // null | {} | category
     const [reject, setReject] = React.useState(null);
+    const [rejectWhy, setRejectWhy] = React.useState('');
     const [productView, setProductView] = React.useState(null); // null | sub-name
     const [attrCat, setAttrCat] = React.useState(null);
     const [toast, setToast] = React.useState('');
@@ -146,6 +151,7 @@
     if (productView) return <ProductList sub={productView} onBack={() => setProductView(null)} />;
     const saveCat = (f, editing) => {
       if (editing) setTree((ts) => ts.map((t) => (t.id === editing.id ? { ...t, name: f.name, icon: f.icon, comm: Number(f.comm) || 0, on: f.on } : t)));
+      else if (f.parent.startsWith('sub:')) { const sub = f.parent.slice(4); setTree((ts) => ts.map((t) => ({ ...t, subs: t.subs.map((s) => (s.name === sub ? { ...s, leaves: [...(s.leaves || []), f.name] } : s)) }))); }
       else if (f.parent) setTree((ts) => ts.map((t) => (t.id === f.parent ? { ...t, subs: [...t.subs, { name: f.name, products: 0, comm: Number(f.comm) || 0 }] } : t)));
       else { const id = f.slug || slugify(f.name); CATEGORY_ATTRS[id] = []; setTree((ts) => [...ts, { id, name: f.name, icon: f.icon, products: 0, shops: 0, comm: Number(f.comm) || 0, on: f.on, subs: [] }]); }
       setCatModal(null); flash('Đã lưu danh mục thành công');
@@ -211,7 +217,7 @@
                   <tbody>
                     {current.subs.map((s, i) => (
                       <tr key={i} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
-                        <td style={td}><button onClick={() => setProductView(s.name)} style={{ display: 'flex', alignItems: 'center', gap: 8, border: 0, background: 'transparent', cursor: 'pointer', color: 'var(--blue-600)', font: '600 13px var(--font-sans)' }}><Icon name="chevron-right" size={15} style={{ color: 'var(--text-subtle)' }} />{s.name}</button></td>
+                        <td style={td}><button onClick={() => setProductView(s.name)} style={{ display: 'flex', alignItems: 'center', gap: 8, border: 0, background: 'transparent', cursor: 'pointer', color: 'var(--blue-600)', font: '600 13px var(--font-sans)' }}><Icon name="chevron-right" size={15} style={{ color: 'var(--text-subtle)' }} />{s.name}</button>{(s.leaves || []).length > 0 && <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginLeft: 23, whiteSpace: 'normal' }}>{s.leaves.join(' · ')}</div>}</td>
                         <td style={{ ...td, textAlign: 'right' }}>{s.products.toLocaleString('vi-VN')}</td>
                         <td style={{ ...td, textAlign: 'right' }}><span style={{ font: '600 12px var(--font-sans)', color: 'var(--orange-600)', background: 'var(--orange-50)', borderRadius: 'var(--radius-pill)', padding: '2px 10px' }}>{s.comm}%</span></td>
                         <td style={{ ...td, textAlign: 'right' }}><Button size="sm" variant="ghost" onClick={() => setProductView(s.name)}>Xem SP</Button></td>
@@ -236,7 +242,7 @@
                     <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{p.name}</div>
                     <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Đề xuất bởi {p.by} · {p.date} · Thuộc: {p.parent}</div>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setReject(p)}>Từ chối</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setRejectWhy(''); setReject(p); }}>Từ chối</Button>
                   <Button size="sm" iconLeft="check" onClick={() => approveSuggestion(p)}>Duyệt</Button>
                 </div>
               ))}
@@ -245,8 +251,9 @@
         </div>
         {catModal && <CatModal cat={catModal} tree={tree} onClose={() => setCatModal(null)} onSave={saveCat} onDelete={delCat} />}
         {reject && <Modal open onClose={() => setReject(null)} title="Từ chối đề xuất"
-          footer={<><Button variant="ghost" onClick={() => setReject(null)}>Huỷ</Button><Button variant="danger" onClick={() => { setPending((ps) => ps.filter((x) => x !== reject)); setReject(null); }}>Từ chối</Button></>}>
-          <div style={{ width: 'min(420px, 80vw)', font: 'var(--type-body)', color: 'var(--text-body)' }}>Từ chối đề xuất danh mục <b>“{reject.name}”</b> từ {reject.by}?</div>
+          footer={<><Button variant="ghost" onClick={() => setReject(null)}>Huỷ</Button><Button variant="danger" disabled={!rejectWhy.trim()} onClick={() => { setPending((ps) => ps.filter((x) => x !== reject)); setReject(null); flash('Đã từ chối và gửi lý do cho người bán'); }}>Từ chối</Button></>}>
+          <div style={{ width: 'min(420px, 80vw)', font: 'var(--type-body)', color: 'var(--text-body)', marginBottom: 12 }}>Từ chối đề xuất danh mục <b>“{reject.name}”</b> từ {reject.by}?</div>
+          <Input label="Lý do từ chối (bắt buộc)" value={rejectWhy} onChange={(e) => setRejectWhy(e.target.value)} placeholder="VD: Đã có danh mục tương tự" />
         </Modal>}
         {toast && <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 200, display: 'flex', alignItems: 'center', gap: 8 }}><Icon name="circle-check" size={15} />{toast}</div>}
       </div>
@@ -334,7 +341,7 @@
               <Button variant="secondary" iconLeft="refresh-cw" onClick={() => set('slug', slugify(f.name))}>Auto</Button>
             </div>
           </div>
-          <div><label style={clab}>Danh mục cha</label><div style={{ marginTop: 6 }}><Select value={f.parent} onChange={(e) => set('parent', e.target.value)}><option value="">— Danh mục gốc (root)</option>{tree.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</Select></div></div>
+          <div><label style={clab}>Danh mục cha</label><div style={{ marginTop: 6 }}><Select value={f.parent} onChange={(e) => set('parent', e.target.value)}><option value="">— Danh mục gốc (root)</option>{tree.map((t) => <React.Fragment key={t.id}><option value={t.id}>{t.name}</option>{t.subs.map((s) => <option key={s.name} value={'sub:' + s.name}>{t.name} › {s.name}</option>)}</React.Fragment>)}</Select></div></div>
           <div>
             <label style={clab}>Icon</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>

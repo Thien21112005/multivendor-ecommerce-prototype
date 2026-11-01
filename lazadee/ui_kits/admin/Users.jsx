@@ -36,7 +36,7 @@
       if (reason === 'Lý do khác' && !note.trim()) { setNoteErr(true); return; }
       const text = reason === 'Lý do khác' ? note.trim() : reason;
       const until = TERMS[term];
-      setRows((rs) => rs.map((u) => (u.id === lock.id ? { ...u, status: until ? 'SUSPENDED' : 'LOCKED', reason: text, until } : u)));
+      setRows((rs) => rs.map((u) => (u.id === lock.id ? { ...u, status: 'SUSPENDED', reason: text, until: until || 'Vô thời hạn' } : u)));
       setLock(null);
     };
     const doUnlock = () => {

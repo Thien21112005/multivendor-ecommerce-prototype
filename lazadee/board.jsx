@@ -116,6 +116,7 @@ const BOARD = [
       { screen: 'kyc', label: 'Hàng đợi duyệt KYC', h: 860 },
       { screen: 'refunds', label: 'Phân xử đổi/trả', h: 824 },
       { screen: 'withdrawals', label: 'Xử lý rút tiền (payout)', h: 632 },
+      { screen: 'cod', label: 'Đối soát COD', h: 640 },
       { screen: 'commission', label: 'Cấu hình hoa hồng', h: 886 },
       { screen: 'ledger', label: 'Sổ cái tài chính', h: 570 },
       { screen: 'reviews', label: 'Kiểm duyệt đánh giá', h: 842 },

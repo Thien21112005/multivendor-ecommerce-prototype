@@ -358,7 +358,7 @@
     const [editName, setEditName] = React.useState(false);
     const [signedOut, setSignedOut] = React.useState(false);
     const fileRef = React.useRef(null);
-    const pickAvatar = (e) => { const file = e.target.files[0]; e.target.value = ''; if (file && file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) setAvatar(URL.createObjectURL(file)); };
+    const pickAvatar = (e) => { const file = e.target.files[0]; e.target.value = ''; if (file && /^image\/(jpeg|png)$/.test(file.type) && file.size <= 1024 * 1024) setAvatar(URL.createObjectURL(file)); };
     const [f, setF] = React.useState({ cur: '', nw: '', cf: '' });
     const [err, setErr] = React.useState({});
     const [stage, setStage] = React.useState('form');
@@ -370,11 +370,11 @@
     const submit = () => {
       const e = {};
       if (!f.cur) e.cur = 'Nhập mật khẩu hiện tại';
-      if (f.nw.length < 8) e.nw = 'Tối thiểu 8 ký tự'; else if (!/[0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ số'; else if (!/[^A-Za-z0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 ký tự đặc biệt';
+      if (f.nw.length < 8) e.nw = 'Tối thiểu 8 ký tự'; else if (!/[A-Z]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ hoa'; else if (!/[a-z]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ thường'; else if (f.nw === f.cur) e.nw = 'Mật khẩu mới phải khác mật khẩu hiện tại'; else if (!/[0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ số'; else if (!/[^A-Za-z0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 ký tự đặc biệt';
       if (f.cf !== f.nw) e.cf = 'Mật khẩu nhập lại không khớp';
       setErr(e); if (Object.keys(e).length === 0) { setStage('otp'); setResend(60); setOtp(''); }
     };
-    const confirm = () => { setStage('done'); setF({ cur: '', nw: '', cf: '' }); setTimeout(() => setStage('form'), 2800); };
+    const confirm = () => { if (otp !== '123456') { setErr({ otp: 'Mã OTP không đúng' }); return; } setErr({}); setStage('done'); setF({ cur: '', nw: '', cf: '' }); setTimeout(() => setStage('form'), 2800); };
     return (
       <div style={{ maxWidth: 1180, display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* profile */}
@@ -409,15 +409,16 @@
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <APwField label="Mật khẩu hiện tại" value={f.cur} onChange={(v) => set('cur', v)} err={err.cur} />
               <div>
-                <APwField label="Mật khẩu mới" value={f.nw} onChange={(v) => set('nw', v)} err={err.nw} hint="Tối thiểu 8 ký tự, cần chữ hoa, số và ký tự đặc biệt" />
+                <APwField label="Mật khẩu mới" value={f.nw} onChange={(v) => set('nw', v)} err={err.nw} hint="Tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt" />
                 {f.nw && <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}><div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (strength / 4 * 100) + '%', height: '100%', borderRadius: 3, background: APW_COLORS[strength], transition: 'all .3s' }} /></div><span style={{ font: '600 12px var(--font-sans)', color: APW_COLORS[strength], minWidth: 64 }}>{APW_LABELS[strength]}</span></div>}
               </div>
               <APwField label="Nhập lại mật khẩu mới" value={f.cf} onChange={(v) => set('cf', v)} err={err.cf} />
               {stage === 'form' && <div><Button iconLeft="check" onClick={submit}>Cập nhật mật khẩu</Button></div>}
               {stage === 'otp' && (
                 <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--blue-600)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến <b>ye****@lazadee.vn</b></span></div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--blue-600)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến <b>ye****@lazadee.vn</b> (demo: 123456)</span></div>
                   <AOtpBoxes onChange={setOtp} />
+                  {err.otp && <div style={{ color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 8 }}>{err.otp}</div>}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
                     <Button iconLeft="check" disabled={otp.length < 6} onClick={confirm}>Xác nhận</Button>
                     <Button variant="ghost" onClick={() => setStage('form')}>Huỷ</Button>
@@ -496,7 +497,7 @@
     );
   }
 
-  const EVENT = { ESCROW_IN: 'warning', COMMISSION: 'primary', ESCROW_RELEASE: 'success', PAYOUT_ACCRUE: 'mint', PAYOUT_SETTLE: 'neutral', REFUND: 'danger' };
+  const EVENT = { ESCROW_IN: 'warning', COMMISSION: 'primary', ESCROW_RELEASE: 'success', PAYOUT_ACCRUE: 'mint', PAYOUT_SETTLE: 'neutral', REFUND: 'danger', COD_REMIT: 'warning' };
   const lab = { font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', display: 'block' };
   const cardBox = { background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: 22 };
   const hrow = { font: '600 12px var(--font-sans)', color: 'var(--text-muted)', textAlign: 'left', background: 'var(--gray-25)' };

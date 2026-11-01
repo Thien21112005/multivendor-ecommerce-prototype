@@ -10,6 +10,12 @@
   // gateway derived from the order's payment method (mocked per shop)
   const GW_OF = { 'TechZone Official': 'VNPAY', 'Beauty Box': 'VietQR', 'Shoe Republic': 'COD' };
 
+  const OUTCOMES = [
+    { id: 'REFUNDED', label: 'A. Người mua đúng: hoàn tiền ngay', note: 'Hoàn tiền từ escrow về người mua. Khoản này được ghi vào sổ cái và tính vào số khiếu nại thua của shop.' },
+    { id: 'AWAITING_RETURN', label: 'A. Người mua đúng: buộc gửi trả hàng rồi hoàn tiền', note: 'Hệ thống tạo vận đơn chiều về. Khách có 7 ngày để giao hàng cho đơn vị vận chuyển; hàng về kho shop mới hoàn tiền.' },
+    { id: 'DENIED', label: 'B. Người bán đúng: bác yêu cầu, giải ngân cho shop', note: 'Bác yêu cầu hoàn tiền, mở khóa ký quỹ và gửi cảnh báo tới tài khoản khách hàng.' },
+    { id: 'CARRIER', label: 'C. Lỗi vận chuyển: hoàn khách và đền bù shop', note: 'Hoàn tiền cho khách, đền bù shop theo giá khai; sàn làm việc với hãng vận chuyển theo chính sách bồi thường.' },
+  ];
   function GatewayCard({ r }) {
     // existing record on already-refunded rows, else a freshly-created one on approve
     const gw = r.gateway || { name: GW_OF[r.shop] || 'VNPAY', txnId: 'TXN-' + (8800 + (r.id.charCodeAt(6) || 40)), gatewayRefundId: GW_OF[r.shop] && GW_OF[r.shop] !== 'VNPAY' ? '—' : 'VNP-RF-20260622-00' + (r.id.slice(-1)), amount: r.amount, status: 'PENDING', createdAt: 'Vừa tạo' };
@@ -32,6 +38,8 @@
           <Field k="Mã hoàn tiền GW" v={gw.gatewayRefundId} mono />
           <Field k="Số tiền hoàn" v={formatVND(gw.amount)} price />
           <Field k="Thời gian tạo" v={gw.createdAt} />
+          {manual && <Field k="Chuyển tới" v={r.bank || 'Tài khoản khách cung cấp'} />}
+          {manual && <Field k="Nội dung bắt buộc" v={'LZDRF' + r.id.replace(/\D/g, '')} mono />}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
             {manual
               ? <Button variant="secondary" size="sm" iconLeft="check" disabled={status === 'SUCCESS'} onClick={() => setStatus('SUCCESS')}>{status === 'SUCCESS' ? 'Đã chuyển khoản' : 'Đã chuyển khoản'}</Button>
@@ -64,7 +72,8 @@
 
   function Refunds() {
     const [decided, setDecided] = React.useState({});
-    const [modal, setModal] = React.useState(null); // {row, action}
+    const [modal, setModal] = React.useState(null); // row being arbitrated
+    const [outcome, setOutcome] = React.useState(OUTCOMES[0].id);
     const [verdict, setVerdict] = React.useState('');
     const state = (r) => decided[r.id] || r.state;
 
@@ -81,7 +90,8 @@
               <span className="code" style={{ font: '13px var(--font-mono)', fontWeight: 600, color: 'var(--text-strong)' }}>{r.id}</span>
               <span className="code" style={{ font: '12px var(--font-mono)', color: 'var(--text-muted)', background: 'var(--gray-100)', padding: '2px 7px', borderRadius: 'var(--radius-sm)' }}>{r.order}</span>
               {state(r) === 'OPEN' && <StatusBadge status="PENDING" label="ĐANG TRANH CHẤP" />}
-              {state(r) === 'REFUNDED' && <Badge variant="success" icon="circle-check">Đã hoàn tiền</Badge>}
+              {state(r) === 'AWAITING_RETURN' && <Badge variant="primary" icon="truck">Chờ hàng hoàn về</Badge>}
+              {(state(r) === 'REFUNDED' || state(r) === 'CARRIER') && <Badge variant="success" icon="circle-check">Đã hoàn tiền</Badge>}
               {state(r) === 'DENIED' && <Badge variant="danger" icon="ban">Đã từ chối</Badge>}
               <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Mở {r.opened}</span>
             </div>
@@ -95,9 +105,15 @@
               <div>
                 <div style={info}>Người bán</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}><Avatar name={r.shop} size={28} square /><span style={val}>{r.shop}</span></div>
-                <div style={{ ...info, marginTop: 10 }}>Bằng chứng ({r.media.length})</div>
-                <div style={{ display: 'flex', gap: 6, marginTop: 5 }}>
+                <div style={{ ...info, marginTop: 10 }}>Bằng chứng của khách ({r.media.length} ảnh{r.video ? ', 1 video' : ''})</div>
+                <div style={{ display: 'flex', gap: 6, marginTop: 5, alignItems: 'center', flexWrap: 'wrap' }}>
                   {r.media.map((m) => <img key={m} src={'../../assets/img/' + m + '.jpg'} style={{ width: 44, height: 44, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />)}
+                  {r.video && <span style={{ display: 'inline-flex', gap: 4, alignItems: 'center', font: 'var(--type-caption)', color: 'var(--text-muted)' }}><Icon name="file-text" size={14} />{r.video}</span>}
+                </div>
+                <div style={{ ...info, marginTop: 10 }}>Bằng chứng của shop</div>
+                <div style={{ display: 'flex', gap: 6, marginTop: 5, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {(r.shopMedia || []).map((m) => <img key={m} src={'../../assets/img/' + m + '.jpg'} style={{ width: 44, height: 44, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />)}
+                  {r.shopVideo ? <span style={{ display: 'inline-flex', gap: 4, alignItems: 'center', font: 'var(--type-caption)', color: 'var(--text-muted)' }}><Icon name="file-text" size={14} />{r.shopVideo}</span> : !(r.shopMedia || []).length && <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Shop chưa cung cấp</span>}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -105,28 +121,28 @@
                 <div style={{ font: '800 22px var(--font-sans)', color: 'var(--text-price)', fontVariantNumeric: 'tabular-nums', margin: '4px 0 12px' }}>{formatVND(r.amount)}</div>
                 {state(r) === 'OPEN' ? (
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <Button variant="secondary" size="sm" onClick={() => { setVerdict(''); setModal({ row: r, action: 'deny' }); }}>Từ chối</Button>
-                    <Button size="sm" iconLeft="hand-coins" onClick={() => { setVerdict(''); setModal({ row: r, action: 'refund' }); }}>Hoàn tiền</Button>
+                    <Button size="sm" iconLeft="scale" onClick={() => { setVerdict(''); setOutcome(OUTCOMES[0].id); setModal(r); }}>Phân xử</Button>
                   </div>
-                ) : <Button variant="ghost" size="sm" onClick={() => setDecided((d) => { const n = { ...d }; delete n[r.id]; return n; })}>Mở lại</Button>}
+                ) : state(r) === 'AWAITING_RETURN'
+                  ? <Button size="sm" iconLeft="check" onClick={() => setDecided((d) => ({ ...d, [r.id]: 'REFUNDED' }))}>Hàng đã về kho shop</Button>
+                  : <Button variant="ghost" size="sm" onClick={() => setDecided((d) => { const n = { ...d }; delete n[r.id]; return n; })}>Mở lại</Button>}
               </div>
             </div>
-            {state(r) === 'REFUNDED' && <GatewayCard key={r.id + '-gw'} r={r} />}
+            {(state(r) === 'REFUNDED' || state(r) === 'CARRIER') && <GatewayCard key={r.id + '-gw'} r={r} />}
           </div>
         ))}
-        <Modal open={!!modal} onClose={() => setModal(null)} title={modal && modal.action === 'refund' ? 'Duyệt hoàn tiền' : 'Từ chối yêu cầu'}
+        <Modal open={!!modal} onClose={() => setModal(null)} width={540} title={modal && 'Phân xử ' + modal.id}
           footer={modal && <>
             <Button variant="ghost" onClick={() => setModal(null)}>Huỷ</Button>
-            <Button variant={modal.action === 'refund' ? 'primary' : 'danger'} disabled={!verdict.trim()}
-              onClick={() => { setDecided((d) => ({ ...d, [modal.row.id]: modal.action === 'refund' ? 'REFUNDED' : 'DENIED' })); setModal(null); }}>
+            <Button variant={outcome === 'DENIED' ? 'danger' : 'primary'} disabled={!verdict.trim()}
+              onClick={() => { setDecided((d) => ({ ...d, [modal.id]: outcome })); setModal(null); }}>
               Thực thi phán quyết
             </Button>
           </>}>
-          {modal && <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>
-            {modal.action === 'refund'
-              ? <>Hoàn <b style={{ color: 'var(--text-price)' }}>{formatVND(modal.row.amount)}</b> từ escrow về người mua. Khoản này sẽ được ghi vào sổ cái với mã <span className="code">{modal.row.id}</span>.</>
-              : <>Từ chối yêu cầu hoàn tiền <span className="code">{modal.row.id}</span>. Tiền vẫn được giữ trong escrow của người bán.</>}
-          </p>}
+          {modal && <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {OUTCOMES.map((o) => <label key={o.id} style={{ display: 'flex', gap: 9, padding: '10px 12px', border: '1.5px solid ' + (outcome === o.id ? 'var(--blue-500)' : 'var(--border-default)'), background: outcome === o.id ? 'var(--blue-50)' : '#fff', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}><input type="radio" name="outcome" checked={outcome === o.id} onChange={() => setOutcome(o.id)} style={{ accentColor: 'var(--blue-500)', marginTop: 3 }} /><span><span style={{ display: 'block', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{o.label}</span><span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{o.note}</span></span></label>)}
+            <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Số tiền tranh chấp: <b style={{ color: 'var(--text-price)' }}>{formatVND(modal.amount)}</b></div>
+          </div>}
           {modal && <div style={{ marginTop: 12 }}>
             <label style={{ display: 'block', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 6 }}>Biên bản kết luận phân xử</label>
             <textarea value={verdict} onChange={(e) => setVerdict(e.target.value)} rows={3} placeholder="Tóm tắt chứng cứ và lý do quyết định..." style={{ width: '100%', padding: '9px 12px', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body)', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />

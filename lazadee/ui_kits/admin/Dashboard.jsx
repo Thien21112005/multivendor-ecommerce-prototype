@@ -65,6 +65,15 @@
     );
   }
 
+  function RankCard({ title, rows, unit }) {
+    return (
+      <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '16px 18px' }}>
+        <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 10 }}>{title}</div>
+        {rows.map(([k, v]) => <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '5px 0', borderTop: '1px solid var(--border-subtle)', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{k}</span><b style={{ flex: 'none', fontVariantNumeric: 'tabular-nums' }}>{typeof v === 'number' ? v.toLocaleString('vi-VN') + ' ' + unit : v}</b></div>)}
+      </div>
+    );
+  }
+
   const PAGE = 5;
   function Dashboard() {
     const [commMonth, setCommMonth] = React.useState(DASHBOARD.months[0]);
@@ -76,7 +85,7 @@
     const D = DASHBOARD;
     const cats = ['Tất cả ngành hàng', ...Array.from(new Set(D.vendors.map((v) => v.cat)))];
     const vendors = D.vendors.filter((v) => cat === 'Tất cả ngành hàng' || v.cat === cat).filter((v) => v.name.toLowerCase().includes(q.trim().toLowerCase()));
-    const exportCsv = () => downloadCsv('tong-quan-doanh-thu.csv', [['Vendor', 'Ngành hàng', 'Sản phẩm bán ra', 'Đánh giá', 'Tăng trưởng %', 'Lợi nhuận'], ...vendors.map((v) => [v.name, v.cat, v.sold, v.rating, v.growth, v.rev])]);
+    const exportCsv = () => downloadCsv('tong-quan-doanh-thu.csv', [['Vendor', 'Ngành hàng', 'Sản phẩm bán ra', 'Đánh giá', 'Tăng trưởng %', 'Lợi nhuận'], ...vendors.map((v) => [v.name, v.cat, v.sold, v.rating, v.growth, v.rev]), [], ['Trạng thái đơn', 'Số đơn'], ...D.orderStatus, [], ['Sản phẩm bán chạy', 'Đã bán'], ...D.topProducts]);
     const pages = Math.max(1, Math.ceil(vendors.length / PAGE));
     const shown = vendors.slice((page - 1) * PAGE, page * PAGE);
     return (
@@ -85,11 +94,12 @@
           <Tile icon="shopping-bag" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Tổng GMV Toàn Sàn" value={vnd(D.gmv)} note={'+' + D.gmvGrowth + '% vs tháng trước'} />
           <Tile icon="banknote" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Doanh thu hoa hồng" value={vnd(D.commission[commMonth])} note="+9,2% vs tháng trước" action={<MonthPick value={commMonth} onChange={setCommMonth} />} />
           <Tile icon="ticket" tone={{ bg: 'var(--flash-50)', fg: 'var(--flash-600)' }} label="Chi phí Voucher / Freeship" value={vnd(D.voucherCost[costMonth])} note="Trợ giá Marketing" action={<MonthPick value={costMonth} onChange={setCostMonth} />} />
-          <Tile icon="percent" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lợi nhuận ròng (Net Profit)" value={vnd(D.commission[commMonth] - D.voucherCost[costMonth])} note="+6,4% vs tháng trước" />
+          <Tile icon="percent" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lợi nhuận ròng (Net Profit)" value={vnd(D.commission[commMonth] - D.voucherCost[commMonth] - D.xuCost[commMonth] - D.gatewayFee[commMonth])} note="Hoa hồng − voucher − Xu − phí cổng" />
           <Tile icon="lock" tone={{ bg: 'var(--amber-50)', fg: 'var(--amber-600)' }} label="Đang giữ Escrow (toàn sàn)" value={vnd(D.escrow)} note="Tiền đang chờ đối soát" />
-          <Tile icon="clock" tone={{ bg: 'var(--purple-50)', fg: 'var(--purple-500)' }} label="Nợ Vendor (Liabilities)" value={vnd(D.liabilities)} note="Số dư chưa payout" />
+          <Tile icon="clock" tone={{ bg: 'var(--purple-50)', fg: 'var(--purple-500)' }} label="Nợ Vendor (Liabilities)" value={vnd(D.liabilities)} note="Số dư ví chưa rút + escrow đang giữ" />
+          <Tile icon="truck" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="COD chờ đối soát" value={vnd(D.codPending)} note="Tiền hãng vận chuyển chưa chuyển về" />
           <Tile icon="refresh-cw" tone={{ bg: 'var(--red-50, #FDECEA)', fg: 'var(--red-600)' }} label="Tiền chờ hoàn trả (Refunds)" value={vnd(D.refunds)} note={D.refundCount + ' yêu cầu đang xử lý'} />
-          <Tile icon="bell" tone={{ bg: 'var(--gray-100)', fg: 'var(--gray-600)' }} label="Cần xử lý (Pending Ops)" value={(D.pendingKyc + D.pendingProducts) + ' mục'} note={D.pendingKyc + ' KYC, ' + D.pendingProducts + ' duyệt SP'} />
+          <Tile icon="bell" tone={{ bg: 'var(--gray-100)', fg: 'var(--gray-600)' }} label="Cần xử lý (Pending Ops)" value={(D.pendingKyc + D.pendingProducts + D.pendingWithdrawals + D.openDisputes) + ' mục'} note={D.pendingKyc + ' KYC, ' + D.pendingProducts + ' duyệt SP, ' + D.pendingWithdrawals + ' lệnh rút, ' + D.openDisputes + ' tranh chấp'} />
         </div>
 
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px', marginBottom: 16 }}>
@@ -101,6 +111,12 @@
             </div>
           </div>
           <AreaChart points={D.chart[range]} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
+          <RankCard title="Đơn theo trạng thái" rows={D.orderStatus} unit="đơn" />
+          <RankCard title="Top 10 shop theo GMV" rows={[...D.vendors].sort((a, b) => b.rev - a.rev).slice(0, 10).map((v) => [v.name, vnd(v.rev)])} />
+          <RankCard title="Top 10 sản phẩm bán chạy" rows={D.topProducts} unit="đã bán" />
         </div>
 
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>

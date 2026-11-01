@@ -18,7 +18,7 @@
   ];
   // action → badge variant
   const VARIANT = {
-    LOGIN_FAILED: 'danger', KYC_APPROVED: 'success', KYC_REJECTED: 'danger',
+    LOGIN_FAILED: 'danger', ACCESS_DENIED: 'danger', KYC_APPROVED: 'success', KYC_REJECTED: 'danger',
     ESCROW_RELEASED: 'success', PAYOUT_APPROVED: 'mint', REFUND_PROCESSED: 'warning',
     REVIEW_HIDDEN: 'neutral', COMMISSION_UPDATED: 'primary', RBAC_ROLE_CHANGED: 'primary',
     STAFF_INVITED: 'primary', PERMISSION_REVOKED: 'danger',
@@ -38,7 +38,18 @@
     const [q, setQ] = React.useState('');
     const [from, setFrom] = React.useState('');
     const [to, setTo] = React.useState('');
-    const list = AUDIT.filter((r) => (cat === 'all' || r.cat === cat))
+    // mock data ends on 22/06/2026, so the windows count back from that day
+    const NOW = '2026-06-22';
+    const iso = (ts) => ts.slice(6, 10) + '-' + ts.slice(3, 5) + '-' + ts.slice(0, 2);
+    const back = (days) => new Date(new Date(NOW).getTime() - days * 864e5).toISOString().slice(0, 10);
+    const inRange = (r) => {
+      const d = iso(r.ts);
+      if (range === 'Hôm nay') return d === NOW;
+      if (range === '7 ngày qua') return d >= back(7);
+      if (range === '30 ngày qua') return d >= back(30);
+      return (!from || d >= from) && (!to || d <= to);
+    };
+    const list = AUDIT.filter(inRange).filter((r) => (cat === 'all' || r.cat === cat))
       .filter((r) => !q.trim() || (r.actor + ' ' + r.action + ' ' + r.target + ' ' + r.ip).toLowerCase().includes(q.trim().toLowerCase()));
     const failed = AUDIT.filter((r) => r.result === 'DENIED').length;
 
@@ -97,15 +108,14 @@
                     <td style={td}><Badge variant={VARIANT[r.action] || 'neutral'}>{r.action}</Badge></td>
                     <td style={{ ...td, color: 'var(--text-body)', whiteSpace: 'normal', maxWidth: 320 }}>{r.target}</td>
                     <td style={{ ...td, color: 'var(--text-muted)' }} className="code">{r.ip}</td>
-                    <td style={td}>{r.result === 'OK'
-                      ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--mint-600)', font: '600 12px var(--font-sans)' }}><Icon name="circle-check" size={14} />OK</span>
-                      : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--red-600)', font: '600 12px var(--font-sans)' }}><Icon name="ban" size={14} />DENIED</span>}</td>
+                    <td style={td}>{r.result === 'SUCCESS'
+                      ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--mint-600)', font: '600 12px var(--font-sans)' }}><Icon name="circle-check" size={14} />SUCCESS</span>
+                      : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--red-600)', font: '600 12px var(--font-sans)' }}><Icon name={r.result === 'DENIED' ? 'ban' : 'triangle-alert'} size={14} />{r.result}</span>}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          {list.length === 0 && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-subtle)', font: 'var(--type-body)' }}>Không có bản ghi nào khớp bộ lọc.</div>}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>
           <Icon name="info" size={13} /> Hiển thị {list.length} / {AUDIT.length} bản ghi gần nhất · lưu trữ tối thiểu 12 tháng theo chính sách.

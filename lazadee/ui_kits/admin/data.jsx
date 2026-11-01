@@ -6,6 +6,7 @@
     { id: 'refunds', name: 'Trả hàng & Hoàn tiền', icon: 'undo-2', badge: 2, perm: 'HANDLE_DISPUTE' },
     { id: 'reviews', name: 'Kiểm duyệt đánh giá', icon: 'star', perm: 'MODERATE_REVIEW' },
     { id: 'withdrawals', name: 'Xử lý rút tiền', icon: 'hand-coins', badge: 4, perm: 'PROCESS_PAYOUT' },
+    { id: 'cod', name: 'Đối soát COD', icon: 'receipt', badge: 2, perm: 'PROCESS_PAYOUT' },
     { id: 'commission', name: 'Cấu hình hoa hồng', icon: 'percent', perm: 'UPDATE_COMMISSION' },
     { id: 'ledger', name: 'Sổ cái tài chính', icon: 'scale', perm: 'VIEW_FINANCE' },
     { id: 'audit', name: 'Nhật ký hệ thống', icon: 'file-text', perm: 'VIEW_AUDIT_LOG' },
@@ -55,10 +56,23 @@
   ];
 
   const REFUNDS = [
-    { id: 'RFN-0231', order: 'LZD-20260608-000035', buyer: 'Vũ Minh Quân', shop: 'Beauty Box', amount: 178000, reason: 'Hàng không đúng mô tả', state: 'OPEN', opened: '2 giờ trước', media: ['skincare', 'cosmetics'] },
-    { id: 'RFN-0230', order: 'LZD-20260608-000028', buyer: 'Hoàng Thu Trang', shop: 'Shoe Republic', amount: 320000, reason: 'Giao sai size', state: 'OPEN', opened: '5 giờ trước', media: ['heels'] },
-    { id: 'RFN-0229', order: 'LZD-20260608-000021', buyer: 'Bùi Đức Anh', shop: 'TechZone Official', amount: 389000, reason: 'Sản phẩm lỗi', state: 'REFUNDED', opened: 'Hôm qua', media: ['headphones'],
+    { id: 'RFN-0231', order: 'LZD-20260608-000035', buyer: 'Vũ Minh Quân', shop: 'Beauty Box', amount: 178000, reason: 'Hàng không đúng mô tả', state: 'OPEN', opened: '2 giờ trước', media: ['skincare', 'cosmetics'], video: 'mo-hop-rfn0231.mp4', shopMedia: ['cosmetics'], shopVideo: 'dong-goi-rfn0231.mp4', bank: 'Techcombank ••4471 · VU MINH QUAN' },
+    { id: 'RFN-0230', order: 'LZD-20260608-000028', buyer: 'Hoàng Thu Trang', shop: 'Shoe Republic', amount: 320000, reason: 'Giao sai size', state: 'OPEN', opened: '5 giờ trước', media: ['heels'], video: 'mo-hop-rfn0230.mp4', shopMedia: [], bank: 'BIDV ••0932 · HOANG THU TRANG' },
+    { id: 'RFN-0229', order: 'LZD-20260608-000021', buyer: 'Bùi Đức Anh', shop: 'TechZone Official', amount: 389000, reason: 'Sản phẩm lỗi', state: 'REFUNDED', opened: 'Hôm qua', media: ['headphones'], video: 'mo-hop-rfn0229.mp4', shopMedia: ['headphones'], shopVideo: 'dong-goi-rfn0229.mp4',
       gateway: { name: 'VNPAY', txnId: 'TXN-8847', gatewayRefundId: 'VNP-RF-20260620-001', amount: 389000, status: 'SUCCESS', createdAt: '20/06/2026 14:32:10' } },
+  ];
+
+  // Money the carrier sent to the platform account (reported by SePay), waiting for its statement.
+  const COD_SHIPMENTS = {
+    VN931042698: { order: 'LZD-20260608-000036', total: 640000 },
+    VN880077120: { order: 'LZD-20260608-000028', total: 484000 },
+    VN931042544: { order: 'LZD-20260608-000034', total: 540000 },
+    VN931042455: { order: 'LZD-20260608-000031', total: 320000 },
+  };
+  const COD_SESSIONS = [
+    { id: 'COD-20260612', carrier: 'GHN', received: 1075000, at: '12/06/2026 09:12', ref: 'FT26163881021', status: 'WAITING', sample: [{ code: 'VN931042698', amount: 640000, fee: 28000 }, { code: 'VN880077120', amount: 484000, fee: 21000 }] },
+    { id: 'COD-20260610', carrier: 'GHTK', received: 820000, at: '10/06/2026 15:40', ref: 'FT26161774310', status: 'WAITING', sample: [{ code: 'VN931042544', amount: 540000, fee: 24000 }, { code: 'VN931042455', amount: 300000, fee: 14000 }, { code: 'VN000000000', amount: 18000, fee: 0 }] },
+    { id: 'COD-20260605', carrier: 'GHN', received: 306000, at: '05/06/2026 10:05', ref: 'FT26156220984', status: 'DONE', file: 'bang-ke-0605.csv', lines: [{ code: 'VN931042455', amount: 320000, fee: 14000 }], sample: [] },
   ];
 
   const REVIEWS = [
@@ -165,23 +179,28 @@
 
   // Append-only audit trail of sensitive actions (immutable). Newest first.
   const AUDIT = [
-    { ts: '22/06/2026 09:42:11', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_APPROVED', cat: 'kyc', target: 'KYC-1037 · TravelGear', ip: '113.161.40.12', result: 'OK' },
-    { ts: '22/06/2026 09:15:03', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'LZD-20260608-000039 · 1.245.000₫', ip: '10.0.2.7', result: 'OK' },
-    { ts: '22/06/2026 08:51:46', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'PAYOUT_APPROVED', cat: 'finance', target: 'PAYOUT-0012 · 5.000.000₫', ip: '113.161.40.88', result: 'OK' },
-    { ts: '22/06/2026 08:33:20', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'yen.dh@lazadee.vn (sai mật khẩu ×3)', ip: '45.119.82.201', result: 'DENIED' },
-    { ts: '21/06/2026 22:07:55', actor: 'nghia.vd@lazadee.vn', role: 'Moderator', action: 'REVIEW_HIDDEN', cat: 'moderation', target: 'RV-9910 · ngôn từ phản cảm', ip: '171.244.10.5', result: 'OK' },
-    { ts: '21/06/2026 18:46:12', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'COMMISSION_UPDATED', cat: 'config', target: 'Làm đẹp: 9% → 10%', ip: '113.161.40.88', result: 'OK' },
-    { ts: '21/06/2026 16:30:41', actor: 'system', role: 'System', action: 'REFUND_PROCESSED', cat: 'finance', target: 'RFN-0229 · 389.000₫', ip: '10.0.2.7', result: 'OK' },
-    { ts: '21/06/2026 14:02:09', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'RBAC_ROLE_CHANGED', cat: 'security', target: 'phat.nt → KYC Reviewer', ip: '113.161.40.12', result: 'OK' },
-    { ts: '20/06/2026 10:30:18', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'PERMISSION_REVOKED', cat: 'security', target: 'nghia.vd — thu hồi quyền refund.arbitrate', ip: '113.161.40.12', result: 'OK' },
-    { ts: '21/06/2026 11:18:33', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'admin@lazadee.vn (tài khoản không tồn tại)', ip: '193.32.126.44', result: 'DENIED' },
-    { ts: '21/06/2026 09:00:00', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'STAFF_INVITED', cat: 'security', target: 'support1@lazadee.vn', ip: '113.161.40.12', result: 'OK' },
-    { ts: '20/06/2026 20:44:17', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_REJECTED', cat: 'kyc', target: 'KYC-1033 · ảnh giấy tờ mờ', ip: '171.244.10.5', result: 'OK' },
-    { ts: '20/06/2026 15:12:50', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'LZD-20260608-000033 · 536.000₫', ip: '10.0.2.7', result: 'OK' },
+    { ts: '22/06/2026 09:42:11', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_APPROVED', cat: 'kyc', target: 'KYC-1037 · TravelGear', ip: '113.161.40.12', result: 'SUCCESS' },
+    { ts: '22/06/2026 09:15:03', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'LZD-20260608-000039 · 1.245.000₫', ip: '10.0.2.7', result: 'SUCCESS' },
+    { ts: '22/06/2026 08:51:46', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'PAYOUT_APPROVED', cat: 'finance', target: 'PAYOUT-0012 · 5.000.000₫', ip: '113.161.40.88', result: 'SUCCESS' },
+    { ts: '22/06/2026 08:33:20', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'yen.dh@lazadee.vn (sai mật khẩu ×3)', ip: '45.119.82.201', result: 'FAILED' },
+    { ts: '21/06/2026 22:07:55', actor: 'nghia.vd@lazadee.vn', role: 'Moderator', action: 'REVIEW_HIDDEN', cat: 'moderation', target: 'RV-9910 · ngôn từ phản cảm', ip: '171.244.10.5', result: 'SUCCESS' },
+    { ts: '21/06/2026 18:46:12', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'COMMISSION_UPDATED', cat: 'config', target: 'Làm đẹp: 9% → 10%', ip: '113.161.40.88', result: 'SUCCESS' },
+    { ts: '21/06/2026 16:30:41', actor: 'system', role: 'System', action: 'REFUND_PROCESSED', cat: 'finance', target: 'RFN-0229 · 389.000₫', ip: '10.0.2.7', result: 'SUCCESS' },
+    { ts: '21/06/2026 14:02:09', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'RBAC_ROLE_CHANGED', cat: 'security', target: 'phat.nt → KYC Reviewer', ip: '113.161.40.12', result: 'SUCCESS' },
+    { ts: '20/06/2026 10:30:18', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'PERMISSION_REVOKED', cat: 'security', target: 'nghia.vd — thu hồi quyền refund.arbitrate', ip: '113.161.40.12', result: 'SUCCESS' },
+    { ts: '21/06/2026 11:18:33', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'admin@lazadee.vn (tài khoản không tồn tại)', ip: '193.32.126.44', result: 'FAILED' },
+    { ts: '21/06/2026 10:02:41', actor: 'nghia.vd@lazadee.vn', role: 'CS Specialist', action: 'ACCESS_DENIED', cat: 'security', target: 'Màn Sổ cái tài chính (thiếu VIEW_FINANCE)', ip: '171.244.10.5', result: 'DENIED' },
+    { ts: '21/06/2026 09:00:00', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'STAFF_INVITED', cat: 'security', target: 'support1@lazadee.vn', ip: '113.161.40.12', result: 'SUCCESS' },
+    { ts: '20/06/2026 20:44:17', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_REJECTED', cat: 'kyc', target: 'KYC-1033 · ảnh giấy tờ mờ', ip: '171.244.10.5', result: 'SUCCESS' },
+    { ts: '20/06/2026 15:12:50', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'LZD-20260608-000033 · 536.000₫', ip: '10.0.2.7', result: 'SUCCESS' },
   ];
 
   const DASHBOARD = {
-    gmv: 18426500000, gmvGrowth: 12.6, escrow: 3264800000, liabilities: 1187300000, refunds: 42650000, refundCount: 12, pendingKyc: 3, pendingProducts: 3,
+    gmv: 18426500000, gmvGrowth: 12.6, escrow: 3264800000, liabilities: 1187300000, refunds: 42650000, refundCount: 12, pendingKyc: 3, pendingProducts: 3, pendingWithdrawals: 4, openDisputes: 2, codPending: 186400000,
+    orderStatus: [['Chờ thanh toán', 184], ['Đã thanh toán', 926], ['Đang chuẩn bị', 1340], ['Đang giao', 2875], ['Đã giao', 1712], ['Hoàn thành', 18240], ['Đã huỷ', 642], ['Trả hàng / hoàn tiền', 118]],
+    topProducts: [['Áo thun cotton basic', 15000], ['Bộ mỹ phẩm 12 món', 12000], ['Serum Vitamin C 30ml', 9300], ['Kính mát UV400', 8900], ['Cốc sứ tối giản 350ml', 6100], ['Giày sneaker Air Run', 5400], ['Đèn bàn LED cảm ứng', 4500], ['Nước hoa nữ 50ml', 4100], ['Áo khoác denim', 3800], ['Balo laptop 25L', 3200]],
+    xuCost: { '06/2026': 38400000, '05/2026': 31200000, '04/2026': 28900000 },
+    gatewayFee: { '06/2026': 51800000, '05/2026': 47300000, '04/2026': 44100000 },
     months: ['06/2026', '05/2026', '04/2026'],
     commission: { '06/2026': 921325000, '05/2026': 843800000, '04/2026': 790450000 },
     voucherCost: { '06/2026': 456800000, '05/2026': 398200000, '04/2026': 372100000 },
@@ -203,11 +222,11 @@
 
   const MODERATORS = [{ name: 'Lê Minh Tú', active: true }, { name: 'Nguyễn Thảo Vy', active: true }, { name: 'Trần Quốc Đạt', active: false }];
   const MODERATION = [
-    { id: 1284, name: 'Đèn bàn LED cảm ứng 3 chế độ sáng', img: 'lamp', vendor: 'Home & Living', state: 'PENDING_APPROVAL', moderator: 'Lê Minh Tú', created: '08/06/2026 15:20', category: 'Nhà cửa > Nội thất > Đèn', brand: 'No Brand', condition: 'Mới', origin: 'Việt Nam', desc: 'Đèn bàn LED cảm ứng, 3 mức sáng, sạc USB-C, pin 8 giờ.', weight: 450, size: '18 × 18 × 40 cm', shipsFrom: 'Hà Nội', payer: 'Người mua', docs: ['hoa-don-nhap-hang.pdf'], skus: [['LAMP-WHT', 'Trắng', 149000, 60], ['LAMP-BLK', 'Đen', 149000, 42]] },
-    { id: 1283, name: 'Nước hoa mini chính hãng 10ml', img: 'perfume', vendor: 'Beauty Box', state: 'FLAGGED', moderator: 'Nguyễn Thảo Vy', aiReason: 'Ảnh sản phẩm trùng logo thương hiệu lớn nhưng giấy ủy quyền chưa khớp tên shop. Cần người kiểm tra.', created: '08/06/2026 11:05', category: 'Làm đẹp > Nước hoa', brand: 'Eau de Parfum', condition: 'Mới', origin: 'Pháp', desc: 'Nước hoa mini 10ml, hương hoa cỏ, lưu hương 6 giờ.', weight: 80, size: '4 × 4 × 10 cm', shipsFrom: 'TP. HCM', payer: 'Shop', docs: ['giay-uy-quyen.pdf', 'phieu-cong-bo-my-pham.pdf'], skus: [['PF-10', '10ml', 129000, 300]] },
-    { id: 1279, name: 'Tai nghe Bluetooth ANC Pro 5 (cập nhật ảnh)', img: 'headphones', vendor: 'TechZone Official', state: 'REQUEUED', moderator: 'Lê Minh Tú', created: '07/06/2026 19:12', category: 'Điện tử > Tai nghe & Loa > Tai nghe Bluetooth', brand: 'Sony', condition: 'Mới', origin: 'Trung Quốc', desc: 'Shop đổi ảnh và tên sản phẩm nên cần duyệt lại. Giá và tồn kho không đổi.', weight: 250, size: '20 × 18 × 8 cm', shipsFrom: 'TP. HCM', payer: 'Người mua', docs: ['ce-certificate.pdf'], skus: [['ANC5-BLK', 'Đen', 389000, 38], ['ANC5-WHT', 'Trắng', 389000, 12]] },
-    { id: 1270, name: 'Bàn phím cơ RGB switch blue', img: 'keyboard', vendor: 'TechZone Official', state: 'PUBLISHED', moderator: 'Lê Minh Tú', created: '05/06/2026 09:30', category: 'Điện tử > Máy tính & Laptop > Bàn phím', brand: 'Logitech', condition: 'Mới', origin: 'Trung Quốc', desc: 'Bàn phím cơ 87 phím, switch blue, LED RGB.', weight: 900, size: '36 × 14 × 4 cm', shipsFrom: 'TP. HCM', payer: 'Người mua', docs: ['hoa-don-nhap-hang.pdf'], skus: [['KB-BLUE', 'Blue switch', 459000, 54]] },
-    { id: 1266, name: 'Sạc nhanh 65W không rõ nguồn gốc', img: 'phone', vendor: 'Cheap Electronics', state: 'REJECTED', moderator: null, aiReason: 'Không có giấy tờ chứng nhận hợp quy cho thiết bị sạc; ảnh có dấu hiệu lấy từ website khác.', created: '04/06/2026 14:45', category: 'Điện tử > Điện thoại & Phụ kiện > Sạc & Cáp', brand: 'No Brand', condition: 'Mới', origin: 'Đang cập nhật', desc: 'Sạc nhanh 65W GaN.', weight: 120, size: '6 × 6 × 3 cm', shipsFrom: 'Bình Dương', payer: 'Người mua', docs: [], skus: [['CHG-65', 'Trắng', 89000, 500]] },
+    { id: 1284, name: 'Đèn bàn LED cảm ứng 3 chế độ sáng', img: 'lamp', vendor: 'Home & Living', state: 'PENDING_APPROVAL', ai: { decision: 'APPROVE', risk: 12, violations: [] }, moderator: 'Lê Minh Tú', created: '08/06/2026 15:20', category: 'Nhà cửa > Nội thất > Đèn', brand: 'No Brand', condition: 'Mới', origin: 'Việt Nam', desc: 'Đèn bàn LED cảm ứng, 3 mức sáng, sạc USB-C, pin 8 giờ.', weight: 450, size: '18 × 18 × 40 cm', shipsFrom: 'Hà Nội', payer: 'Người mua', docs: ['hoa-don-nhap-hang.pdf'], skus: [['LAMP-WHT', 'Trắng', 149000, 60], ['LAMP-BLK', 'Đen', 149000, 42]] },
+    { id: 1283, name: 'Nước hoa mini chính hãng 10ml', img: 'perfume', vendor: 'Beauty Box', state: 'FLAGGED', ai: { decision: 'NEED_REVIEW', risk: 62, violations: ['COUNTERFEIT'] }, moderator: 'Nguyễn Thảo Vy', aiReason: 'Ảnh sản phẩm trùng logo thương hiệu lớn nhưng giấy ủy quyền chưa khớp tên shop. Cần người kiểm tra.', created: '08/06/2026 11:05', category: 'Làm đẹp > Nước hoa', brand: 'Eau de Parfum', condition: 'Mới', origin: 'Pháp', desc: 'Nước hoa mini 10ml, hương hoa cỏ, lưu hương 6 giờ.', weight: 80, size: '4 × 4 × 10 cm', shipsFrom: 'TP. HCM', payer: 'Shop', docs: ['giay-uy-quyen.pdf', 'phieu-cong-bo-my-pham.pdf'], skus: [['PF-10', '10ml', 129000, 300]] },
+    { id: 1279, name: 'Tai nghe Bluetooth ANC Pro 5 (cập nhật ảnh)', img: 'headphones', vendor: 'TechZone Official', state: 'REQUEUED', ai: { decision: 'APPROVE', risk: 18, violations: [] }, moderator: 'Lê Minh Tú', created: '07/06/2026 19:12', category: 'Điện tử > Tai nghe & Loa > Tai nghe Bluetooth', brand: 'Sony', condition: 'Mới', origin: 'Trung Quốc', desc: 'Shop đổi ảnh và tên sản phẩm nên cần duyệt lại. Giá và tồn kho không đổi.', weight: 250, size: '20 × 18 × 8 cm', shipsFrom: 'TP. HCM', payer: 'Người mua', docs: ['ce-certificate.pdf'], skus: [['ANC5-BLK', 'Đen', 389000, 38], ['ANC5-WHT', 'Trắng', 389000, 12]] },
+    { id: 1270, name: 'Bàn phím cơ RGB switch blue', img: 'keyboard', vendor: 'TechZone Official', state: 'PUBLISHED', ai: { decision: 'APPROVE', risk: 9, violations: [] }, moderator: 'Lê Minh Tú', created: '05/06/2026 09:30', category: 'Điện tử > Máy tính & Laptop > Bàn phím', brand: 'Logitech', condition: 'Mới', origin: 'Trung Quốc', desc: 'Bàn phím cơ 87 phím, switch blue, LED RGB.', weight: 900, size: '36 × 14 × 4 cm', shipsFrom: 'TP. HCM', payer: 'Người mua', docs: ['hoa-don-nhap-hang.pdf'], skus: [['KB-BLUE', 'Blue switch', 459000, 54]] },
+    { id: 1266, name: 'Sạc nhanh 65W không rõ nguồn gốc', img: 'phone', vendor: 'Cheap Electronics', state: 'REJECTED', ai: { decision: 'REJECT', risk: 91, violations: ['PROHIBITED_ITEM', 'BAD_IMAGE'] }, moderator: null, aiReason: 'Không có giấy tờ chứng nhận hợp quy cho thiết bị sạc; ảnh có dấu hiệu lấy từ website khác.', created: '04/06/2026 14:45', category: 'Điện tử > Điện thoại & Phụ kiện > Sạc & Cáp', brand: 'No Brand', condition: 'Mới', origin: 'Đang cập nhật', desc: 'Sạc nhanh 65W GaN.', weight: 120, size: '6 × 6 × 3 cm', shipsFrom: 'Bình Dương', payer: 'Người mua', docs: [], skus: [['CHG-65', 'Trắng', 89000, 500]] },
   ];
 
   const PLATFORM_NOTIFS = [
@@ -215,7 +234,7 @@
     { id: 'PN-1047', title: 'Nâng cấp hệ thống 02:00 – 04:00', content: 'Một số dịch vụ có thể gián đoạn trong khung giờ bảo trì. Đơn hàng và ví Escrow không bị ảnh hưởng.', target: 'ALL', by: 'Admin (1)', at: '07/06/2026 09:00', reads: 73560, reach: 248300, image: '' },
     { id: 'PN-1046', title: 'Cập nhật biểu phí hoa hồng từ 01/07', content: 'Phí hoa hồng ngành Làm đẹp điều chỉnh từ 6% lên 7%. Xem chi tiết tại Bảng hoa hồng & Phí dịch vụ.', target: 'SELLER', by: 'Admin (2)', at: '05/06/2026 16:30', reads: 2140, reach: 3120, image: '' },
     { id: 'PN-1045', title: 'Đăng ký Flash Sale khung giờ vàng', content: 'Người bán đăng ký tối đa 20 sản phẩm tham gia Flash Sale trước ngày 10/06.', target: 'SELLER', by: 'Admin (2)', at: '03/06/2026 10:00', reads: 1860, reach: 3120, image: '../../assets/img/banner-tech.jpg' },
-    { id: 'PN-1044', title: 'Điểm danh nhận Xu mỗi ngày', content: 'Điểm danh 7 ngày liên tiếp để nhận tới 700 Lazadee Xu.', target: 'BUYER', by: 'Admin (1)', at: '01/06/2026 08:00', reads: 35420, reach: 118900, image: '' },
+    { id: 'PN-1044', title: 'Điểm danh nhận Xu mỗi ngày', content: 'Điểm danh 7 ngày liên tiếp để nhận tới 1.600 Lazadee Xu.', target: 'BUYER', by: 'Admin (1)', at: '01/06/2026 08:00', reads: 35420, reach: 118900, image: '' },
     { id: 'PN-1043', title: 'Chính sách đổi trả mới', content: 'Lazadee cập nhật chính sách đổi trả và hoàn tiền áp dụng cho toàn sàn.', target: 'ALL', by: 'Admin (1)', at: '28/05/2026 14:00', reads: 61200, reach: 240100, image: '' },
   ];
 
@@ -225,5 +244,5 @@
     { id: 'an3', title: 'Yêu cầu rút tiền mới', body: 'TechZone Official yêu cầu rút 5.000.000₫.', date: '07/06/2026 16:40', unread: false, icon: 'hand-coins', nav: 'withdrawals' },
   ];
 
-  window.LZA = { USERS, BANNERS, BANNER_POSITIONS, FLASH_CAMPAIGNS, CATEGORY_ATTRS, downloadCsv, DASHBOARD, MODERATION, MODERATORS, PLATFORM_NOTIFS, NOTIFS, NAV, KYC, REFUNDS, REVIEWS, WITHDRAWALS, LEDGER, STAFF, ROLES, AUDIT, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, PLATFORM_VOUCHERS };
+  window.LZA = { COD_SESSIONS, COD_SHIPMENTS, USERS, BANNERS, BANNER_POSITIONS, FLASH_CAMPAIGNS, CATEGORY_ATTRS, downloadCsv, DASHBOARD, MODERATION, MODERATORS, PLATFORM_NOTIFS, NOTIFS, NAV, KYC, REFUNDS, REVIEWS, WITHDRAWALS, LEDGER, STAFF, ROLES, AUDIT, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, PLATFORM_VOUCHERS };
 })();
