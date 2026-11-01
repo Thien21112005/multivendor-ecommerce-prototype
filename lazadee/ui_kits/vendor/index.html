@@ -1,0 +1,94 @@
+<!-- @dsCard group="Vendor Dashboard" viewport="1280x860" name="Vendor Seller Center" subtitle="Escrow wallet, commission ledger, order fulfillment, sales" -->
+<!-- @startingPoint section="Vendor Dashboard" subtitle="Lazadee Seller Center — escrow wallet & overview" viewport="1280x860" -->
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lazadee — Seller Center</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html,body{margin:0;background:var(--surface-page)}
+  *::-webkit-scrollbar{height:8px;width:8px}
+  *::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:4px}
+  aside::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="VendorShell.jsx"></script>
+<script type="text/babel" src="Overview.jsx"></script>
+<script type="text/babel" src="Wallet.jsx"></script>
+<script type="text/babel" src="Products.jsx"></script>
+<script type="text/babel" src="Fulfillment.jsx"></script>
+<script type="text/babel" src="Onboarding.jsx"></script>
+<script type="text/babel" src="Chat.jsx"></script>
+<script type="text/babel" src="VendorPages.jsx"></script>
+<script type="text/babel">
+const { Icon } = window.LazadeeDesignSystem_0477b7;
+
+function Placeholder({ name }) {
+  return (
+    <div style={{ display: 'grid', placeItems: 'center', minHeight: 360, color: 'var(--text-subtle)', textAlign: 'center', gap: 10 }}>
+      <Icon name="layout-dashboard" size={40} />
+      <div style={{ font: 'var(--type-body)' }}>Màn “{name}” — trong bộ UI kit demo này tập trung vào Tổng quan & Ví Escrow.</div>
+    </div>
+  );
+}
+
+const { Button } = window.LazadeeDesignSystem_0477b7;
+function KycGate({ status, onGo }) {
+  const rejected = status === 'REJECTED';
+  return (
+    <div style={{ maxWidth: 640, margin: '32px auto', textAlign: 'center' }}>
+      <div style={{ width: 84, height: 84, borderRadius: '50%', background: rejected ? 'var(--red-50, #FDECEA)' : 'var(--amber-50, #FEF3E2)', color: rejected ? 'var(--red-600)' : 'var(--amber-600, #C77700)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
+        <Icon name={rejected ? 'triangle-alert' : 'lock'} size={42} />
+      </div>
+      <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 10 }}>{rejected ? 'Hồ sơ KYC bị từ chối' : 'Tính năng bị khoá — chưa xác minh KYC'}</h2>
+      <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 24, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+        {rejected
+          ? 'Hồ sơ của bạn chưa đạt yêu cầu. Vui lòng kiểm tra lý do từ chối và nộp lại hồ sơ để mở khoá đầy đủ tính năng người bán.'
+          : 'Bạn cần hoàn tất xác minh danh tính (KYC) trước khi đăng bán, quản lý đơn hàng, ví Escrow và các tính năng khác của Seller Center.'}
+      </p>
+      <Button size="lg" iconLeft="shield-check" onClick={onGo}>Đi đến Xác minh KYC</Button>
+    </div>
+  );
+}
+
+function App() {
+  const [active, setActive] = React.useState(new URLSearchParams(location.search).get('screen') || 'overview');
+  const [kyc, setKyc] = React.useState(new URLSearchParams(location.search).get('kyc') || 'VERIFIED');
+  window.LZ_KYC_STATUS = kyc;
+  const Shell = window.LZVShell;
+  const map = {
+    overview: () => <window.LZVOverview onNav={setActive} />,
+    wallet: window.LZVWallet,
+    products: window.LZVProducts,
+    orders: window.LZVFulfillment,
+    kyc: window.LZVOnboarding,
+    chat: window.LZVChat,
+    promo: window.LZVPromo,
+    reviews: window.LZVReviews,
+    stats: window.LZVStats,
+    settings: window.LZVSettings,
+  };
+  const Screen = map[active];
+  const locked = kyc !== 'VERIFIED' && active !== 'kyc' && active !== 'settings';
+  return (
+    <Shell active={active} onNav={setActive} kyc={kyc} setKyc={setKyc}>
+      {locked
+        ? <KycGate status={kyc} onGo={() => setActive('kyc')} />
+        : (Screen ? <Screen /> : <Placeholder name={(window.LZV.NAV.find(n => n.id === active) || {}).name} />)}
+    </Shell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+</body>
+</html>

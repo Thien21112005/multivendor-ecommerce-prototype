@@ -1,0 +1,188 @@
+/* ===========================================================================
+   Lazadee component styles. Token-driven classes consumed by the React
+   primitives. Imported from styles.css so cards & UI kits get them too.
+   All primary controls honor a 44px minimum hit target.
+   =========================================================================== */
+
+/* ---- Button -------------------------------------------------------------- */
+.lz-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:0 20px;border:1.5px solid transparent;border-radius:var(--radius-md);
+  background:var(--color-primary);color:var(--color-on-primary);
+  font:var(--weight-semibold) var(--text-base)/1 var(--font-sans);letter-spacing:-0.01em;
+  cursor:pointer;user-select:none;white-space:nowrap;
+  transition:background var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);
+}
+.lz-btn:hover{background:var(--color-primary-hover)}
+.lz-btn:active{background:var(--color-primary-active);transform:translateY(1px)}
+.lz-btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.lz-btn[disabled],.lz-btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.lz-btn--secondary{background:var(--surface-card);color:var(--color-primary);border-color:var(--color-primary)}
+.lz-btn--secondary:hover{background:var(--color-primary-tint)}
+.lz-btn--secondary:active{background:var(--orange-100)}
+.lz-btn--ghost{background:transparent;color:var(--text-body);border-color:transparent}
+.lz-btn--ghost:hover{background:var(--gray-100)}
+.lz-btn--ghost:active{background:var(--gray-200)}
+.lz-btn--subtle{background:var(--gray-100);color:var(--text-body);border-color:transparent}
+.lz-btn--subtle:hover{background:var(--gray-200)}
+.lz-btn--danger{background:var(--red-500);color:#fff}
+.lz-btn--danger:hover{background:var(--red-600)}
+.lz-btn--danger:active{background:var(--red-600)}
+.lz-btn--sm{min-height:44px;padding:0 14px;font-size:var(--text-sm)}
+.lz-btn--lg{min-height:52px;padding:0 28px;font-size:var(--text-lg)}
+.lz-btn--block{display:flex;width:100%}
+
+/* ---- IconButton ---------------------------------------------------------- */
+.lz-iconbtn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:var(--radius-md);border:1.5px solid transparent;
+  background:transparent;color:var(--text-body);cursor:pointer;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);
+}
+.lz-iconbtn:hover{background:var(--gray-100)}
+.lz-iconbtn:active{background:var(--gray-200)}
+.lz-iconbtn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.lz-iconbtn--solid{background:var(--color-primary);color:#fff}
+.lz-iconbtn--solid:hover{background:var(--color-primary-hover)}
+.lz-iconbtn--outline{border-color:var(--border-default)}
+.lz-iconbtn--outline:hover{border-color:var(--border-strong);background:var(--gray-50)}
+.lz-iconbtn--sm{width:44px;height:44px}
+
+/* ---- Field / Input / Select / Textarea ----------------------------------- */
+.lz-field{display:flex;flex-direction:column;gap:6px}
+.lz-field__label{font:var(--type-label);color:var(--text-strong)}
+.lz-field__label .req{color:var(--flash-500);margin-left:2px}
+.lz-field__hint{font:var(--type-caption);color:var(--text-muted)}
+.lz-field__error{font:var(--type-caption);color:var(--red-600);display:flex;align-items:center;gap:4px}
+.lz-inputwrap{position:relative;display:flex;align-items:center}
+.lz-inputwrap__icon{position:absolute;left:12px;display:flex;color:var(--text-subtle);pointer-events:none}
+.lz-inputwrap__icon--right{left:auto;right:12px}
+.lz-input,.lz-select,.lz-textarea{
+  width:100%;min-height:44px;padding:0 14px;
+  border:1.5px solid var(--border-default);border-radius:var(--radius-md);
+  background:var(--surface-card);color:var(--text-strong);
+  font:var(--type-body);transition:border-color var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out);
+}
+.lz-textarea{padding:11px 14px;min-height:88px;resize:vertical;line-height:var(--leading-normal)}
+.lz-inputwrap--icon .lz-input{padding-left:38px}
+.lz-inputwrap--icon-right .lz-input{padding-right:38px}
+.lz-input::placeholder,.lz-textarea::placeholder{color:var(--text-subtle)}
+.lz-input:hover,.lz-select:hover,.lz-textarea:hover{border-color:var(--border-strong)}
+.lz-input:focus,.lz-select:focus,.lz-textarea:focus{outline:none;border-color:var(--border-focus);box-shadow:var(--focus-ring)}
+.lz-input--invalid,.lz-input--invalid:focus{border-color:var(--red-500);box-shadow:0 0 0 3px rgba(224,20,43,.18)}
+.lz-input[disabled],.lz-select[disabled]{background:var(--gray-50);color:var(--text-disabled);cursor:not-allowed}
+.lz-select{appearance:none;padding-right:38px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%237E786E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center}
+
+/* ---- Checkbox / Radio ---------------------------------------------------- */
+.lz-check,.lz-radio{display:inline-flex;align-items:center;gap:9px;cursor:pointer;min-height:44px;font:var(--type-body);color:var(--text-body)}
+.lz-check input,.lz-radio input{position:absolute;opacity:0;width:0;height:0}
+.lz-check__box,.lz-radio__box{
+  width:20px;height:20px;flex:none;border:1.5px solid var(--border-strong);background:var(--surface-card);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);
+}
+.lz-check__box{border-radius:var(--radius-xs)}
+.lz-radio__box{border-radius:var(--radius-pill)}
+.lz-check__box svg,.lz-radio__box i{opacity:0;transition:opacity var(--dur-fast)}
+.lz-radio__box i{width:8px;height:8px;border-radius:50%;background:#fff}
+.lz-check input:checked+.lz-check__box,.lz-radio input:checked+.lz-radio__box{background:var(--color-primary);border-color:var(--color-primary)}
+.lz-check input:checked+.lz-check__box svg,.lz-radio input:checked+.lz-radio__box i{opacity:1}
+.lz-check input:focus-visible+.lz-check__box,.lz-radio input:focus-visible+.lz-radio__box{box-shadow:var(--focus-ring)}
+.lz-check input:disabled~*,.lz-radio input:disabled~*{opacity:.45}
+
+/* ---- Switch -------------------------------------------------------------- */
+.lz-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;min-height:44px;font:var(--type-body);color:var(--text-body)}
+.lz-switch input{position:absolute;opacity:0;width:0;height:0}
+.lz-switch__track{width:42px;height:24px;border-radius:var(--radius-pill);background:var(--gray-300);position:relative;transition:background var(--dur-base) var(--ease-out);flex:none}
+.lz-switch__thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:transform var(--dur-base) var(--ease-spring)}
+.lz-switch input:checked+.lz-switch__track{background:var(--color-primary)}
+.lz-switch input:checked+.lz-switch__track .lz-switch__thumb{transform:translateX(18px)}
+.lz-switch input:focus-visible+.lz-switch__track{box-shadow:var(--focus-ring)}
+
+/* ---- Badge --------------------------------------------------------------- */
+.lz-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);
+  font:var(--weight-semibold) var(--text-xs)/1.1 var(--font-sans);letter-spacing:.01em;white-space:nowrap}
+.lz-badge--neutral{background:var(--gray-100);color:var(--text-body)}
+.lz-badge--primary{background:var(--color-primary-tint);color:var(--orange-700)}
+.lz-badge--solid{background:var(--color-primary);color:#fff}
+.lz-badge--flash{background:var(--flash-500);color:#fff}
+.lz-badge--success{background:var(--green-50);color:var(--green-600)}
+.lz-badge--warning{background:var(--amber-50);color:var(--amber-600)}
+.lz-badge--danger{background:var(--red-50);color:var(--red-600)}
+.lz-badge--mint{background:var(--mint-50);color:var(--mint-600)}
+.lz-badge--gold{background:var(--gold-50);color:var(--gold-600)}
+.lz-badge--outline{background:transparent;box-shadow:inset 0 0 0 1px var(--border-default);color:var(--text-muted)}
+
+/* ---- Tag (removable filter chip) ----------------------------------------- */
+.lz-tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 11px;border-radius:var(--radius-pill);
+  background:var(--gray-100);color:var(--text-body);font:var(--weight-medium) var(--text-sm)/1 var(--font-sans)}
+.lz-tag--brand{background:var(--color-primary-tint);color:var(--orange-700)}
+.lz-tag__x{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;cursor:pointer;color:inherit;opacity:.6}
+.lz-tag__x:hover{opacity:1;background:rgba(0,0,0,.08)}
+
+/* ---- StatusBadge (order lifecycle / KYC / escrow) ------------------------ */
+.lz-status{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--radius-pill);
+  font:var(--weight-semibold) var(--text-xs)/1 var(--font-sans);letter-spacing:.02em;white-space:nowrap}
+.lz-status__dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+/* ---- PriceVND ------------------------------------------------------------ */
+.lz-price{display:inline-flex;align-items:baseline;gap:8px;font-variant-numeric:tabular-nums}
+.lz-price__now{color:var(--text-price);font:var(--weight-bold) var(--text-2xl)/1 var(--font-sans)}
+.lz-price__now .sym{font-size:.62em;vertical-align:.42em;text-decoration:underline;text-underline-offset:1px;font-weight:700}
+.lz-price__was{color:var(--text-subtle);font-size:var(--text-sm);text-decoration:line-through}
+.lz-price--sm .lz-price__now{font-size:var(--text-lg)}
+.lz-price--lg .lz-price__now{font-size:var(--text-4xl)}
+
+/* ---- Rating -------------------------------------------------------------- */
+.lz-rating{display:inline-flex;align-items:center;gap:3px}
+.lz-rating__stars{display:inline-flex;color:var(--gold-500)}
+.lz-rating__num{font:var(--weight-semibold) var(--text-sm)/1 var(--font-sans);color:var(--text-body);margin-left:3px}
+.lz-rating__count{font:var(--type-caption);color:var(--text-muted)}
+
+/* ---- QuantityStepper ----------------------------------------------------- */
+.lz-qty{display:inline-flex;align-items:stretch;border:1.5px solid var(--border-default);border-radius:var(--radius-md);overflow:hidden;height:44px}
+.lz-qty button{width:40px;display:flex;align-items:center;justify-content:center;background:var(--surface-card);color:var(--text-body);cursor:pointer;border:0}
+.lz-qty button:hover{background:var(--gray-100)}
+.lz-qty button:disabled{color:var(--text-disabled);cursor:not-allowed}
+.lz-qty input{width:48px;text-align:center;border:0;border-left:1.5px solid var(--border-default);border-right:1.5px solid var(--border-default);
+  font:var(--weight-semibold) var(--text-base) var(--font-sans);font-variant-numeric:tabular-nums;color:var(--text-strong)}
+.lz-qty input:focus{outline:none}
+
+/* ---- VendorChip ---------------------------------------------------------- */
+.lz-vendor{display:inline-flex;align-items:center;gap:8px}
+.lz-vendor__logo{width:32px;height:32px;border-radius:var(--radius-sm);object-fit:cover;background:var(--gray-100);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-weight:700;flex:none}
+.lz-vendor__name{font:var(--weight-semibold) var(--text-sm)/1.2 var(--font-sans);color:var(--text-strong);display:flex;align-items:center;gap:4px}
+.lz-vendor__meta{font:var(--type-caption);color:var(--text-muted)}
+
+/* ---- VoucherTag (perforated ticket) -------------------------------------- */
+.lz-voucher{position:relative;display:inline-flex;align-items:center;gap:10px;padding:9px 14px 9px 16px;border-radius:var(--radius-md);
+  color:#fff;font:var(--weight-semibold) var(--text-sm)/1.2 var(--font-sans);overflow:hidden}
+.lz-voucher::before,.lz-voucher::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--surface-page);left:54px}
+.lz-voucher::before{top:-6px}.lz-voucher::after{bottom:-6px}
+.lz-voucher--platform{background:var(--color-primary)}
+.lz-voucher--shop{background:var(--flash-500)}
+.lz-voucher--freeship{background:var(--mint-500)}
+.lz-voucher__amt{font:var(--weight-black) var(--text-lg) var(--font-sans)}
+.lz-voucher__body{display:flex;flex-direction:column;line-height:1.25}
+.lz-voucher__kind{font-size:var(--text-2xs);text-transform:uppercase;letter-spacing:.06em;opacity:.85}
+
+/* ---- Card surface -------------------------------------------------------- */
+.lz-card{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+
+/* ---- ProductCard --------------------------------------------------------- */
+.lz-pcard{display:flex;flex-direction:column;background:var(--surface-card);border:1px solid var(--border-subtle);
+  border-radius:var(--radius-md);overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;
+  transition:box-shadow var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out),border-color var(--dur-base) var(--ease-out)}
+.lz-pcard:hover{box-shadow:var(--shadow-lift);transform:translateY(-2px);border-color:var(--orange-200);text-decoration:none}
+.lz-pcard__media{position:relative;aspect-ratio:1/1;background:var(--gray-100)}
+.lz-pcard__media img{width:100%;height:100%;object-fit:cover}
+.lz-pcard__flags{position:absolute;top:0;left:0;display:flex;flex-direction:column;gap:0}
+.lz-pcard__disc{position:absolute;top:0;right:0;background:var(--gold-400);color:var(--orange-800);
+  font:var(--weight-bold) var(--text-xs)/1 var(--font-sans);padding:5px 5px 6px;border-bottom-left-radius:var(--radius-sm);text-align:center}
+.lz-pcard__disc b{display:block;font-size:var(--text-sm);font-weight:800}
+.lz-pcard__body{padding:9px 10px 11px;display:flex;flex-direction:column;gap:7px}
+.lz-pcard__title{font:var(--type-body-sm);color:var(--text-body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+.lz-pcard__foot{display:flex;align-items:center;justify-content:space-between;gap:6px;font:var(--type-caption);color:var(--text-muted)}
+.lz-pcard__loc{display:inline-flex;align-items:center;gap:2px}

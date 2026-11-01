@@ -1,0 +1,60 @@
+/* ===========================================================================
+   Lazadee — Typography tokens
+   Be Vietnam Pro (geometric, Vietnamese-first) for everything; IBM Plex Mono
+   for SKU / order IDs / waybill codes / ledger figures. Dense marketplace
+   scale — base text is 14px.
+   =========================================================================== */
+:root {
+  /* Families */
+  --font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    800;
+
+  /* Type scale (dense) */
+  --text-2xs:  11px;
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;   /* default body */
+  --text-md:   15px;
+  --text-lg:   16px;
+  --text-xl:   18px;
+  --text-2xl:  22px;
+  --text-3xl:  28px;
+  --text-4xl:  34px;
+  --text-5xl:  44px;
+  --text-display: 56px;
+
+  /* Line heights */
+  --leading-none:    1;
+  --leading-tight:   1.15;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.02em;
+  --tracking-tight:   -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-caps:    0.06em;   /* uppercase eyebrows / labels */
+
+  /* Tabular figures for prices, money, counts */
+  --numeric-tabular: tabular-nums; /* @kind other */
+
+  /* --- Semantic text roles ------------------------------------------------- */
+  --type-display:  var(--weight-black) var(--text-display)/var(--leading-tight) var(--font-sans);
+  --type-h1:       var(--weight-bold)  var(--text-4xl)/var(--leading-tight) var(--font-sans);
+  --type-h2:       var(--weight-bold)  var(--text-3xl)/var(--leading-snug) var(--font-sans);
+  --type-h3:       var(--weight-semibold) var(--text-2xl)/var(--leading-snug) var(--font-sans);
+  --type-h4:       var(--weight-semibold) var(--text-xl)/var(--leading-snug) var(--font-sans);
+  --type-body:     var(--weight-regular) var(--text-base)/var(--leading-normal) var(--font-sans);
+  --type-body-sm:  var(--weight-regular) var(--text-sm)/var(--leading-normal) var(--font-sans);
+  --type-label:    var(--weight-semibold) var(--text-sm)/var(--leading-snug) var(--font-sans);
+  --type-caption:  var(--weight-regular) var(--text-xs)/var(--leading-snug) var(--font-sans);
+}

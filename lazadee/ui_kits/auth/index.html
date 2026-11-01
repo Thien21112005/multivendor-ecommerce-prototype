@@ -1,0 +1,328 @@
+<!-- @dsCard group="Auth" viewport="1280x820" name="OTP auth & account lock" subtitle="Login, OTP verify, and 5-failed-attempt account-lock states" -->
+<!-- @startingPoint section="Auth" subtitle="Lazadee OTP login, verify, and account-lock" viewport="1280x820" -->
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lazadee — Đăng nhập</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html,body{margin:0;background:var(--surface-page)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { Icon, Button, Input, Badge, Checkbox } = window.LazadeeDesignSystem_0477b7;
+const backBtn = { display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 20, padding: 0 };
+
+function Panel({ children, sub }) {
+  return (
+    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 480px' }}>
+      {/* brand side */}
+      <div style={{ background: 'linear-gradient(150deg, var(--orange-500), var(--orange-700))', color: '#fff', padding: '56px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img src="../../assets/logomark.svg" width="44" height="44" alt="" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.2))' }} />
+          <span style={{ font: '800 28px var(--font-sans)', letterSpacing: '-0.02em' }}>lazadee</span>
+        </div>
+        <div>
+          <h1 style={{ font: '800 40px/1.1 var(--font-sans)', letterSpacing: '-0.02em', maxWidth: 420, marginBottom: 16 }}>Mua sắm an tâm, thanh toán bảo chứng.</h1>
+          <p style={{ font: 'var(--text-lg)/1.5 var(--font-sans)', color: 'rgba(255,255,255,.85)', maxWidth: 380 }}>Hàng triệu sản phẩm từ người bán đã xác minh. Giữ tiền escrow đến khi bạn nhận hàng.</p>
+        </div>
+        <div style={{ display: 'flex', gap: 20, font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.8)' }}>
+          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="shield-check" size={16} /> Escrow</span>
+          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="truck" size={16} /> Freeship</span>
+          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="undo-2" size={16} /> Đổi trả 15 ngày</span>
+        </div>
+      </div>
+      {/* form side */}
+      <div style={{ background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 48px' }}>{children}</div>
+    </div>
+  );
+}
+
+function OTPInput({ value, onChange, locked }) {
+  const refs = React.useRef([]);
+  const set = (i, v) => {
+    v = v.replace(/\D/g, '').slice(-1);
+    const arr = value.split('');
+    arr[i] = v; const next = arr.join('').slice(0, 6);
+    onChange(next);
+    if (v && refs.current[i + 1]) refs.current[i + 1].focus();
+  };
+  return (
+    <div style={{ display: 'flex', gap: 10 }}>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <input key={i} ref={(el) => (refs.current[i] = el)} value={value[i] || ''} disabled={locked}
+          onChange={(e) => set(i, e.target.value)} inputMode="numeric" maxLength={1}
+          style={{ width: 52, height: 60, textAlign: 'center', font: '700 24px var(--font-mono)', border: '1.5px solid ' + (value[i] ? 'var(--color-primary)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', outline: 'none', color: 'var(--text-strong)', background: locked ? 'var(--gray-50)' : '#fff' }} />
+      ))}
+    </div>
+  );
+}
+
+function SocialButton({ brand }) {
+  const cfg = {
+    google: { label: 'Google', svg: <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg> },
+    apple: { label: 'Apple', svg: <svg width="17" height="18" viewBox="0 0 17 18"><path fill="#000" d="M14.07 13.9c-.26.6-.57 1.16-.93 1.67-.5.7-.9 1.18-1.22 1.45-.49.45-1.02.68-1.59.7-.4 0-.9-.12-1.46-.35-.57-.23-1.1-.34-1.58-.34-.5 0-1.04.11-1.63.34-.59.24-1.06.36-1.42.37-.55.02-1.09-.22-1.62-.71-.34-.29-.76-.79-1.27-1.5-.54-.76-.99-1.64-1.34-2.64C.92 13.05.7 11.98.7 10.95c0-1.18.26-2.2.77-3.05a4.5 4.5 0 0 1 1.6-1.62 4.32 4.32 0 0 1 2.17-.61c.42 0 .98.13 1.67.39.69.26 1.13.39 1.32.39.14 0 .63-.15 1.46-.46.78-.28 1.45-.4 1.99-.36 1.47.12 2.58.7 3.31 1.75-1.32.8-1.97 1.92-1.96 3.35.01 1.12.42 2.05 1.22 2.79.36.34.77.61 1.22.8-.1.29-.2.56-.32.83zM11.6 1.4c0 .88-.32 1.7-.96 2.46-.78.9-1.72 1.42-2.74 1.34a2.76 2.76 0 0 1-.02-.33c0-.84.37-1.74 1.02-2.48.33-.37.74-.68 1.24-.93.5-.24.97-.38 1.42-.4.02.11.04.23.04.34z"/></svg> },
+  }[brand];
+  return (
+    <button style={{ flex: 1, height: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, border: '1.5px solid var(--border-default)', background: '#fff', borderRadius: 'var(--radius-md)', cursor: 'pointer', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>
+      {cfg.svg}{cfg.label}
+    </button>
+  );
+}
+
+function PasswordInput({ label, value, onChange, error, placeholder }) {
+  const [show, setShow] = React.useState(false);
+  return (
+    <div>
+      <label style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', display: 'block', marginBottom: 6 }}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        <input type={show ? 'text' : 'password'} value={value} onChange={onChange} placeholder={placeholder}
+          style={{ width: '100%', height: 44, border: '1.5px solid ' + (error ? 'var(--red-500)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', padding: '0 42px 0 14px', font: 'var(--type-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--text-strong)' }} />
+        <button type="button" onClick={() => setShow((s) => !s)} style={{ position: 'absolute', right: 6, top: 6, width: 32, height: 32, border: 0, background: 'transparent', color: 'var(--text-subtle)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name={show ? 'eye-off' : 'eye'} size={18} /></button>
+      </div>
+      {error && <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 5 }}><Icon name="circle-alert" size={13} />{error}</div>}
+    </div>
+  );
+}
+
+function Register({ onDone, onLogin }) {
+  const [f, setF] = React.useState({ name: '', email: '', phone: '', pw: '', pw2: '', agree: false });
+  const [err, setErr] = React.useState({});
+  const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
+  const strength = (() => {
+    const p = f.pw; let s = 0;
+    if (p.length >= 8) s++; if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++;
+    return s;
+  })();
+  const submit = () => {
+    const e = {};
+    if (!f.name.trim()) e.name = 'Nhập họ và tên';
+    if (!/.+@.+\..+/.test(f.email)) e.email = 'Email không hợp lệ';
+    if (!/^0\d{8,10}$/.test(f.phone.replace(/\s/g, ''))) e.phone = 'Số điện thoại không hợp lệ';
+    if (f.pw.length < 8) e.pw = 'Mật khẩu tối thiểu 8 ký tự';
+    if (f.pw2 !== f.pw) e.pw2 = 'Mật khẩu nhập lại không khớp';
+    if (!f.agree) e.agree = true;
+    setErr(e);
+    if (Object.keys(e).length === 0) onDone && onDone();
+  };
+  const sColor = ['var(--red-500)', 'var(--red-500)', 'var(--gold-500)', 'var(--mint-500)', 'var(--mint-600)'][strength];
+  const sLabel = ['Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'][strength];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <Input label="Họ và tên" iconLeft="user" value={f.name} onChange={(e) => set('name', e.target.value)} error={err.name} placeholder="Nguyễn Văn A" />
+      <Input label="Email" iconLeft="mail" value={f.email} onChange={(e) => set('email', e.target.value)} error={err.email} placeholder="ban@email.com" />
+      <Input label="Số điện thoại" iconLeft="phone" value={f.phone} onChange={(e) => set('phone', e.target.value)} error={err.phone} placeholder="0901 234 567" />
+      <div>
+        <PasswordInput label="Mật khẩu" value={f.pw} onChange={(e) => set('pw', e.target.value)} error={err.pw} placeholder="Tối thiểu 8 ký tự" />
+        {f.pw && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7 }}>
+            <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (strength / 4 * 100) + '%', height: '100%', background: sColor, transition: 'width .2s' }} /></div>
+            <span style={{ font: 'var(--type-caption)', color: sColor, fontWeight: 600 }}>{sLabel}</span>
+          </div>
+        )}
+      </div>
+      <PasswordInput label="Nhập lại mật khẩu" value={f.pw2} onChange={(e) => set('pw2', e.target.value)} error={err.pw2} placeholder="Nhập lại mật khẩu" />
+      <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer' }}>
+        <Checkbox checked={f.agree} onChange={() => set('agree', !f.agree)} />
+        <span style={{ font: 'var(--type-caption)', color: err.agree ? 'var(--red-600)' : 'var(--text-muted)', lineHeight: 1.5 }}>Tôi đồng ý với <a style={{ color: 'var(--orange-600)' }}>Điều khoản dịch vụ</a> và <a style={{ color: 'var(--orange-600)' }}>Chính sách bảo mật</a>.</span>
+      </label>
+      <Button block size="lg" onClick={submit}>Đăng ký</Button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '4px 0' }}>
+        <span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} /><span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Hoặc đăng ký với</span><span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} />
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <SocialButton brand="google" />
+        <SocialButton brand="apple" />
+      </div>
+      <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 4 }}>Đã có tài khoản? <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={onLogin}>Đăng nhập</a></p>
+    </div>
+  );
+}
+
+function Forgot({ email, setEmail, onLogin }) {
+  const [stage, setStage] = React.useState('email'); // email | otp | reset | done
+  const [otp, setOtp] = React.useState('');
+  const [resend, setResend] = React.useState(42);
+  const [pw, setPw] = React.useState('');
+  const [pw2, setPw2] = React.useState('');
+  const [err, setErr] = React.useState({});
+
+  React.useEffect(() => {
+    if (stage !== 'otp') return;
+    const i = setInterval(() => setResend((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(i);
+  }, [stage]);
+
+  const strength = (() => { const p = pw; let s = 0; if (p.length >= 8) s++; if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++; return s; })();
+  const sColor = ['var(--red-500)', 'var(--red-500)', 'var(--gold-500)', 'var(--mint-500)', 'var(--mint-600)'][strength];
+  const sLabel = ['Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'][strength];
+  const submitReset = () => {
+    const e = {};
+    if (pw.length < 8) e.pw = 'Tối thiểu 8 ký tự';
+    else if (!/[0-9]/.test(pw)) e.pw = 'Cần ít nhất 1 chữ số';
+    else if (!/[^A-Za-z0-9]/.test(pw)) e.pw = 'Cần ít nhất 1 ký tự đặc biệt';
+    if (pw2 !== pw) e.pw2 = 'Mật khẩu nhập lại không khớp';
+    setErr(e);
+    if (Object.keys(e).length === 0) setStage('done');
+  };
+
+  return (
+    <Panel>
+      <div style={{ maxWidth: 380, margin: '0 auto', width: '100%' }}>
+        {stage === 'email' && <>
+          <button onClick={onLogin} style={backBtn}><Icon name="chevron-left" size={16} /> Quay lại đăng nhập</button>
+          <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Quên mật khẩu</h2>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Nhập email đăng ký để nhận mã xác thực đặt lại mật khẩu.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Input label="Email" iconLeft="mail" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="VD: ban@email.com" />
+            <Button block size="lg" onClick={() => { setStage('otp'); setResend(42); }}>Gửi mã xác thực</Button>
+          </div>
+        </>}
+
+        {stage === 'otp' && <>
+          <button onClick={() => setStage('email')} style={backBtn}><Icon name="chevron-left" size={16} /> Đổi email</button>
+          <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Xác thực email</h2>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mã xác thực đã được gửi đến <b style={{ color: 'var(--text-body)' }}>{email}</b>. (demo: <span className="code">123456</span>)</p>
+          <OTPInput value={otp} onChange={setOtp} />
+          <Button block size="lg" style={{ marginTop: 20 }} disabled={otp.length < 6} onClick={() => setStage('reset')}>Xác nhận</Button>
+          <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 18 }}>
+            {resend > 0 ? <>Gửi lại mã sau <b className="code">{String(Math.floor(resend / 60)).padStart(2, '0')}:{String(resend % 60).padStart(2, '0')}</b></> : <a style={{ cursor: 'pointer' }} onClick={() => setResend(42)}>Gửi lại mã</a>}
+          </p>
+        </>}
+
+        {stage === 'reset' && <>
+          <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Đặt mật khẩu mới</h2>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mật khẩu tối thiểu 8 ký tự, có chữ số và ký tự đặc biệt.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <PasswordInput label="Mật khẩu mới" value={pw} onChange={(e) => setPw(e.target.value)} error={err.pw} placeholder="Tối thiểu 8 ký tự" />
+              {pw && <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7 }}>
+                <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (strength / 4 * 100) + '%', height: '100%', background: sColor, transition: 'width .2s' }} /></div>
+                <span style={{ font: 'var(--type-caption)', color: sColor, fontWeight: 600 }}>{sLabel}</span>
+              </div>}
+            </div>
+            <PasswordInput label="Xác nhận mật khẩu mới" value={pw2} onChange={(e) => setPw2(e.target.value)} error={err.pw2} placeholder="Nhập lại mật khẩu" />
+            <Button block size="lg" onClick={submitReset}>Cập nhật mật khẩu</Button>
+          </div>
+        </>}
+
+        {stage === 'done' && <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--mint-50)', color: 'var(--mint-600)', display: 'grid', placeItems: 'center', margin: '0 auto 22px' }}><Icon name="circle-check" size={42} /></div>
+          <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Đặt lại mật khẩu thành công</h2>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Bạn có thể đăng nhập bằng mật khẩu mới.</p>
+          <Button block size="lg" onClick={onLogin}>Đăng nhập ngay</Button>
+        </div>}
+      </div>
+    </Panel>
+  );
+}
+
+function Auth() {
+  const [step, setStep] = React.useState(new URLSearchParams(location.search).get('screen') || 'login'); // login | register | otp | forgot | locked
+  const [email, setEmail] = React.useState('ban@email.com');
+  const [otp, setOtp] = React.useState('');
+  const [attempts, setAttempts] = React.useState(0);
+  const [resend, setResend] = React.useState(42);
+
+  React.useEffect(() => {
+    if (step !== 'otp') return;
+    const i = setInterval(() => setResend((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(i);
+  }, [step]);
+
+  const verify = () => {
+    // demo: any code != 000000 fails; track 5-attempt lock
+    if (otp === '123456') { alert('Đăng nhập thành công (demo)'); return; }
+    const n = attempts + 1;
+    setAttempts(n);
+    setOtp('');
+    if (n >= 5) setStep('locked');
+  };
+
+  if (step === 'login') return (
+    <Panel>
+      <div style={{ maxWidth: 360, margin: '0 auto', width: '100%' }}>
+        <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Đăng nhập</h2>
+        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 28 }}>Nhập Email để nhận mã OTP.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <Input label="Email" iconLeft="mail" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="VD: ban@email.com" />
+          <Button block size="lg" onClick={() => { setStep('otp'); setResend(42); }}>Gửi mã OTP</Button>
+        </div>
+        <div style={{ textAlign: 'right', marginTop: 10 }}>
+          <a style={{ font: 'var(--type-body-sm)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('forgot')}>Quên mật khẩu?</a>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0' }}>
+          <span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} /><span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>HOẶC</span><span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} />
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <SocialButton brand="google" />
+          <SocialButton brand="apple" />
+        </div>
+        <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 28 }}>Chưa có tài khoản? <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('register')}>Đăng ký người mua</a> · <a href="../storefront/index.html?screen=seller" style={{ color: 'var(--orange-600)', cursor: 'pointer' }}>Mở shop</a></p>
+      </div>
+    </Panel>
+  );
+
+  if (step === 'register') return (
+    <Panel>
+      <div style={{ maxWidth: 384, margin: '0 auto', width: '100%' }}>
+        <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Đăng ký tài khoản</h2>
+        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 22 }}>Tạo tài khoản người mua Lazadee miễn phí.</p>
+        <Register onDone={() => { setStep('otp'); setResend(42); }} onLogin={() => setStep('login')} />
+      </div>
+    </Panel>
+  );
+
+  if (step === 'forgot') return <Forgot email={email} setEmail={setEmail} onLogin={() => setStep('login')} />;
+
+  if (step === 'otp') return (
+    <Panel>
+      <div style={{ maxWidth: 380, margin: '0 auto', width: '100%' }}>
+        <button onClick={() => { setStep('login'); setAttempts(0); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 20 }}><Icon name="chevron-left" size={16} /> Đổi Email</button>
+        <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Nhập mã OTP</h2>
+        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mã 6 số đã gửi tới địa chỉ email <b style={{ color: 'var(--text-body)' }}>{email}</b>. (demo: <span className="code">123456</span>)</p>
+        <OTPInput value={otp} onChange={setOtp} />
+        {attempts > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--red-600)', font: 'var(--type-body-sm)', marginTop: 14 }}>
+            <Icon name="circle-alert" size={15} /> Mã không đúng. Còn <b style={{ margin: '0 3px' }}>{5 - attempts}</b> lần thử trước khi khoá.
+          </div>
+        )}
+        <Button block size="lg" style={{ marginTop: 20 }} disabled={otp.length < 6} onClick={verify}>Xác nhận</Button>
+        <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 18 }}>
+          {resend > 0 ? <>Gửi lại mã sau <b className="code">{String(Math.floor(resend / 60)).padStart(2, '0')}:{String(resend % 60).padStart(2, '0')}</b></> : <a style={{ cursor: 'pointer' }} onClick={() => setResend(42)}>Gửi lại mã OTP</a>}
+        </p>
+      </div>
+    </Panel>
+  );
+
+  // locked
+  return (
+    <Panel>
+      <div style={{ maxWidth: 380, margin: '0 auto', width: '100%', textAlign: 'center' }}>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', margin: '0 auto 22px' }}><Icon name="lock" size={40} /></div>
+        <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Tài khoản tạm khoá</h2>
+        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 8 }}>Bạn đã nhập sai mã OTP <b style={{ color: 'var(--red-600)' }}>5 lần</b>. Vì lý do bảo mật, tài khoản bị khoá tạm thời.</p>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--red-50)', color: 'var(--red-600)', borderRadius: 'var(--radius-md)', padding: '10px 16px', font: 'var(--weight-semibold) var(--text-base) var(--font-sans)', margin: '8px 0 24px' }}>
+          <Icon name="clock" size={18} /> Thử lại sau <span className="code">29:48</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Button block size="lg" variant="secondary" iconLeft="shield-check">Xác minh qua email</Button>
+          <Button block variant="ghost" iconLeft="circle-help">Liên hệ hỗ trợ</Button>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<Auth />);
+</script>
+</body>
+</html>

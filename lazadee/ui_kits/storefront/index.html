@@ -1,0 +1,195 @@
+<!-- @dsCard group="Storefront" viewport="1280x900" name="Customer storefront" subtitle="Home · product detail · multi-vendor cart · checkout" -->
+<!-- @startingPoint section="Storefront" subtitle="Lazadee customer storefront — home, product, cart, checkout" viewport="1280x900" -->
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lazadee — Storefront</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html,body{margin:0;background:var(--surface-page)}
+  #app{min-height:100vh}
+  *::-webkit-scrollbar{height:8px;width:8px}
+  *::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:4px}
+  @keyframes lz-spin{to{transform:rotate(360deg)}}
+  .lz-spin{animation:lz-spin .8s linear infinite}
+  @keyframes lz-typing{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+  .lz-typing-dot{display:inline-block;animation:lz-typing 1s infinite ease-in-out}
+  @keyframes lzSlideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="Header.jsx"></script>
+<script type="text/babel" src="Home.jsx"></script>
+<script type="text/babel" src="Discover.jsx"></script>
+<script type="text/babel" src="ProductDetail.jsx"></script>
+<script type="text/babel" src="Cart.jsx"></script>
+<script type="text/babel" src="Checkout.jsx"></script>
+<script type="text/babel" src="Account.jsx"></script>
+<script type="text/babel" src="OrderTracking.jsx"></script>
+<script type="text/babel" src="AddressModal.jsx"></script>
+<script type="text/babel" src="Shop.jsx"></script>
+<script type="text/babel" src="Search.jsx"></script>
+<script type="text/babel" src="BecomeSeller.jsx"></script>
+<script type="text/babel" src="ChatWidget.jsx"></script>
+<script type="text/babel">
+const { Icon } = window.LazadeeDesignSystem_0477b7;
+
+const LZ_INIT = new URLSearchParams(location.search).get('screen') || 'home';
+function App() {
+  const [screen, setScreen] = React.useState(LZ_INIT);     // home | product | cart | checkout | done | account | tracking
+  const [productId, setProductId] = React.useState(LZ_INIT === 'product' ? 'p1' : null);
+  const [trackId, setTrackId] = React.useState(new URLSearchParams(location.search).get('order') || null);
+  const [shopId, setShopId] = React.useState(new URLSearchParams(location.search).get('shop') || 'techzone');
+  const [searchScope, setSearchScope] = React.useState(new URLSearchParams(location.search).get('scope') || 'all');
+  const [searchShopId, setSearchShopId] = React.useState(new URLSearchParams(location.search).get('shop') || null);
+  const [cart, setCart] = React.useState(() => seedCart());
+  const [query, setQuery] = React.useState(new URLSearchParams(location.search).get('q') || '');
+  const [acctView, setAcctView] = React.useState(new URLSearchParams(location.search).get('view') || null);
+
+  const cartCount = cart.reduce((n, l) => n + l.qty, 0);
+  const go = (s) => { setScreen(s); window.scrollTo(0, 0); };
+  const goAccount = (v) => { setAcctView(v); go('account'); };
+  const open = (id) => { setProductId(id); go('product'); };
+  const addToCart = (item) => {
+    setCart((c) => {
+      const i = c.findIndex((l) => l.key === item.key);
+      if (i >= 0) { const n = [...c]; n[i] = { ...n[i], qty: n[i].qty + item.qty }; return n; }
+      return [...c, item];
+    });
+  };
+
+  const Header = window.LZHeader;
+  const track = (id) => { setTrackId(id); go('tracking'); };
+  const review = (id) => { const o = window.LZ.orderById(id); if (o) open(o.items[0].productId); };
+  const openShop = (vid) => { setShopId(vid); go('shop'); };
+  const runSearch = (q, vid) => {
+    setQuery(q || '');
+    if (vid) { setSearchShopId(vid); setSearchScope('shop'); }
+    else { setSearchScope('all'); }
+    go('search');
+  };
+  let body = null;
+  if (screen === 'home') body = <window.LZHome onOpen={open} onMore={() => go('discover')} />;
+  else if (screen === 'discover') body = <window.LZDiscover initialPage={2} onOpen={open} onHome={() => go('home')} />;
+  else if (screen === 'product') body = <window.LZProductDetail id={productId} onOpen={open} onAdd={addToCart} onGoCart={() => go('cart')} onShop={openShop} />;
+  else if (screen === 'cart') body = <window.LZCart cart={cart} setCart={setCart} onCheckout={() => go('checkout')} onContinue={() => go('home')} onOpen={open} />;
+  else if (screen === 'checkout') body = <window.LZCheckout cart={cart} onPlaced={() => { setCart([]); go('done'); }} onFailed={() => go('payfail')} onBack={() => go('cart')} />;
+  else if (screen === 'done') body = <OrderDone onHome={() => go('home')} onTrack={() => track('ORD-2412-0044')} />;
+  else if (screen === 'payfail') body = <PaymentFailed onRetry={() => go('checkout')} onCart={() => go('cart')} onHome={() => go('home')} />;
+  else if (screen === 'account') body = <window.LZAccount initialView={acctView} onTrack={track} onOpen={open} onReview={review} onShop={openShop} onGo={go} />;
+  else if (screen === 'tracking') body = <window.LZOrderTracking orderId={trackId} onBack={() => go('account')} onReview={review} />;
+  else if (screen === 'shop') body = <window.LZShop vendorId={shopId} onOpen={open} onSearch={runSearch} onChat={() => {}} />;
+  else if (screen === 'search') body = <window.LZSearch query={query} scope={searchScope} shopId={searchShopId} onOpen={open} onScope={setSearchScope} onShop={openShop} />;
+  else if (screen === 'seller') body = <window.LZBecomeSeller onLogin={() => { window.location.href = '../auth/index.html?screen=login'; }} onRegistered={() => { window.location.href = '../vendor/index.html?screen=kyc'; }} />;
+
+  return (
+    <div>
+      <Header cartCount={cartCount} onNav={go} onNotifications={() => goAccount('notifications')} query={query} onQuery={setQuery} onSearch={(q) => runSearch(q, null)} />
+      {body}
+      <Footer />
+      <window.LZChatWidget />
+    </div>
+  );
+}
+
+function OrderDone({ onHome, onTrack }) {
+  const { Button } = window.LazadeeDesignSystem_0477b7;
+  return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+      <div style={{ width: 88, height: 88, borderRadius: '50%', background: 'var(--green-50)', color: 'var(--green-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
+        <Icon name="circle-check" size={52} strokeWidth={2} />
+      </div>
+      <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Đặt hàng thành công!</h1>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 6 }}>Đơn của bạn đã được tách thành các đơn riêng theo từng người bán.</p>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 28 }}>Mã đơn: <span className="code">ORD-2412-0041</span> · Bạn sẽ nhận thông báo khi shop chuẩn bị hàng.</p>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+        <Button size="lg" variant="outline" onClick={onHome} iconLeft="house">Về trang chủ</Button>
+        <Button size="lg" onClick={onTrack} iconLeft="truck">Theo dõi đơn hàng</Button>
+      </div>
+    </div>
+  );
+}
+
+function PaymentFailed({ onRetry, onCart, onHome }) {
+  const { Button, Icon: I, StatusBadge } = window.LazadeeDesignSystem_0477b7;
+  return (
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '64px 24px', textAlign: 'center' }}>
+      <div style={{ width: 88, height: 88, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
+        <I name="circle-alert" size={52} strokeWidth={2} />
+      </div>
+      <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Thanh toán thất bại</h1>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><StatusBadge status="ERROR" label="PAYMENT_FAILED" /></div>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 6 }}>Cổng thanh toán không thể xử lý giao dịch (thẻ bị từ chối hoặc hết thời gian chờ). <b>Bạn chưa bị trừ tiền.</b></p>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Đơn hàng <span className="code">ORD-2412-0045</span> đang ở trạng thái <b>PENDING_PAYMENT</b>.</p>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '10px 16px', font: 'var(--type-body-sm)', marginBottom: 28 }}>
+        <I name="lock" size={16} /> Tồn kho vẫn được giữ thêm <b>13:54</b> — hãy thử lại trước khi hết hạn để không mất hàng.
+      </div>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Button size="lg" iconLeft="refresh-cw" onClick={onRetry}>Thử thanh toán lại</Button>
+        <Button size="lg" variant="outline" iconLeft="credit-card" onClick={onRetry}>Đổi phương thức</Button>
+        <Button size="lg" variant="ghost" iconLeft="shopping-cart" onClick={onCart}>Về giỏ hàng</Button>
+      </div>
+    </div>
+  );
+}
+
+function Footer() {
+  const cols = [
+    ['Chăm sóc khách hàng', ['Trung tâm trợ giúp', 'Hướng dẫn mua hàng', 'Vận chuyển', 'Trả hàng & hoàn tiền', 'Chính sách bảo hành']],
+    ['Về Lazadee', ['Giới thiệu', 'Tuyển dụng', 'Điều khoản', 'Chính sách bảo mật', 'Lazadee Mall']],
+    ['Thanh toán', ['Cổng VNPAY', 'Ví MoMo & ZaloPay', 'Thẻ Quốc tế', 'Trả góp 0%']],
+  ];
+  return (
+    <footer style={{ background: '#fff', borderTop: '4px solid var(--color-primary)', marginTop: 20 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 24px', display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 32 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <img src="../../assets/logomark.svg" width="32" height="32" alt="" />
+            <span style={{ font: '800 22px var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--text-strong)' }}>lazadee</span>
+          </div>
+          <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', maxWidth: 260 }}>Sàn thương mại điện tử đa người bán. Mua sắm an tâm với thanh toán giữ tạm (escrow) và đổi trả trong 7 ngày.</p>
+        </div>
+        {cols.map(([h, items]) => (
+          <div key={h}>
+            <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 14 }}>{h}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {items.map((i) => <a key={i} style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', textDecoration: 'none', cursor: 'pointer' }}>{i}</a>)}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '16px 24px', textAlign: 'center', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>© 2026 Lazadee. Demo design-system recreation. Giá hiển thị bằng VND (₫).</div>
+    </footer>
+  );
+}
+
+function seedCart() {
+  const { byId } = window.LZ;
+  const mk = (id, opt, qty) => { const p = byId(id); return { key: id + '|' + opt.label, productId: id, vendorId: p.v, title: p.title, img: p.img, price: opt.price, original: p.original, snapshot: opt.snapshot, variant: opt.label, qty, stock: opt.stock }; };
+  return [
+    mk('p1', { label: 'Đen', price: 389000, stock: 38 }, 1),
+    mk('p18', { label: 'Blue switch', price: 459000, snapshot: 429000, stock: 25 }, 1),
+    mk('p2', { label: 'Đen', price: 690000, stock: 20 }, 1),
+    mk('p3', { label: 'Trắng / 42', price: 259000, stock: 12 }, 2),
+    mk('p14', { label: 'Đen / 37', price: 320000, snapshot: 289000, stock: 18 }, 1),
+    mk('p13', { label: '30ml', price: 178000, stock: 50 }, 1),
+    mk('p12', { label: 'Full set', price: 235000, stock: 30 }, 1),
+    mk('p19', { label: '50ml', price: 420000, stock: 22 }, 1),
+    mk('p15', { label: 'Xanh / L', price: 245000, stock: 40 }, 1),
+    mk('p16', { label: 'Trắng / M', price: 89000, stock: 100 }, 2),
+    mk('p10', { label: 'Trắng', price: 149000, stock: 60 }, 1),
+  ];
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+</body>
+</html>
