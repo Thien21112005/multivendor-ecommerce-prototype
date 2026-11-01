@@ -101,7 +101,7 @@ sequenceDiagram
     Note over Buyer,Vendor: Hành trình 3 & 6: Chống bán quá & Vận hành đơn
     Buyer->>Buyer: Hệ thống khoá mềm tồn kho 15 phút
     Buyer->>Vendor: Đơn hàng tạo thành công (Trạng thái PAID)
-    Vendor->>Vendor: Xác nhận -> Đóng gói -> In AWB -> Giao ĐVVC (SHIPPED)
+    Vendor->>Vendor: Xác nhận -> Đóng gói -> In AWB -> Giao ĐVVC (DELIVERING)
     
     Note over Buyer,Admin: Hành trình 5 & 7: Escrow & Khiếu nại đổi trả
     Buyer->>Buyer: Nhận hàng (DELIVERED) -> Khiếu nại hàng lỗi
@@ -111,42 +111,42 @@ sequenceDiagram
 
 ### Chi tiết các kịch bản kiểm thử:
 
-### 1. Tách giỏ đa người bán & Thanh toán gộp (`FR-ORD-001`)
+### 1. Tách giỏ đa người bán & Thanh toán gộp (`FR-ORD-02`, `FR-ORD-03`)
 - **Nghiệp vụ:** Khách hàng có thể chọn mua sản phẩm từ nhiều shop khác nhau trong cùng một giỏ hàng.
 - **Xử lý:** Khi tiến hành đặt hàng, hệ thống tự động tách thành các đơn hàng độc lập theo từng Shop (`vendorId`), tính toán phí vận chuyển riêng biệt cho từng gói hàng nhưng cho phép người mua gộp chung và thanh toán qua một giao dịch duy nhất.
 
-### 2. Mã giảm giá xếp chồng 3 lớp (`FR-ORD-003`)
+### 2. Mã giảm giá xếp chồng 3 tầng + Xu (`FR-PRO-04`)
 - **Nghiệp vụ:** Cho phép áp dụng đồng thời tối đa 3 loại khuyến mãi trong một lượt thanh toán:
   - **1 Voucher toàn sàn:** Giảm % hoặc tiền mặt tài trợ bởi sàn Lazadee.
   - **1 Voucher của từng Shop:** Do từng nhà bán tự phát hành và tài trợ.
   - **1 Mã Miễn phí vận chuyển (Freeship Xtra):** Khấu trừ trực tiếp vào tổng cước vận chuyển.
-- **Xử lý:** Hệ thống tự động phân bổ tỷ lệ giảm giá vào từng dòng sản phẩm tương ứng để đảm bảo chính xác khi phát sinh hoàn tiền từng món.
+- **Xử lý:** Thứ tự áp dụng Shop → Sàn → Freeship → Xu (tối đa 50% tiền hàng còn lại). Hệ thống gợi ý bộ mã giảm nhiều nhất và phân bổ giảm giá vào từng dòng sản phẩm để hoàn tiền từng món chính xác.
 
-### 3. Chống bán quá tồn kho (Anti-Overselling & Soft-Lock) (`FR-ORD-002`)
+### 3. Chống bán quá tồn kho (Anti-Overselling & Soft-Lock) (`FR-ORD-03`, `NFR-03`)
 - **Nghiệp vụ:** Khi người mua nhấn nút Đặt hàng, tồn kho của sản phẩm sẽ được chuyển sang trạng thái "Khóa mềm" (Soft-lock) trong 15 phút chờ thanh toán.
-- **Xử lý ngoại lệ:** Nếu người dùng thanh toán chậm hoặc có tranh chấp tồn kho dẫn đến hết hàng thực tế, giao diện sẽ kích hoạt màn hình cảnh báo lỗi `ERR_STOCK_UNAVAILABLE`, hướng dẫn người dùng điều chỉnh lại số lượng hoặc hủy mặt hàng hết tồn.
+- **Xử lý ngoại lệ:** Nếu người dùng thanh toán chậm hoặc có tranh chấp tồn kho dẫn đến hết hàng thực tế, giao diện sẽ báo lỗi `LZD-INV-4090`, hướng dẫn người dùng điều chỉnh lại số lượng hoặc hủy mặt hàng hết tồn.
 
-### 4. Định danh Người bán (KYC) & Duyệt hồ sơ (`FR-VND-001`)
+### 4. Định danh Người bán (KYC) & Duyệt hồ sơ (`FR-VND-02`, `FR-VND-03`)
 - **Nghiệp vụ:** Người bán phải hoàn tất định danh mới được quyền đăng tải và kinh doanh sản phẩm.
 - **Xử lý:**
   - Người bán nộp ảnh chụp CCCD/CMND (mặt trước + mặt sau), Giấy phép kinh doanh / Đăng ký kinh doanh và thông tin thuế.
   - Hệ thống chấm điểm rủi ro tự động (Low / Medium / High Risk).
   - Nhân viên sàn tại Admin Console xem xét hồ sơ: Phê duyệt (`VERIFIED`), Yêu cầu bổ sung chứng từ (`SUPPLEMENT_REQUESTED`), hoặc Từ chối kèm lý do chi tiết (`REJECTED`).
 
-### 5. Cơ chế Tài chính Escrow & Khấu trừ Hoa hồng (`FR-FIN-001`)
+### 5. Cơ chế Tài chính Escrow & Khấu trừ Hoa hồng (`FR-PAY-03`, `FR-PAY-05`)
 - **Nghiệp vụ:** Bảo vệ quyền lợi thanh toán của cả người mua và người bán.
 - **Xử lý:**
   - Tiền thanh toán của người mua được nạp vào tài khoản ký quỹ trung gian (`Escrow Held`).
-  - Khi đơn hàng hoàn tất (người mua xác nhận nhận hàng hoặc hết thời hạn đổi trả 15 ngày), tiền được giải phóng (`RELEASE`).
+  - Khi đơn hàng hoàn tất (người mua xác nhận nhận hàng hoặc hết thời hạn đổi trả 7 ngày), tiền được giải phóng (`RELEASE`).
   - Sàn tự động trích thu phí hoa hồng theo ngành hàng (mặc định 5% cho đồ điện tử), phần doanh thu thực nhận (`Net = Gross - Commission`) được ghi nhận ngay lập tức vào số dư khả dụng (`Available Balance`) của người bán để phục vụ rút tiền (`Payout`).
 
-### 6. Vòng đời Đơn hàng & Giao vận 3PL (`UC-Fulfillment`)
-- **Nghiệp vụ:** Quy trình khép kín từ lúc phát sinh đơn đến khi hoàn thành: `PAID` -> `PROCESSING` (Đóng gói) -> `SHIPPED` (Giao ĐVVC) -> `DELIVERED` (Đã giao hàng) -> `COMPLETED`.
+### 6. Vòng đời Đơn hàng & Giao vận 3PL (`UC-LOG-16`, `UC-LOG-01`, `UC-LOG-02`)
+- **Nghiệp vụ:** Quy trình khép kín từ lúc phát sinh đơn đến khi hoàn thành: `PAID` -> `CONFIRMED` (Shop xác nhận) -> `PREPARING` (Đóng gói) -> `READY_FOR_PICKUP` -> `DELIVERING` (Đang giao) -> `DELIVERED` (Đã giao hàng) -> `COMPLETED`.
 - **Xử lý:** Tích hợp tạo mã vận đơn tự động với các đối tác logistics (J&T Express, Giao Hàng Nhanh...), cập nhật nhật ký hành trình bưu kiện thời gian thực.
 
-### 7. Khiếu nại, Đổi trả & Hoàn tiền cổng thanh toán (`UC-Returns`)
-- **Nghiệp vụ:** Người mua tạo yêu cầu Đổi/Trả trong vòng 15 ngày kèm ảnh/video bằng chứng hàng lỗi hoặc không đúng mô tả.
-- **Xử lý:** Admin Console đóng vai trò trọng tài độc lập, kiểm tra chứng cứ và thực hiện lệnh hoàn tiền tự động qua API cổng thanh toán VNPAY (`VNP-RF-TXN`), ghi nhận vào sổ cái tài chính bất biến.
+### 7. Khiếu nại, Đổi trả & Hoàn tiền (`UC-SUP-01`…`UC-SUP-04`)
+- **Nghiệp vụ:** Người mua tạo yêu cầu Trả hàng/Hoàn tiền trong vòng 7 ngày kèm ảnh và video bằng chứng hàng lỗi hoặc không đúng mô tả.
+- **Xử lý:** Admin Console đóng vai trò trọng tài độc lập, kiểm tra chứng cứ của hai bên. Đơn VNPay hoàn qua API cổng thanh toán; đơn VietQR và COD do nhân viên chuyển khoản với nội dung `LZDRF{id}`. Mọi khoản được ghi vào sổ cái tài chính bất biến.
 
 ---
 
@@ -219,7 +219,7 @@ Toàn bộ prototype chạy bằng dữ liệu mock ngay trên trình duyệt, k
 
 Tài khoản demo: mật khẩu `Lazadee@123`, mã OTP `123456`. Thêm `?guest=1` vào URL Storefront để xem trạng thái chưa đăng nhập.
 
-Các phần chỉ mô phỏng: mã QR không quét được và không có giao dịch thật, SePay / VNPay / Google / Apple / GHN được giả lập bằng nút hoặc độ trễ, OTP không gửi đi đâu. Các trang chính sách lấy nguyên từ bản client nên còn nhắc đổi trả 15 ngày và MoMo / ZaloPay / thẻ quốc tế, khác với phạm vi TLCN.
+Các phần chỉ mô phỏng: mã QR không quét được và không có giao dịch thật, SePay / VNPay / Google / Apple / GHN được giả lập bằng nút hoặc độ trễ, OTP không gửi đi đâu. Bản dịch tiếng Anh áp dụng cho chuỗi giao diện chính; nội dung trang chính sách, dữ liệu mẫu và một số hộp thoại, thông báo vẫn bằng tiếng Việt.
 
 ---
 
@@ -300,7 +300,7 @@ sequenceDiagram
     Note over Buyer,Vendor: Journey 3 & 6: Anti-Overselling & Fulfillment
     Buyer->>Buyer: 15-minute soft-lock on item inventory
     Buyer->>Vendor: Order created successfully (PAID status)
-    Vendor->>Vendor: Pack -> Generate AWB -> 3PL Handover (SHIPPED)
+    Vendor->>Vendor: Pack -> Generate AWB -> 3PL Handover (DELIVERING)
     
     Note over Buyer,Admin: Journey 5 & 7: Escrow Settlement & Returns
     Buyer->>Buyer: Delivered item -> Issue return request with proof
@@ -310,42 +310,42 @@ sequenceDiagram
 
 ### Detailed Scenario Breakdowns:
 
-### 1. Multi-Vendor Cart Splitting & Consolidated Payment (`FR-ORD-001`)
+### 1. Multi-Vendor Cart Splitting & Consolidated Payment (`FR-ORD-02`, `FR-ORD-03`)
 - **Business Rule:** Buyers can seamlessly add items from disparate merchants into a unified cart.
 - **Execution:** During checkout initiation, the system partitions items into distinct sub-orders keyed by `vendorId`. Shipping fees are calculated per merchant origin while permitting the buyer to settle all packages in a single gateway transaction.
 
-### 2. 3-Tier Stacked Coupon Engine (`FR-ORD-003`)
+### 2. 3-Tier Stacked Voucher Engine with Xu (`FR-PRO-04`)
 - **Business Rule:** Enables concurrent application of up to 3 distinct promotional vouchers:
   - **1 Platform Voucher:** Percentage or fixed discount funded by Lazadee.
   - **1 Shop-Specific Voucher:** Self-funded merchant discount code.
   - **1 Free Shipping Voucher (Freeship Xtra):** Shipping subsidy deduction.
 - **Execution:** The calculation engine proportionally distributes aggregate discounts across individual line items to ensure precise partial refund calculations.
 
-### 3. Anti-Overselling & Inventory Soft-Locking (`FR-ORD-002`)
+### 3. Anti-Overselling & Inventory Soft-Locking (`FR-ORD-03`, `NFR-03`)
 - **Business Rule:** Clicking "Place Order" activates a 15-minute soft-lock on product inventory.
-- **Exception Intercept:** If stock becomes depleted due to concurrent checkouts before payment confirmation, the system intercepts the transaction with an explicit `ERR_STOCK_UNAVAILABLE` modal, instructing the user to update their cart.
+- **Exception Intercept:** If stock becomes depleted due to concurrent checkouts before payment confirmation, the system intercepts the transaction with an explicit `LZD-INV-4090` error, instructing the user to update their cart.
 
-### 4. Merchant Onboarding, Identity KYC & Verification (`FR-VND-001`)
+### 4. Merchant Onboarding, Identity KYC & Verification (`FR-VND-02`, `FR-VND-03`)
 - **Business Rule:** Merchants are restricted from publishing catalog listings until identity verification reaches `VERIFIED` status.
 - **Execution:**
   - Merchants submit National ID (Front/Back), Business Registration, and Banking certificates.
   - Automated heuristics assign risk levels (`low`, `medium`, `high`).
   - Compliance officers in Admin Console review documents: Approve (`VERIFIED`), Request Supplemental Documents (`SUPPLEMENT_REQUESTED`), or Reject with explicit feedback (`REJECTED`).
 
-### 5. Escrow Settlement & Commission Deduction (`FR-FIN-001`)
+### 5. Escrow Settlement & Commission Deduction (`FR-PAY-03`, `FR-PAY-05`)
 - **Business Rule:** Guarantees transactional trust between buyers and sellers.
 - **Execution:**
   - Buyer payments are held in an intermediary `Escrow Held` pool.
-  - Upon order completion (explicit delivery confirmation or expiry of 15-day return window), escrow funds are released (`ESCROW_RELEASE`).
+  - Upon order completion (explicit delivery confirmation or expiry of 7-day return window), escrow funds are released (`ESCROW_RELEASE`).
   - Platform commission fees (default 5% for electronics) are automatically debited, and net proceeds (`Net = Gross - Commission`) are credited directly to the merchant's `Available Balance` for bank withdrawal (`Payout`).
 
-### 6. Order Lifecycle & 3PL Carrier Fulfillment (`UC-Fulfillment`)
-- **Business Rule:** Full lifecycle management: `PAID` -> `PROCESSING` -> `SHIPPED` -> `DELIVERED` -> `COMPLETED`.
+### 6. Order Lifecycle & 3PL Carrier Fulfillment (`UC-LOG-16`, `UC-LOG-01`, `UC-LOG-02`)
+- **Business Rule:** Full lifecycle management: `PAID` -> `CONFIRMED` -> `PREPARING` -> `READY_FOR_PICKUP` -> `DELIVERING` -> `DELIVERED` -> `COMPLETED`.
 - **Execution:** Automated Airway Bill (AWB) generation with third-party logistics carriers (J&T Express, GHN), providing step-by-step milestone tracking events.
 
-### 7. Disputes, Returns & Payment Gateway Refunds (`UC-Returns`)
-- **Business Rule:** Buyers can initiate return claims within 15 days with attached photo evidence.
-- **Execution:** The Admin Console serves as an impartial arbitration tribunal, validating evidence and executing automated electronic refunds directly via the VNPAY Gateway API (`VNP-RF-TXN`).
+### 7. Disputes, Returns & Refunds (`UC-SUP-01`…`UC-SUP-04`)
+- **Business Rule:** Buyers can initiate return claims within 7 days with photo and video evidence.
+- **Execution:** The Admin Console serves as an impartial arbitration tribunal, validating both parties' evidence. VNPay orders are refunded through the gateway API; VietQR and COD orders by staff bank transfer with the note `LZDRF{id}`.
 
 ---
 
@@ -410,4 +410,4 @@ The whole prototype runs on in-browser mock data with no backend. Data lives in 
 
 Demo credentials: password `Lazadee@123`, OTP `123456`. Add `?guest=1` to the Storefront URL to see the signed-out state.
 
-Simulated only: QR codes cannot be scanned and no money moves; SePay, VNPay, Google, Apple and GHN are stood in for by buttons or delays; OTPs are never sent. Policy pages come unchanged from the client build, so they still mention 15-day returns and MoMo / ZaloPay / international cards, which differ from the TLCN scope.
+Simulated only: QR codes cannot be scanned and no money moves; SePay, VNPay, Google, Apple and GHN are stood in for by buttons or delays; OTPs are never sent. English covers the main interface strings; policy page content, mock data and some dialogs and toasts stay in Vietnamese.
