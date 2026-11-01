@@ -4,12 +4,14 @@
    combobox) · Specs table · Rich description · Variants & price · Shipping. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Badge, Input, Select, Switch, Money, Tabs } = DS;
+  const { Icon, Button, Badge, Input, Select, Switch, Money, Tabs, Modal } = DS;
   const formatVND = Money.format;
   const IMG_TINT = ['var(--orange-100, #FFE6D9)', 'var(--blue-100, #DCE8FE)', 'var(--mint-100, #D6F5E6)', 'var(--gold-100, #FFEFC2)'];
 
   const PRODUCTS = [
     { name: 'Tai nghe Bluetooth ANC Pro 5', img: 'headphones', skus: 4, price: 389000, stock: 38, sold: '2,1k', state: 'PUBLISHED' },
+    { name: 'Đèn bàn LED cảm ứng 3 chế độ', img: 'lamp', skus: 2, price: 149000, stock: 60, sold: '—', state: 'PENDING_APPROVAL' },
+    { name: 'Sạc nhanh 65W (thiếu giấy tờ)', img: 'phone', skus: 1, price: 280000, stock: 25, sold: '—', state: 'REJECTED', rejectReason: 'Thiếu giấy tờ chứng thực sản phẩm' },
     { name: 'Đồng hồ thông minh Watch S2', img: 'watch', skus: 3, price: 690000, stock: 12, sold: '986', state: 'PUBLISHED' },
     { name: 'Loa bluetooth mini IPX7', img: 'speaker', skus: 2, price: 320000, stock: 0, sold: '2,6k', state: 'PUBLISHED' },
     { name: 'Bàn phím cơ RGB switch blue', img: 'keyboard', skus: 6, price: 459000, stock: 54, sold: '1,9k', state: 'DRAFT' },
@@ -61,6 +63,44 @@
           )}
         </div>
         <div style={hint}>Tối đa 8 ảnh · JPG/PNG · ≤ 2MB/ảnh · Tỉ lệ 1:1 khuyến nghị. Ảnh đầu tiên là ảnh chính hiển thị trên kết quả tìm kiếm. Kéo thả để sắp xếp.</div>
+      </div>
+    );
+  }
+
+  /* ---- product legal documents: PDF/DOC/XLS only, up to 4 files, required to publish ---- */
+  function LegalDocs({ docs, setDocs, hasError }) {
+    const [err, setErr] = React.useState('');
+    const pick = (e) => {
+      const picked = Array.from(e.target.files); e.target.value = '';
+      if (picked.some((f) => f.type.startsWith('image/'))) { setErr('Chỉ chấp nhận file tài liệu (PDF, DOC, XLS), không hỗ trợ file ảnh.'); return; }
+      setErr('');
+      setDocs((d) => [...d, ...picked.map((f) => f.name)].slice(0, 4));
+    };
+    return (
+      <div style={{ ...card, border: hasError ? '2px solid var(--red-500)' : 'none' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <Icon name="file-text" size={19} style={{ color: hasError ? 'var(--red-600)' : 'var(--color-primary)' }} />
+          <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: hasError ? 'var(--red-600)' : 'var(--text-strong)' }}>Giấy tờ chứng thực</span>
+          {docs.length === 0 && <Badge variant="danger">Bắt buộc</Badge>}
+          <Badge variant="neutral" style={{ marginLeft: 'auto' }}>PDF/DOC/XLS · Tối đa 4 file</Badge>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+          {docs.map((d, i) => (
+            <div key={d + i} style={{ position: 'relative', width: 120, height: 120, borderRadius: 'var(--radius-md)', border: '1.5px solid var(--border-strong)', background: 'var(--gray-50)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 8, boxSizing: 'border-box' }}>
+              <Icon name="file-text" size={28} style={{ color: 'var(--text-muted)' }} />
+              <span style={{ font: 'var(--type-caption)', color: 'var(--text-body)', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d}</span>
+              <button onClick={() => setDocs((x) => x.filter((_, j) => j !== i))} aria-label="Xoá giấy tờ" style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', border: 0, background: 'rgba(0,0,0,.6)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button>
+            </div>
+          ))}
+          {docs.length < 4 && (
+            <label style={{ width: 120, height: 120, borderRadius: 'var(--radius-md)', border: '1.5px dashed var(--border-strong)', background: 'var(--gray-50)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--text-subtle)' }}>
+              <input type="file" hidden multiple accept=".pdf,.doc,.docx,.xls,.xlsx" onChange={pick} />
+              <Icon name="upload" size={26} /><span style={{ font: 'var(--type-caption)' }}>Thêm giấy tờ</span>
+            </label>
+          )}
+        </div>
+        {err && <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 10 }}><Icon name="circle-alert" size={13} />{err}</div>}
+        <div style={hint}>Hóa đơn nhập hàng, giấy ủy quyền thương hiệu hoặc giấy kiểm định. Nhân viên kiểm duyệt xem tại mục Hồ sơ pháp lý sản phẩm.</div>
       </div>
     );
   }
@@ -474,47 +514,75 @@
     );
   }
 
-  function Editor({ onClose }) {
+  function Editor({ product, onClose, onSaved }) {
     const kycStatus = window.LZ_KYC_STATUS || 'VERIFIED';
     const [category, setCategory] = React.useState(['Điện tử', 'Máy tính & Laptop', 'Bàn phím']);
+    const editingLive = product && product.state === 'PUBLISHED';
+    const [docs, setDocs] = React.useState(product && product.state !== 'REJECTED' ? ['Giấy tờ cũ.pdf'] : []);
+    const [docsError, setDocsError] = React.useState(false);
+    const [reReview, setReReview] = React.useState(false);
+    const [cancelOpen, setCancelOpen] = React.useState(false);
+    const publish = () => {
+      if (docs.length === 0) { setDocsError(true); window.scrollTo(0, 0); return; }
+      if (editingLive) { setReReview(true); return; }
+      onSaved(product ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm thành công!');
+    };
     return (
       <div style={{ maxWidth: 1180 }}>
-        <button onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 14 }}><Icon name="chevron-left" size={16} /> Quay lại danh sách</button>
+        {product && product.state === 'REJECTED' && <div style={{ display: 'flex', gap: 12, background: 'var(--red-50, #FDECEA)', border: '1px solid var(--red-300, #F3B0A8)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}><Icon name="triangle-alert" size={22} style={{ color: 'var(--red-600)', flex: 'none' }} /><div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Sản phẩm bị từ chối</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginTop: 2 }}>Lý do: {product.rejectReason}. Sửa rồi gửi lại để được duyệt.</div></div></div>}
+        <button onClick={() => setCancelOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 14 }}><Icon name="chevron-left" size={16} /> Quay lại danh sách</button>
         <ImageUpload />
+        <LegalDocs docs={docs} setDocs={(u) => { setDocs(u); setDocsError(false); }} hasError={docsError} />
         <BasicInfo category={category} onCategory={setCategory} />
         <SpecsTable rootCat={category[0]} />
         <RichDescription />
         <VariantSection />
         <ShippingInfo />
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Button variant="secondary" iconLeft="file-text">Lưu nháp</Button>
-          <Button iconLeft="check" disabled={kycStatus !== 'VERIFIED'}>Đăng bán</Button>
+          <Button variant="secondary" iconLeft="file-text" onClick={() => onSaved('Đã lưu nháp sản phẩm')}>Lưu nháp</Button>
+          <Button iconLeft="check" disabled={kycStatus !== 'VERIFIED'} onClick={publish}>{product ? 'Lưu & gửi duyệt' : 'Đăng bán'}</Button>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)' }}>
             {kycStatus === 'VERIFIED' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--mint-600)' }}><Icon name="shield-check" size={14} /> Shop đã VERIFIED — được phép đăng bán</span>}
             {kycStatus === 'PENDING' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--amber-600, #C77700)' }}><Icon name="clock" size={14} /> KYC đang chờ duyệt — chưa thể đăng bán</span>}
             {kycStatus === 'REJECTED' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--red-600)' }}><Icon name="triangle-alert" size={14} /> KYC bị từ chối — vui lòng nộp lại hồ sơ</span>}
           </span>
         </div>
+        <Modal open={reReview} onClose={() => setReReview(false)} width={420} title="Sản phẩm sẽ được kiểm duyệt lại"
+          footer={<><Button variant="ghost" onClick={() => setReReview(false)}>Huỷ</Button><Button onClick={() => onSaved('Cập nhật sản phẩm thành công!')}>Tiếp tục lưu</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55 }}>Sản phẩm đang bán sẽ chuyển sang trạng thái chờ duyệt lại nếu bạn đổi tên, ảnh, danh mục hoặc giấy tờ. Thay đổi giá và tồn kho không cần <b>kiểm duyệt</b>.</div>
+        </Modal>
+        <Modal open={cancelOpen} onClose={() => setCancelOpen(false)} width={400} title="Hủy thay đổi?"
+          footer={<><Button variant="ghost" onClick={() => setCancelOpen(false)}>Tiếp tục sửa</Button><Button variant="danger" onClick={onClose}>Đồng ý hủy</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Các thay đổi chưa lưu sẽ bị mất.</div>
+        </Modal>
       </div>
     );
   }
 
   function Products() {
     const [tab, setTab] = React.useState('all');
-    const [editing, setEditing] = React.useState(false);
-    if (editing) return <Editor onClose={() => setEditing(false)} />;
-    const list = PRODUCTS.filter((p) => tab === 'all' || (tab === 'pub' ? p.state === 'PUBLISHED' : p.state === 'DRAFT'));
+    const [editing, setEditing] = React.useState(null); // null | {} (new) | product
+    const [rows, setRows] = React.useState(PRODUCTS);
+    const [del, setDel] = React.useState(null);
+    const [toast, setToast] = React.useState('');
+    const say = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
+    if (editing) return <Editor product={editing.name ? editing : null} onClose={() => setEditing(null)} onSaved={(m) => { setEditing(null); say(m); }} />;
+    const STATE_TAB = { pub: 'PUBLISHED', draft: 'DRAFT', wait: 'PENDING_APPROVAL', bad: 'REJECTED' };
+    const list = rows.filter((p) => tab === 'all' || p.state === STATE_TAB[tab]);
+    const n = (s) => rows.filter((p) => p.state === s).length;
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
           <div style={{ flex: 1 }}>
             <Tabs value={tab} onChange={setTab} items={[
-              { id: 'all', label: 'Tất cả', badge: PRODUCTS.length },
-              { id: 'pub', label: 'Đang bán', badge: PRODUCTS.filter((p) => p.state === 'PUBLISHED').length },
-              { id: 'draft', label: 'Bản nháp', badge: PRODUCTS.filter((p) => p.state === 'DRAFT').length },
+              { id: 'all', label: 'Tất cả', badge: rows.length },
+              { id: 'pub', label: 'Đang bán', badge: n('PUBLISHED') },
+              { id: 'draft', label: 'Bản nháp', badge: n('DRAFT') },
+              { id: 'wait', label: 'Chờ duyệt', badge: n('PENDING_APPROVAL') },
+              { id: 'bad', label: 'Không hợp lệ', badge: n('REJECTED') },
             ]} />
           </div>
-          <Button iconLeft="plus-circle" onClick={() => setEditing(true)}>Thêm sản phẩm</Button>
+          <Button iconLeft="plus-circle" onClick={() => setEditing({})}>Thêm sản phẩm</Button>
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
@@ -529,13 +597,18 @@
                   <td style={{ ...td, textAlign: 'right', fontWeight: 600, color: 'var(--text-price)' }}>{formatVND(p.price)}</td>
                   <td style={{ ...td, textAlign: 'right', color: p.stock === 0 ? 'var(--red-600)' : 'var(--text-body)', fontWeight: p.stock === 0 ? 600 : 400 }}>{p.stock === 0 ? 'Hết' : p.stock}</td>
                   <td style={{ ...td, textAlign: 'right', color: 'var(--text-muted)' }}>{p.sold}</td>
-                  <td style={td}>{p.state === 'PUBLISHED' ? <Badge variant="success" icon="circle-check">Đang bán</Badge> : <Badge variant="neutral" icon="file-text">Nháp</Badge>}</td>
-                  <td style={{ ...td, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(true)}>Sửa</Button></div></td>
+                  <td style={td}>{p.state === 'PUBLISHED' ? <Badge variant="success" icon="circle-check">Đang bán</Badge> : p.state === 'PENDING_APPROVAL' ? <Badge variant="warning" icon="clock">Chờ duyệt</Badge> : p.state === 'REJECTED' ? <Badge variant="danger" icon="triangle-alert">Không hợp lệ</Badge> : <Badge variant="neutral" icon="file-text">Nháp</Badge>}</td>
+                  <td style={{ ...td, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(p)}>Sửa</Button><Button variant="ghost" size="sm" iconLeft="trash-2" style={{ color: 'var(--red-600)' }} onClick={() => setDel(p)}>Xóa</Button></div></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <Modal open={!!del} onClose={() => setDel(null)} title="Xác nhận xóa sản phẩm"
+          footer={<><Button variant="ghost" onClick={() => setDel(null)}>Hủy</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setRows((r) => r.filter((x) => x !== del)); setDel(null); say('Đã xóa sản phẩm'); }}>Xóa sản phẩm</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn có chắc chắn muốn xóa sản phẩm <b>{del && del.name}</b>? Hành động này không thể hoàn tác.</div>
+        </Modal>
+        {toast && <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 200 }}>{toast}</div>}
       </div>
     );
   }

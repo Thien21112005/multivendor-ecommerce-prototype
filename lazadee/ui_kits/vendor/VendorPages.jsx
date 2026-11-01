@@ -89,7 +89,7 @@
       code: voucher && voucher.id ? (voucher._dup ? '' : voucher.id) : '',
       kind: (voucher && voucher.kind) || 'percent',
       value: '', cap: '', minOrder: '', total: '', perUser: '1', start: '', end: '',
-      scope: 'all', sponsor: 'Lazadee', budget: '',
+      scope: 'all', sponsor: 'Lazadee', budget: '', scopeCat: '', exclude: '',
     });
     const [err, setErr] = React.useState({});
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
@@ -157,10 +157,13 @@
               <label style={lab}>Sản phẩm áp dụng</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', font: 'var(--type-body)', color: 'var(--text-body)' }}><Radio name="vscope" checked={f.scope === 'all'} onChange={() => set('scope', 'all')} />Tất cả sản phẩm shop</label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', font: 'var(--type-body)', color: 'var(--text-body)' }}><Radio name="vscope" checked={f.scope === 'some'} onChange={() => set('scope', 'some')} />Chọn sản phẩm cụ thể</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', font: 'var(--type-body)', color: 'var(--text-body)' }}><Radio name="vscope" checked={f.scope === 'cat'} onChange={() => set('scope', 'cat')} />Danh mục cụ thể</label>
+                {f.scope === 'cat' && <Select value={f.scopeCat || 'Chọn danh mục'} onChange={(e) => set('scopeCat', e.target.value)}>{['Chọn danh mục', 'Tai nghe & Loa', 'Máy tính & Laptop', 'Điện thoại & Phụ kiện', 'Camera'].map((c) => <option key={c}>{c}</option>)}</Select>}
+                <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', font: 'var(--type-body)', color: 'var(--text-body)' }}><Radio name="vscope" checked={f.scope === 'some'} onChange={() => set('scope', 'some')} />Sản phẩm cụ thể</label>
                 {f.scope === 'some' && <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '10px 12px', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
                   {['Tai nghe ANC Pro 5', 'Watch S2 AMOLED', 'Bàn phím cơ RGB'].map((p) => <label key={p} style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Checkbox />{p}</label>)}
                 </div>}
+                {f.scope !== 'some' && <Select label="Ngoại trừ (Không áp dụng giảm giá)" value={f.exclude || 'Không loại trừ'} onChange={(e) => set('exclude', e.target.value)}>{['Không loại trừ', 'Camera', 'Điện thoại & Phụ kiện', 'Máy tính & Laptop'].map((c) => <option key={c}>{c}</option>)}</Select>}
               </div>
             </div>
           )}
@@ -333,6 +336,19 @@
   function Settings() {
     const [t, setT] = React.useState({ autoReply: true, vacation: false, freeship: true, preorder: false });
     const tog = (k) => setT((s) => ({ ...s, [k]: !s[k] }));
+    const [toast, setToast] = React.useState('');
+    const say = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
+    const [pickup, setPickup] = React.useState({ phone: '0912 345 678', province: 'TP. Hồ Chí Minh', district: 'Q.7', ward: 'P. Tân Phong', line: 'Kho TechZone, 88 Nguyễn Văn Linh' });
+    const setP = (k, v) => setPickup((p) => ({ ...p, [k]: v }));
+    const [greeting, setGreeting] = React.useState('Chào bạn, shop có thể giúp gì cho bạn?');
+    const [away, setAway] = React.useState('Hiện tại shop đang bận, sẽ trả lời bạn sớm nhất có thể.');
+    const [bank, setBank] = React.useState({ bank: 'Vietcombank', holder: 'TECHZONE OFFICIAL', number: '0071000006712' });
+    const [bankForm, setBankForm] = React.useState(null);
+    const [delBank, setDelBank] = React.useState(false);
+    const saveBank = () => {
+      if (!bankForm.bank || !bankForm.holder.trim() || !bankForm.number.trim()) { say('Vui lòng điền đủ thông tin'); return; }
+      setBank({ ...bankForm, holder: bankForm.holder.toUpperCase() }); setBankForm(null); say('Lưu tài khoản thành công');
+    };
     return (
       <div style={{ maxWidth: 1180 }}>
         <SectionTitle icon="settings" title="Cài đặt Shop" sub="Thông tin gian hàng, vận chuyển và thanh toán" />
@@ -381,23 +397,45 @@
             </div>
           </Section>
 
+          {/* pickup address */}
+          <Section title="Địa chỉ lấy hàng (GHN)" icon="map-pin">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
+              <Input label="Số điện thoại kho" value={pickup.phone} onChange={(e) => setP('phone', e.target.value)} />
+              <Select label="Tỉnh / Thành phố" value={pickup.province} onChange={(e) => setP('province', e.target.value)}>{['TP. Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Bình Dương', 'Đồng Nai'].map((c) => <option key={c}>{c}</option>)}</Select>
+              <Select label="Quận / Huyện" value={pickup.district} onChange={(e) => setP('district', e.target.value)}>{['Q.1', 'Q.3', 'Q.7', 'TP. Thủ Đức'].map((c) => <option key={c}>{c}</option>)}</Select>
+              <Select label="Phường / Xã" value={pickup.ward} onChange={(e) => setP('ward', e.target.value)}>{['P. Tân Phong', 'P. Tân Hưng', 'P. Tân Quy'].map((c) => <option key={c}>{c}</option>)}</Select>
+            </div>
+            <div style={{ marginTop: 14 }}><Input label="Địa chỉ chi tiết" value={pickup.line} onChange={(e) => setP('line', e.target.value)} /></div>
+            <div style={{ marginTop: 14 }}><Button size="sm" iconLeft="check" onClick={() => say('Đã lưu địa chỉ lấy hàng thành công!')}>Lưu địa chỉ</Button></div>
+          </Section>
+
           {/* payout bank */}
           <Section title="Tài khoản nhận tiền (Payout)" icon="banknote">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'var(--blue-50)', color: 'var(--blue-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="credit-card" size={22} /></div>
-              <div style={{ flex: 1 }}>
-                <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Vietcombank · CTK: TECHZONE OFFICIAL</div>
-                <div className="code" style={{ font: '13px var(--font-mono)', color: 'var(--text-muted)' }}>•••• •••• 6712</div>
+            {bank ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'var(--blue-50)', color: 'var(--blue-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="credit-card" size={22} /></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{bank.bank} · CTK: {bank.holder}</div>
+                  <div className="code" style={{ font: '13px var(--font-mono)', color: 'var(--text-muted)' }}>•••• •••• {bank.number.slice(-4)}</div>
+                </div>
+                <Badge variant="mint" icon="badge-check">Đã xác minh</Badge>
+                <Button size="sm" variant="ghost" onClick={() => setBankForm({ ...bank })}>Thay đổi</Button>
+                <Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setDelBank(true)}>Xóa</Button>
               </div>
-              <Badge variant="mint" icon="badge-check">Đã xác minh</Badge>
-              <Button size="sm" variant="ghost">Thay đổi</Button>
-            </div>
+            ) : <Button variant="outline" iconLeft="plus" onClick={() => setBankForm({ bank: 'Vietcombank', holder: '', number: '' })}>Thêm tài khoản nhận tiền</Button>}
           </Section>
 
           {/* preferences */}
           <Section title="Tuỳ chọn vận hành" icon="sliders-horizontal">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <ToggleRow label="Tự động trả lời chat" desc="Gửi lời chào khi khách nhắn tin" on={t.autoReply} onToggle={() => tog('autoReply')} />
+              {t.autoReply && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <Input label="Lời chào" value={greeting} onChange={(e) => setGreeting(e.target.value)} placeholder="VD: Chào bạn, shop có thể giúp gì cho bạn?" />
+                  <Input label="Tin nhắn khi vắng mặt" value={away} onChange={(e) => setAway(e.target.value)} placeholder="VD: Hiện tại shop đang bận, sẽ trả lời bạn sớm nhất có thể." />
+                  <div><Button size="sm" variant="secondary" iconLeft="check" onClick={() => say('Đã lưu cấu hình tự động trả lời!')}>Lưu tin nhắn</Button></div>
+                </div>
+              )}
               <ToggleRow label="Cho phép đặt trước (Pre-order)" desc="Bán sản phẩm chưa có sẵn hàng" on={t.preorder} onToggle={() => tog('preorder')} />
               <ToggleRow label="Chế độ nghỉ (Vacation)" desc="Tạm ẩn toàn bộ sản phẩm khỏi sàn" on={t.vacation} onToggle={() => tog('vacation')} danger />
             </div>
@@ -407,9 +445,22 @@
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             <Button variant="ghost">Huỷ</Button>
-            <Button iconLeft="check">Lưu cài đặt</Button>
+            <Button iconLeft="check" onClick={() => say('Đã lưu cài đặt')}>Lưu cài đặt</Button>
           </div>
         </div>
+        <Modal open={!!bankForm} onClose={() => setBankForm(null)} title="Cập nhật tài khoản nhận tiền"
+          footer={<><Button variant="ghost" onClick={() => setBankForm(null)}>Huỷ</Button><Button iconLeft="check" onClick={saveBank}>Lưu tài khoản</Button></>}>
+          {bankForm && <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <Select label="Ngân hàng" value={bankForm.bank} onChange={(e) => setBankForm({ ...bankForm, bank: e.target.value })}>{['Vietcombank', 'Techcombank', 'BIDV', 'VietinBank', 'MB Bank', 'ACB'].map((b) => <option key={b}>{b}</option>)}</Select>
+            <Input label="Tên chủ tài khoản" value={bankForm.holder} onChange={(e) => setBankForm({ ...bankForm, holder: e.target.value })} hint="Viết hoa không dấu, trùng với tên trên CCCD" />
+            <Input label="Số tài khoản" value={bankForm.number} onChange={(e) => setBankForm({ ...bankForm, number: e.target.value.replace(/\D/g, '') })} />
+          </div>}
+        </Modal>
+        <Modal open={delBank} onClose={() => setDelBank(false)} title="Xóa tài khoản"
+          footer={<><Button variant="ghost" onClick={() => setDelBank(false)}>Huỷ</Button><Button variant="danger" onClick={() => { setBank(null); setDelBank(false); say('Xóa tài khoản thành công'); }}>Xóa</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn có chắc chắn muốn xóa tài khoản ngân hàng này không?</div>
+        </Modal>
+        {toast && <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 200 }}>{toast}</div>}
       </div>
     );
   }

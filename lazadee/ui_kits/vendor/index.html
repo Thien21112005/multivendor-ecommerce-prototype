@@ -29,6 +29,7 @@
 <script type="text/babel" src="Onboarding.jsx"></script>
 <script type="text/babel" src="Chat.jsx"></script>
 <script type="text/babel" src="VendorPages.jsx"></script>
+<script type="text/babel" src="VendorCatalog.jsx"></script>
 <script type="text/babel">
 const { Icon } = window.LazadeeDesignSystem_0477b7;
 
@@ -61,7 +62,8 @@ function KycGate({ status, onGo }) {
 }
 
 function App() {
-  const [active, setActive] = React.useState(new URLSearchParams(location.search).get('screen') || 'overview');
+  const [active, setActiveRaw] = React.useState(new URLSearchParams(location.search).get('screen') || 'overview');
+  const setActive = (id) => { setActiveRaw(id); const u = new URL(location.href); u.searchParams.set('screen', id); history.replaceState({}, '', u); window.scrollTo(0, 0); };
   const [kyc, setKyc] = React.useState(new URLSearchParams(location.search).get('kyc') || 'VERIFIED');
   window.LZ_KYC_STATUS = kyc;
   const Shell = window.LZVShell;
@@ -75,6 +77,7 @@ function App() {
     promo: window.LZVPromo,
     reviews: window.LZVReviews,
     stats: window.LZVStats,
+    catalog: window.LZVCatalog,
     settings: window.LZVSettings,
   };
   const Screen = map[active];

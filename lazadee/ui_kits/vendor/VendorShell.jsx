@@ -1,8 +1,88 @@
 /* Vendor dashboard shell: dark sidebar nav + topbar. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Badge, StatusBadge } = DS;
-  const { NAV, SHOP } = window.LZV;
+  const { Icon, Badge, StatusBadge, Avatar, Button, Modal } = DS;
+  const { NAV, SHOP, NOTIFICATIONS } = window.LZV;
+
+  function NotifBell() {
+    const [open, setOpen] = React.useState(false);
+    const [items, setItems] = React.useState(NOTIFICATIONS);
+    const [detail, setDetail] = React.useState(null);
+    const timer = React.useRef(null);
+    const unread = items.filter((n) => n.unread).length;
+    const hoverIn = () => { clearTimeout(timer.current); timer.current = setTimeout(() => setOpen(true), 150); };
+    const hoverOut = () => { clearTimeout(timer.current); timer.current = setTimeout(() => setOpen(false), 250); };
+    const read = (n) => { setItems((xs) => xs.map((x) => (x.id === n.id ? { ...x, unread: false } : x))); setDetail(n); setOpen(false); };
+    return (
+      <div style={{ position: 'relative' }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+        <button style={{ ...ico, position: 'relative' }} aria-label="Thông báo" onClick={() => setOpen((o) => !o)}>
+          <Icon name="bell" size={20} />
+          {unread > 0 && <span style={{ position: 'absolute', top: 4, right: 4, background: 'var(--red-500)', color: '#fff', font: '700 10px var(--font-sans)', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread}</span>}
+        </button>
+        {open && (
+          <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, width: 340, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', zIndex: 100, border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--border-default)', background: 'var(--surface-sunken)' }}>
+              <b style={{ font: '600 14px var(--font-sans)', color: 'var(--text-strong)' }}>Thông báo</b>
+              {unread > 0 && <button onClick={() => setItems((xs) => xs.map((x) => ({ ...x, unread: false })))} style={{ border: 0, background: 'none', padding: 0, color: 'var(--blue-600)', font: '500 12px var(--font-sans)', cursor: 'pointer' }}>Đánh dấu đã đọc</button>}
+            </div>
+            <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+              {items.length === 0 && <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', font: '500 13px var(--font-sans)' }}>Không có thông báo nào.</div>}
+              {items.map((n) => (
+                <div key={n.id} onClick={() => read(n)} style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border-default)', cursor: 'pointer', background: n.unread ? 'var(--blue-50)' : '#fff' }}>
+                  <div style={{ position: 'relative', width: 44, height: 44, flex: 'none', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-sm)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}>
+                    {n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" width="28" height="28" alt="" /> : <Icon name={n.icon} size={20} />}
+                    {n.unread && <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: 'var(--blue-500)', border: '2px solid #fff' }} />}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.title}</div>
+                    <div style={{ font: '13px/1.4 var(--font-sans)', color: 'var(--text-body)', margin: '3px 0 5px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.body}</div>
+                    <div style={{ font: '11px var(--font-sans)', color: 'var(--text-muted)' }}>{n.date}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <Modal open={!!detail} onClose={() => setDetail(null)} width={500} title="Chi tiết thông báo" footer={<Button onClick={() => setDetail(null)}>Đã hiểu</Button>}>
+          {detail && <div>
+            <div style={{ font: '600 18px var(--font-sans)', color: 'var(--text-strong)' }}>{detail.title}</div>
+            <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)', margin: '6px 0 14px' }}>{detail.date}</div>
+            <div style={{ font: '14px/1.6 var(--font-sans)', color: 'var(--text-body)' }}>{detail.body}</div>
+          </div>}
+        </Modal>
+      </div>
+    );
+  }
+
+  function AccountMenu({ onNav }) {
+    const [open, setOpen] = React.useState(false);
+    const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--text-body)' };
+    const hover = { onMouseEnter: (e) => (e.currentTarget.style.background = 'var(--gray-50)'), onMouseLeave: (e) => (e.currentTarget.style.background = 'transparent') };
+    return (
+      <div style={{ position: 'relative' }}>
+        <div onClick={() => setOpen((o) => !o)} style={{ cursor: 'pointer' }}><Avatar name={SHOP.name} size={36} /></div>
+        {open && <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
+          <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 260, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', zIndex: 95, padding: 4 }}>
+            <div {...hover} style={row} onClick={() => { setOpen(false); onNav('settings'); }}>
+              <Avatar name={SHOP.name} size={36} />
+              <div style={{ minWidth: 0 }}><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{SHOP.name}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Quản lý cửa hàng</div></div>
+            </div>
+            <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
+            <div {...hover} style={row} onClick={() => { window.location.href = '../storefront/index.html'; }}>
+              <Avatar name="Kênh người mua" size={32} />
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-strong)' }}>Kênh người mua</div><div style={{ font: '11px var(--font-sans)', color: 'var(--text-subtle)' }}>Trở về Lazadee</div></div>
+              <Icon name="refresh-cw" size={14} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
+            <div {...hover} style={{ ...row, color: 'var(--red-600)', font: '600 13px var(--font-sans)' }} onClick={() => { window.location.href = '../storefront/index.html?guest=1'; }}>
+              <span style={{ width: 32, display: 'flex', justifyContent: 'center' }}><Icon name="log-out" size={18} /></span>Đăng xuất
+            </div>
+          </div>
+        </>}
+      </div>
+    );
+  }
 
   function VendorShell({ active, onNav, children, kyc = 'VERIFIED', setKyc }) {
     const [toast, setToast] = React.useState('');
@@ -47,7 +127,7 @@
             })}
           </nav>
           <div style={{ padding: 12 }}>
-            <button onClick={() => onNav('overview')} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, width: '100%', borderRadius: 'var(--radius-md)', border: 0, cursor: 'pointer', background: 'transparent', color: 'rgba(255,255,255,.5)', font: '500 14px var(--font-sans)' }}>
+            <button onClick={() => { window.location.href = '../storefront/index.html?guest=1'; }} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, width: '100%', borderRadius: 'var(--radius-md)', border: 0, cursor: 'pointer', background: 'transparent', color: 'rgba(255,255,255,.5)', font: '500 14px var(--font-sans)' }}>
               <Icon name="log-out" size={19} /> Đăng xuất
             </button>
           </div>
@@ -68,10 +148,10 @@
                 <span style={{ position: 'absolute', left: 12, color: 'var(--text-subtle)', display: 'flex' }}><Icon name="search" size={16} /></span>
                 <input placeholder="Tìm đơn, sản phẩm…" style={{ width: 260, height: 40, paddingLeft: 36, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none' }} />
               </div>
-              <button style={ico}><Icon name="bell" size={20} /></button>
-              <button style={ico}><Icon name="circle-help" size={20} /></button>
+              <NotifBell />
+              <button style={ico} aria-label="Trợ giúp"><Icon name="circle-help" size={20} /></button>
               <div style={{ width: 1, height: 28, background: 'var(--border-default)', margin: '0 4px' }} />
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--ink-800)', color: '#fff', display: 'grid', placeItems: 'center', font: '700 14px var(--font-sans)' }}>T</div>
+              <AccountMenu onNav={onNav} />
             </div>
           </header>
           <main style={{ flex: 1, padding: '24px 28px 60px', minWidth: 0 }}>{children}</main>
