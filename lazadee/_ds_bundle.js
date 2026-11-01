@@ -249,7 +249,19 @@ const ICONS = {
   "user-check": "<path d=\"m16 11 2 2 4-4\" /><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><circle cx=\"9\" cy=\"7\" r=\"4\" />",
   "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /><path d=\"M4.929 4.929 19.07 19.071\" />",
   "undo-2": "<path d=\"M9 14 4 9l5-5\" /><path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
-  "download": "<path d=\"M12 15V3\" /><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /><path d=\"m7 10 5 5 5-5\" />"
+  "download": "<path d=\"M12 15V3\" /><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /><path d=\"m7 10 5 5 5-5\" />",
+  "book": "<path d=\"M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20\" />",
+  "dumbbell": "<path d=\"m6.5 6.5 11 11\"/><path d=\"m21 21-1-1\"/><path d=\"m3 3 1 1\"/><path d=\"m18 22 4-4\"/><path d=\"m2 6 4-4\"/><path d=\"m3 10 7-7\"/><path d=\"m14 21 7-7\"/>",
+  "gamepad-2": "<line x1=\"6\" x2=\"10\" y1=\"12\" y2=\"12\"/><line x1=\"8\" x2=\"8\" y1=\"10\" y2=\"14\"/><line x1=\"15\" x2=\"15.01\" y1=\"13\" y2=\"13\"/><line x1=\"18\" x2=\"18.01\" y1=\"11\" y2=\"11\"/><rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\"/>",
+  "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\"/><line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\"/>",
+  "smartphone": "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/>",
+  "watch": "<circle cx=\"12\" cy=\"12\" r=\"6\"/><polyline points=\"12 10 12 12 13 13\"/><path d=\"m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05\"/><path d=\"m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05\"/>",
+  "car": "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\"/><circle cx=\"7\" cy=\"17\" r=\"2\"/><path d=\"M9 17h6\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/>",
+  "coffee": "<path d=\"M17 8h1a4 4 0 1 1 0 8h-1\"/><path d=\"M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z\"/><line x1=\"6\" x2=\"6\" y1=\"2\" y2=\"4\"/><line x1=\"10\" x2=\"10\" y1=\"2\" y2=\"4\"/><line x1=\"14\" x2=\"14\" y1=\"2\" y2=\"4\"/>",
+  "shirt": "<path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\"/>",
+  "scissors": "<circle cx=\"6\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><line x1=\"20\" x2=\"8.12\" y1=\"4\" y2=\"15.88\"/><line x1=\"14.47\" x2=\"20\" y1=\"14.48\" y2=\"20\"/><line x1=\"8.12\" x2=\"12\" y1=\"8.12\" y2=\"12\"/>",
+  "headphones": "<path d=\"M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3\"/>",
+  "music": "<path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/>"
 };
 function Icon({
   name,
@@ -394,13 +406,18 @@ function ProductCard({
     className: "lz-pcard",
     onClick: onClick
   }, rest), /*#__PURE__*/React.createElement("div", {
-    className: "lz-pcard__media"
+    className: "lz-pcard__media",
+    style: { position: 'relative', width: '100%', paddingTop: '100%', background: 'var(--gray-100)' }
   }, image ? /*#__PURE__*/React.createElement("img", {
     src: image,
     alt: title,
-    loading: "lazy"
+    loading: "lazy",
+    style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }
   }) : /*#__PURE__*/React.createElement("div", {
     style: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
       width: '100%',
       height: '100%',
       display: 'grid',
@@ -446,15 +463,18 @@ function ProductCard({
   }, /*#__PURE__*/React.createElement(__ds_scope.Icon, {
     name: "truck",
     size: 12
-  }), "Freeship"), /*#__PURE__*/React.createElement("div", {
-    className: "lz-pcard__foot"
-  }, rating != null && /*#__PURE__*/React.createElement(__ds_scope.Rating, {
+  }), "Freeship"), rating != null && /*#__PURE__*/React.createElement(__ds_scope.Rating, {
     value: rating,
-    sold: sold,
     size: 12,
     showNumber: true
-  }), location && /*#__PURE__*/React.createElement("span", {
-    className: "lz-pcard__loc"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "lz-pcard__foot"
+  }, sold != null && /*#__PURE__*/React.createElement("span", {
+    className: "lz-rating__count",
+    style: { whiteSpace: 'nowrap', flexShrink: 0 }
+  }, "\u0110\xE3 b\xE1n ", sold), location && /*#__PURE__*/React.createElement("span", {
+    className: "lz-pcard__loc",
+    style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
   }, /*#__PURE__*/React.createElement(__ds_scope.Icon, {
     name: "map-pin",
     size: 11
@@ -876,20 +896,75 @@ function Select({
   id,
   children,
   className = '',
+  value,
+  defaultValue,
+  onChange,
   ...rest
 }) {
+  const [innerValue, setInnerValue] = React.useState(defaultValue);
+  if (value === undefined) value = innerValue;
   const fid = id || (label ? 's-' + label.replace(/\s+/g, '-').toLowerCase() : undefined);
+  const [open, setOpen] = React.useState(false);
+  const containerRef = React.useRef(null);
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  const options = [];
+  React.Children.forEach(children, child => {
+    if (child && child.type === 'option') {
+      options.push({ value: child.props.value !== undefined ? child.props.value : child.props.children, label: child.props.children });
+    } else if (child && Array.isArray(child)) {
+      child.forEach(c => {
+        if (c && c.type === 'option') options.push({ value: c.props.value !== undefined ? c.props.value : c.props.children, label: c.props.children });
+      });
+    }
+  });
+  const selectedOption = options.find(o => String(o.value) === String(value)) || options[0] || {label: '...'};
+
   return /*#__PURE__*/React.createElement("div", {
-    className: 'lz-field ' + className
+    className: 'lz-field ' + className,
+    ref: containerRef
   }, label && /*#__PURE__*/React.createElement("label", {
     className: "lz-field__label",
     htmlFor: fid
   }, label, required && /*#__PURE__*/React.createElement("span", {
     className: "req"
-  }, "*")), /*#__PURE__*/React.createElement("select", _extends({
-    id: fid,
-    className: "lz-select"
-  }, rest), children), hint && /*#__PURE__*/React.createElement("span", {
+  }, "*")), /*#__PURE__*/React.createElement("div", {
+    style: { position: 'relative' }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lz-input",
+    style: { cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderColor: open ? 'var(--orange-500)' : undefined, background: '#fff', userSelect: 'none' },
+    onClick: () => setOpen(!open)
+  }, /*#__PURE__*/React.createElement("span", { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, selectedOption.label), /*#__PURE__*/React.createElement(__ds_scope.Icon, {
+    name: "chevron-down",
+    size: 16,
+    style: { color: 'var(--text-muted)' }
+  })), open && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+      background: '#fff', border: '1px solid var(--border-default)',
+      borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)',
+      zIndex: 100, maxHeight: 250, overflowY: 'auto', padding: '4px'
+    }
+  }, options.map((opt, i) => {
+    const isSelected = String(opt.value) === String(value);
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        padding: '8px 12px', cursor: 'pointer', borderRadius: 'var(--radius-sm)',
+        background: isSelected ? 'var(--orange-50)' : 'transparent',
+        color: isSelected ? 'var(--orange-600)' : 'var(--text-body)',
+        fontWeight: isSelected ? 500 : 400
+      },
+      onMouseEnter: e => { if (!isSelected) { e.target.style.background = 'var(--orange-50)'; e.target.style.color = 'var(--orange-600)'; } },
+      onMouseLeave: e => { if (!isSelected) { e.target.style.background = 'transparent'; e.target.style.color = 'var(--text-body)'; } },
+      onClick: () => { setInnerValue(opt.value); if (onChange) onChange({ target: { value: opt.value } }); setOpen(false); }
+    }, opt.label);
+  }))), hint && /*#__PURE__*/React.createElement("span", {
     className: "lz-field__hint"
   }, hint));
 }

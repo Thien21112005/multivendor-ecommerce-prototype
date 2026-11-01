@@ -30,7 +30,24 @@
     );
   }
 
-  function Home({ onOpen, onMore }) {
+  function SaveVoucher({ kind, amount, label, code }) {
+    const v = window.LZ.VOUCHERS.find((x) => x.code === code);
+    const [saved, setSaved] = React.useState(!!(v && v.saved));
+    const save = () => {
+      if (saved) return;
+      if (v) v.saved = true;
+      setSaved(true);
+      window.dispatchEvent(new CustomEvent('show_toast', { detail: { message: 'Đã lưu voucher thành công' } }));
+    };
+    return (
+      <span onClick={save} title={saved ? 'Đã lưu vào Kho Voucher' : 'Bấm để lưu voucher'} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: saved ? 'default' : 'pointer' }}>
+        <VoucherTag kind={kind} amount={amount} label={label} />
+        <span style={{ position: 'absolute', top: -7, right: -6, padding: '1px 7px', borderRadius: 'var(--radius-pill)', font: '700 10px/16px var(--font-sans)', color: saved ? 'var(--mint-600)' : '#fff', background: saved ? 'var(--mint-50)' : 'var(--color-primary)', boxShadow: 'var(--shadow-sm)' }}>{saved ? 'Đã lưu' : 'Lưu'}</span>
+      </span>
+    );
+  }
+
+  function Home({ onOpen, onMore, onCategory }) {
     // Fixed teaser grid (12 = 2 rows of 6). "Xem thêm" → full paginated discover page.
     const feed = Array.from({ length: 12 }, (_, i) => ({ ...PRODUCTS[i % PRODUCTS.length], _k: i }));
     const flash = PRODUCTS.filter((p) => p.flash).slice(0, 6);
@@ -65,7 +82,7 @@
         <div className="lz-card" style={{ padding: '18px 20px', marginBottom: 22 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 8 }}>
             {CATEGORIES.map((c) => (
-              <button key={c.name} style={catTile}>
+              <button key={c.name} style={catTile} onClick={() => onCategory && onCategory(c.name)}>
                 <span style={catIcon}><Icon name={c.icon} size={22} /></span>
                 <span style={{ font: 'var(--type-caption)', color: 'var(--text-body)', textAlign: 'center' }}>{c.name}</span>
               </button>
@@ -75,10 +92,10 @@
 
         {/* voucher row */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          <VoucherTag kind="platform" amount="-30k" label="Đơn từ 199.000₫" />
-          <VoucherTag kind="shop" amount="-15%" label="Tối đa 50.000₫" />
-          <VoucherTag kind="freeship" amount="0₫" label="Miễn phí vận chuyển" />
-          <VoucherTag kind="platform" amount="-100k" label="Đơn từ 1.000.000₫" />
+          <SaveVoucher kind="platform" amount="-30k" label="Đơn từ 199.000₫" code="LAZ30K" />
+          <SaveVoucher kind="shop" amount="-15%" label="Tối đa 50.000₫" code="TECH15" />
+          <SaveVoucher kind="freeship" amount="0₫" label="Miễn phí vận chuyển" code="FREESHIP30" />
+          <SaveVoucher kind="platform" amount="-12%" label="Siêu sale 12.12" code="SALE1212" />
         </div>
 
         {/* flash sale */}

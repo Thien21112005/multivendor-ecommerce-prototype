@@ -1,8 +1,9 @@
 /* Lazadee consolidated checkout: cart splits into N sub-orders (one Order ID per
-   vendor); stackable Platform + Shop + Freeship vouchers, prorated; soft-lock. */
+   vendor); stackable Platform + Shop + Freeship vouchers chosen from the voucher
+   picker, prorated per line; soft-lock. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Badge, Checkbox, Radio, Switch, StatusBadge, Money } = DS;
+  const { Icon, Button, Badge, Radio, Switch, StatusBadge, Money } = DS;
   const formatVND = Money.format;
   const { V } = window.LZ;
 
@@ -13,16 +14,32 @@
     return <b className="code" style={{ color: 'var(--amber-600)' }}>{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}</b>;
   }
 
-  function Checkout({ cart, onPlaced, onFailed, onBack }) {
-    const { ADDRESSES } = window.LZ;
+  const CodLogo = () => (
+    <svg viewBox="0 0 100 100" width="30" height="30" aria-hidden="true">
+      <rect x="10" y="25" width="80" height="50" rx="6" fill="#fff" stroke="#10b981" strokeWidth="4" />
+      <circle cx="50" cy="50" r="14" fill="#d1fae5" stroke="#10b981" strokeWidth="3" />
+      <text x="50" y="55" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="16" fill="#047857" textAnchor="middle">$</text>
+    </svg>
+  );
+  const PAYMENTS = [
+    { id: 'vnpay', name: 'Cổng VNPAY', logo: 'vnpay.png', meta: 'Thẻ ATM / QR Code' },
+    { id: 'momo', name: 'Ví điện tử MoMo', logo: 'momo-logo.png' },
+    { id: 'zalopay', name: 'Ví ZaloPay', logo: 'zalopay-logo.png' },
+    { id: 'card', name: 'Thẻ Tín dụng / Ghi nợ Quốc tế', logo: 'card.svg', meta: 'Visa / Mastercard' },
+    { id: 'cod', name: 'Thanh toán tiền mặt (COD)', meta: 'Nhận hàng rồi thanh toán', off: '(Không khả dụng cho Đơn bảo chứng)' },
+  ];
+
+  function Checkout({ cart, voucherSel, setVoucherSel, useXu, setUseXu, onPlaced, onFailed, onBack }) {
+    const LZ = window.LZ;
+    const { ADDRESSES } = LZ;
     const [addr, setAddr] = React.useState(ADDRESSES.find((a) => a.default) || ADDRESSES[0]);
     const [addrOpen, setAddrOpen] = React.useState(new URLSearchParams(location.search).get('addr') === '1');
     const [simFail, setSimFail] = React.useState(false);
-    const [usePlatform, setUsePlatform] = React.useState(true);
-    const [useFreeship, setUseFreeship] = React.useState(true);
-    const [useShop, setUseShop] = React.useState(true);
     const [pay, setPay] = React.useState('vnpay');
-    const [useXu, setUseXu] = React.useState(false); // 1 Xu = 1₫, capped at 50% of subtotal
+    const [placing, setPlacing] = React.useState(false);
+    const [lazOpen, setLazOpen] = React.useState(false);
+    const [shopPicker, setShopPicker] = React.useState(null); // vendorId
+    const [notes, setNotes] = React.useState({});
     const [oos, setOos] = React.useState(new URLSearchParams(location.search).get('oos') === '1'); // simulate ERR_STOCK_UNAVAILABLE
 
     const groups = React.useMemo(() => {
@@ -31,32 +48,29 @@
     }, [cart]);
 
     const oosKey = cart[0] && cart[0].key;
-    const liveLines = (lines) => oos ? lines.filter((l) => l.key !== oosKey) : lines;
-
-    const subtotal = cart.reduce((n, l) => n + ((oos && l.key === oosKey) ? 0 : l.price * l.qty), 0);
-    const shipping = groups.reduce((n, [vid, lines]) => (liveLines(lines).length ? n + V[vid].ship : n), 0);
-
-    // stackable vouchers
-    const platformDisc = usePlatform && subtotal >= 199000 ? 30000 : 0;
-    const freeshipDisc = useFreeship ? Math.min(shipping, 30000) : 0;
-    const shopDiscByVendor = {};
-    groups.forEach(([vid, lines]) => {
-      const sub = liveLines(lines).reduce((n, l) => n + l.price * l.qty, 0);
-      shopDiscByVendor[vid] = useShop && sub > 0 ? Math.min(Math.round(sub * 0.15), 50000) : 0;
-    });
-    const shopDisc = Object.values(shopDiscByVendor).reduce((a, b) => a + b, 0);
-
-    // Lazadee Xu: 1 Xu = 1₫, usable up to min(balance, 50% of subtotal). Applied after vouchers.
-    const coins = (window.LZ.USER && window.LZ.USER.coins) || 0;
-    const xuCap = Math.floor(subtotal * 0.5);
-    const xuDiscount = useXu ? Math.min(coins, xuCap) : 0;
-    const total = Math.max(0, subtotal + shipping - platformDisc - freeshipDisc - shopDisc - xuDiscount);
-
-    // prorate platform voucher across sub-orders by subtotal weight
-    const prorate = (vSub) => (subtotal > 0 ? Math.round(platformDisc * (vSub / subtotal)) : 0);
+    const liveLines = (lines) => (oos ? lines.filter((l) => l.key !== oosKey) : lines);
+    const live = liveLines(cart);
+    const price = LZ.priceCart(live, voucherSel, useXu);
+    const { subtotal, shipping, platformDisc, freeshipDisc, shopDisc, xuCap, xuDiscount, total, platformVoucher, freeshipVoucher } = price;
+    const coins = (LZ.USER && LZ.USER.coins) || 0;
 
     let orderSeq = 40;
-    const canPlace = cart.length > (oos ? 1 : 0);
+    const canPlace = cart.length > (oos ? 1 : 0) && !placing;
+
+    const place = () => {
+      if (simFail) { onFailed && onFailed(); return; }
+      setPlacing(true);
+      setTimeout(() => {
+        let seq = 40;
+        const orders = groups.filter(([, ls]) => liveLines(ls).length).map(([vid, ls]) => {
+          const lines = liveLines(ls);
+          const sub = lines.reduce((n, l) => n + l.price * l.qty, 0);
+          const grand = Math.max(0, sub + V[vid].ship - (price.shopByVendor[vid] || 0) - (price.shipCutByVendor[vid] || 0) - lines.reduce((n, l) => n + (price.perLine[l.key] || 0), 0));
+          return { id: 'ORD-2412-00' + (seq++), vendorId: vid, grandTotal: grand };
+        });
+        onPlaced && onPlaced({ sessionId: 'CS-' + Date.now().toString(36).toUpperCase(), orders, price, keys: live.map((l) => l.key), pay });
+      }, 700);
+    };
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 60px' }}>
@@ -83,10 +97,13 @@
             {/* sub-orders */}
             {groups.map(([vid, lines]) => {
               const vendor = V[vid];
-              const live = liveLines(lines);
-              const vSub = live.reduce((n, l) => n + l.price * l.qty, 0);
+              const liveV = liveLines(lines);
+              const vSub = liveV.reduce((n, l) => n + l.price * l.qty, 0);
               const oid = 'ORD-2412-00' + (orderSeq++);
-              const vTotal = vSub + (live.length ? vendor.ship : 0) - (useShop ? shopDiscByVendor[vid] : 0) - (useFreeship ? Math.min(vendor.ship, 30000) : 0) - prorate(vSub);
+              const platformCut = liveV.reduce((n, l) => n + (price.perLine[l.key] || 0), 0);
+              const shopCut = price.shopByVendor[vid] || 0;
+              const shipCut = price.shipCutByVendor[vid] || 0;
+              const vTotal = vSub + (liveV.length ? vendor.ship : 0) - shopCut - shipCut - platformCut;
               return (
                 <div key={vid} style={card}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)', marginBottom: 4 }}>
@@ -111,18 +128,25 @@
                         <div style={{ textAlign: 'right', flex: 'none' }}>
                           <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: dead ? 'var(--text-disabled)' : 'var(--text-body)', textDecoration: dead ? 'line-through' : 'none', fontVariantNumeric: 'tabular-nums' }}>{formatVND(l.price)}</div>
                           <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>x{l.qty}</div>
+                          {!dead && price.perLine[l.key] > 0 && <div style={{ font: 'var(--type-caption)', color: 'var(--mint-600)', marginTop: 2 }}>−{formatVND(price.perLine[l.key])}</div>}
                         </div>
                       </div>
                     );
                   })}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                    <div style={voucherRow}><Icon name="ticket" size={15} style={{ color: 'var(--flash-500)' }} /><span>Voucher Shop {useShop && shopDiscByVendor[vid] ? '−' + formatVND(shopDiscByVendor[vid]) : 'Chọn'}</span><Icon name="chevron-right" size={14} style={{ marginLeft: 'auto', color: 'var(--text-subtle)' }} /></div>
-                    <div style={voucherRow}><Icon name="message-square" size={15} style={{ color: 'var(--text-muted)' }} /><input placeholder="Lời nhắn cho Shop…" style={{ border: 0, outline: 'none', font: 'var(--type-body-sm)', flex: 1, background: 'transparent' }} /></div>
+                    <div style={voucherRow} onClick={() => setShopPicker(vid)}><Icon name="ticket" size={15} style={{ color: 'var(--flash-500)' }} /><span>{shopCut ? 'Voucher Shop −' + formatVND(shopCut) : 'Chọn Voucher của Shop'}</span><Icon name="chevron-right" size={14} style={{ marginLeft: 'auto', color: 'var(--text-subtle)' }} /></div>
+                    <div style={{ ...voucherRow, cursor: 'text' }}><Icon name="message-square" size={15} style={{ color: 'var(--text-muted)' }} /><input value={notes[vid] || ''} maxLength={500} onChange={(e) => setNotes((n) => ({ ...n, [vid]: e.target.value }))} placeholder="Lời nhắn cho Shop…" style={{ border: 0, outline: 'none', font: 'var(--type-body-sm)', flex: 1, minWidth: 0, background: 'transparent' }} /></div>
                   </div>
+                  {platformCut > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="ticket" size={14} style={{ color: 'var(--blue-600)' }} /> Voucher Sàn phân bổ:</span>
+                      <span style={{ color: 'var(--blue-600)', fontWeight: 600 }}>−{formatVND(platformCut)}</span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 12 }}>
                     <Icon name="truck" size={16} style={{ color: 'var(--mint-600)' }} />
-                    <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Giao nhanh · {formatVND(vendor.ship)}{useFreeship && <span style={{ color: 'var(--mint-600)', marginLeft: 6 }}>(Freeship áp dụng)</span>}</span>
-                    <span style={{ marginLeft: 'auto', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Tổng đơn ({live.length} SP): <b style={{ color: 'var(--text-price)', fontSize: 16, fontVariantNumeric: 'tabular-nums' }}>{formatVND(Math.max(0, vTotal))}</b></span>
+                    <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Giao nhanh · {formatVND(vendor.ship)}{shipCut > 0 && <span style={{ color: 'var(--mint-600)', marginLeft: 6 }}>(Freeship −{formatVND(shipCut)})</span>}</span>
+                    <span style={{ marginLeft: 'auto', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Tổng đơn ({liveV.length} SP): <b style={{ color: 'var(--text-price)', fontSize: 16, fontVariantNumeric: 'tabular-nums' }}>{formatVND(Math.max(0, vTotal))}</b></span>
                   </div>
                 </div>
               );
@@ -135,9 +159,18 @@
                 <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Lazadee Voucher</span>
                 <Badge variant="neutral">Tối đa 1 mỗi loại</Badge>
               </div>
-              <label style={vchk}><Checkbox checked={usePlatform} onChange={() => setUsePlatform(!usePlatform)} /><span style={{ flex: 1 }}><b>Giảm 30.000₫</b> · Đơn từ 199.000₫ · Voucher Sàn</span><Badge variant="primary">Platform</Badge></label>
-              <label style={vchk}><Checkbox checked={useFreeship} onChange={() => setUseFreeship(!useFreeship)} /><span style={{ flex: 1 }}><b>Miễn phí vận chuyển</b> · Giảm tối đa 30.000₫ phí ship</span><Badge variant="mint">Freeship</Badge></label>
-              <label style={{ ...vchk, borderBottom: 0 }}><Checkbox checked={useShop} onChange={() => setUseShop(!useShop)} /><span style={{ flex: 1 }}><b>Voucher Shop −15%</b> · Áp dụng cho từng người bán (tối đa 50k/shop)</span><Badge variant="flash">Shop</Badge></label>
+              <div onClick={() => setLazOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', background: 'var(--gray-25)', cursor: 'pointer' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: platformVoucher || freeshipVoucher ? 8 : 0 }}>{platformVoucher || freeshipVoucher ? 'Đã chọn Lazadee Voucher' : 'Chọn mã giảm giá'}</div>
+                  {(platformVoucher || freeshipVoucher) && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {platformVoucher && <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Badge variant="primary">Platform</Badge><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span className="code">{platformVoucher.code}</span>: giảm {formatVND(platformDisc)}</span></div>}
+                      {freeshipVoucher && <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Badge variant="mint">Freeship</Badge><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span className="code">{freeshipVoucher.code}</span>: giảm {formatVND(freeshipDisc)} phí ship</span></div>}
+                    </div>
+                  )}
+                </div>
+                <Icon name="chevron-right" size={20} style={{ color: 'var(--text-muted)' }} />
+              </div>
             </div>
 
             {/* Lazadee Xu */}
@@ -167,12 +200,12 @@
             <div style={card}>
               <div style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 4 }}>Phương thức thanh toán</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 12 }}><Icon name="shield-check" size={14} style={{ color: 'var(--mint-600)' }} />Thanh toán qua cổng để giữ tiền bảo chứng (Escrow) · không hỗ trợ COD</div>
-              {[['vnpay', 'Cổng VNPAY', 'layout-grid', 'Thẻ ATM / QR Code'], ['momo', 'Ví điện tử MoMo', 'wallet', ''], ['zalopay', 'Ví ZaloPay', 'phone', ''], ['card', 'Thẻ Tín dụng / Ghi nợ Quốc tế', 'credit-card', 'Visa / Mastercard']].map(([id, name, icon, meta]) => (
-                <label key={id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', border: '1.5px solid ' + (pay === id ? 'var(--color-primary)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', marginBottom: 8, cursor: 'pointer', background: pay === id ? 'var(--color-primary-tint)' : '#fff' }}>
-                  <Radio name="pay" checked={pay === id} onChange={() => setPay(id)} />
-                  <Icon name={icon} size={20} style={{ color: 'var(--text-body)' }} />
-                  <span style={{ font: 'var(--weight-medium) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{name}</span>
-                  {meta && <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{meta}</span>}
+              {PAYMENTS.map((m) => (
+                <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', border: '1.5px solid ' + (pay === m.id ? 'var(--color-primary)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', marginBottom: 8, cursor: m.off ? 'not-allowed' : 'pointer', background: pay === m.id ? 'var(--color-primary-tint)' : '#fff', opacity: m.off ? 0.55 : 1 }}>
+                  <Radio name="pay" checked={pay === m.id} disabled={!!m.off} onChange={() => !m.off && setPay(m.id)} />
+                  <span style={{ width: 30, height: 30, display: 'grid', placeItems: 'center', flex: 'none' }}>{m.logo ? <img src={'../../assets/payments/' + m.logo} alt="" style={{ width: 30, height: 30, objectFit: 'contain' }} /> : <CodLogo />}</span>
+                  <span style={{ font: 'var(--weight-medium) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{m.name}{m.off && <span style={{ font: 'var(--type-caption)', color: 'var(--red-600)', marginLeft: 6 }}>{m.off}</span>}</span>
+                  {m.meta && <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{m.meta}</span>}
                 </label>
               ))}
             </div>
@@ -198,8 +231,8 @@
                 <span style={{ font: '800 26px var(--font-sans)', color: 'var(--text-price)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(total)}</span>
               </div>
               <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', textAlign: 'right', marginTop: 2 }}>{groups.length} đơn · {cart.length} sản phẩm</div>
-              <Button block size="lg" style={{ marginTop: 16 }} disabled={!canPlace} onClick={() => (simFail ? onFailed && onFailed() : onPlaced && onPlaced())}>Đặt hàng</Button>
-              <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>Nhấn "Đặt hàng" đồng nghĩa bạn đồng ý với <a>Điều khoản Lazadee</a></p>
+              <Button block size="lg" style={{ marginTop: 16 }} disabled={!canPlace} onClick={place}>{placing ? 'Đang xử lý...' : 'Đặt hàng'}</Button>
+              <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>Nhấn "Đặt hàng" đồng nghĩa bạn đồng ý với <a href="?screen=page&id=terms" target="_blank" rel="noreferrer">Điều khoản Lazadee</a></p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button onClick={() => setOos(!oos)} style={{ width: '100%', border: '1px dashed var(--border-strong)', background: '#fff', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', padding: '10px', font: 'var(--type-caption)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
@@ -213,13 +246,17 @@
         </div>
 
         {window.LZAddressModal && <window.LZAddressModal open={addrOpen} onClose={() => setAddrOpen(false)} selectedId={addr.id} onSelect={setAddr} />}
+        <window.LZVoucherPicker open={lazOpen} onClose={() => setLazOpen(false)} title="Chọn Lazadee Voucher" lines={live} selected={voucherSel}
+          onConfirm={(r) => setVoucherSel((s) => ({ ...s, ...r }))} />
+        <window.LZVoucherPicker open={!!shopPicker} onClose={() => setShopPicker(null)} title="Chọn Voucher của Shop" mode="shop" vendorId={shopPicker}
+          lines={live.filter((l) => l.vendorId === shopPicker)} selected={{ shop: shopPicker && (voucherSel.shop || {})[shopPicker] }}
+          onConfirm={(r) => setVoucherSel((s) => ({ ...s, shop: { ...(s.shop || {}), [shopPicker]: r.shop } }))} />
       </div>
     );
   }
 
   const card = { background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 18px', marginBottom: 14, boxShadow: 'var(--shadow-sm)' };
   const voucherRow = { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--gray-25)', borderRadius: 'var(--radius-md)', padding: '9px 12px', font: 'var(--type-body-sm)', color: 'var(--text-body)', cursor: 'pointer' };
-  const vchk = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--border-subtle)', font: 'var(--type-body-sm)', color: 'var(--text-body)' };
   const sumRow = { display: 'flex', justifyContent: 'space-between', font: 'var(--type-body-sm)', color: 'var(--text-muted)', padding: '4px 0' };
   const disc = { color: 'var(--mint-600)', fontVariantNumeric: 'tabular-nums', fontWeight: 600 };
 

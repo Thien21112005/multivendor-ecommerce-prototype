@@ -96,6 +96,18 @@
 
     const totalUnread = ORDER.reduce((n, id) => n + (meta[id] ? meta[id].unread : 0), 0);
 
+    // other screens open a thread via: window.dispatchEvent(new CustomEvent('open_chat', { detail: { vendorId } }))
+    React.useEffect(() => {
+      const onOpen = (e) => {
+        const id = e.detail && e.detail.vendorId;
+        setOpen(true);
+        if (id && ORDER.includes(id)) { setActiveShop(id); setView('thread'); setMeta((mt) => ({ ...mt, [id]: { ...mt[id], unread: 0 } })); }
+        else setView('list');
+      };
+      window.addEventListener('open_chat', onOpen);
+      return () => window.removeEventListener('open_chat', onOpen);
+    }, []);
+
     React.useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight; }, [threads, typing, view, activeShop]);
 
     const openThread = (id) => {

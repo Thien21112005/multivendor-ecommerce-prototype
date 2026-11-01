@@ -56,6 +56,16 @@
   ];
   const FOLLOWS = ['techzone', 'beauty', 'boutique'];
 
+  /* ---- Category meta + sub-categories (category landing pages) ---- */
+  const CATEGORY_META = {"Điện tử":{"icon":"zap","desc":"Smartphone, laptop, tai nghe, camera và phụ kiện công nghệ chính hãng."},"Thời trang":{"icon":"shopping-bag","desc":"Thời trang nam nữ, giày dép, túi xách và phụ kiện theo xu hướng mới nhất."},"Làm đẹp":{"icon":"star","desc":"Mỹ phẩm, chăm sóc da, trang điểm và nước hoa từ các thương hiệu uy tín."},"Nhà cửa":{"icon":"house","desc":"Nội thất, đồ dùng nhà bếp, trang trí và đồ gia dụng thông minh."},"Phụ kiện":{"icon":"tag","desc":"Đồng hồ, trang sức, balo, túi xách và phụ kiện thời trang."},"Mẹ & Bé":{"icon":"gift","desc":"Tã bỉm, sữa, đồ chơi, thời trang mẹ và bé đầy đủ."},"Thể thao":{"icon":"dumbbell","desc":"Dụng cụ thể thao, quần áo tập luyện và phụ kiện outdoor."},"Sách":{"icon":"file-text","desc":"Sách văn học, sách kỹ năng, truyện tranh và sách thiếu nhi."},"Bách hoá":{"icon":"shopping-cart","desc":"Thực phẩm, đồ uống, gia vị và đồ dùng hằng ngày."},"Voucher":{"icon":"ticket","desc":"Voucher giảm giá, thẻ quà tặng và dịch vụ số."},"Điện thoại & Phụ kiện":{"icon":"smartphone","desc":"Điện thoại smartphone, ốp lưng, sạc cáp và phụ kiện chính hãng."},"Máy tính & Laptop":{"icon":"laptop","desc":"Laptop, PC, linh kiện và phụ kiện máy tính."},"Thiết bị âm thanh":{"icon":"headphones","desc":"Tai nghe, loa Bluetooth và thiết bị âm thanh chất lượng cao."},"Thời trang Nam":{"icon":"shopping-bag","desc":"Áo thun, quần jeans, giày và phụ kiện thời trang nam."},"Giày dép":{"icon":"footprints","desc":"Giày sneaker, dép, sandal và giày thể thao."},"Đồng hồ & Trang sức":{"icon":"watch","desc":"Đồng hồ nam nữ, trang sức và phụ kiện thời trang."},"Túi xách & Balo":{"icon":"briefcase","desc":"Balo, túi đeo chéo, túi xách thời trang và du lịch."},"Thiết bị gia dụng":{"icon":"house","desc":"Máy lọc không khí, robot hút bụi và đồ gia dụng thông minh."},"Mỹ phẩm & Chăm sóc":{"icon":"star","desc":"Kem chống nắng, serum, trang điểm và chăm sóc da."},"Phụ kiện điện tử":{"icon":"plug","desc":"Sạc, cáp, chuột, bàn phím và phụ kiện công nghệ."},"Thời trang Nữ":{"icon":"shopping-bag","desc":"Đầm, váy, quần áo và phụ kiện thời trang nữ."}};
+  const SUBCATEGORIES = {
+    'Điện tử': { 'Điện thoại & Phụ kiện': ['phone'], 'Máy tính & Laptop': ['laptop', 'keyboard'], 'Thiết bị âm thanh': ['headphones', 'speaker'], 'Phụ kiện điện tử': ['watch', 'camera'] },
+    'Thời trang': { 'Thời trang Nam': ['tshirt', 'jacket'], 'Thời trang Nữ': ['sunglasses', 'jacket'], 'Giày dép': ['sneakers', 'heels'] },
+    'Làm đẹp': { 'Mỹ phẩm & Chăm sóc': ['cosmetics', 'skincare', 'perfume'] },
+    'Nhà cửa': { 'Thiết bị gia dụng': ['lamp'], 'Nội thất': ['chair'], 'Nhà bếp': ['mug'] },
+    'Phụ kiện': { 'Đồng hồ & Trang sức': ['watch2'], 'Túi xách & Balo': ['backpack'] },
+  };
+
   /* ---- Login sessions / devices (account security) ---- */
   const DEVICES = [
     { id: 'd1', kind: 'desktop', name: 'Windows PC · Chrome 126', where: 'TP. Hồ Chí Minh, VN', ip: '113.161.40.12', last: 'Đang hoạt động', current: true },
@@ -66,10 +76,21 @@
 
   /* ---- Voucher wallet + Lazadee Xu history ---- */
   const VOUCHERS = [
-    { id: 'v1', kind: 'platform', amount: '-30k', label: 'Giảm 30.000₫', cond: 'Đơn từ 199.000₫', expiry: '30/06/2026', scope: 'Toàn sàn' },
-    { id: 'v2', kind: 'freeship', amount: '0₫', label: 'Miễn phí vận chuyển', cond: 'Đơn từ 99.000₫', expiry: '15/06/2026', scope: 'Toàn sàn' },
-    { id: 'v3', kind: 'shop', amount: '-15%', label: 'Giảm 15% tối đa 50k', cond: 'Đơn từ 250.000₫', expiry: '20/06/2026', scope: 'TechZone Official' },
-    { id: 'v4', kind: 'platform', amount: '-50k', label: 'Hoàn 50.000₫ Xu', cond: 'Đơn từ 500.000₫', expiry: '28/06/2026', scope: 'Toàn sàn' },
+    { id: 'v1', code: 'LAZ30K', kind: 'platform', amount: '-30k', label: 'Giảm 30.000₫', cond: 'Đơn từ 199.000₫', expiry: '30/06/2026', validFrom: '01/06/2026', scope: 'Toàn sàn', type: 'FIXED', value: 30000, min: 199000, saved: true, status: 'active', used: 1840, limit: 5000, sponsor: 'Lazadee tài trợ', content: 'Áp dụng 1 lần cho mỗi tài khoản, không giới hạn ngành hàng.' },
+    { id: 'v2', code: 'FREESHIP30', kind: 'freeship', amount: '0₫', label: 'Miễn phí vận chuyển', cond: 'Đơn từ 99.000₫', expiry: '15/06/2026', validFrom: '01/06/2026', scope: 'Toàn sàn', type: 'FREESHIP', value: 0, cap: 30000, min: 99000, saved: true, status: 'active', used: 3120, limit: 4000, sponsor: 'Lazadee tài trợ', content: 'Giảm tối đa 30.000₫ phí vận chuyển cho mỗi lần thanh toán.' },
+    { id: 'v3', code: 'TECH15', kind: 'shop', vendorId: 'techzone', amount: '-15%', label: 'Giảm 15% tối đa 50k', cond: 'Đơn từ 250.000₫', expiry: '20/06/2026', validFrom: '01/06/2026', scope: 'TechZone Official', type: 'PERCENT', value: 15, cap: 50000, min: 250000, saved: true, status: 'active', used: 412, limit: 800, sponsor: 'TechZone Official tài trợ', content: 'Chỉ áp dụng cho sản phẩm của TechZone Official.' },
+    { id: 'v4', code: 'XU50K', kind: 'platform', amount: '-50k', label: 'Hoàn 50.000₫ Xu', cond: 'Đơn từ 500.000₫', expiry: '28/06/2026', validFrom: '05/06/2026', scope: 'Toàn sàn', type: 'FIXED', value: 50000, min: 500000, saved: true, status: 'active', used: 960, limit: 1000, sponsor: 'Lazadee tài trợ', content: 'Xu hoàn vào ví sau khi đơn hoàn tất, xu có hạn 12 tháng.' },
+    { id: 'v5', code: 'LAZ100K', kind: 'platform', amount: '-100k', label: 'Giảm 100.000₫', cond: 'Đơn từ 1.000.000₫', expiry: '30/06/2026', validFrom: '01/06/2026', scope: 'Toàn sàn', type: 'FIXED', value: 100000, min: 1000000, saved: true, status: 'active', used: 250, limit: 2000, sponsor: 'Lazadee tài trợ', content: 'Áp dụng cho đơn có giá trị từ 1.000.000₫.' },
+    { id: 'v6', code: 'TECH10', kind: 'platform', amount: '-10%', label: 'Giảm 10% đồ điện tử', cond: 'Đơn từ 500.000₫', expiry: '25/06/2026', validFrom: '01/06/2026', scope: 'Danh mục cụ thể', type: 'PERCENT', value: 10, cap: 200000, min: 500000, categories: ['Điện tử'], saved: true, status: 'active', used: 680, limit: 1500, sponsor: 'Đồng tài trợ với Shop', content: 'Chỉ tính trên các sản phẩm thuộc ngành hàng Điện tử.' },
+    { id: 'v7', code: 'STYLE20K', kind: 'platform', amount: '-20k', label: 'Giảm 20.000₫ mọi ngành hàng', cond: 'Đơn từ 150.000₫', expiry: '24/06/2026', validFrom: '01/06/2026', scope: 'Toàn sàn', type: 'FIXED', value: 20000, min: 150000, excluded: ['Điện tử'], saved: true, status: 'active', used: 142, limit: 1000, sponsor: 'Lazadee tài trợ', content: 'Không áp dụng cho ngành hàng Điện tử.' },
+    { id: 'v8', code: 'SHIPMAX', kind: 'freeship', amount: '0₫', label: 'Freeship Xtra tối đa 50k', cond: 'Đơn từ 299.000₫', expiry: '22/06/2026', validFrom: '01/06/2026', scope: 'Toàn sàn', type: 'FREESHIP', value: 0, cap: 50000, min: 299000, saved: true, status: 'active', used: 510, limit: 1000, sponsor: 'Lazadee tài trợ', content: 'Giảm tối đa 50.000₫ phí vận chuyển.' },
+    { id: 'v9', code: 'BEAUTY50', kind: 'shop', vendorId: 'beauty', amount: '-50k', label: 'Giảm 50.000₫', cond: 'Đơn từ 300.000₫', expiry: '27/06/2026', validFrom: '01/06/2026', scope: 'Beauty Box', type: 'FIXED', value: 50000, min: 300000, saved: true, status: 'active', used: 88, limit: 300, sponsor: 'Beauty Box tài trợ', content: 'Chỉ áp dụng cho sản phẩm của Beauty Box.' },
+    { id: 'v10', code: 'SHOE10', kind: 'shop', vendorId: 'shoe', amount: '-10%', label: 'Giảm 10% tối đa 30k', cond: 'Đơn từ 200.000₫', expiry: '26/06/2026', validFrom: '01/06/2026', scope: 'Shoe Republic', type: 'PERCENT', value: 10, cap: 30000, min: 200000, saved: true, status: 'active', used: 73, limit: 500, sponsor: 'Shoe Republic tài trợ', content: 'Chỉ áp dụng cho sản phẩm của Shoe Republic.' },
+    { id: 'v11', code: 'BTQ20K', kind: 'shop', vendorId: 'boutique', amount: '-20k', label: 'Giảm 20.000₫', cond: 'Đơn từ 150.000₫', expiry: '26/06/2026', validFrom: '01/06/2026', scope: 'Boutique Sài Gòn', type: 'FIXED', value: 20000, min: 150000, saved: true, status: 'active', used: 49, limit: 400, sponsor: 'Boutique Sài Gòn tài trợ', content: 'Chỉ áp dụng cho sản phẩm của Boutique Sài Gòn.' },
+    { id: 'v12', code: 'HOME15K', kind: 'shop', vendorId: 'home', amount: '-15k', label: 'Giảm 15.000₫', cond: 'Đơn từ 100.000₫', expiry: '26/06/2026', validFrom: '01/06/2026', scope: 'Home & Living', type: 'FIXED', value: 15000, min: 100000, saved: true, status: 'active', used: 31, limit: 400, sponsor: 'Home & Living tài trợ', content: 'Chỉ áp dụng cho sản phẩm của Home & Living.' },
+    { id: 'v13', code: 'SALE1212', kind: 'platform', amount: '-12%', label: 'Siêu sale 12.12 giảm 12%', cond: 'Đơn từ 300.000₫', expiry: '12/12/2026', validFrom: '12/12/2026', scope: 'Toàn sàn', type: 'PERCENT', value: 12, cap: 120000, min: 300000, saved: false, status: 'upcoming', used: 0, limit: 10000, sponsor: 'Lazadee tài trợ', content: 'Lưu trước để dùng khi chương trình bắt đầu.' },
+    { id: 'v14', code: 'WELCOME20', kind: 'platform', amount: '-20k', label: 'Chào bạn mới giảm 20.000₫', cond: 'Đơn từ 100.000₫', expiry: '31/05/2026', validFrom: '01/03/2026', scope: 'Toàn sàn', type: 'FIXED', value: 20000, min: 100000, saved: true, status: 'used', used: 7400, limit: 10000, sponsor: 'Lazadee tài trợ', content: 'Đã dùng cho đơn ORD-2412-0033.' },
+    { id: 'v15', code: 'MAY15', kind: 'freeship', amount: '0₫', label: 'Freeship tháng 5', cond: 'Đơn từ 50.000₫', expiry: '31/05/2026', validFrom: '01/05/2026', scope: 'Toàn sàn', type: 'FREESHIP', value: 0, cap: 15000, min: 50000, saved: true, status: 'expired', used: 2300, limit: 3000, sponsor: 'Lazadee tài trợ', content: 'Voucher đã hết hạn.' },
   ];
   const COIN_LOG = [
     { type: 'earn', label: 'Hoàn xu đơn ORD-2412-0041', amount: 120, at: '08/06/2026' },
@@ -131,10 +152,22 @@
       address: ADDRESSES[0], completedAt: '02/06/2026 15:10',
     },
     {
-      id: 'ORD-2412-0029', vendorId: 'home', status: 'PENDING_PAYMENT', placedAt: '10/06/2026 09:40',
+      id: 'ORD-2412-0029', sessionId: 'CS-8F21A', vendorId: 'home', status: 'PENDING_PAYMENT', placedAt: '10/06/2026 09:40',
       items: [oi('p9', 'Trắng', 2, 59000)],
       subtotal: 118000, shipping: 30000, discount: 0, total: 148000,
       tracking: null, address: ADDRESSES[0], expireAt: '10/06/2026 09:55',
+    },
+    {
+      id: 'ORD-2412-0030', sessionId: 'CS-8F21A', vendorId: 'travel', status: 'PENDING_PAYMENT', placedAt: '10/06/2026 09:40',
+      items: [oi('p6', 'Đen / 25L', 1, 189000)],
+      subtotal: 189000, shipping: 22000, discount: 20000, total: 191000,
+      tracking: null, address: ADDRESSES[0], expireAt: '10/06/2026 09:55',
+    },
+    {
+      id: 'ORD-2412-0018', vendorId: 'shoe', status: 'CANCELLED', placedAt: '12/05/2026 10:02',
+      items: [oi('p14', 'Đen / 37', 1, 320000)],
+      subtotal: 320000, shipping: 18000, discount: 0, total: 338000,
+      tracking: null, address: ADDRESSES[0],
     },
     {
       id: 'ORD-2412-0021', vendorId: 'boutique', status: 'REFUNDED', placedAt: '20/05/2026 13:27',
@@ -153,15 +186,98 @@
     { id: 'n3', type: 'order', icon: 'badge-check', tint: 'var(--orange-600)', bg: 'var(--orange-50)', title: 'Đơn ORD-2412-0041 đã giao thành công', body: 'Bấm "Đã nhận hàng" để hoàn tất đơn và giải ngân cho người bán.', date: '21/06/2026', unread: true, link: { action: 'track', orderId: 'ORD-2412-0041' } },
     { id: 'n4', type: 'promo', icon: 'zap', tint: 'var(--gold-700)', bg: 'var(--gold-50)', title: 'FLASH SALE 12.12 bắt đầu!', body: 'Giảm tới 50% hàng nghìn sản phẩm — săn deal ngay trên trang chủ.', date: '20/06/2026', unread: false, link: { action: 'home' } },
     { id: 'n5', type: 'system', icon: 'shield-check', tint: 'var(--blue-600)', bg: 'var(--blue-50)', title: 'Đăng nhập mới trên thiết bị lạ', body: 'Tài khoản vừa đăng nhập trên Chrome · TP. HCM. Nếu không phải bạn, hãy đổi mật khẩu ngay.', date: '20/06/2026', unread: false, link: { action: 'view', view: 'password' } },
+    { id: 'n7', type: 'system', icon: 'lazadee', tint: 'var(--orange-600)', bg: 'var(--orange-50)', title: 'Lazadee nâng cấp hệ thống 02:00 – 04:00', body: 'Thông báo toàn sàn: một số dịch vụ có thể gián đoạn trong khung giờ bảo trì, đơn hàng của bạn không bị ảnh hưởng.', date: '18/06/2026', unread: false, platform: true },
     { id: 'n6', type: 'chat', icon: 'message-circle', tint: 'var(--orange-600)', bg: 'var(--orange-50)', title: 'TechZone Official đã trả lời', body: '"Dạ còn đủ màu đen bạn nhé! Freeship cho đơn từ 199k ạ."', date: '19/06/2026', unread: false, link: { action: 'home' } },
   ];
 
   const PROVINCES = ['TP. Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Bình Dương', 'Đồng Nai', 'Hải Phòng', 'Cần Thơ'];
   const DISTRICTS = { 'TP. Hồ Chí Minh': ['Q.1', 'Q.3', 'Q.5', 'Q.7', 'Q. Bình Thạnh', 'Q. Phú Nhuận', 'TP. Thủ Đức'], 'Hà Nội': ['Q. Hoàn Kiếm', 'Q. Ba Đình', 'Q. Cầu Giấy', 'Q. Đống Đa'] };
 
+  /* ---- Voucher rules, shared by VoucherPicker, Cart and Checkout ---- */
+  const lineTotal = (lines) => lines.reduce((n, l) => n + l.price * l.qty, 0);
+  const lineCat = (l) => { const p = byId(l.productId); return p ? p.cat : null; };
+  const voucherLines = (v, lines) => lines.filter((l) => {
+    if (v.vendorId && l.vendorId !== v.vendorId) return false;
+    if (v.excluded && v.excluded.includes(lineCat(l))) return false;
+    if (v.categories && !v.categories.includes(lineCat(l))) return false;
+    return true;
+  });
+  const fmtVND = (n) => Number(n).toLocaleString('vi-VN') + '₫';
+  const voucherCheck = (v, lines) => {
+    const base = lineTotal(voucherLines(v, lines));
+    if (base === 0) return { ok: false, base, reason: 'Giỏ hàng chưa có sản phẩm phù hợp' };
+    if (base < v.min) return { ok: false, base, reason: 'Chưa đạt giá trị tối thiểu ' + fmtVND(v.min) };
+    return { ok: true, base };
+  };
+  const shipOf = (lines) => [...new Set(lines.map((l) => l.vendorId))].reduce((n, vid) => n + V[vid].ship, 0);
+  const voucherDiscount = (v, lines) => {
+    const c = voucherCheck(v, lines);
+    if (!c.ok) return 0;
+    if (v.type === 'FREESHIP') return Math.min(v.cap, shipOf(voucherLines(v, lines)));
+    if (v.type === 'PERCENT') return Math.min(Math.round(c.base * v.value / 100), v.cap || Infinity);
+    return Math.min(v.value, c.base);
+  };
+  // sel = { platform, freeship, shop: { [vendorId]: voucherId } }. Platform voucher is prorated per line;
+  // Xu = 1₫, capped at 50% of the amount left after vouchers.
+  const priceCart = (lines, sel, useXu) => {
+    const find = (id) => VOUCHERS.find((v) => v.id === id);
+    const subtotal = lineTotal(lines);
+    const vendors = [...new Set(lines.map((l) => l.vendorId))];
+    const shipping = vendors.reduce((n, vid) => n + V[vid].ship, 0);
+    const s = sel || {};
+    const pv = s.platform ? find(s.platform) : null, fv = s.freeship ? find(s.freeship) : null;
+    const platformDisc = pv ? voucherDiscount(pv, lines) : 0;
+    const freeshipDisc = fv ? voucherDiscount(fv, lines) : 0;
+    const perLine = {};
+    if (platformDisc > 0) {
+      const hit = voucherLines(pv, lines), base = lineTotal(hit);
+      let left = platformDisc;
+      hit.forEach((l, i) => { const cut = i === hit.length - 1 ? left : Math.round(platformDisc * l.price * l.qty / base); perLine[l.key] = cut; left -= cut; });
+    }
+    const shipCutByVendor = {};
+    if (freeshipDisc > 0) {
+      const hit = [...new Set(voucherLines(fv, lines).map((l) => l.vendorId))], base = hit.reduce((n, vid) => n + V[vid].ship, 0);
+      let left = freeshipDisc;
+      hit.forEach((vid, i) => { const cut = i === hit.length - 1 ? left : Math.round(freeshipDisc * V[vid].ship / base); shipCutByVendor[vid] = cut; left -= cut; });
+    }
+    const shopByVendor = {};
+    vendors.forEach((vid) => {
+      const id = (s.shop || {})[vid], v = id && find(id);
+      shopByVendor[vid] = v ? voucherDiscount(v, lines.filter((l) => l.vendorId === vid)) : 0;
+    });
+    const shopDisc = Object.values(shopByVendor).reduce((a, b) => a + b, 0);
+    const afterVouchers = Math.max(0, subtotal + shipping - platformDisc - freeshipDisc - shopDisc);
+    const xuCap = Math.floor(afterVouchers * 0.5);
+    const xuDiscount = useXu ? Math.min(USER.coins || 0, xuCap) : 0;
+    return {
+      subtotal, shipping, platformDisc, freeshipDisc, shopDisc, shopByVendor, shipCutByVendor, perLine, xuCap, xuDiscount,
+      discountTotal: platformDisc + freeshipDisc + shopDisc + xuDiscount, total: afterVouchers - xuDiscount,
+      platformVoucher: platformDisc > 0 ? pv : null, freeshipVoucher: freeshipDisc > 0 ? fv : null,
+    };
+  };
+
+  const VARIANT_GROUPS = {
+    'Điện tử': [{ key: 'Màu sắc', values: ['Đen', 'Trắng', 'Xanh navy'] }],
+    'Thời trang': [{ key: 'Màu sắc', values: ['Đen', 'Trắng', 'Xanh'] }, { key: 'Kích cỡ', values: ['S', 'M', 'L', '37', '42'] }],
+    'Làm đẹp': [{ key: 'Dung tích', values: ['30ml', '50ml', 'Full set'] }],
+    'Nhà cửa': [{ key: 'Màu sắc', values: ['Trắng', 'Đen', 'Gỗ tự nhiên'] }],
+    'Phụ kiện': [{ key: 'Màu sắc', values: ['Đen', 'Nâu'] }, { key: 'Dung tích', values: ['25L', '30L'] }],
+  };
+
   window.LZ = {
-    V, PRODUCTS, CATEGORIES, USER, ADDRESSES, FOLLOWS, ORDERS, PROVINCES, DISTRICTS, VOUCHERS, COIN_LOG, NOTIFICATIONS, DEVICES,
-    byId,
+    V, PRODUCTS, CATEGORIES, USER, ADDRESSES, FOLLOWS, ORDERS, PROVINCES, DISTRICTS, VOUCHERS, COIN_LOG, NOTIFICATIONS, DEVICES, CATEGORY_META,
+    byId, voucherCheck, voucherDiscount, priceCart,
+    variantOptions: (p) => (p && VARIANT_GROUPS[p.cat]) || [{ key: 'Phân loại', values: ['Tiêu chuẩn'] }],
+    subCategoriesOf: (name) => Object.keys(SUBCATEGORIES[name] || {}),
+    // a top-level name matches by cat; a sub-category name matches by product image group
+    productsOfCategory: (name, sub) => {
+      const parent = Object.keys(SUBCATEGORIES).find((k) => SUBCATEGORIES[k][name]);
+      const pick = sub || (parent ? name : null);
+      const groups = SUBCATEGORIES[parent || name] || {};
+      const base = PRODUCTS.filter((p) => p.cat === (parent || name));
+      if (!pick || !groups[pick]) return base;
+      return base.filter((p) => groups[pick].some((g) => p.img.endsWith('/' + g + '.jpg')));
+    },
     orderById: (id) => ORDERS.find((o) => o.id === id),
     vendorList: () => Object.values(V),
     productsOfVendor: (vid) => PRODUCTS.filter((p) => p.v === vid),

@@ -13,7 +13,38 @@
   ];
   const SIZES = [{ label: 'Tiêu chuẩn', delta: 0 }, { label: 'Bản Pro', delta: 150000 }];
 
+  const toast = (message, type) => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message, type } }));
+
+  const REVIEWS = [
+    { id: 'r1', name: 'Nguyễn Minh', when: '2026-05-28', rating: 5, variant: 'Đen / Bản Pro', text: 'Sản phẩm đúng mô tả, chất lượng tốt, đóng gói cẩn thận. Giao hàng nhanh trong 2 ngày. Sẽ ủng hộ shop lần sau!', imgs: ['headphones', 'banner-tech'], reply: 'Cảm ơn bạn đã tin tưởng TechZone! Shop rất vui khi sản phẩm làm bạn hài lòng 🧡' },
+    { id: 'r2', name: 'Trần Thu Hà', when: '2026-05-21', rating: 4, variant: 'Trắng / Tiêu chuẩn', text: 'Pin trâu, âm thanh ổn trong tầm giá. Trừ 1 sao vì hộp hơi móp khi nhận nhưng sản phẩm vẫn nguyên vẹn.' },
+    { id: 'r3', name: 'Lê Hoàng', when: '2026-05-15', rating: 5, variant: 'Đen / Tiêu chuẩn', text: 'Chống ồn tốt, đeo êm tai. Đáng tiền!', imgs: ['speaker'] },
+    { id: 'r4', name: 'Phạm An', when: '2026-05-02', rating: 3, variant: 'Trắng / Tiêu chuẩn', text: 'Dùng tạm ổn, kết nối đôi lúc chập chờn. Shop hỗ trợ đổi hàng nhanh.' },
+  ];
+  const R_FILTERS = [
+    { id: 'all', label: 'Tất cả', test: () => true },
+    { id: '5', label: '5 Sao', test: (r) => r.rating === 5 },
+    { id: '4', label: '4 Sao', test: (r) => r.rating === 4 },
+    { id: '3', label: '3 Sao', test: (r) => r.rating === 3 },
+    { id: 'img', label: 'Có hình ảnh', test: (r) => r.imgs && r.imgs.length > 0 },
+    { id: 'buy', label: 'Đã mua hàng', test: () => true },
+  ];
+
+  function Lightbox({ images, start, onClose }) {
+    const [i, setI] = React.useState(start);
+    const step = (d) => setI((x) => (x + d + images.length) % images.length);
+    return (
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(20,23,31,.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <button aria-label="Ảnh trước" onClick={(e) => { e.stopPropagation(); step(-1); }} style={lbBtn}><Icon name="chevron-left" size={26} /></button>
+        <img src={images[i]} alt="" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '76vw', maxHeight: '84vh', borderRadius: 'var(--radius-lg)', objectFit: 'contain', background: '#fff' }} />
+        <button aria-label="Ảnh sau" onClick={(e) => { e.stopPropagation(); step(1); }} style={lbBtn}><Icon name="chevron-right" size={26} /></button>
+        <button aria-label="Đóng" onClick={onClose} style={{ ...lbBtn, position: 'absolute', top: 18, right: 18 }}><Icon name="x" size={22} /></button>
+      </div>
+    );
+  }
+
   function Review({ name, when, rating, variant, text, imgs, reply }) {
+    const [helpful, setHelpful] = React.useState(false);
     return (
       <div style={{ display: 'flex', gap: 12, padding: '18px 0', borderBottom: '1px solid var(--border-subtle)' }}>
         <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--gray-200)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)', fontWeight: 700, flex: 'none' }}>{name[0]}</div>
@@ -36,39 +67,51 @@
             </div>
           )}
         </div>
-        <button style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-caption)', cursor: 'pointer' }}><Icon name="thumbs-up" size={14} /> Hữu ích (24)</button>
+        <button onClick={() => setHelpful((h) => !h)} style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: helpful ? 'var(--color-primary)' : 'var(--text-muted)', font: 'var(--type-caption)', cursor: 'pointer' }}><Icon name="thumbs-up" size={14} /> Hữu ích ({24 + (helpful ? 1 : 0)})</button>
       </div>
     );
   }
 
-  function ProductDetail({ id, onOpen, onAdd, onGoCart, onShop }) {
+  function ProductDetail({ id, onOpen, onAdd, onGoCart, onShop, onCategory, onHome, onChat, onRequireLogin, loggedIn = true }) {
     const p = byId(id) || PRODUCTS[0];
     const vendor = V[p.v];
     const gallery = [p.img, '../../assets/img/banner-tech.jpg', '../../assets/img/keyboard.jpg', '../../assets/img/speaker.jpg'].filter(Boolean);
     const [active, setActive] = React.useState(0);
-    const [color, setColor] = React.useState(0);
-    const [size, setSize] = React.useState(0);
+    const [color, setColor] = React.useState(null);
+    const [size, setSize] = React.useState(null);
     const [qty, setQty] = React.useState(1);
     const [follow, setFollow] = React.useState(false);
-    const c = COLORS[color], s = SIZES[size];
-    const price = p.price + c.delta + s.delta;
-    const stock = c.stock;
+    const [lightbox, setLightbox] = React.useState(false);
+    const [rFilter, setRFilter] = React.useState('all');
+    const [liked, setLiked] = React.useState(false);
+    const c = color === null ? null : COLORS[color], s = size === null ? null : SIZES[size];
+    const price = p.price + (c ? c.delta : 0) + (s ? s.delta : 0);
+    const stock = c ? c.stock : COLORS.reduce((n, x) => n + x.stock, 0);
     const soldOut = stock === 0;
+    const similar = PRODUCTS.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 6);
+    const rShown = REVIEWS.filter(R_FILTERS.find((f) => f.id === rFilter).test);
 
     React.useEffect(() => { setQty(1); }, [color, size]);
+    React.useEffect(() => { setActive(0); setColor(null); setSize(null); setRFilter('all'); window.scrollTo(0, 0); }, [id]);
 
-    const add = () => onAdd({ key: p.id + '|' + c.label + '/' + s.label, productId: p.id, vendorId: p.v, title: p.title, img: p.img, price, original: p.original, variant: c.label + ' / ' + s.label, qty, stock });
+    // returns the cart line, or null after warning when a variant group is still open
+    const line = () => {
+      if (!c && !s) { toast('Vui lòng chọn Phân loại hàng', 'error'); return null; }
+      if (!c || !s) { toast('Vui lòng chọn đầy đủ Phân loại hàng', 'error'); return null; }
+      return { key: p.id + '|' + c.label + '/' + s.label, productId: p.id, vendorId: p.v, title: p.title, img: p.img, price, original: p.original, variant: c.label + ' / ' + s.label, qty, stock };
+    };
+    const add = () => { if (!loggedIn) { onRequireLogin(); return null; } const l = line(); if (l) onAdd(l); return l; };
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 24px 60px' }}>
         <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 14, display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ cursor: 'pointer' }}>Trang chủ</span><Icon name="chevron-right" size={13} /><span style={{ cursor: 'pointer' }}>{p.cat}</span><Icon name="chevron-right" size={13} /><span style={{ color: 'var(--text-body)' }}>{p.title.slice(0, 30)}…</span>
+          <span style={{ cursor: 'pointer' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={13} /><span style={{ cursor: 'pointer' }} onClick={() => onCategory && onCategory(p.cat)}>{p.cat}</span><Icon name="chevron-right" size={13} /><span style={{ color: 'var(--text-body)' }}>{p.title.slice(0, 30)}…</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '440px 1fr', gap: 24, background: '#fff', borderRadius: 'var(--radius-lg)', padding: 20, boxShadow: 'var(--shadow-sm)' }}>
           {/* gallery */}
           <div>
-            <div style={{ aspectRatio: '1', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--gray-100)' }}>
+            <div onClick={() => setLightbox(true)} style={{ aspectRatio: '1', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--gray-100)', cursor: 'zoom-in' }}>
               <img src={gallery[active]} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
@@ -79,8 +122,8 @@
               ))}
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-              <button style={shareBtn}><Icon name="heart" size={16} /> Yêu thích</button>
-              <button style={shareBtn}><Icon name="message-circle" size={16} /> Chia sẻ</button>
+              <button style={{ ...shareBtn, color: liked ? 'var(--color-primary)' : 'var(--text-muted)' }} onClick={() => setLiked((x) => !x)}><Icon name="heart" size={16} style={{ fill: liked ? 'currentColor' : 'none' }} /> Yêu thích</button>
+              <button style={shareBtn} onClick={() => toast('Đã sao chép liên kết sản phẩm')}><Icon name="message-circle" size={16} /> Chia sẻ</button>
             </div>
           </div>
 
@@ -138,7 +181,7 @@
             {/* actions */}
             <div style={{ display: 'flex', gap: 12 }}>
               <Button variant="secondary" size="lg" iconLeft="shopping-cart" disabled={soldOut} onClick={add}>Thêm vào giỏ</Button>
-              <Button size="lg" disabled={soldOut} onClick={() => { add(); onGoCart(); }}>Mua ngay</Button>
+              <Button size="lg" disabled={soldOut} onClick={() => { const l = add(); if (l) onGoCart(l.key); }}>Mua ngay</Button>
             </div>
           </div>
         </div>
@@ -156,7 +199,7 @@
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <Button variant={follow ? 'subtle' : 'secondary'} iconLeft={follow ? 'check' : 'plus'} onClick={() => setFollow(!follow)}>{follow ? 'Đang theo dõi' : 'Theo dõi'}</Button>
-            <Button variant="ghost" iconLeft="message-circle">Chat ngay</Button>
+            <Button variant="ghost" iconLeft="message-circle" onClick={() => onChat && onChat(p.v, p)}>Chat ngay</Button>
             <Button variant="ghost" iconLeft="store" onClick={() => onShop && onShop(p.v)}>Xem shop</Button>
           </div>
         </div>
@@ -175,22 +218,24 @@
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-            {['Tất cả', '5 Sao', '4 Sao', '3 Sao', 'Có hình ảnh', 'Đã mua hàng'].map((f, i) => (
-              <button key={f} style={{ height: 32, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid ' + (i === 0 ? 'var(--color-primary)' : 'var(--border-default)'), background: i === 0 ? 'var(--color-primary-tint)' : '#fff', color: i === 0 ? 'var(--orange-700)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>{f}</button>
-            ))}
+            {R_FILTERS.map((f) => {
+              const on = f.id === rFilter;
+              return <button key={f.id} onClick={() => setRFilter(f.id)} style={{ height: 32, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--orange-700)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>{f.label} ({REVIEWS.filter(f.test).length})</button>;
+            })}
           </div>
-          <Review name="Nguyễn Minh" when="2026-05-28" rating={5} variant="Đen / Bản Pro" text="Sản phẩm đúng mô tả, chất lượng tốt, đóng gói cẩn thận. Giao hàng nhanh trong 2 ngày. Sẽ ủng hộ shop lần sau!" imgs={['headphones', 'banner-tech']} reply="Cảm ơn bạn đã tin tưởng TechZone! Shop rất vui khi sản phẩm làm bạn hài lòng 🧡" />
-          <Review name="Trần Thu Hà" when="2026-05-21" rating={4} variant="Trắng / Tiêu chuẩn" text="Pin trâu, âm thanh ổn trong tầm giá. Trừ 1 sao vì hộp hơi móp khi nhận nhưng sản phẩm vẫn nguyên vẹn." />
-          <Review name="Lê Hoàng" when="2026-05-15" rating={5} variant="Đen / Tiêu chuẩn" text="Chống ồn tốt, đeo êm tai. Đáng tiền!" imgs={['speaker']} />
+          {rShown.map((r) => <Review key={r.id} {...r} />)}
+          {rShown.length === 0 && <div style={{ padding: '32px 0', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Chưa có đánh giá nào ở mục này</div>}
         </div>
 
         {/* related */}
         <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', margin: '24px 0 14px' }}>Sản phẩm tương tự</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
-          {PRODUCTS.filter((x) => x.cat === p.cat && x.id !== p.id).slice(0, 6).map((x) => (
+          {similar.map((x) => (
             <DS.ProductCard key={x.id} {...window.LZ.card(x)} onClick={() => onOpen(x.id)} />
           ))}
         </div>
+        {similar.length === 0 && <div style={{ padding: '24px 0', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có sản phẩm tương tự.</div>}
+        {lightbox && <Lightbox images={gallery} start={active} onClose={() => setLightbox(false)} />}
       </div>
     );
   }
@@ -287,6 +332,7 @@
     );
   }
 
+  const lbBtn = { width: 46, height: 46, borderRadius: '50%', border: 0, background: 'rgba(255,255,255,.14)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center', flex: 'none' };
   const vLabel = { font: 'var(--type-body-sm)', color: 'var(--text-muted)' };
   const shareBtn = { display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', padding: '6px 0' };
   function chip(on, disabled) {

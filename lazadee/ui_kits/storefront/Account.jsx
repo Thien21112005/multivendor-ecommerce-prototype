@@ -36,34 +36,52 @@
     { group: '', items: [
       { id: 'orders', name: 'Đơn mua', icon: 'package' },
       { id: 'notifications', name: 'Thông báo', icon: 'bell' },
-      { id: 'vouchers', name: 'Kho Voucher', icon: 'ticket', badge: USER.vouchers },
+      { id: 'vouchers', name: 'Kho Voucher', icon: 'ticket' },
       { id: 'coins', name: 'Lazadee Xu', icon: 'star' },
       { id: 'follow', name: 'Shop đang theo dõi', icon: 'store', badge: FOLLOWS.length },
     ] },
   ];
 
-  function Account({ initialView, onTrack, onOpen, onChat, onReview, onShop, onGo }) {
+  const toast = (message, type) => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message, type } }));
+
+  function Account({ initialView, pendingNotif, onClearPendingNotif, onTrack, onOpen, onChat, onReview, onBuyAgain, onShop, onGo, onViewChange, onLogout, reviewedIds = [] }) {
     const [view, setView] = React.useState(initialView || new URLSearchParams(location.search).get('view') || 'orders');
     const [orders, setOrders] = React.useState(ORDERS);
     const [addrOpen, setAddrOpen] = React.useState(false);
     const [notifs, setNotifs] = React.useState(NOTIFICATIONS);
+    const [notifDetail, setNotifDetail] = React.useState(null);
+    const [cancelIds, setCancelIds] = React.useState(null);
     const [logoutOpen, setLogoutOpen] = React.useState(false);
     const [provider, setProvider] = React.useState(USER.authProvider || 'email'); // demo: 'email' | 'google'
     const hasPassword = provider === 'email';
     const notifUnread = notifs.filter((n) => n.unread).length;
     React.useEffect(() => { if (initialView) setView(initialView); }, [initialView]);
+    React.useEffect(() => { if (onViewChange) onViewChange(view); }, [view]);
+    React.useEffect(() => { if (pendingNotif) { openNotif(pendingNotif); onClearPendingNotif && onClearPendingNotif(); } }, [pendingNotif]);
     const confirmReceipt = (id) =>
       setOrders((os) => os.map((o) => (o.id === id ? { ...o, status: 'COMPLETED', completedAt: 'vừa xong' } : o)));
 
     // Mark a notification read, then route to its target.
+    const payOrders = (ids) => {
+      setOrders((os) => os.map((o) => (ids.includes(o.id) ? { ...o, status: 'PAID' } : o)));
+      toast(ids.length > 1 ? 'Đã thanh toán nhóm đơn hàng (mô phỏng)' : 'Đã thanh toán đơn hàng (mô phỏng)');
+    };
+    const doCancel = () => {
+      setOrders((os) => os.map((o) => (cancelIds.includes(o.id) ? { ...o, status: 'CANCELLED' } : o)));
+      toast(cancelIds.length > 1 ? 'Huỷ nhóm đơn hàng thành công' : 'Huỷ đơn hàng thành công');
+      setCancelIds(null);
+    };
+
     const openNotif = (n) => {
+      n.unread = false;
       setNotifs((ns) => ns.map((x) => (x.id === n.id ? { ...x, unread: false } : x)));
+      if (n.platform) { setView('notifications'); setNotifDetail(n); return; }
       const lk = n.link || {};
       if (lk.action === 'track' && onTrack) onTrack(lk.orderId);
       else if (lk.action === 'view') setView(lk.view);
       else if (lk.action === 'home' && onGo) onGo('home');
     };
-    const markAllRead = () => setNotifs((ns) => ns.map((x) => ({ ...x, unread: false })));
+    const markAllRead = () => { NOTIFICATIONS.forEach((x) => { x.unread = false; }); setNotifs((ns) => ns.map((x) => ({ ...x, unread: false }))); };
 
     return (
       <div style={{ background: 'var(--surface-page)', minHeight: '100%' }}>
@@ -100,7 +118,7 @@
                 {sec.group && <div style={{ font: '700 11px var(--font-sans)', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--text-subtle)', padding: '0 8px 8px' }}>{sec.group}</div>}
                 {sec.items.map((m) => {
                   const on = m.id === view;
-                  const badge = m.id === 'notifications' ? notifUnread : m.badge;
+                  const badge = m.id === 'notifications' ? notifUnread : m.id === 'vouchers' ? VOUCHERS.filter((x) => x.saved && x.status === 'active').length : m.badge;
                   const name = m.id === 'password' ? (hasPassword ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu') : m.name;
                   return (
                     <div key={m.id} onClick={() => setView(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, height: 40, padding: '0 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: on ? 'var(--orange-600)' : 'var(--text-body)', background: on ? 'var(--orange-50)' : 'transparent', font: on ? 'var(--weight-semibold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)' }}>
@@ -122,13 +140,13 @@
 
           {/* ---- Main panel ---- */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
-            {view === 'orders' && <OrdersPanel orders={orders} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={confirmReceipt} />}
+            {view === 'orders' && <OrdersPanel orders={orders} reviewedIds={reviewedIds} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={confirmReceipt} onBuyAgain={onBuyAgain} onPay={payOrders} onCancel={setCancelIds} />}
             {view === 'notifications' && <NotificationsPanel notifs={notifs} unread={notifUnread} onOpen={openNotif} onMarkAll={markAllRead} />}
-            {view === 'profile' && <ProfilePanel key={provider} provider={provider} onSetPassword={() => setView('password')} />}
+            {view === 'profile' && <ProfilePanel key={provider} provider={provider} onSetPassword={() => setView('password')} onDeleted={onLogout} />}
             {view === 'address' && <AddressPanel onAdd={() => setAddrOpen(true)} />}
             {view === 'password' && <PasswordPanel key={provider} provider={provider} />}
             {view === 'devices' && <DevicesPanel />}
-            {view === 'vouchers' && <VouchersPanel />}
+            {view === 'vouchers' && <VouchersPanel onUse={() => onGo && onGo('cart')} />}
             {view === 'coins' && <CoinsPanel />}
             {view === 'follow' && <FollowsPanel onShop={onShop} />}
           </div>
@@ -136,8 +154,23 @@
 
         {window.LZAddressModal && <window.LZAddressModal open={addrOpen} onClose={() => setAddrOpen(false)} selectedId={(ADDRESSES.find((a) => a.default) || {}).id} onSelect={() => setAddrOpen(false)} />}
 
+        <Modal open={!!notifDetail} onClose={() => setNotifDetail(null)} title="Chi tiết thông báo" footer={<Button onClick={() => setNotifDetail(null)}>Đã hiểu</Button>}>
+          {notifDetail && (
+            <div>
+              <div style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{notifDetail.title}</div>
+              <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', margin: '4px 0 12px' }}>{notifDetail.date}</div>
+              <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.6 }}>{notifDetail.body}</div>
+            </div>
+          )}
+        </Modal>
+
+        <Modal open={!!cancelIds} onClose={() => setCancelIds(null)} title="Xác nhận huỷ đơn hàng"
+          footer={<><Button variant="ghost" onClick={() => setCancelIds(null)}>Không</Button><Button variant="danger" onClick={doCancel}>Xác nhận huỷ</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc muốn huỷ {cancelIds && cancelIds.length > 1 ? 'nhóm ' + cancelIds.length + ' đơn hàng' : 'đơn hàng'} này không? Quá trình này không thể hoàn tác, xu và voucher (nếu có) sẽ được hoàn lại.</div>
+        </Modal>
+
         <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="Đăng xuất"
-          footer={<><Button variant="ghost" onClick={() => setLogoutOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="log-out" onClick={() => setLogoutOpen(false)}>Đăng xuất</Button></>}>
+          footer={<><Button variant="ghost" onClick={() => setLogoutOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="log-out" onClick={() => { setLogoutOpen(false); onLogout && onLogout(); }}>Đăng xuất</Button></>}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', width: 'min(420px, 80vw)' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="log-out" size={20} /></div>
             <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc muốn đăng xuất khỏi tài khoản <b>{USER.name}</b> trên thiết bị này?</div>
@@ -148,10 +181,18 @@
   }
 
   /* ============================== ORDERS ============================== */
-  function OrdersPanel({ orders, onTrack, onChat, onReview, onConfirm }) {
+  function OrdersPanel({ orders, reviewedIds, onTrack, onChat, onReview, onConfirm, onBuyAgain, onPay, onCancel }) {
     const [tab, setTab] = React.useState('all');
     const active = TABS.find((t) => t.value === tab);
     const list = tab === 'all' ? orders : orders.filter((o) => active.match.includes(o.status));
+    // orders paid together (same checkout session, not yet shipped) show as one group
+    const rows = [];
+    list.forEach((o) => {
+      const grouped = o.sessionId && ['PENDING_PAYMENT', 'CANCELLED'].includes(o.status);
+      const hit = grouped && rows.find((r) => r.sessionId === o.sessionId && r.orders[0].status === o.status);
+      if (hit) hit.orders.push(o); else rows.push({ key: o.id, sessionId: grouped ? o.sessionId : null, orders: [o] });
+    });
+    const handlers = { onTrack, onChat, onReview, onConfirm, onBuyAgain, onPay, onCancel };
     return (
       <section style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '16px 22px 0' }}>
@@ -160,13 +201,63 @@
         </div>
         <div style={{ padding: '16px 22px 22px', display: 'flex', flexDirection: 'column', gap: 14, background: 'var(--surface-sunken)' }}>
           {list.length === 0 ? <Empty icon="package" text="Chưa có đơn hàng nào ở mục này" />
-            : list.map((o) => <OrderCard key={o.id} o={o} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={onConfirm} />)}
+            : rows.map((r) => (r.orders.length > 1
+              ? <OrderGroup key={r.key} orders={r.orders} {...handlers} />
+              : <OrderCard key={r.key} o={r.orders[0]} reviewed={reviewedIds.includes(r.orders[0].id)} {...handlers} />))}
         </div>
       </section>
     );
   }
 
-  function OrderCard({ o, onTrack, onChat, onReview, onConfirm }) {
+  function OrderGroup({ orders, onTrack, onBuyAgain, onPay, onCancel }) {
+    const cancelled = orders[0].status === 'CANCELLED';
+    const sum = (k) => orders.reduce((n, o) => n + (o[k] || 0), 0);
+    return (
+      <div style={{ background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-sunken)' }}>
+          <Icon name="package" size={16} style={{ color: 'var(--text-muted)' }} />
+          <span style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{cancelled ? 'Nhóm đơn hàng đã hủy' : 'Nhóm đơn hàng chờ thanh toán'}</span>
+          <span style={{ marginLeft: 'auto' }}><StatusBadge status={orders[0].status} label={cancelled ? 'Đã hủy' : 'Chờ thanh toán'} /></span>
+        </div>
+        {orders.map((o, i) => (
+          <div key={o.id} style={{ borderBottom: i < orders.length - 1 ? '1px dashed var(--border-subtle)' : 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px' }}>
+              <VendorChip name={V[o.vendorId].name} mall={V[o.vendorId].mall} />
+              <span className="code" style={{ font: '12px var(--font-mono)', color: 'var(--text-subtle)', marginLeft: 'auto' }}>{o.id}</span>
+            </div>
+            <div style={{ padding: '0 16px 12px' }}>
+              {o.items.map((it, j) => (
+                <div key={j} onClick={() => onTrack && onTrack(o.id)} style={{ display: 'flex', gap: 12, padding: '8px 0', cursor: 'pointer' }}>
+                  <img src={it.img} alt="" width="50" height="50" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none', border: '1px solid var(--border-subtle)' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{it.title}</div>
+                    <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Phân loại: {it.variant}</div>
+                  </div>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-price)', flex: 'none' }}>{fmt(it.price)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        {!cancelled && (
+          <div style={{ padding: '8px 16px', background: 'var(--surface-sunken)', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 3, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tiền hàng</span><span>{fmt(sum('subtotal'))}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Phí vận chuyển</span><span>+{fmt(sum('shipping'))}</span></div>
+            {sum('discount') > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--mint-600)' }}><span>Giảm giá (Voucher + Xu)</span><span>-{fmt(sum('discount'))}</span></div>}
+          </div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 12px', padding: '12px 16px', background: 'var(--orange-50)' }}>
+          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Tổng thanh toán ({orders.length} đơn):</span>
+          <span style={{ font: '800 20px var(--font-sans)', color: 'var(--text-price)', marginRight: 'auto' }}>{fmt(sum('total'))}</span>
+          {cancelled
+            ? <Button size="sm" onClick={() => onBuyAgain && onBuyAgain(orders.flatMap((o) => o.items))}>Mua lại tất cả</Button>
+            : <><Button size="sm" onClick={() => onPay(orders.map((o) => o.id))}>Thanh toán ngay</Button><Button size="sm" variant="ghost" onClick={() => onCancel(orders.map((o) => o.id))}>Huỷ nhóm đơn</Button></>}
+        </div>
+      </div>
+    );
+  }
+
+  function OrderCard({ o, reviewed, onTrack, onChat, onReview, onConfirm, onBuyAgain, onPay, onCancel }) {
     const v = V[o.vendorId];
     return (
       <div style={{ background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
@@ -196,26 +287,36 @@
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Thành tiền:</span>
           <span style={{ font: '800 20px var(--font-sans)', color: 'var(--text-price)', marginRight: 'auto' }}>{fmt(o.total)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <Actions o={o} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={onConfirm} />
+            <Actions o={o} reviewed={reviewed} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={onConfirm} onBuyAgain={onBuyAgain} onPay={onPay} onCancel={onCancel} />
           </div>
         </div>
       </div>
     );
   }
-  function Actions({ o, onTrack, onChat, onReview, onConfirm }) {
+  function Actions({ o, reviewed, onTrack, onChat, onReview, onConfirm, onBuyAgain, onPay, onCancel }) {
     const t = (fn, a) => () => fn && fn(a);
     const track = <Button size="sm" variant="outline" iconLeft="truck" onClick={t(onTrack, o.id)}>Theo dõi đơn</Button>;
-    const chat = <Button size="sm" variant="ghost" iconLeft="message-circle" onClick={t(onChat, o.id)}>Liên hệ Shop</Button>;
-    if (o.status === 'PENDING_PAYMENT') return <><Button size="sm">Thanh toán ngay</Button><Button size="sm" variant="ghost">Huỷ đơn</Button></>;
+    const chat = <Button size="sm" variant="ghost" iconLeft="message-circle" onClick={t(onChat, o.vendorId)}>Liên hệ Shop</Button>;
+    const again = <Button size="sm" variant="outline" onClick={() => onBuyAgain && onBuyAgain(o.items)}>Mua lại</Button>;
+    if (o.status === 'PENDING_PAYMENT') return <><Button size="sm" onClick={() => onPay([o.id])}>Thanh toán ngay</Button><Button size="sm" variant="ghost" onClick={() => onCancel([o.id])}>Huỷ đơn</Button></>;
     if (o.status === 'PAID' || o.status === 'PROCESSING') return <>{track}{chat}</>;
     if (o.status === 'SHIPPED') return <><Button size="sm" iconLeft="truck" onClick={t(onTrack, o.id)}>Theo dõi đơn</Button>{chat}</>;
     if (o.status === 'DELIVERED') return <><Button size="sm" iconLeft="check" onClick={t(onConfirm, o.id)}>Đã nhận hàng</Button><Button size="sm" variant="outline" iconLeft="undo-2" onClick={t(onTrack, o.id)}>Trả hàng</Button>{track}</>;
-    if (o.status === 'COMPLETED') return <><Button size="sm" iconLeft="star" onClick={t(onReview, o.id)}>Đánh giá</Button><Button size="sm" variant="outline">Mua lại</Button>{chat}</>;
-    return <><Button size="sm" variant="outline">Mua lại</Button>{chat}</>;
+    if (o.status === 'COMPLETED') return <>{reviewed ? <Button size="sm" iconLeft="star" disabled>Đã đánh giá</Button> : <Button size="sm" iconLeft="star" onClick={t(onReview, o.id)}>Đánh giá</Button>}{again}{chat}</>;
+    return <>{again}{chat}</>;
   }
 
   /* ============================== PROFILE ============================== */
-  function ProfilePanel({ provider, onSetPassword }) {
+  function ProfilePanel({ provider, onSetPassword, onDeleted }) {
+    const [delOpen, setDelOpen] = React.useState(false);
+    const [avatar, setAvatar] = React.useState(null);
+    const fileRef = React.useRef(null);
+    const pickAvatar = (e) => {
+      const f = e.target.files[0]; e.target.value = '';
+      if (!f) return;
+      if (f.size > 1024 * 1024) { toast('Ảnh vượt quá dung lượng 1MB. Vui lòng chọn ảnh nhỏ hơn.', 'error'); return; }
+      setAvatar(URL.createObjectURL(f));
+    };
     const prov = provider || USER.authProvider || 'email';
     const isSSO = prov !== 'email';
     const provName = prov === 'apple' ? 'Apple' : 'Google';
@@ -289,16 +390,25 @@
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-              <Button iconLeft="check" onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}>Lưu thay đổi</Button>
+              <Button iconLeft="check" onClick={() => { if (!f.name.trim()) { toast('Vui lòng nhập Họ và tên trước khi lưu.', 'error'); return; } setSaved(true); setTimeout(() => setSaved(false), 2000); }}>Lưu thay đổi</Button>
+              <Button variant="danger" iconLeft="trash-2" onClick={() => setDelOpen(true)}>Xóa tài khoản</Button>
               {saved && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--mint-600)', font: 'var(--type-body-sm)' }}><Icon name="circle-check" size={16} />Đã lưu hồ sơ</span>}
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, borderLeft: '1px solid var(--border-subtle)', paddingLeft: 28 }}>
-            <Avatar name={USER.name} src={isSSO ? USER.avatarUrl : null} size={104} />
-            <Button variant="outline" iconLeft="upload">Chọn ảnh</Button>
+            <Avatar name={USER.name} src={avatar || (isSSO ? USER.avatarUrl : null)} size={104} />
+            <input ref={fileRef} type="file" hidden accept="image/jpeg, image/png" onChange={pickAvatar} />
+            <Button variant="outline" iconLeft="upload" onClick={() => fileRef.current.click()}>Chọn ảnh</Button>
             <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', lineHeight: 1.5 }}>Định dạng JPG, PNG.<br />Tối đa 1 MB.</p>
           </div>
         </div>
+        <Modal open={delOpen} onClose={() => setDelOpen(false)} title="Xóa tài khoản"
+          footer={<><Button variant="ghost" onClick={() => setDelOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setDelOpen(false); toast('Đã xóa tài khoản (mô phỏng)'); onDeleted && onDeleted(); }}>Xóa tài khoản</Button></>}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', width: 'min(420px, 80vw)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="triangle-alert" size={20} /></div>
+            <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Hành động này không thể hoàn tác. Toàn bộ hồ sơ, voucher và Xu của <b>{USER.name}</b> sẽ bị xóa.</div>
+          </div>
+        </Modal>
       </section>
     );
   }
@@ -306,6 +416,7 @@
   /* ============================== ADDRESS ============================== */
   function AddressPanel({ onAdd }) {
     const [list, setList] = React.useState(ADDRESSES);
+    const [delAddr, setDelAddr] = React.useState(null);
     const makeDefault = (id) => setList((l) => l.map((x) => ({ ...x, default: x.id === id })));
     return (
       <section style={card}>
@@ -330,13 +441,17 @@
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 14 }}>
                   <span style={linkS} onClick={onAdd}>Sửa</span>
-                  {!a.default && <span style={{ ...linkS, color: 'var(--red-600)' }}>Xoá</span>}
+                  {!a.default && <span style={{ ...linkS, color: 'var(--red-600)' }} onClick={() => setDelAddr(a)}>Xoá</span>}
                 </div>
                 <Button size="sm" variant="outline" disabled={a.default} onClick={() => makeDefault(a.id)}>Thiết lập mặc định</Button>
               </div>
             </div>
           ))}
         </div>
+        <Modal open={!!delAddr} onClose={() => setDelAddr(null)} title="Xoá địa chỉ"
+          footer={<><Button variant="ghost" onClick={() => setDelAddr(null)}>Huỷ</Button><Button variant="danger" onClick={() => { setList((l) => l.filter((x) => x.id !== delAddr.id)); setDelAddr(null); }}>Xoá</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn có chắc muốn xoá địa chỉ này?</div>
+        </Modal>
       </section>
     );
   }
@@ -351,6 +466,14 @@
     const [resend, setResend] = React.useState(0);
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
     const strength = pwStrength(f.nw);
+    // current password is checked as you type (mock: anything of 6+ characters passes)
+    const [curCheck, setCurCheck] = React.useState(null); // null | 'checking' | 'ok' | 'bad'
+    React.useEffect(() => {
+      if (!f.cur) { setCurCheck(null); return undefined; }
+      setCurCheck('checking');
+      const t = setTimeout(() => setCurCheck(f.cur.length >= 6 ? 'ok' : 'bad'), 500);
+      return () => clearTimeout(t);
+    }, [f.cur]);
 
     React.useEffect(() => {
       if (stage !== 'otp' || resend <= 0) return;
@@ -375,7 +498,10 @@
         <PanelHead icon="shield-check" title={hasPw ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'} sub={hasPw ? 'Bảo mật tài khoản bằng mật khẩu mạnh' : 'Tạo mật khẩu để đăng nhập bằng email bên cạnh Google SSO'} />
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: 28, marginTop: 18, alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {hasPw && <PwField label="Mật khẩu hiện tại" value={f.cur} onChange={(v) => set('cur', v)} err={err.cur} />}
+            {hasPw && <div>
+              <PwField label="Mật khẩu hiện tại" value={f.cur} onChange={(v) => set('cur', v)} err={err.cur} />
+              {curCheck && <div style={{ font: 'var(--type-caption)', marginTop: 5, color: curCheck === 'ok' ? 'var(--mint-600)' : curCheck === 'bad' ? 'var(--red-600)' : 'var(--text-subtle)' }}>{curCheck === 'ok' ? 'Chính xác' : curCheck === 'bad' ? 'Không chính xác' : 'Đang kiểm tra...'}</div>}
+            </div>}
             <div>
               <PwField label="Mật khẩu mới" value={f.nw} onChange={(v) => set('nw', v)} err={err.nw} hint="Tối thiểu 8 ký tự, cần chữ hoa, số và ký tự đặc biệt" />
               {f.nw && (
@@ -385,7 +511,10 @@
                 </div>
               )}
             </div>
-            <PwField label="Nhập lại mật khẩu mới" value={f.cf} onChange={(v) => set('cf', v)} err={err.cf} />
+            <div>
+              <PwField label="Nhập lại mật khẩu mới" value={f.cf} onChange={(v) => set('cf', v)} err={err.cf} />
+              {f.cf && !err.cf && <div style={{ font: 'var(--type-caption)', marginTop: 5, color: f.cf === f.nw ? 'var(--mint-600)' : 'var(--red-600)' }}>{f.cf === f.nw ? 'Mật khẩu khớp' : 'Mật khẩu không khớp'}</div>}
+            </div>
 
             {stage === 'form' && <div><Button iconLeft="check" onClick={submit}>{hasPw ? 'Cập nhật mật khẩu' : 'Thiết lập mật khẩu'}</Button></div>}
 
@@ -438,55 +567,152 @@
   }
 
   /* ============================== VOUCHERS ============================== */
-  function VouchersPanel() {
+  function VouchersPanel({ onUse }) {
+    const [mode, setMode] = React.useState('active'); // active | history
     const [tab, setTab] = React.useState('all');
-    const KINDS = { all: null, platform: 'platform', shop: 'shop', freeship: 'freeship' };
-    const list = tab === 'all' ? VOUCHERS : VOUCHERS.filter((v) => v.kind === KINDS[tab]);
+    const [histTab, setHistTab] = React.useState('expired');
+    const [rows, setRows] = React.useState(VOUCHERS);
+    const [code, setCode] = React.useState('');
+    const [detail, setDetail] = React.useState(null);
+    const [del, setDel] = React.useState(null);
+    const isLive = (v) => v.status === 'active' || v.status === 'upcoming';
+    const live = rows.filter(isLive);
+    const count = (k) => live.filter((v) => v.kind === k).length;
+    const list = mode === 'history'
+      ? rows.filter((v) => v.status === (histTab === 'used' ? 'used' : 'expired'))
+      : tab === 'all' ? live : live.filter((v) => v.kind === tab);
+
+    const setSaved = (id, saved) => {
+      const v = VOUCHERS.find((x) => x.id === id); if (v) v.saved = saved;
+      setRows((rs) => rs.map((x) => (x.id === id ? { ...x, saved } : x)));
+    };
+    const saveCode = () => {
+      const v = rows.find((x) => x.code === code.trim().toUpperCase() && isLive(x));
+      if (!v) { toast('Mã voucher không tồn tại hoặc đã hết hạn.', 'error'); return; }
+      if (v.saved) { toast('Voucher đã được lưu trước đó', 'error'); return; }
+      setSaved(v.id, true); setCode(''); toast('Lưu voucher thành công!');
+    };
+    const bar = (pct) => (pct >= 100 ? 'var(--text-subtle)' : pct >= 80 ? 'var(--red-500)' : pct >= 55 ? 'var(--amber-500)' : 'var(--mint-500)');
+    const rule = (v) => (v.categories ? { text: 'Chỉ áp dụng danh mục ' + v.categories.join(', '), color: 'var(--mint-600)' } : v.excluded ? { text: 'Ngoại trừ danh mục ' + v.excluded.join(', '), color: 'var(--red-600)' } : null);
+
     return (
       <section style={card}>
-        <PanelHead icon="ticket" title="Kho Voucher" sub={`Bạn đang có ${VOUCHERS.length} voucher khả dụng`} />
-        <div style={{ marginTop: 4 }}>
-          <Tabs value={tab} onChange={setTab} items={[{ id: 'all', label: 'Tất cả' }, { id: 'platform', label: 'Voucher Sàn' }, { id: 'shop', label: 'Voucher Shop' }, { id: 'freeship', label: 'Freeship' }]} />
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          {mode === 'history' && <button onClick={() => setMode('active')} aria-label="Quay lại" style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: 4, marginRight: 6, color: 'var(--text-muted)', display: 'grid', placeItems: 'center' }}><Icon name="arrow-left" size={20} /></button>}
+          <PanelHead icon="ticket" title={mode === 'history' ? 'Lịch sử voucher' : 'Kho Voucher'} sub={mode === 'history' ? 'Voucher đã dùng hoặc đã hết hạn' : `Bạn đang có ${live.filter((v) => v.saved).length} voucher khả dụng`} />
+          {mode === 'active' && <span style={{ ...linkS, marginLeft: 'auto' }} onClick={() => setMode('history')}>Xem lịch sử voucher</span>}
         </div>
+        {mode === 'active' && (
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-md)', padding: '10px 14px', margin: '14px 0 4px' }}>
+            <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Mã Voucher</span>
+            <input value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveCode()} placeholder="Nhập mã voucher tại đây" style={{ flex: 1, minWidth: 0, height: 36, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '0 10px', font: 'var(--type-body-sm)', outline: 'none', background: '#fff' }} />
+            <Button size="sm" disabled={!code.trim()} onClick={saveCode}>Lưu</Button>
+          </div>
+        )}
+        <div style={{ marginTop: 4 }}>
+          {mode === 'active'
+            ? <Tabs value={tab} onChange={setTab} items={[{ id: 'all', label: `Tất cả (${live.length})` }, { id: 'platform', label: `Voucher Sàn (${count('platform')})` }, { id: 'shop', label: `Voucher Shop (${count('shop')})` }, { id: 'freeship', label: `Freeship (${count('freeship')})` }]} />
+            : <Tabs value={histTab} onChange={setHistTab} items={[{ id: 'expired', label: 'Hết hiệu lực' }, { id: 'used', label: 'Đã sử dụng' }]} />}
+        </div>
+        {list.length === 0 && <Empty icon="ticket" text="Chưa có voucher nào trong mục này" />}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginTop: 16 }}>
-          {list.map((v) => (
-            <div key={v.id} style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#fff' }}>
-              <div style={{ width: 96, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#fff', background: v.kind === 'freeship' ? 'var(--mint-500)' : v.kind === 'shop' ? 'var(--flash-500)' : 'var(--orange-500)' }}>
-                <Icon name={v.kind === 'freeship' ? 'truck' : v.kind === 'shop' ? 'store' : 'ticket'} size={22} />
-                <span style={{ font: '800 17px var(--font-sans)' }}>{v.amount}</span>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, padding: '12px 14px' }}>
-                <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{v.label}</div>
-                <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 2 }}>{v.cond} · {v.scope}</div>
-                <div style={{ display: 'flex', alignItems: 'center', marginTop: 9 }}>
-                  <span style={{ font: 'var(--type-caption)', color: 'var(--flash-600)' }}>HSD: {v.expiry}</span>
-                  <Button size="sm" style={{ marginLeft: 'auto' }}>Dùng ngay</Button>
+          {list.map((v) => {
+            const pct = v.limit ? Math.min(100, Math.round(v.used / v.limit * 100)) : 0;
+            const old = mode === 'history';
+            const r = rule(v);
+            return (
+              <div key={v.id} onClick={() => setDetail(v)} style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#fff', cursor: 'pointer', opacity: old ? 0.72 : 1 }}>
+                <div style={{ position: 'relative', width: 96, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#fff', background: old ? 'var(--gray-400)' : v.kind === 'freeship' ? 'var(--mint-500)' : v.kind === 'shop' ? 'var(--flash-500)' : 'var(--orange-500)' }}>
+                  {old && <span style={{ position: 'absolute', top: 4, left: 4, padding: '2px 4px', borderRadius: 4, background: 'rgba(0,0,0,.3)', font: '600 10px var(--font-sans)' }}>{v.status === 'used' ? 'Đã dùng' : 'Hết hạn'}</span>}
+                  <Icon name={v.kind === 'freeship' ? 'truck' : v.kind === 'shop' ? 'store' : 'ticket'} size={22} />
+                  <span style={{ font: '800 17px var(--font-sans)' }}>{v.amount}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0, padding: '12px 14px' }}>
+                  <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{v.label}</div>
+                  <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 2 }}>{v.cond} · {v.scope}</div>
+                  {r && <div style={{ font: '600 11px var(--font-sans)', color: r.color, marginTop: 2 }}>{r.text}</div>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 9 }}>
+                    <span style={{ font: 'var(--type-caption)', color: v.status === 'upcoming' ? 'var(--amber-600)' : old ? 'var(--text-muted)' : 'var(--flash-600)' }}>{v.status === 'upcoming' ? 'Có hiệu lực: ' + v.validFrom : 'HSD: ' + v.expiry}</span>
+                    {!old && <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      {v.saved && <button aria-label="Xoá voucher" onClick={(e) => { e.stopPropagation(); setDel(v); }} style={{ border: 0, background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="trash-2" size={16} /></button>}
+                      {!v.saved ? <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSaved(v.id, true); toast('Lưu voucher thành công!'); }}>Lưu</Button>
+                        : v.status === 'upcoming' ? <Button size="sm" disabled>Chưa tới giờ</Button>
+                          : <Button size="sm" onClick={(e) => { e.stopPropagation(); onUse && onUse(); }}>Dùng ngay</Button>}
+                    </span>}
+                  </div>
+                  {!old && (
+                    <div style={{ marginTop: 6 }}>
+                      <div style={{ height: 4, borderRadius: 999, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', background: bar(pct) }} /></div>
+                      <div style={{ marginTop: 3, font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{v.used.toLocaleString('vi-VN')}/{v.limit ? v.limit.toLocaleString('vi-VN') : '∞'} lượt đã dùng</div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        <Modal open={!!detail} onClose={() => setDetail(null)} title="Chi tiết voucher" footer={<Button onClick={() => setDetail(null)}>Đã hiểu</Button>}>
+          {detail && (
+            <div style={{ display: 'grid', gap: 12 }}>
+              {[['Mã voucher', detail.code], ['Ưu đãi', detail.label], ['Nhà tài trợ', detail.sponsor], ['Điều kiện', detail.cond], ['Phạm vi', rule(detail) ? rule(detail).text : detail.scope], ['Hạn sử dụng', detail.validFrom + ' - ' + detail.expiry]].map(([k, val]) => (
+                <div key={k} style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 12, font: 'var(--type-body-sm)' }}><span style={{ color: 'var(--text-muted)' }}>{k}</span><span style={{ color: 'var(--text-strong)', fontWeight: 600 }}>{val}</span></div>
+              ))}
+              <div style={{ display: 'grid', gap: 6, font: 'var(--type-body-sm)' }}><span style={{ color: 'var(--text-muted)' }}>Nội dung voucher</span><div style={{ color: 'var(--text-strong)', lineHeight: 1.6 }}>{detail.content}</div></div>
+            </div>
+          )}
+        </Modal>
+        <Modal open={!!del} onClose={() => setDel(null)} title="Xác nhận xoá"
+          footer={<><Button variant="ghost" onClick={() => setDel(null)}>Huỷ</Button><Button variant="danger" onClick={() => { setSaved(del.id, false); setDel(null); toast('Đã xoá voucher khỏi kho'); }}>Xoá</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-strong)' }}>Bạn có chắc chắn muốn xoá voucher <b>{del && del.label}</b> khỏi kho không?</div>
+        </Modal>
       </section>
     );
   }
 
   /* ============================== COINS ============================== */
   function CoinsPanel() {
+    const [streak, setStreak] = React.useState(3);
+    const [checked, setChecked] = React.useState(false);
+    const [balance, setBalance] = React.useState(USER.coins);
+    const [log, setLog] = React.useState(COIN_LOG);
+    const checkin = () => {
+      setChecked(true); setStreak((s) => s + 1); setBalance((b) => b + 100); USER.coins += 100;
+      setLog((l) => [{ type: 'earn', label: 'Điểm danh hằng ngày', amount: 100, at: 'Hôm nay' }, ...l]);
+      toast('Điểm danh thành công! +100 Xu');
+    };
     return (
       <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ ...card, background: 'linear-gradient(120deg, var(--gold-600, #E09600), var(--gold-500, #FFB100))', color: '#fff', display: 'flex', alignItems: 'center', gap: 18 }}>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="star" size={34} /></div>
           <div style={{ flex: 1 }}>
             <div style={{ font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.9)' }}>Số dư Lazadee Xu</div>
-            <div style={{ font: '800 34px var(--font-sans)', lineHeight: 1.1 }}>{USER.coins.toLocaleString('vi-VN')} <span style={{ fontSize: 18, fontWeight: 600 }}>Xu</span></div>
+            <div style={{ font: '800 34px var(--font-sans)', lineHeight: 1.1 }}>{balance.toLocaleString('vi-VN')} <span style={{ fontSize: 18, fontWeight: 600 }}>Xu</span></div>
             <div style={{ font: 'var(--type-caption)', color: 'rgba(255,255,255,.85)', marginTop: 2 }}>1 Xu = 1₫ khi thanh toán · Xu hết hạn sau 12 tháng</div>
           </div>
           <Button variant="secondary" iconLeft="gift">Đổi quà</Button>
         </div>
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
+            <PanelHead icon="calendar" title="Điểm danh nhận Xu" />
+            <Button style={{ marginLeft: 'auto' }} variant={checked ? 'outline' : 'primary'} iconLeft={checked ? 'check' : 'calendar'} disabled={checked} onClick={checkin}>{checked ? 'Đã điểm danh' : 'Điểm danh nhận Xu'}</Button>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {[1, 2, 3, 4, 5, 6, 7].map((d) => {
+              const state = d <= streak ? 'done' : !checked && d === streak + 1 ? 'today' : 'next';
+              return (
+                <div key={d} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', font: '700 12px var(--font-sans)', background: state === 'done' ? 'var(--gold-500)' : state === 'today' ? 'var(--gold-50)' : 'var(--gray-100)', color: state === 'done' ? '#fff' : state === 'today' ? 'var(--gold-700)' : 'var(--text-subtle)', border: '2px solid ' + (state === 'today' ? 'var(--gold-500)' : 'transparent') }}>{state === 'done' ? <Icon name="check" size={20} /> : '+100'}</div>
+                  <span style={{ font: 'var(--type-caption)', color: state === 'today' ? 'var(--gold-700)' : 'var(--text-muted)', fontWeight: state === 'today' ? 600 : 400 }}>Ngày {d}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
         <section style={{ ...card, padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '16px 22px 12px' }}><PanelHead icon="clock" title="Lịch sử Xu" /></div>
           <div>
-            {COIN_LOG.map((c, i) => (
+            {log.map((c, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 22px', borderTop: '1px solid var(--border-subtle)' }}>
                 <div style={{ width: 38, height: 38, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: c.type === 'earn' ? 'var(--mint-50)' : 'var(--surface-sunken)', color: c.type === 'earn' ? 'var(--mint-600)' : 'var(--text-muted)' }}><Icon name={c.type === 'earn' ? 'plus' : 'minus'} size={18} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -505,13 +731,14 @@
   /* ============================== FOLLOWS ============================== */
   function FollowsPanel({ onShop }) {
     const [following, setFollowing] = React.useState(FOLLOWS);
-    const toggle = (vid) => setFollowing((f) => (f.includes(vid) ? f.filter((x) => x !== vid) : [...f, vid]));
+    const [unfollow, setUnfollow] = React.useState(null);
+    const toggle = (vid) => { if (following.includes(vid)) setUnfollow(vid); else setFollowing((f) => [...f, vid]); };
     return (
       <section style={card}>
         <PanelHead icon="store" title={`Shop đang theo dõi (${following.length})`} sub="Nhận thông báo khuyến mãi từ các shop yêu thích" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14, marginTop: 16 }}>
-          {FOLLOWS.map((vid) => {
-            const v = V[vid]; const on = following.includes(vid);
+          {following.map((vid) => {
+            const v = V[vid]; const on = true;
             return (
               <div key={vid} style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '14px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -532,6 +759,11 @@
             );
           })}
         </div>
+        {following.length === 0 && <Empty icon="store" text="Bạn chưa theo dõi shop nào." />}
+        <Modal open={!!unfollow} onClose={() => setUnfollow(null)} title="Hủy theo dõi Shop?"
+          footer={<><Button variant="ghost" onClick={() => setUnfollow(null)}>Không</Button><Button variant="danger" onClick={() => { setFollowing((f) => f.filter((x) => x !== unfollow)); setUnfollow(null); }}>Hủy theo dõi</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn sẽ không nhận được khuyến mãi từ <b>{unfollow && V[unfollow].name}</b> nữa.</div>
+        </Modal>
       </section>
     );
   }
@@ -546,7 +778,9 @@
   ];
   function NotificationsPanel({ notifs, unread, onOpen, onMarkAll }) {
     const [tab, setTab] = React.useState('all');
-    const list = tab === 'all' ? notifs : notifs.filter((n) => n.type === tab);
+    const [limit, setLimit] = React.useState(5);
+    const all = tab === 'all' ? notifs : notifs.filter((n) => n.type === tab);
+    const list = all.slice(0, limit);
     return (
       <section style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', padding: '16px 22px 0' }}>
@@ -561,7 +795,7 @@
             <div key={n.id} onClick={() => onOpen(n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 22px', borderTop: '1px solid var(--border-subtle)', background: n.unread ? 'var(--orange-50)' : '#fff', cursor: 'pointer' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = n.unread ? 'var(--orange-100, #FFE6D9)' : 'var(--gray-50)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = n.unread ? 'var(--orange-50)' : '#fff')}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: n.bg, color: n.tint }}><Icon name={n.icon} size={19} /></div>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: n.bg, color: n.tint }}>{n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" alt="" width="24" height="24" /> : <Icon name={n.icon} size={19} />}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ font: (n.unread ? 'var(--weight-bold)' : 'var(--weight-medium)') + ' var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{n.title}</div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.45 }}>{n.body}</div>
@@ -570,6 +804,7 @@
               {n.unread && <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--orange-500)', flex: 'none' }} />}
             </div>
           ))}
+        {all.length > limit && <div style={{ padding: 14, textAlign: 'center', borderTop: '1px solid var(--border-subtle)' }}><Button size="sm" variant="ghost" onClick={() => setLimit((l) => l + 5)}>Xem thêm thông báo</Button></div>}
       </section>
     );
   }
