@@ -2,9 +2,47 @@
    append-only transaction ledger, withdrawal request. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Badge, StatusBadge, Money } = DS;
+  const { Icon, Button, Badge, StatusBadge, Money, Modal, Input, Select } = DS;
   const formatVND = Money.format;
-  const { WALLET, LEDGER } = window.LZV;
+  const { WALLET, LEDGER, BANK, downloadCsv } = window.LZV;
+  const MIN_WITHDRAW = 100000;
+  const T_FILTER = { 'Tất cả giao dịch': null, 'Bán hàng': 'SALE', 'Giải ngân': 'RELEASE', 'Rút tiền': 'PAYOUT', 'Hoàn tiền': 'REFUND' };
+
+  function WithdrawModal({ balance, onClose, onDone, onGoSettings }) {
+    const [step, setStep] = React.useState('form'); // form | otp
+    const [amount, setAmount] = React.useState('');
+    const [otp, setOtp] = React.useState('');
+    const [err, setErr] = React.useState('');
+    const n = Number(amount) || 0;
+    const next = () => {
+      if (n < MIN_WITHDRAW) { setErr('Số tiền rút tối thiểu ' + formatVND(MIN_WITHDRAW)); return; }
+      if (n > balance) { setErr('Số dư ví không đủ để thực hiện giao dịch'); return; }
+      setErr(''); setStep('otp');
+    };
+    return (
+      <Modal open onClose={onClose} width={460} title="Yêu cầu rút tiền"
+        footer={!BANK.number ? <Button variant="ghost" onClick={onClose}>Đóng</Button> : step === 'form'
+          ? <><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={next}>Tiếp tục</Button></>
+          : <><Button variant="ghost" onClick={() => setStep('form')}>Quay lại</Button><Button iconLeft="check" disabled={otp.length < 6} onClick={() => onDone(n)}>Xác nhận rút tiền</Button></>}>
+        {!BANK.number
+          ? <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn chưa có tài khoản nhận tiền đã xác minh. <a onClick={onGoSettings} style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }}>Thêm ở Cài đặt</a> trước khi rút.</div>
+          : <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', font: 'var(--type-body-sm)' }}><span style={{ color: 'var(--text-muted)' }}>Số dư khả dụng</span><b style={{ fontVariantNumeric: 'tabular-nums' }}>{formatVND(balance)}</b></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                <Icon name="credit-card" size={18} style={{ color: 'var(--blue-600)' }} />
+                <div style={{ flex: 1, minWidth: 0 }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{BANK.bank} · {BANK.holder}</div><div className="code" style={{ font: '12px var(--font-mono)', color: 'var(--text-muted)' }}>•••• •••• {BANK.number.slice(-4)}</div></div>
+                <Badge variant="mint" icon="badge-check">Đã xác minh</Badge>
+              </div>
+              {step === 'form'
+                ? <div>
+                    <Input label="Số tiền cần rút (₫)" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/\D/g, '')); setErr(''); }} error={err} placeholder="Tối thiểu 100.000" />
+                    <button onClick={() => setAmount(String(balance))} style={{ marginTop: 6, border: 0, padding: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>Rút toàn bộ</button>
+                  </div>
+                : <div><Input label={'Mã OTP gửi tới email để xác nhận rút ' + formatVND(n)} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Nhập đủ 6 số" /></div>}
+            </div>}
+      </Modal>
+    );
+  }
 
   const TYPE_BADGE = {
     SALE:    ['warning', 'Bán hàng'],
@@ -14,7 +52,22 @@
   };
 
   function Wallet() {
-    const [show, setShow] = React.useState(false);
+    const [open, setOpen] = React.useState(false);
+    const [available, setAvailable] = React.useState(WALLET.available);
+    const [rows, setRows] = React.useState(LEDGER);
+    const [filterOpen, setFilterOpen] = React.useState(false);
+    const [type, setType] = React.useState('Tất cả giao dịch');
+    const [q, setQ] = React.useState('');
+    const [toast, setToast] = React.useState('');
+    const shown = rows.filter((r) => !T_FILTER[type] || r.type === T_FILTER[type]).filter((r) => (r.ref + ' ' + r.label).toLowerCase().includes(q.trim().toLowerCase()));
+    const withdraw = (n) => {
+      setAvailable((a) => a - n);
+      setRows((rs) => [{ date: 'Vừa xong', ref: 'PAYOUT-00' + (13 + rs.length), type: 'PAYOUT', label: 'Rút tiền về ngân hàng (chờ duyệt)', gross: -n, commission: 0, net: -n, bucket: 'PAYOUT' }, ...rs]);
+      setOpen(false);
+      setToast('Lệnh rút tiền đã được tạo thành công và đang chờ kế toán sàn phê duyệt giải ngân trong 24 giờ làm việc');
+      setTimeout(() => setToast(''), 4000);
+    };
+    const exportCsv = () => downloadCsv('so-giao-dich-vi.csv', [['Thời gian', 'Mã tham chiếu', 'Loại', 'Diễn giải', 'Gross', 'Hoa hồng', 'Net'], ...shown.map((r) => [r.date, r.ref, TYPE_BADGE[r.type][1], r.label, r.gross, r.commission, r.net])]);
 
     return (
       <div style={{ maxWidth: 1180 }}>
@@ -26,9 +79,9 @@
               <Icon name="wallet" size={18} style={{ color: 'var(--mint-500)' }} />
               <span style={{ font: '600 13px var(--font-sans)', color: 'rgba(255,255,255,.78)' }}>Số dư khả dụng</span>
             </div>
-            <div style={{ font: '800 30px var(--font-sans)', margin: '12px 0 4px', fontVariantNumeric: 'tabular-nums' }}>{formatVND(WALLET.available)}</div>
+            <div style={{ font: '800 30px var(--font-sans)', margin: '12px 0 4px', fontVariantNumeric: 'tabular-nums' }}>{formatVND(available)}</div>
             <div style={{ font: '12px var(--font-sans)', color: 'rgba(255,255,255,.6)' }}>Có thể rút về ngân hàng</div>
-            <Button block style={{ marginTop: 16 }} iconLeft="hand-coins">Yêu cầu rút tiền</Button>
+            <Button block style={{ marginTop: 16 }} iconLeft="hand-coins" onClick={() => setOpen(true)}>Yêu cầu rút tiền</Button>
           </div>
           {/* held / escrow */}
           <div style={{ ...bal, border: '1px solid var(--amber-200, #FCE3B0)', background: 'var(--amber-50)' }}>
@@ -77,10 +130,14 @@
             <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Sổ giao dịch ví</span>
             <Badge variant="neutral"><Icon name="lock" size={11} /> Append-only</Badge>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-              <Button variant="ghost" size="sm" iconLeft="sliders-horizontal">Lọc</Button>
-              <Button variant="secondary" size="sm" iconLeft="download">Xuất CSV</Button>
+              <Button variant="ghost" size="sm" iconLeft="sliders-horizontal" onClick={() => setFilterOpen((o) => !o)}>Lọc</Button>
+              <Button variant="secondary" size="sm" iconLeft="download" onClick={exportCsv}>Xuất CSV</Button>
             </div>
           </div>
+          {filterOpen && <div style={{ display: 'flex', gap: 12, padding: '12px 20px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--gray-25)' }}>
+            <div style={{ width: 200 }}><Select value={type} onChange={(e) => setType(e.target.value)}>{Object.keys(T_FILTER).map((k) => <option key={k}>{k}</option>)}</Select></div>
+            <div style={{ flex: 1, maxWidth: 320 }}><Input iconLeft="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Mã đơn, diễn giải..." /></div>
+          </div>}
           <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 880, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
             <thead>
@@ -90,7 +147,8 @@
               </tr>
             </thead>
             <tbody>
-              {LEDGER.map((r, i) => {
+              {shown.length === 0 && <tr><td colSpan="8" style={{ padding: 36, textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Chưa có giao dịch nào trong tháng này</td></tr>}
+              {shown.map((r, i) => {
                 const [bv, bl] = TYPE_BADGE[r.type];
                 const neg = r.net < 0;
                 return (
@@ -115,6 +173,8 @@
           </table>
           </div>
         </div>
+        {open && <WithdrawModal balance={available} onClose={() => setOpen(false)} onDone={withdraw} onGoSettings={() => { window.location.search = '?screen=settings'; }} />}
+        {toast && <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', maxWidth: '80vw', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 1000 }}>{toast}</div>}
       </div>
     );
   }

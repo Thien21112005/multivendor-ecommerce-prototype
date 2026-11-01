@@ -19,8 +19,13 @@
     const [proposals, setProposals] = React.useState(SEED);
     const [form, setForm] = React.useState(null);
     const toggle = (n) => setOpen((s) => { const x = new Set(s); x.has(n) ? x.delete(n) : x.add(n); return x; });
+    const [dup, setDup] = React.useState('');
+    const allNames = TREE.flatMap((c) => [c.name, ...c.children.map((s) => s.name)]);
     const submit = () => {
       if (!form.name.trim()) return;
+      const hit = allNames.find((n) => n.toLowerCase() === form.name.trim().toLowerCase());
+      if (hit) { setDup('Danh mục "' + hit + '" đã có sẵn, hãy dùng danh mục này.'); return; }
+      setDup('');
       setProposals((p) => [{ id: 'CP-0' + (82 + p.length), name: form.name.trim(), parent: form.parent, state: 'PENDING', at: 'Hôm nay' }, ...p]);
       setForm(null);
     };
@@ -54,7 +59,7 @@
         <div style={card}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
             <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Đề xuất của Shop</span>
-            <Button size="sm" iconLeft="plus" style={{ marginLeft: 'auto' }} onClick={() => setForm({ name: '', parent: TREE[0].name, why: '' })}>Đề xuất danh mục</Button>
+            <Button size="sm" iconLeft="plus" style={{ marginLeft: 'auto' }} onClick={() => { setDup(''); setForm({ name: '', parent: '— Danh mục gốc mới', why: '' }); }}>Đề xuất danh mục mới</Button>
           </div>
           {proposals.map((p) => (
             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 0', borderTop: '1px solid var(--border-subtle)' }}>
@@ -72,8 +77,9 @@
           {form && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <Input label="Tên danh mục" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="VD: Thiết bị đeo thông minh" />
-              <Select label="Danh mục cha" value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })}>{TREE.map((c) => <option key={c.name}>{c.name}</option>)}</Select>
+              <Select label="Danh mục cha" value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })}><option>— Danh mục gốc mới</option>{TREE.map((c) => <option key={c.name}>{c.name}</option>)}</Select>
               <Input label="Lý do đề xuất" value={form.why} onChange={(e) => setForm({ ...form, why: e.target.value })} placeholder="Sản phẩm của bạn chưa khớp danh mục nào?" />
+              {dup && <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--red-600)', font: 'var(--type-caption)' }}><Icon name="circle-alert" size={13} />{dup}</div>}
             </div>
           )}
         </Modal>

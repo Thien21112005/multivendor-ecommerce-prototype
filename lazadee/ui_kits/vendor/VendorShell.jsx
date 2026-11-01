@@ -149,7 +149,7 @@
                 <input placeholder="Tìm đơn, sản phẩm…" style={{ width: 260, height: 40, paddingLeft: 36, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none' }} />
               </div>
               <NotifBell />
-              <button style={ico} aria-label="Trợ giúp"><Icon name="circle-help" size={20} /></button>
+              <button style={ico} aria-label="Trợ giúp" onClick={() => { window.location.href = '../storefront/index.html?screen=page&id=help-center'; }}><Icon name="circle-help" size={20} /></button>
               <div style={{ width: 1, height: 28, background: 'var(--border-default)', margin: '0 4px' }} />
               <AccountMenu onNav={onNav} />
             </div>

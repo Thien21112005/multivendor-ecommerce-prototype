@@ -36,6 +36,7 @@
     const [files, setFiles] = React.useState({});
     const [selfie, setSelfie] = React.useState(null);
     const [camOpen, setCamOpen] = React.useState(false);
+    const [draftMsg, setDraftMsg] = React.useState('');
     const [note, setNote] = React.useState('');
     const pick = (key, e) => {
       const f = e.target.files[0]; e.target.value = '';
@@ -57,7 +58,7 @@
     const isIndividual = formData.businessType === 'Cá nhân';
     const submit = () => {
       if (state !== 'VERIFIED' && !selfie) { setNote('Hồ sơ chưa hoàn thiện: vui lòng bổ sung ảnh chân dung (selfie).'); return; }
-      setNote(''); setState('PENDING');
+      setNote(''); setState('PENDING'); setDraftMsg('Hồ sơ của bạn đã được tiếp nhận và đang được thẩm định tự động');
       if (onSubmit) onSubmit(formData);
     };
     const docs = [
@@ -164,9 +165,10 @@
         </div>
         {camOpen && <CameraModal onClose={() => setCamOpen(false)} onShot={(src) => { setSelfie(src); setCamOpen(false); }} />}
 
+        {draftMsg && <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12, color: 'var(--mint-600)', font: 'var(--type-body-sm)' }}><Icon name="circle-check" size={16} />{draftMsg}</div>}
         {state !== 'VERIFIED' && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button variant="ghost">Lưu nháp</Button>
+            <Button variant="ghost" onClick={() => setDraftMsg('Đã lưu nháp hồ sơ')}>Lưu nháp</Button>
             <Button iconLeft="send" onClick={submit}>{state === 'REJECTED' || state === 'SUPPLEMENT_REQUESTED' ? 'Gửi lại hồ sơ' : 'Gửi duyệt KYC'}</Button>
           </div>
         )}

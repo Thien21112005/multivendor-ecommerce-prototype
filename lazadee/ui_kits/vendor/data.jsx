@@ -47,6 +47,17 @@
     { id: 'vn4', title: 'Sản phẩm bị từ chối', body: '"Camera Mirrorless X-100" thiếu giấy tờ chứng thực. Vui lòng bổ sung và gửi duyệt lại.', date: '05/06/2026 11:40', unread: false, icon: 'triangle-alert' },
   ];
 
+  // Payout account, shared between Cài đặt and the withdrawal form (UC-VND-07 → UC-ADM-04).
+  const BANK = { bank: 'Vietcombank', holder: 'TECHZONE OFFICIAL', number: '0071000006712', verified: true };
+  const KYC_NAME = 'TECHZONE OFFICIAL';
+
+  const downloadCsv = (name, rows) => {
+    const text = rows.map((r) => r.map((v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const SALES_7D = [
     { d: 'T2', v: 4.2 }, { d: 'T3', v: 5.8 }, { d: 'T4', v: 5.1 }, { d: 'T5', v: 7.4 },
     { d: 'T6', v: 9.2 }, { d: 'T7', v: 11.6 }, { d: 'CN', v: 8.9 },
@@ -74,5 +85,5 @@
     { id: 'settings', name: 'Cài đặt', icon: 'settings' },
   ];
 
-  window.LZV = { SHOP, WALLET, LEDGER, SALES_7D, SALES, ORDERS, NAV, NOTIFICATIONS, PRODUCT_COUNTS, ORDER_COUNTS, ghnStatus };
+  window.LZV = { SHOP, WALLET, LEDGER, SALES_7D, SALES, ORDERS, NAV, NOTIFICATIONS, PRODUCT_COUNTS, ORDER_COUNTS, ghnStatus, BANK, KYC_NAME, downloadCsv };
 })();

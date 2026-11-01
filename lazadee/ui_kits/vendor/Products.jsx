@@ -474,6 +474,8 @@
   /* ---- SECTION 6: shipping ---- */
   function ShippingInfo() {
     const [payer, setPayer] = React.useState('buyer');
+    const [preOrder, setPreOrder] = React.useState(false);
+    const [preDays, setPreDays] = React.useState('14');
     const dimInput = { width: '100%', height: 44, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '0 12px', font: 'var(--type-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--text-strong)' };
     return (
       <div style={card}>
@@ -510,6 +512,11 @@
             </div>
           </div>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
+          <Switch checked={preOrder} onChange={() => setPreOrder((v) => !v)} />
+          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Đặt trước (Pre-order)</span>
+          {preOrder && <><input aria-label="Số ngày chuẩn bị" value={preDays} onChange={(e) => setPreDays(e.target.value.replace(/\D/g, ''))} style={{ width: 70, height: 36, border: '1.5px solid ' + (Number(preDays) < 7 || Number(preDays) > 30 ? 'var(--red-500)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', padding: '0 10px', font: 'var(--type-body-sm)', outline: 'none' }} /><span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>ngày chuẩn bị (7–30 ngày)</span></>}
+        </div>
       </div>
     );
   }
@@ -522,6 +529,7 @@
     const [docsError, setDocsError] = React.useState(false);
     const [reReview, setReReview] = React.useState(false);
     const [cancelOpen, setCancelOpen] = React.useState(false);
+    const viewOnly = product && (product.state === 'PENDING_APPROVAL');
     const publish = () => {
       if (docs.length === 0) { setDocsError(true); window.scrollTo(0, 0); return; }
       if (editingLive) { setReReview(true); return; }
@@ -529,8 +537,9 @@
     };
     return (
       <div style={{ maxWidth: 1180 }}>
+        {viewOnly && <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--amber-50)', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: 14, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Icon name="clock" size={18} style={{ color: 'var(--amber-600)', flex: 'none' }} />Sản phẩm đang chờ duyệt. Bạn chỉ có thể xem thông tin, không sửa được.</div>}
         {product && product.state === 'REJECTED' && <div style={{ display: 'flex', gap: 12, background: 'var(--red-50, #FDECEA)', border: '1px solid var(--red-300, #F3B0A8)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}><Icon name="triangle-alert" size={22} style={{ color: 'var(--red-600)', flex: 'none' }} /><div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Sản phẩm bị từ chối</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginTop: 2 }}>Lý do: {product.rejectReason}. Sửa rồi gửi lại để được duyệt.</div></div></div>}
-        <button onClick={() => setCancelOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 14 }}><Icon name="chevron-left" size={16} /> Quay lại danh sách</button>
+        <button onClick={() => (viewOnly ? onClose() : setCancelOpen(true))} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 14 }}><Icon name="chevron-left" size={16} /> Quay lại danh sách</button>
         <ImageUpload />
         <LegalDocs docs={docs} setDocs={(u) => { setDocs(u); setDocsError(false); }} hasError={docsError} />
         <BasicInfo category={category} onCategory={setCategory} />
@@ -538,7 +547,7 @@
         <RichDescription />
         <VariantSection />
         <ShippingInfo />
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: viewOnly ? 'none' : 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <Button variant="secondary" iconLeft="file-text" onClick={() => onSaved('Đã lưu nháp sản phẩm')}>Lưu nháp</Button>
           <Button iconLeft="check" disabled={kycStatus !== 'VERIFIED'} onClick={publish}>{product ? 'Lưu & gửi duyệt' : 'Đăng bán'}</Button>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)' }}>
@@ -567,7 +576,8 @@
     const [toast, setToast] = React.useState('');
     const say = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
     if (editing) return <Editor product={editing.name ? editing : null} onClose={() => setEditing(null)} onSaved={(m) => { setEditing(null); say(m); }} />;
-    const STATE_TAB = { pub: 'PUBLISHED', draft: 'DRAFT', wait: 'PENDING_APPROVAL', bad: 'REJECTED' };
+    const STATE_TAB = { pub: 'PUBLISHED', draft: 'DRAFT', wait: 'PENDING_APPROVAL', bad: 'REJECTED', hidden: 'HIDDEN' };
+    const setHidden = (p, hide) => { setRows((r) => r.map((x) => (x === p ? { ...x, state: hide ? 'HIDDEN' : 'PUBLISHED' } : x))); say(hide ? 'Đã tạm ẩn sản phẩm khỏi sàn' : 'Đã mở bán lại sản phẩm'); };
     const list = rows.filter((p) => tab === 'all' || p.state === STATE_TAB[tab]);
     const n = (s) => rows.filter((p) => p.state === s).length;
     return (
@@ -580,6 +590,7 @@
               { id: 'draft', label: 'Bản nháp', badge: n('DRAFT') },
               { id: 'wait', label: 'Chờ duyệt', badge: n('PENDING_APPROVAL') },
               { id: 'bad', label: 'Không hợp lệ', badge: n('REJECTED') },
+              { id: 'hidden', label: 'Đã ẩn', badge: n('HIDDEN') || undefined },
             ]} />
           </div>
           <Button iconLeft="plus-circle" onClick={() => setEditing({})}>Thêm sản phẩm</Button>
@@ -597,8 +608,8 @@
                   <td style={{ ...td, textAlign: 'right', fontWeight: 600, color: 'var(--text-price)' }}>{formatVND(p.price)}</td>
                   <td style={{ ...td, textAlign: 'right', color: p.stock === 0 ? 'var(--red-600)' : 'var(--text-body)', fontWeight: p.stock === 0 ? 600 : 400 }}>{p.stock === 0 ? 'Hết' : p.stock}</td>
                   <td style={{ ...td, textAlign: 'right', color: 'var(--text-muted)' }}>{p.sold}</td>
-                  <td style={td}>{p.state === 'PUBLISHED' ? <Badge variant="success" icon="circle-check">Đang bán</Badge> : p.state === 'PENDING_APPROVAL' ? <Badge variant="warning" icon="clock">Chờ duyệt</Badge> : p.state === 'REJECTED' ? <Badge variant="danger" icon="triangle-alert">Không hợp lệ</Badge> : <Badge variant="neutral" icon="file-text">Nháp</Badge>}</td>
-                  <td style={{ ...td, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(p)}>Sửa</Button><Button variant="ghost" size="sm" iconLeft="trash-2" style={{ color: 'var(--red-600)' }} onClick={() => setDel(p)}>Xóa</Button></div></td>
+                  <td style={td}>{p.state === 'PUBLISHED' ? <Badge variant="success" icon="circle-check">Đang bán</Badge> : p.state === 'PENDING_APPROVAL' ? <Badge variant="warning" icon="clock">Chờ duyệt</Badge> : p.state === 'REJECTED' ? <Badge variant="danger" icon="triangle-alert">Không hợp lệ</Badge> : p.state === 'HIDDEN' ? <Badge variant="neutral" icon="eye-off">Đã ẩn</Badge> : <Badge variant="neutral" icon="file-text">Nháp</Badge>}</td>
+                  <td style={{ ...td, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button variant="ghost" size="sm" iconLeft={p.state === 'PENDING_APPROVAL' ? 'eye' : 'pencil'} onClick={() => setEditing(p)}>{p.state === 'PENDING_APPROVAL' ? 'Xem' : 'Sửa'}</Button>{p.state === 'PUBLISHED' && <Button variant="ghost" size="sm" iconLeft="eye-off" onClick={() => setHidden(p, true)}>Ẩn</Button>}{p.state === 'HIDDEN' && <Button variant="ghost" size="sm" iconLeft="eye" onClick={() => setHidden(p, false)}>Hiện</Button>}<Button variant="ghost" size="sm" iconLeft="trash-2" style={{ color: 'var(--red-600)' }} onClick={() => setDel(p)}>Xóa</Button></div></td>
                 </tr>
               ))}
             </tbody>

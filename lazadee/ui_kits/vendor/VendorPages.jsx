@@ -19,6 +19,21 @@
   function Promo() {
     const [voucherModal, setVoucherModal] = React.useState(null); // null | {} | voucher
     const [confirmOff, setConfirmOff] = React.useState(null);
+    const FLASH_PRODUCTS = [{ sku: 'ANC5-BLK', name: 'Tai nghe ANC Pro 5', price: 389000, stock: 38 }, { sku: 'WS2-BLK', name: 'Đồng hồ Watch S2', price: 690000, stock: 12 }, { sku: 'KB-BLUE', name: 'Bàn phím cơ RGB', price: 459000, stock: 54 }];
+    const [flashOpen, setFlashOpen] = React.useState(false);
+    const [fp, setFp] = React.useState({ sku: FLASH_PRODUCTS[0].sku, price: '', stock: '' });
+    const [fpErr, setFpErr] = React.useState({});
+    const [registered, setRegistered] = React.useState([]);
+    const fSel = FLASH_PRODUCTS.find((p) => p.sku === fp.sku);
+    const registerFlash = () => {
+      const e = {};
+      if (!fp.price || Number(fp.price) > fSel.price * 0.85) e.price = 'Giá Flash phải thấp hơn giá bán 30 ngày ít nhất 15% (tối đa ' + fmt(Math.floor(fSel.price * 0.85)) + ')';
+      if (!fp.stock || Number(fp.stock) <= 0 || Number(fp.stock) > fSel.stock) e.stock = 'Số suất phải từ 1 đến ' + fSel.stock;
+      setFpErr(e);
+      if (Object.keys(e).length) return;
+      setRegistered((r) => [...r.filter((x) => x.sku !== fp.sku), { ...fp, name: fSel.name }]);
+      setFp({ sku: fp.sku, price: '', stock: '' });
+    };
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
@@ -33,8 +48,22 @@
             <div style={{ font: 'var(--weight-bold) var(--text-lg) var(--font-sans)' }}>FLASH SALE 12.12 — Đăng ký gian hàng</div>
             <div style={{ font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.9)' }}>Hạn đăng ký: 10/06/2026 · Chọn tối đa 20 sản phẩm tham gia khung giờ vàng.</div>
           </div>
-          <Button variant="secondary">Đăng ký ngay</Button>
+          <Button variant="secondary" onClick={() => { setFpErr({}); setFlashOpen(true); }}>{registered.length ? 'Đã đăng ký ' + registered.length + ' SP' : 'Đăng ký ngay'}</Button>
         </div>
+        <Modal open={flashOpen} onClose={() => setFlashOpen(false)} width={520} title="Đăng ký Flash Sale 12.12"
+          footer={<><Button variant="ghost" onClick={() => setFlashOpen(false)}>Đóng</Button><Button iconLeft="plus" onClick={registerFlash}>Thêm sản phẩm</Button></>}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Select label="Sản phẩm / SKU" value={fp.sku} onChange={(e) => setFp({ ...fp, sku: e.target.value })}>{FLASH_PRODUCTS.map((p) => <option key={p.sku} value={p.sku}>{p.name} ({fmt(p.price)})</option>)}</Select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <Input label="Giá Flash Sale (₫)" value={fp.price} onChange={(e) => setFp({ ...fp, price: e.target.value.replace(/\D/g, '') })} error={fpErr.price} />
+              <Input label={'Số suất (tồn ' + fSel.stock + ')'} value={fp.stock} onChange={(e) => setFp({ ...fp, stock: e.target.value.replace(/\D/g, '') })} error={fpErr.stock} />
+            </div>
+            {registered.length > 0 && <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 10 }}>
+              <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 6 }}>Đã đăng ký, chờ sàn duyệt</div>
+              {registered.map((r) => <div key={r.sku} style={{ display: 'flex', justifyContent: 'space-between', font: 'var(--type-body-sm)', color: 'var(--text-body)', padding: '3px 0' }}><span>{r.name}</span><span>{fmt(Number(r.price))} · {r.stock} suất</span></div>)}
+            </div>}
+          </div>
+        </Modal>
 
         {/* KPI mini */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
@@ -219,7 +248,11 @@
       </div>
     );
   }
+  const REPORT_REASONS = ['Spam / chuyển hướng giao dịch', 'Ngôn từ thô tục, xúc phạm', 'Mua giả, không phải người mua thật'];
   function ReviewCard({ r, onReply }) {
+    const [reportOpen, setReportOpen] = React.useState(false);
+    const [reported, setReported] = React.useState(false);
+    const [why, setWhy] = React.useState(REPORT_REASONS[0]);
     const [open, setOpen] = React.useState(false);
     const [text, setText] = React.useState('');
     return (
@@ -230,6 +263,12 @@
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{r.user}</span>
               <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginLeft: 'auto' }}>{r.date}</span>
+              <button disabled={reported} onClick={() => setReportOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: reported ? 'var(--text-subtle)' : 'var(--red-600)', font: '600 12px var(--font-sans)', cursor: reported ? 'default' : 'pointer' }}><Icon name="triangle-alert" size={13} />{reported ? 'Đã báo cáo' : 'Báo cáo'}</button>
+              <Modal open={reportOpen} onClose={() => setReportOpen(false)} width={440} title="Báo cáo đánh giá vi phạm"
+                footer={<><Button variant="ghost" onClick={() => setReportOpen(false)}>Huỷ</Button><Button variant="danger" onClick={() => { setReported(true); setReportOpen(false); }}>Gửi báo cáo</Button></>}>
+                <Select label="Lý do" value={why} onChange={(e) => setWhy(e.target.value)}>{REPORT_REASONS.map((x) => <option key={x}>{x}</option>)}</Select>
+                <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.5 }}>Báo cáo chỉ là tín hiệu ưu tiên. Quyết định ẩn đánh giá do nhân viên kiểm duyệt của sàn đưa ra.</div>
+              </Modal>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 2, margin: '3px 0' }}>{Array.from({ length: 5 }).map((_, i) => <Icon key={i} name="star" size={14} style={{ color: i < r.rating ? 'var(--gold-500)' : 'var(--gray-300)' }} />)}</div>
             <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 6 }}>{r.product} · Phân loại: {r.variant}</div>
@@ -285,6 +324,11 @@
           <MiniStat icon="user" tone={{ bg: 'var(--purple-50)', fg: 'var(--purple-600, #6C2BD9)' }} label="Lượt truy cập" value="8.420" delta="+12%" />
           <MiniStat icon="percent" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Tỉ lệ chuyển đổi" value="3,7%" delta="+0,4%" />
         </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
+          <MiniStat icon="ban" tone={{ bg: 'var(--red-50, #FDECEA)', fg: 'var(--red-600)' }} label="Tỉ lệ hủy của shop" value="1,8%" />
+          <MiniStat icon="triangle-alert" tone={{ bg: 'var(--amber-50)', fg: 'var(--amber-600)' }} label="Khiếu nại thua" value="1" />
+          <MiniStat icon="clock" tone={{ bg: 'var(--gray-100)', fg: 'var(--gray-600)' }} label="Đơn chậm xác nhận" value="2" />
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 16, marginBottom: 16 }}>
           <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px' }}>
             <div style={{ display: 'flex', marginBottom: 18 }}><span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Doanh thu theo ngày</span><span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>triệu ₫</span></div>
@@ -336,18 +380,44 @@
   function Settings() {
     const [t, setT] = React.useState({ autoReply: true, vacation: false, freeship: true, preorder: false });
     const tog = (k) => setT((s) => ({ ...s, [k]: !s[k] }));
+    const [cover, setCover] = React.useState('../../assets/img/banner-tech.jpg');
+    const [logo, setLogo] = React.useState(null);
+    const coverRef = React.useRef(null);
+    const logoRef = React.useRef(null);
+    const pickImg = (fn, maxMb) => (e) => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; if (f.size > maxMb * 1048576) { say('Ảnh vượt quá ' + maxMb + ' MB'); return; } fn(URL.createObjectURL(f)); };
+    const [freeFrom, setFreeFrom] = React.useState('99000');
+    const [shopName, setShopName] = React.useState('TechZone Official');
+    const [shopDesc, setShopDesc] = React.useState('Thiết bị công nghệ chính hãng — bảo hành 12 tháng.');
+    const [vacOpen, setVacOpen] = React.useState(false);
+    const [vacUntil, setVacUntil] = React.useState('');
+    const [vacMsg, setVacMsg] = React.useState('Shop đang tạm nghỉ, sẽ trả lời bạn khi mở lại nhé!');
+    const [pendingOrders, setPendingOrders] = React.useState(['ORD-2412-0046', 'ORD-2412-0045']);
+    const [ghnId, setGhnId] = React.useState('GHN-884120');
+    const [bankStep, setBankStep] = React.useState('form');
+    const [bankOtp, setBankOtp] = React.useState('');
+    const [bankErr, setBankErr] = React.useState('');
+    const [delOtp, setDelOtp] = React.useState('');
+    const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/\s+/g, ' ').trim();
+    const resetAll = () => { setShopName('TechZone Official'); setShopDesc('Thiết bị công nghệ chính hãng — bảo hành 12 tháng.'); setCover('../../assets/img/banner-tech.jpg'); setLogo(null); setFreeFrom('99000'); say('Đã hoàn tác các thay đổi chưa lưu'); };
     const [toast, setToast] = React.useState('');
     const say = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
     const [pickup, setPickup] = React.useState({ phone: '0912 345 678', province: 'TP. Hồ Chí Minh', district: 'Q.7', ward: 'P. Tân Phong', line: 'Kho TechZone, 88 Nguyễn Văn Linh' });
     const setP = (k, v) => setPickup((p) => ({ ...p, [k]: v }));
     const [greeting, setGreeting] = React.useState('Chào bạn, shop có thể giúp gì cho bạn?');
     const [away, setAway] = React.useState('Hiện tại shop đang bận, sẽ trả lời bạn sớm nhất có thể.');
-    const [bank, setBank] = React.useState({ bank: 'Vietcombank', holder: 'TECHZONE OFFICIAL', number: '0071000006712' });
+    const { BANK, KYC_NAME } = window.LZV;
+    const [bank, setBank] = React.useState(BANK.number ? { ...BANK } : null);
     const [bankForm, setBankForm] = React.useState(null);
     const [delBank, setDelBank] = React.useState(false);
     const saveBank = () => {
-      if (!bankForm.bank || !bankForm.holder.trim() || !bankForm.number.trim()) { say('Vui lòng điền đủ thông tin'); return; }
-      setBank({ ...bankForm, holder: bankForm.holder.toUpperCase() }); setBankForm(null); say('Lưu tài khoản thành công');
+      if (bankStep === 'form') {
+        if (!bankForm.bank || !bankForm.holder.trim() || !bankForm.number.trim()) { setBankErr('Vui lòng điền đủ thông tin'); return; }
+        if (norm(bankForm.holder) !== norm(KYC_NAME)) { setBankErr('Tên chủ tài khoản không khớp họ tên trên CCCD / GPKD (' + KYC_NAME + ')'); return; }
+        setBankErr(''); setBankOtp(''); setBankStep('otp'); return;
+      }
+      const saved = { ...bankForm, holder: norm(bankForm.holder), verified: true };
+      Object.assign(BANK, saved);
+      setBank(saved); setBankForm(null); setBankStep('form'); say('Lưu tài khoản thành công');
     };
     return (
       <div style={{ maxWidth: 1180 }}>
@@ -359,7 +429,7 @@
             <div style={{ marginBottom: 18 }}>
               <label style={lab}>Ảnh bìa Shop</label>
               <div style={{ position: 'relative', marginTop: 8, height: 150, borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'linear-gradient(120deg, #1E232E, #3a4250)', border: '1px solid var(--border-subtle)' }}>
-                <img src="../../assets/img/banner-tech.jpg" alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
+                <img src={cover} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(20,23,31,.55), rgba(20,23,31,.1))' }} />
                 {/* logo overlapping a corner, like a real marketplace */}
                 <div style={{ position: 'absolute', left: 16, bottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -367,21 +437,23 @@
                   <span style={{ color: '#fff', font: 'var(--weight-bold) var(--text-base) var(--font-sans)', textShadow: '0 1px 3px rgba(0,0,0,.4)' }}>TechZone Official</span>
                 </div>
                 <div style={{ position: 'absolute', right: 12, top: 12 }}>
-                  <Button size="sm" variant="secondary" iconLeft="upload">Tải ảnh bìa</Button>
+                  <input ref={coverRef} type="file" hidden accept="image/jpeg,image/png" onChange={pickImg(setCover, 2)} />
+                  <Button size="sm" variant="secondary" iconLeft="upload" onClick={() => coverRef.current.click()}>Tải ảnh bìa</Button>
                 </div>
               </div>
               <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 6 }}>Khuyến nghị 1200×300px (tỉ lệ 4:1), JPG/PNG, tối đa 2 MB. Ảnh bìa hiển thị ở đầu trang Shop.</div>
             </div>
             <div style={{ display: 'flex', gap: 18 }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 84, height: 84, borderRadius: 'var(--radius-lg)', background: '#1E232E', color: '#fff', display: 'grid', placeItems: 'center', font: '800 36px var(--font-sans)' }}>T</div>
-                <Button size="sm" variant="outline" iconLeft="upload">Đổi logo</Button>
+                <div style={{ width: 84, height: 84, borderRadius: 'var(--radius-lg)', background: '#1E232E', color: '#fff', display: 'grid', placeItems: 'center', font: '800 36px var(--font-sans)', overflow: 'hidden' }}>{logo ? <img src={logo} alt="Logo shop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'T'}</div>
+                <input ref={logoRef} type="file" hidden accept="image/jpeg,image/png" onChange={pickImg(setLogo, 1)} />
+                <Button size="sm" variant="outline" iconLeft="upload" onClick={() => logoRef.current.click()}>Đổi logo</Button>
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <Input label="Tên Shop" defaultValue="TechZone Official" />
+                <Input label="Tên Shop" value={shopName} onChange={(e) => setShopName(e.target.value)} />
                 <div>
                   <label style={lab}>Mô tả Shop</label>
-                  <textarea defaultValue="Thiết bị công nghệ chính hãng — bảo hành 12 tháng." rows={2} style={{ width: '100%', marginTop: 6, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '9px 12px', font: 'var(--type-body)', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                  <textarea value={shopDesc} onChange={(e) => setShopDesc(e.target.value)} rows={2} style={{ width: '100%', marginTop: 6, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '9px 12px', font: 'var(--type-body)', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
                 </div>
               </div>
             </div>
@@ -393,7 +465,8 @@
               {[['GHN — Giao Hàng Nhanh', true, 'Đối tác 3PL'], ['GHTK — Giao Hàng Tiết Kiệm', true, 'Đối tác 3PL'], ['ViettelPost', false, 'Đối tác 3PL'], ['J&T Express', false, 'Đối tác 3PL'], ['Lazadee Express', false, 'Giao nội thành · FBL (Fulfillment by Lazadee)']].map(([name, on, desc]) => (
                 <ToggleRow key={name} label={name} desc={desc} on={on} />
               ))}
-              <ToggleRow label="Miễn phí vận chuyển" desc="Cho đơn từ 99.000₫" on={t.freeship} onToggle={() => tog('freeship')} />
+              <ToggleRow label="Miễn phí vận chuyển" desc="Shop tự chịu phí ship khi đơn đạt mức dưới đây" on={t.freeship} onToggle={() => tog('freeship')} />
+              {t.freeship && <div style={{ width: 240, padding: '10px 0' }}><Input label="Miễn phí vận chuyển cho đơn từ (₫)" value={freeFrom} onChange={(e) => setFreeFrom(e.target.value.replace(/\D/g, ''))} /></div>}
             </div>
           </Section>
 
@@ -406,7 +479,7 @@
               <Select label="Phường / Xã" value={pickup.ward} onChange={(e) => setP('ward', e.target.value)}>{['P. Tân Phong', 'P. Tân Hưng', 'P. Tân Quy'].map((c) => <option key={c}>{c}</option>)}</Select>
             </div>
             <div style={{ marginTop: 14 }}><Input label="Địa chỉ chi tiết" value={pickup.line} onChange={(e) => setP('line', e.target.value)} /></div>
-            <div style={{ marginTop: 14 }}><Button size="sm" iconLeft="check" onClick={() => say('Đã lưu địa chỉ lấy hàng thành công!')}>Lưu địa chỉ</Button></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}><Button size="sm" iconLeft="check" onClick={() => { setGhnId('GHN-' + (884000 + pickup.line.length)); say('Đã lưu địa chỉ lấy hàng thành công!'); }}>Lưu và Đồng bộ với GHN</Button><span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>GHN Shop ID: <b className="code">{ghnId}</b></span></div>
           </Section>
 
           {/* payout bank */}
@@ -419,10 +492,10 @@
                   <div className="code" style={{ font: '13px var(--font-mono)', color: 'var(--text-muted)' }}>•••• •••• {bank.number.slice(-4)}</div>
                 </div>
                 <Badge variant="mint" icon="badge-check">Đã xác minh</Badge>
-                <Button size="sm" variant="ghost" onClick={() => setBankForm({ ...bank })}>Thay đổi</Button>
-                <Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setDelBank(true)}>Xóa</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setBankErr(''); setBankStep('form'); setBankForm({ ...bank }); }}>Thay đổi</Button>
+                <Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => { setDelOtp(''); setDelBank(true); }}>Xóa</Button>
               </div>
-            ) : <Button variant="outline" iconLeft="plus" onClick={() => setBankForm({ bank: 'Vietcombank', holder: '', number: '' })}>Thêm tài khoản nhận tiền</Button>}
+            ) : <Button variant="outline" iconLeft="plus" onClick={() => { setBankErr(''); setBankStep('form'); setBankForm({ bank: 'Vietcombank', holder: '', number: '' }); }}>Thêm tài khoản nhận tiền</Button>}
           </Section>
 
           {/* preferences */}
@@ -437,28 +510,51 @@
                 </div>
               )}
               <ToggleRow label="Cho phép đặt trước (Pre-order)" desc="Bán sản phẩm chưa có sẵn hàng" on={t.preorder} onToggle={() => tog('preorder')} />
-              <ToggleRow label="Chế độ nghỉ (Vacation)" desc="Tạm ẩn toàn bộ sản phẩm khỏi sàn" on={t.vacation} onToggle={() => tog('vacation')} danger />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Chế độ nghỉ (Vacation)</div>
+                  <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{t.vacation ? 'Đang nghỉ, mở lại ngày ' + vacUntil + '. Sản phẩm hiện nhãn "Shop đang tạm nghỉ" và khóa nút mua.' : 'Sản phẩm vẫn hiển thị nhưng khách không mua được'}</div>
+                </div>
+                <Switch checked={t.vacation} onChange={() => { if (t.vacation) tog('vacation'); else setVacOpen(true); }} />
+              </div>
             </div>
           </Section>
 
           <SecuritySection />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-            <Button variant="ghost">Huỷ</Button>
+            <Button variant="ghost" onClick={resetAll}>Huỷ</Button>
             <Button iconLeft="check" onClick={() => say('Đã lưu cài đặt')}>Lưu cài đặt</Button>
           </div>
         </div>
         <Modal open={!!bankForm} onClose={() => setBankForm(null)} title="Cập nhật tài khoản nhận tiền"
-          footer={<><Button variant="ghost" onClick={() => setBankForm(null)}>Huỷ</Button><Button iconLeft="check" onClick={saveBank}>Lưu tài khoản</Button></>}>
+          footer={<><Button variant="ghost" onClick={() => setBankForm(null)}>Huỷ</Button><Button iconLeft="check" disabled={bankStep === 'otp' && bankOtp.length < 6} onClick={saveBank}>{bankStep === 'otp' ? 'Xác nhận & lưu' : 'Xác minh chính chủ'}</Button></>}>
           {bankForm && <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <Select label="Ngân hàng" value={bankForm.bank} onChange={(e) => setBankForm({ ...bankForm, bank: e.target.value })}>{['Vietcombank', 'Techcombank', 'BIDV', 'VietinBank', 'MB Bank', 'ACB'].map((b) => <option key={b}>{b}</option>)}</Select>
             <Input label="Tên chủ tài khoản" value={bankForm.holder} onChange={(e) => setBankForm({ ...bankForm, holder: e.target.value })} hint="Viết hoa không dấu, trùng với tên trên CCCD" />
             <Input label="Số tài khoản" value={bankForm.number} onChange={(e) => setBankForm({ ...bankForm, number: e.target.value.replace(/\D/g, '') })} />
+            {bankErr && <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--red-600)', font: 'var(--type-caption)' }}><Icon name="circle-alert" size={13} />{bankErr}</div>}
+            {bankStep === 'otp' && <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--mint-600)', font: 'var(--type-body-sm)', marginBottom: 10 }}><Icon name="badge-check" size={16} />Tên chủ tài khoản khớp hồ sơ. Nhập OTP gửi tới email để xác nhận.</div>
+              <VOtpBoxes onChange={setBankOtp} />
+            </div>}
           </div>}
         </Modal>
         <Modal open={delBank} onClose={() => setDelBank(false)} title="Xóa tài khoản"
-          footer={<><Button variant="ghost" onClick={() => setDelBank(false)}>Huỷ</Button><Button variant="danger" onClick={() => { setBank(null); setDelBank(false); say('Xóa tài khoản thành công'); }}>Xóa</Button></>}>
-          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn có chắc chắn muốn xóa tài khoản ngân hàng này không?</div>
+          footer={<><Button variant="ghost" onClick={() => setDelBank(false)}>Huỷ</Button><Button variant="danger" disabled={delOtp.length < 6} onClick={() => { setBank(null); BANK.number = ''; setDelBank(false); say('Xóa tài khoản thành công'); }}>Xóa</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', marginBottom: 12 }}>Bạn có chắc chắn muốn xóa tài khoản ngân hàng này không? Chỉ xóa được khi không có lệnh rút đang chờ. Nhập OTP gửi tới email để xác nhận:</div>
+          {delBank && <VOtpBoxes onChange={setDelOtp} />}
+        </Modal>
+        <Modal open={vacOpen} onClose={() => setVacOpen(false)} width={480} title="Bật chế độ nghỉ"
+          footer={pendingOrders.length
+            ? <><Button variant="ghost" onClick={() => setVacOpen(false)}>Đóng</Button><Button variant="secondary" onClick={() => setPendingOrders([])}>Mô phỏng: đã bàn giao hết</Button></>
+            : <><Button variant="ghost" onClick={() => setVacOpen(false)}>Huỷ</Button><Button disabled={!vacUntil} onClick={() => { setT((s) => ({ ...s, vacation: true })); setVacOpen(false); say('Đã bật chế độ nghỉ'); }}>Bật chế độ nghỉ</Button></>}>
+          {pendingOrders.length
+            ? <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Còn đơn chưa bàn giao, cần xử lý trước khi nghỉ:<ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>{pendingOrders.map((o) => <li key={o} className="code">{o}</li>)}</ul></div>
+            : <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div><label style={lab}>Mở lại ngày</label><input type="date" aria-label="Mở lại ngày" value={vacUntil} onChange={(e) => setVacUntil(e.target.value)} style={{ ...dateInput, width: '100%', marginTop: 6, boxSizing: 'border-box' }} /></div>
+                <Input label="Tin nhắn tự động khi nghỉ" value={vacMsg} onChange={(e) => setVacMsg(e.target.value)} />
+              </div>}
         </Modal>
         {toast && <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 200 }}>{toast}</div>}
       </div>
