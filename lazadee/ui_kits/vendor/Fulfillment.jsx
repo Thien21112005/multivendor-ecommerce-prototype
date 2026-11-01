@@ -12,9 +12,9 @@
     { id: 'LZD-20260608-000045', customer: 'Đinh Gia Bảo', addr: 'Thủ Đức, TP.HCM', items: [['Bàn phím cơ RGB', 'Blue switch', 1, 459000]], total: 484000, status: 'NEW', pay: 'COD', note: '', at: 45 },
     { id: 'LZD-20260608-000041', customer: 'Trần Thị Mai', addr: 'Q1, TP.HCM', items: [['Tai nghe ANC Pro 5', 'Đen / Pro', 1, 389000], ['Serum Vitamin C', '30ml', 1, 178000]], total: 778000, status: 'CONFIRMED', pay: 'VNPay', note: 'Gói kỹ giúp mình, đồ làm quà.', at: 41 },
     { id: 'LZD-20260608-000040', customer: 'Nguyễn Văn An', addr: 'Cầu Giấy, Hà Nội', items: [['Đồng hồ Watch S2', 'Navy', 1, 690000]], total: 690000, status: 'PREPARING', pay: 'VietQR', note: '', at: 40 },
-    { id: 'LZD-20260608-000038', customer: 'Lê Hoàng Phúc', addr: 'Hải Châu, Đà Nẵng', items: [['Bàn phím cơ RGB', 'Đen/Blue', 1, 459000]], total: 459000, status: 'SHIPPED', pay: 'VNPay', ghn: 'transporting', waybill: 'VN931042771', carrier: 'Lazadee Express', note: '', at: 38 },
-    { id: 'LZD-20260608-000036', customer: 'Đỗ Minh Khang', addr: 'Biên Hòa, Đồng Nai', items: [['Loa bluetooth mini IPX7', 'Đen', 2, 320000]], total: 640000, status: 'SHIPPED', pay: 'COD', ghn: 'delivering', waybill: 'VN931042698', carrier: 'GHN', note: '', at: 36 },
-    { id: 'LZD-20260608-000034', customer: 'Bùi Thu Hằng', addr: 'Ninh Kiều, Cần Thơ', items: [['Webcam Full HD', 'Đen', 1, 540000]], total: 540000, status: 'SHIPPED', pay: 'VNPay', ghn: 'delivery_fail', waybill: 'VN931042544', carrier: 'GHTK', note: '', at: 34 },
+    { id: 'LZD-20260608-000038', customer: 'Lê Hoàng Phúc', addr: 'Hải Châu, Đà Nẵng', items: [['Bàn phím cơ RGB', 'Đen/Blue', 1, 459000]], total: 459000, status: 'DELIVERING', pay: 'VNPay', ghn: 'transporting', waybill: 'VN931042771', carrier: 'J&T Express', note: '', at: 38 },
+    { id: 'LZD-20260608-000036', customer: 'Đỗ Minh Khang', addr: 'Biên Hòa, Đồng Nai', items: [['Loa bluetooth mini IPX7', 'Đen', 2, 320000]], total: 640000, status: 'DELIVERING', pay: 'COD', ghn: 'delivering', waybill: 'VN931042698', carrier: 'GHN', note: '', at: 36 },
+    { id: 'LZD-20260608-000034', customer: 'Bùi Thu Hằng', addr: 'Ninh Kiều, Cần Thơ', items: [['Webcam Full HD', 'Đen', 1, 540000]], total: 540000, status: 'DELIVERING', pay: 'VNPay', ghn: 'delivery_fail', waybill: 'VN931042544', carrier: 'GHTK', note: '', at: 34 },
     { id: 'LZD-20260608-000039', customer: 'Phạm Thu Hà', addr: 'Q7, TP.HCM', items: [['Máy ảnh Mirrorless X-100', 'Kit 15-45', 1, 1245000]], total: 1245000, status: 'DELIVERED', pay: 'VNPay', ghn: 'delivered', waybill: 'VN931042500', carrier: 'GHN', note: '', at: 39 },
     { id: 'LZD-20260608-000035', customer: 'Vũ Minh Quân', addr: 'Long Biên, Hà Nội', items: [['Sạc nhanh 65W', 'Trắng', 1, 178000]], total: 178000, status: 'CANCELLED', pay: 'VNPay', ghn: 'cancel', note: '', at: 35 },
   ];
@@ -22,7 +22,7 @@
     { id: 'ALL', label: 'Tất cả' },
     { id: 'NEW', label: 'Mới', match: ['NEW'] },
     { id: 'PREP', label: 'Chờ chuẩn bị', match: ['CONFIRMED', 'PREPARING'] },
-    { id: 'SHIPPED', label: 'Đang giao', match: ['SHIPPED'] },
+    { id: 'DELIVERING', label: 'Đang giao', match: ['DELIVERING'] },
     { id: 'DELIVERED', label: 'Đã giao', match: ['DELIVERED'] },
     { id: 'RETURN', label: 'Trả hàng' },
     { id: 'CANCELLED', label: 'Đã hủy', match: ['CANCELLED'] },
@@ -128,7 +128,7 @@
     const handOver = () => {
       setPlacing(true);
       setTimeout(() => {
-        const next = { ...route, status: 'SHIPPED', ghn: 'ready_to_pick', waybill: 'VN' + (931042800 + route.at), carrier: best.carrier };
+        const next = { ...route, status: 'DELIVERING', ghn: 'ready_to_pick', waybill: 'VN' + (931042800 + route.at), carrier: best.carrier };
         setOrder(route.id, next);
         setPlacing(false); setRoute(null); setWaybill(next);
       }, 500);

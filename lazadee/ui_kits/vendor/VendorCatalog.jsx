@@ -25,6 +25,8 @@
       if (!form.name.trim()) return;
       const hit = allNames.find((n) => n.toLowerCase() === form.name.trim().toLowerCase());
       if (hit) { setDup('Danh mục "' + hit + '" đã có sẵn, hãy dùng danh mục này.'); return; }
+      if (proposals.filter((p) => p.state === 'PENDING').length >= 5) { setDup('Mỗi shop có tối đa 5 đề xuất đang chờ duyệt.'); return; }
+      if (!form.why.trim()) { setDup('Vui lòng nhập lý do đề xuất.'); return; }
       setDup('');
       setProposals((p) => [{ id: 'CP-0' + (82 + p.length), name: form.name.trim(), parent: form.parent, state: 'PENDING', at: 'Hôm nay' }, ...p]);
       setForm(null);

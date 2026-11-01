@@ -14,6 +14,8 @@
     const [otp, setOtp] = React.useState('');
     const [err, setErr] = React.useState('');
     const n = Number(amount) || 0;
+    const [otpErr, setOtpErr] = React.useState('');
+    const confirm = () => { if (otp !== '123456') { setOtpErr('Mã OTP không đúng'); return; } onDone(n); };
     const next = () => {
       if (n < MIN_WITHDRAW) { setErr('Số tiền rút tối thiểu ' + formatVND(MIN_WITHDRAW)); return; }
       if (n > balance) { setErr('Số dư ví không đủ để thực hiện giao dịch'); return; }
@@ -23,7 +25,7 @@
       <Modal open onClose={onClose} width={460} title="Yêu cầu rút tiền"
         footer={!BANK.number ? <Button variant="ghost" onClick={onClose}>Đóng</Button> : step === 'form'
           ? <><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={next}>Tiếp tục</Button></>
-          : <><Button variant="ghost" onClick={() => setStep('form')}>Quay lại</Button><Button iconLeft="check" disabled={otp.length < 6} onClick={() => onDone(n)}>Xác nhận rút tiền</Button></>}>
+          : <><Button variant="ghost" onClick={() => setStep('form')}>Quay lại</Button><Button iconLeft="check" disabled={otp.length < 6} onClick={confirm}>Xác nhận rút tiền</Button></>}>
         {!BANK.number
           ? <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn chưa có tài khoản nhận tiền đã xác minh. <a onClick={onGoSettings} style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }}>Thêm ở Cài đặt</a> trước khi rút.</div>
           : <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -38,7 +40,7 @@
                     <Input label="Số tiền cần rút (₫)" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/\D/g, '')); setErr(''); }} error={err} placeholder="Tối thiểu 100.000" />
                     <button onClick={() => setAmount(String(balance))} style={{ marginTop: 6, border: 0, padding: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>Rút toàn bộ</button>
                   </div>
-                : <div><Input label={'Mã OTP gửi tới email để xác nhận rút ' + formatVND(n)} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Nhập đủ 6 số" /></div>}
+                : <div><Input label={'Mã OTP gửi tới email để xác nhận rút ' + formatVND(n) + ' (demo: 123456)'} value={otp} error={otpErr} onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setOtpErr(''); }} placeholder="Nhập đủ 6 số" /></div>}
             </div>}
       </Modal>
     );
@@ -58,16 +60,22 @@
     const [filterOpen, setFilterOpen] = React.useState(false);
     const [type, setType] = React.useState('Tất cả giao dịch');
     const [q, setQ] = React.useState('');
+    const [month, setMonth] = React.useState('06/2026');
+    const [pending, setPending] = React.useState(WALLET.pendingPayout);
+    const months = Array.from(new Set(LEDGER.map((r) => r.date.slice(3, 10))));
+    const latest = LEDGER.find((r) => r.type === 'SALE');
+    const rate = Math.round(latest.commission / latest.gross * 1000) / 10;
     const [toast, setToast] = React.useState('');
-    const shown = rows.filter((r) => !T_FILTER[type] || r.type === T_FILTER[type]).filter((r) => (r.ref + ' ' + r.label).toLowerCase().includes(q.trim().toLowerCase()));
+    const shown = rows.filter((r) => r.date === 'Vừa xong' || r.date.slice(3, 10) === month).filter((r) => !T_FILTER[type] || r.type === T_FILTER[type]).filter((r) => (r.ref + ' ' + r.label).toLowerCase().includes(q.trim().toLowerCase()));
     const withdraw = (n) => {
       setAvailable((a) => a - n);
+      setPending((p) => p + n);
       setRows((rs) => [{ date: 'Vừa xong', ref: 'PAYOUT-00' + (13 + rs.length), type: 'PAYOUT', label: 'Rút tiền về ngân hàng (chờ duyệt)', gross: -n, commission: 0, net: -n, bucket: 'PAYOUT' }, ...rs]);
       setOpen(false);
       setToast('Lệnh rút tiền đã được tạo thành công và đang chờ kế toán sàn phê duyệt giải ngân trong 24 giờ làm việc');
       setTimeout(() => setToast(''), 4000);
     };
-    const exportCsv = () => downloadCsv('so-giao-dich-vi.csv', [['Thời gian', 'Mã tham chiếu', 'Loại', 'Diễn giải', 'Gross', 'Hoa hồng', 'Net'], ...shown.map((r) => [r.date, r.ref, TYPE_BADGE[r.type][1], r.label, r.gross, r.commission, r.net])]);
+    const exportCsv = () => downloadCsv('so-giao-dich-vi-' + month.replace('/', '-') + '.csv', [['Thời gian', 'Mã tham chiếu', 'Loại', 'Diễn giải', 'Gross', 'Hoa hồng', 'Net'], ...shown.map((r) => [r.date, r.ref, TYPE_BADGE[r.type][1], r.label, r.gross, r.commission, r.net])]);
 
     return (
       <div style={{ maxWidth: 1180 }}>
@@ -106,21 +114,34 @@
           </div>
         </div>
 
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
+          <div style={{ ...bal, background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-muted)' }}>Chờ đối soát COD</div>
+            <div style={{ font: '800 24px var(--font-sans)', margin: '8px 0 2px', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(WALLET.codPending)}</div>
+            <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)' }}>Vào ký quỹ khi hãng vận chuyển chuyển tiền thu hộ về sàn</div>
+          </div>
+          <div style={{ ...bal, background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-muted)' }}>Đang rút</div>
+            <div style={{ font: '800 24px var(--font-sans)', margin: '8px 0 2px', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(pending)}</div>
+            <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)' }}>Lệnh rút đang chờ sàn chuyển khoản</div>
+          </div>
+        </div>
+
         {/* commission explainer */}
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <Icon name="receipt" size={18} style={{ color: 'var(--color-primary)' }} />
             <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Cách tính tiền về ví</span>
-            <Badge variant="outline">Phí sàn 5%</Badge>
+            <Badge variant="outline">Theo ngành của đơn gần nhất: {rate}%</Badge>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <Flow label="Tổng tiền hàng (Gross)" value="778.000₫" tone="var(--text-strong)" />
+            <Flow label="Tổng tiền hàng (Gross)" value={formatVND(latest.gross)} tone="var(--text-strong)" />
             <Op>−</Op>
-            <Flow label="Phí hoa hồng (5%)" value="38.900₫" tone="var(--gray-500)" />
+            <Flow label={'Phí hoa hồng (' + rate + '%)'} value={formatVND(latest.commission)} tone="var(--gray-500)" />
             <Op>=</Op>
-            <Flow label="Thực nhận (Net) → Escrow" value="739.100₫" tone="var(--amber-600)" bg="var(--amber-50)" />
+            <Flow label="Thực nhận (Net) → Escrow" value={formatVND(latest.net)} tone="var(--amber-600)" bg="var(--amber-50)" />
             <Op>→</Op>
-            <Flow label="Giải ngân khi hoàn tất" value="739.100₫" tone="var(--green-600)" bg="var(--green-50)" />
+            <Flow label="Giải ngân khi hoàn tất" value={formatVND(latest.net)} tone="var(--green-600)" bg="var(--green-50)" />
           </div>
         </div>
 
@@ -135,6 +156,7 @@
             </div>
           </div>
           {filterOpen && <div style={{ display: 'flex', gap: 12, padding: '12px 20px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--gray-25)' }}>
+            <div style={{ width: 130 }}><Select value={month} onChange={(e) => setMonth(e.target.value)}>{months.map((m) => <option key={m}>{m}</option>)}<option>05/2026</option></Select></div>
             <div style={{ width: 200 }}><Select value={type} onChange={(e) => setType(e.target.value)}>{Object.keys(T_FILTER).map((k) => <option key={k}>{k}</option>)}</Select></div>
             <div style={{ flex: 1, maxWidth: 320 }}><Input iconLeft="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Mã đơn, diễn giải..." /></div>
           </div>}

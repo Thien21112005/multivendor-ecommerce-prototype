@@ -1,5 +1,5 @@
-/* Vendor: KYC onboarding — upload ID / business license (PDF/JPG/PNG, <10MB),
-   status states PENDING / VERIFIED / REJECTED with reason. */
+/* Vendor: KYC onboarding — ID card, selfie with a liveness challenge, business licence for
+   household and company shops (PDF/JPG/PNG, <10MB), biometric consent, status banner. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, StatusBadge, Input, Select, Modal } = DS;
@@ -8,6 +8,8 @@
   function CameraModal({ onClose, onShot }) {
     const video = React.useRef(null);
     const [err, setErr] = React.useState('');
+    const CHALLENGES = ['Nháy mắt 2 lần', 'Quay đầu sang trái', 'Quay đầu sang phải'];
+    const [done, setDone] = React.useState(0);
     React.useEffect(() => {
       let stream = null;
       if (!navigator.mediaDevices) { setErr('Không thể truy cập camera. Vui lòng cấp quyền camera trong trình duyệt.'); return undefined; }
@@ -22,9 +24,14 @@
     };
     return (
       <Modal open onClose={onClose} width={520} title="Chụp ảnh chân dung"
-        footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button iconLeft="camera" disabled={!!err} onClick={capture}>Chụp</Button></>}>
+        footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button>{done < CHALLENGES.length
+          ? <Button iconLeft="check" disabled={!!err} onClick={() => setDone(done + 1)}>Mô phỏng: đã làm xong</Button>
+          : <Button iconLeft="camera" disabled={!!err} onClick={capture}>Chụp</Button>}</>}>
         {err ? <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--red-600)', font: 'var(--type-body-sm)' }}><Icon name="circle-alert" size={16} />{err}</div>
-          : <video ref={video} autoPlay playsInline muted style={{ width: '100%', borderRadius: 'var(--radius-md)', background: 'var(--ink-900)' }} />}
+          : <div>
+              <video ref={video} autoPlay playsInline muted style={{ width: '100%', borderRadius: 'var(--radius-md)', background: 'var(--ink-900)' }} />
+              <div role="status" style={{ marginTop: 10, font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{done < CHALLENGES.length ? 'Kiểm tra người thật ' + (done + 1) + '/' + CHALLENGES.length + ': ' + CHALLENGES[done] : 'Đã kiểm tra xong, bấm Chụp để lưu ảnh chân dung.'}</div>
+            </div>}
       </Modal>
     );
   }
@@ -42,6 +49,8 @@
       const f = e.target.files[0]; e.target.value = '';
       if (!f) return;
       if (f.size > 10 * 1024 * 1024) { setNote('File quá lớn (tối đa 10MB)'); return; }
+      if (!/^image\/(jpeg|png)$|pdf$/.test(f.type)) { setNote('Sai định dạng. Chỉ nhận PDF, JPG, PNG.'); return; }
+      if (f.size < 20 * 1024 && f.type.startsWith('image/')) { setNote('Ảnh quá mờ hoặc quá nhỏ, vui lòng chụp lại rõ nét.'); return; }
       setNote('');
       setFiles((s) => ({ ...s, [key]: { file: f.name, size: (f.size / 1048576).toFixed(1).replace('.', ',') + ' MB' } }));
     };
@@ -51,23 +60,32 @@
       shopName: 'TechZone Official',
       businessType: 'Doanh nghiệp',
       cccd: '',
-      taxCode: '0312987654',
+      taxCode: '',
       representative: 'Đặng Quốc Huy',
     });
     const setField = (k, v) => setFormData((s) => ({ ...s, [k]: v }));
     const isIndividual = formData.businessType === 'Cá nhân';
+    const [consent, setConsent] = React.useState(false);
+    const [reviewAsked, setReviewAsked] = React.useState(false);
     const submit = () => {
-      if (state !== 'VERIFIED' && !selfie) { setNote('Hồ sơ chưa hoàn thiện: vui lòng bổ sung ảnh chân dung (selfie).'); return; }
-      setNote(''); setState('PENDING'); setDraftMsg('Hồ sơ của bạn đã được tiếp nhận và đang được thẩm định tự động');
+      const missing = docs.filter((d) => !d.done).map((d) => d.label);
+      if (!/^\d{12}$/.test(formData.cccd)) { setNote('Số CCCD phải gồm 12 chữ số.'); return; }
+      if (!isIndividual && !formData.taxCode.trim()) { setNote('Hộ kinh doanh và doanh nghiệp phải nhập Mã số thuế.'); return; }
+      if (missing.length) { setNote('Hồ sơ chưa hoàn thiện: còn thiếu ' + missing.join(', ') + '.'); return; }
+      if (!selfie) { setNote('Hồ sơ chưa hoàn thiện: vui lòng bổ sung ảnh chân dung (selfie).'); return; }
+      setNote(''); setState('PENDING');
+      setDraftMsg(consent ? 'Hồ sơ của bạn đã được tiếp nhận và đang được thẩm định tự động' : 'Hồ sơ của bạn đã được tiếp nhận. Vì bạn không đồng ý xử lý sinh trắc, nhân viên sẽ đối chiếu ảnh trực tiếp');
       if (onSubmit) onSubmit(formData);
     };
+    const filed = state === 'VERIFIED' || state === 'PENDING';
     const docs = [
-      { key: 'id_front', label: 'CCCD / CMND — mặt trước', done: true, file: 'cccd-truoc.jpg', size: '2,1 MB' },
-      { key: 'id_back', label: 'CCCD / CMND — mặt sau', done: true, file: 'cccd-sau.jpg', size: '1,9 MB' },
-      { key: 'license', label: 'Giấy phép kinh doanh', done: state === 'VERIFIED' || state === 'PENDING', file: 'gpkd.pdf', size: '3,4 MB' },
+      { key: 'id_front', label: 'CCCD gắn chip — mặt trước (rõ mã QR và ảnh chân dung)', done: filed, file: 'cccd-truoc.jpg', size: '2,1 MB' },
+      { key: 'id_back', label: 'CCCD gắn chip — mặt sau (rõ 3 dòng MRZ)', done: filed, file: 'cccd-sau.jpg', size: '1,9 MB' },
+      ...(isIndividual ? [] : [{ key: 'license', label: 'Giấy chứng nhận đăng ký kinh doanh', done: filed, file: 'gpkd.pdf', size: '3,4 MB' }]),
     ].map((d) => (files[d.key] ? { ...d, done: true, ...files[d.key] } : d));
     const banner = {
-      PENDING: { v: 'warning', icon: 'clock', t: 'Hồ sơ đang chờ duyệt', s: 'Đội ngũ Lazadee sẽ xét duyệt trong vòng 24 giờ. Bạn chưa thể đăng bán cho đến khi được duyệt.' },
+      NOT_SUBMITTED: { v: 'warning', icon: 'file-text', t: 'Chưa nộp hồ sơ KYC', s: 'Hoàn tất hồ sơ bên dưới để mở khóa đăng bán, đơn hàng và ví.' },
+      PENDING: { v: 'warning', icon: 'clock', t: 'Hồ sơ đang chờ duyệt', s: 'AI đang thẩm định; hồ sơ nghi ngờ do nhân viên xử lý trong 24 giờ làm việc. Bạn chưa thể đăng bán cho đến khi được duyệt.' },
       VERIFIED: { v: 'success', icon: 'badge-check', t: 'Hồ sơ đã được xác minh', s: 'Tài khoản của bạn đã VERIFIED — bạn có thể đăng bán sản phẩm và nhận thanh toán.' },
       REJECTED: { v: 'danger', icon: 'triangle-alert', t: 'Hồ sơ bị từ chối', s: 'Lý do: Ảnh giấy tờ không hợp lệ. Vui lòng tải lại và gửi duyệt.' },
       SUPPLEMENT_REQUESTED: { v: 'warning', icon: 'file-text', t: 'Yêu cầu bổ sung hồ sơ', s: 'Vui lòng cung cấp CCCD hoặc Giấy phép kinh doanh để chúng tôi xác minh danh tính của bạn. Hạn bổ sung: 7 ngày.' },
@@ -78,7 +96,7 @@
         {/* state preview toggle (demo only) */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 16, alignItems: 'center' }}>
           <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Xem trạng thái (demo):</span>
-          {['PENDING', 'VERIFIED', 'REJECTED', 'SUPPLEMENT_REQUESTED'].map((s) => (
+          {['NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED', 'SUPPLEMENT_REQUESTED'].map((s) => (
             <button key={s} onClick={() => setState(s)} style={{ height: 28, padding: '0 12px', borderRadius: 'var(--radius-pill)', border: '1px solid ' + (state === s ? 'var(--color-primary)' : 'var(--border-default)'), background: state === s ? 'var(--color-primary-tint)' : '#fff', color: state === s ? 'var(--orange-700)' : 'var(--text-muted)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>{s}</button>
           ))}
         </div>
@@ -89,9 +107,10 @@
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{banner.t}</span>
-              <StatusBadge status={state === 'SUPPLEMENT_REQUESTED' ? 'PENDING' : state} label={state === 'SUPPLEMENT_REQUESTED' ? 'Cần bổ sung' : undefined} />
+              <StatusBadge status={state === 'SUPPLEMENT_REQUESTED' || state === 'NOT_SUBMITTED' ? 'PENDING' : state} label={state === 'SUPPLEMENT_REQUESTED' ? 'Cần bổ sung' : state === 'NOT_SUBMITTED' ? 'Chưa nộp' : undefined} />
             </div>
             <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginTop: 4 }}>{banner.s}</div>
+            {state === 'REJECTED' && <div style={{ marginTop: 10 }}><Button size="sm" variant="secondary" disabled={reviewAsked} onClick={() => setReviewAsked(true)}>{reviewAsked ? 'Đã yêu cầu nhân viên xem xét' : 'Yêu cầu nhân viên xem xét'}</Button></div>}
           </div>
         </div>
 
@@ -105,17 +124,16 @@
             </div>
             <div style={{ display: 'flex', gap: 14 }}>
               <div style={{ flex: 1 }}>
-                {isIndividual
-                  ? <Input label="Số CCCD (Dành cho Cá nhân)" iconLeft="badge-check" value={formData.cccd} onChange={(e) => setField('cccd', e.target.value)} placeholder="VD: 0790xxxxxxxx" required />
-                  : <Input label="Mã số thuế (Doanh nghiệp / Hộ KD)" iconLeft="file-text" value={formData.taxCode} onChange={(e) => setField('taxCode', e.target.value)} placeholder="VD: 0312xxxxxx" required />}
+                <Input label="Số CCCD" iconLeft="badge-check" value={formData.cccd} onChange={(e) => setField('cccd', e.target.value.replace(/\D/g, '').slice(0, 12))} placeholder="12 chữ số" required />
               </div>
+              {!isIndividual && <div style={{ flex: 1 }}><Input label="Mã số thuế (Doanh nghiệp / Hộ KD)" iconLeft="file-text" value={formData.taxCode} onChange={(e) => setField('taxCode', e.target.value)} placeholder="VD: 0312xxxxxx" required /></div>}
               <div style={{ flex: 1 }}><Input label="Người đại diện" value={formData.representative} onChange={(e) => setField('representative', e.target.value)} required /></div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>
               <Icon name="info" size={14} />
               {isIndividual
-                ? 'Cá nhân: nhập số CCCD để đối soát định danh qua OCR khi giải ngân Escrow.'
-                : 'Doanh nghiệp / Hộ KD: nhập Mã số thuế (MST) để đối soát dòng tiền Escrow.'}
+                ? 'Cá nhân: nhập số CCCD để đối chiếu với mã QR và MRZ trên thẻ.'
+                : 'Doanh nghiệp / Hộ KD: nhập số CCCD của người đại diện và Mã số thuế (MST).'}
             </div>
           </div>
         </div>
@@ -163,6 +181,10 @@
           </div>
           {note && <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 10 }}><Icon name="circle-alert" size={13} />{note}</div>}
         </div>
+        <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '14px 18px', marginBottom: 16, cursor: 'pointer' }}>
+          <input type="checkbox" checked={consent} onChange={() => setConsent((c) => !c)} style={{ accentColor: 'var(--color-primary)', marginTop: 3 }} />
+          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>Tôi đồng ý cho Lazadee xử lý dữ liệu sinh trắc học phục vụ KYC. Nếu không đồng ý, hệ thống bỏ qua so khớp khuôn mặt tự động và nhân viên sẽ đối chiếu ảnh trực tiếp.</span>
+        </label>
         {camOpen && <CameraModal onClose={() => setCamOpen(false)} onShot={(src) => { setSelfie(src); setCamOpen(false); }} />}
 
         {draftMsg && <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12, color: 'var(--mint-600)', font: 'var(--type-body-sm)' }}><Icon name="circle-check" size={16} />{draftMsg}</div>}

@@ -11,7 +11,7 @@
   const PRODUCTS = [
     { name: 'Tai nghe Bluetooth ANC Pro 5', img: 'headphones', skus: 4, price: 389000, stock: 38, sold: '2,1k', state: 'PUBLISHED' },
     { name: 'Đèn bàn LED cảm ứng 3 chế độ', img: 'lamp', skus: 2, price: 149000, stock: 60, sold: '—', state: 'PENDING_APPROVAL' },
-    { name: 'Sạc nhanh 65W (thiếu giấy tờ)', img: 'phone', skus: 1, price: 280000, stock: 25, sold: '—', state: 'REJECTED', rejectReason: 'Thiếu giấy tờ chứng thực sản phẩm' },
+    { name: 'Sạc nhanh 65W (thiếu giấy tờ)', img: 'phone', skus: 1, price: 280000, stock: 25, sold: '—', state: 'REJECTED', rejectReason: 'Thiếu chứng nhận an toàn' },
     { name: 'Đồng hồ thông minh Watch S2', img: 'watch', skus: 3, price: 690000, stock: 12, sold: '986', state: 'PUBLISHED' },
     { name: 'Loa bluetooth mini IPX7', img: 'speaker', skus: 2, price: 320000, stock: 0, sold: '2,6k', state: 'PUBLISHED' },
     { name: 'Bàn phím cơ RGB switch blue', img: 'keyboard', skus: 6, price: 459000, stock: 54, sold: '1,9k', state: 'DRAFT' },
@@ -32,13 +32,35 @@
   /* ---- VĐ-1: product image uploader (main + up to 7 secondary) ---- */
   function ImageUpload() {
     const [images, setImages] = React.useState([{ id: 1, tint: IMG_TINT[0] }, { id: 2, tint: IMG_TINT[1] }, { id: 3, tint: IMG_TINT[2] }]);
-    const add = () => { if (images.length >= 8) return; setImages((im) => [...im, { id: Date.now(), tint: IMG_TINT[im.length % IMG_TINT.length] }]); };
+    const [video, setVideo] = React.useState(null);
+    const [imgErr, setImgErr] = React.useState('');
+    const fileRef = React.useRef(null);
+    const videoRef = React.useRef(null);
+    const dragFrom = React.useRef(null);
+    const add = () => { if (images.length < 8) fileRef.current.click(); };
+    const pick = (e) => {
+      const files = Array.from(e.target.files); e.target.value = '';
+      if (files.some((f) => !/^image\/(jpeg|png|webp)$/.test(f.type) || f.size > 5 * 1048576)) { setImgErr('Ảnh phải là JPG, PNG, WEBP và tối đa 5 MB.'); return; }
+      setImgErr('');
+      setImages((im) => [...im, ...files.map((f, i) => ({ id: Date.now() + i, src: URL.createObjectURL(f), tint: 'var(--gray-100)' }))].slice(0, 8));
+    };
+    const pickVideo = (e) => {
+      const f = e.target.files[0]; e.target.value = '';
+      if (!f) return;
+      if (f.size > 30 * 1048576) { setImgErr('Video tối đa 30 MB.'); return; }
+      setImgErr(''); setVideo(f.name);
+    };
+    const drop = (to) => {
+      const from = dragFrom.current; dragFrom.current = null;
+      if (from === null || from === to) return;
+      setImages((im) => { const next = im.slice(); const [x] = next.splice(from, 1); next.splice(to, 0, x); return next; });
+    };
     const remove = (id) => setImages((im) => im.filter((x) => x.id !== id));
-    const Slot = ({ img, main }) => {
+    const Slot = ({ img, main, index }) => {
       const dim = main ? 200 : 120;
       return (
-        <div style={{ position: 'relative', width: dim, height: dim, flex: 'none', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: main ? '2px dashed var(--color-primary)' : '1.5px dashed var(--border-strong)' }}>
-          <div style={{ width: '100%', height: '100%', background: img.tint, display: 'grid', placeItems: 'center' }}><Icon name="image" size={main ? 40 : 26} style={{ color: 'rgba(0,0,0,.28)' }} /></div>
+        <div draggable onDragStart={() => { dragFrom.current = index; }} onDragOver={(e) => e.preventDefault()} onDrop={() => drop(index)} style={{ position: 'relative', width: dim, height: dim, flex: 'none', cursor: 'grab', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: main ? '2px dashed var(--color-primary)' : '1.5px dashed var(--border-strong)' }}>
+          {img.src ? <img src={img.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: img.tint, display: 'grid', placeItems: 'center' }}><Icon name="image" size={main ? 40 : 26} style={{ color: 'rgba(0,0,0,.28)' }} /></div>}
           {main && <span style={{ position: 'absolute', top: 6, left: 6, font: '700 10px var(--font-sans)', color: '#fff', background: 'var(--color-primary)', borderRadius: 'var(--radius-pill)', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: 3 }}><Icon name="star" size={11} />Ảnh chính</span>}
           <button onClick={() => remove(img.id)} aria-label="Xoá ảnh" style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', border: 0, background: 'rgba(0,0,0,.6)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={14} /></button>
         </div>
@@ -50,10 +72,12 @@
           <Icon name="image" size={19} style={{ color: 'var(--color-primary)' }} />
           <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Hình ảnh sản phẩm</span>
           {images.length === 0 && <Badge variant="danger">Tối thiểu 1 ảnh</Badge>}
-          <Badge variant="neutral" style={{ marginLeft: 'auto' }}>JPG/PNG · ≤ 2MB · 1:1</Badge>
+          <Badge variant="neutral" style={{ marginLeft: 'auto' }}>JPG/PNG/WEBP · ≤ 5MB · 1:1</Badge>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-          {images.map((img, i) => <Slot key={img.id} img={img} main={i === 0} />)}
+          {images.map((img, i) => <Slot key={img.id} img={img} main={i === 0} index={i} />)}
+          <input ref={fileRef} type="file" hidden multiple accept="image/jpeg,image/png,image/webp" onChange={pick} />
+          <input ref={videoRef} type="file" hidden accept="video/mp4" onChange={pickVideo} />
           {images.length < 8 && (
             <button onClick={add} style={{ width: 120, height: 120, flex: 'none', borderRadius: 'var(--radius-md)', border: '1.5px dashed var(--border-strong)', background: 'var(--gray-50)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--text-subtle)' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--gray-100)'; e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
@@ -62,17 +86,24 @@
             </button>
           )}
         </div>
-        <div style={hint}>Tối đa 8 ảnh · JPG/PNG · ≤ 2MB/ảnh · Tỉ lệ 1:1 khuyến nghị. Ảnh đầu tiên là ảnh chính hiển thị trên kết quả tìm kiếm. Kéo thả để sắp xếp.</div>
+        <div style={hint}>Tối đa 8 ảnh · Tỉ lệ 1:1 khuyến nghị. Ảnh đầu tiên là ảnh chính hiển thị trên kết quả tìm kiếm. Kéo thả để sắp xếp.</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+          <Button size="sm" variant="outline" iconLeft="upload" onClick={() => videoRef.current.click()}>{video ? 'Đổi video' : 'Thêm 1 video'}</Button>
+          <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{video || 'MP4, tối đa 30 MB'}</span>
+        </div>
+        {imgErr && <div style={{ color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 8 }}>{imgErr}</div>}
       </div>
     );
   }
 
-  /* ---- product legal documents: PDF/DOC/XLS only, up to 4 files, required to publish ---- */
-  function LegalDocs({ docs, setDocs, hasError }) {
+  /* ---- product legal documents: PDF/DOC/XLS only, ≤ 10 MB, up to 4 files; required for conditional categories ---- */
+  const requiresDocs = (cat) => cat[0] === 'Làm đẹp' || cat[2] === 'Sữa & Dinh dưỡng';
+  function LegalDocs({ docs, setDocs, hasError, required }) {
     const [err, setErr] = React.useState('');
     const pick = (e) => {
       const picked = Array.from(e.target.files); e.target.value = '';
       if (picked.some((f) => f.type.startsWith('image/'))) { setErr('Chỉ chấp nhận file tài liệu (PDF, DOC, XLS), không hỗ trợ file ảnh.'); return; }
+      if (picked.some((f) => f.size > 10 * 1048576)) { setErr('Mỗi tệp tối đa 10 MB.'); return; }
       setErr('');
       setDocs((d) => [...d, ...picked.map((f) => f.name)].slice(0, 4));
     };
@@ -81,8 +112,8 @@
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <Icon name="file-text" size={19} style={{ color: hasError ? 'var(--red-600)' : 'var(--color-primary)' }} />
           <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: hasError ? 'var(--red-600)' : 'var(--text-strong)' }}>Giấy tờ chứng thực</span>
-          {docs.length === 0 && <Badge variant="danger">Bắt buộc</Badge>}
-          <Badge variant="neutral" style={{ marginLeft: 'auto' }}>PDF/DOC/XLS · Tối đa 4 file</Badge>
+          {docs.length === 0 && (required ? <Badge variant="danger">Bắt buộc với ngành này</Badge> : <Badge variant="neutral">Không bắt buộc</Badge>)}
+          <Badge variant="neutral" style={{ marginLeft: 'auto' }}>PDF/DOC/XLS · ≤ 10 MB · Tối đa 4 file</Badge>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
           {docs.map((d, i) => (
@@ -177,7 +208,7 @@
             {l3arr.map((k) => <ItemRow key={k} label={k} active={value[2] === k} onClick={() => { onChange([l1, l2, k]); setOpen(false); }} />)}
           </div>}
         </div>
-        <div style={hint}>Chọn dần từ danh mục cha đến danh mục con. Danh mục cuối cùng xác định phí hoa hồng &amp; thông số gợi ý.</div>
+        <div style={hint}>Chọn dần từ danh mục cha đến danh mục con. Danh mục cuối cùng xác định phí hoa hồng &amp; thông số gợi ý. Không có danh mục phù hợp? <a href="?screen=catalog" style={{ color: 'var(--orange-600)', fontWeight: 600 }}>Đề xuất danh mục mới</a></div>
       </div>
     );
   }
@@ -251,7 +282,8 @@
     'Thời trang': ['Chất liệu', 'Xuất xứ vải', 'Hướng dẫn giặt'],
     'Làm đẹp': ['Thành phần', 'Dung tích', 'Hạn sử dụng', 'Loại da phù hợp'],
   };
-  function SpecsTable({ rootCat }) {
+  const REQUIRED_SPECS = { 'Điện tử': ['Bảo hành'], 'Thời trang': ['Chất liệu'], 'Làm đẹp': ['Hạn sử dụng'] };
+  function SpecsTable({ rootCat, specsRef, showMissing }) {
     const [specs, setSpecs] = React.useState([
       { key: 'Chất liệu', value: 'Nhựa ABS + Polycarbonate' },
       { key: 'Loại switch', value: 'Cherry MX Blue' },
@@ -261,6 +293,9 @@
       { key: 'Pin', value: '4000mAh' },
       { key: 'Bảo hành', value: '12 tháng chính hãng' },
     ]);
+    const required = REQUIRED_SPECS[rootCat] || [];
+    const missing = required.filter((k) => !specs.some((r) => r.key === k && r.value.trim()));
+    specsRef.current = missing;
     // ensure a trailing empty row for quick entry
     const rows = specs.length && specs[specs.length - 1].key === '' && specs[specs.length - 1].value === '' ? specs : [...specs, { key: '', value: '' }];
     const setRow = (i, patch) => {
@@ -302,6 +337,7 @@
             );
           })}
         </div>
+        {required.length > 0 && <div style={{ font: 'var(--type-caption)', color: showMissing && missing.length ? 'var(--red-600)' : 'var(--text-muted)', marginTop: 10 }}>Bắt buộc với ngành này: {required.join(', ')}{showMissing && missing.length ? ' (còn thiếu ' + missing.join(', ') + ')' : ''}</div>}
         <div style={{ display: 'flex', gap: 7, ...hint, marginTop: 10 }}><Icon name="info" size={14} style={{ flex: 'none', marginTop: 1 }} />Thông số sẽ hiển thị trong mục “Chi tiết sản phẩm” trên trang sản phẩm cho khách hàng xem.</div>
       </div>
     );
@@ -318,21 +354,27 @@
       + '<p style="font-weight:700">Cam kết:</p>'
       + '<ul><li>✅ Hàng chính hãng 100%</li><li>✅ Đổi trả miễn phí trong 7 ngày</li><li>✅ Bảo hành 12 tháng · Giao hàng toàn quốc</li></ul>';
     React.useEffect(() => { if (ref.current) { ref.current.innerHTML = PREFILL; setCount(ref.current.innerText.length); } }, []);
-    const tools = [['bold', 'B'], ['italic', 'I'], ['underline', 'U'], '|', ['heading', 'H1'], ['heading', 'H2'], '|', ['list', '•'], ['list-ordered', '1.'], '|', ['paperclip', null], ['image', null]];
+    const imgRef = React.useRef(null);
+    const run = (cmd, arg) => { ref.current.focus(); document.execCommand(cmd, false, arg); setCount(ref.current.innerText.length); };
+    const tools = [['bold', 'B', () => run('bold')], ['italic', 'I', () => run('italic')], ['underline', 'U', () => run('underline')], '|', ['heading', 'H1', () => run('formatBlock', 'H1')], ['heading', 'H2', () => run('formatBlock', 'H2')], '|', ['list', '•', () => run('insertUnorderedList')], ['list-ordered', '1.', () => run('insertOrderedList')], '|',
+      ['paperclip', null, () => { const url = window.prompt('Nhập URL liên kết:', 'https://'); if (url && /^https?:\/\//.test(url)) run('createLink', url); }, 'Chèn liên kết'],
+      ['image', null, () => imgRef.current.click(), 'Chèn ảnh']];
+    const pickImg = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) run('insertImage', URL.createObjectURL(f)); };
     const cColor = count > 9500 ? 'var(--red-600)' : count > 8000 ? 'var(--amber-600, #C77700)' : 'var(--text-subtle)';
     return (
       <div style={card}>
         {cardHead('file-text', 'Mô tả chi tiết sản phẩm')}
+        <input ref={imgRef} type="file" hidden accept="image/jpeg,image/png" onChange={pickImg} />
         <div style={{ border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'var(--gray-25)', borderBottom: '1px solid var(--border-subtle)', padding: '5px 8px' }}>
             {tools.map((t, i) => t === '|'
               ? <span key={i} style={{ width: 1, height: 20, background: 'var(--border-default)', margin: '0 4px' }} />
-              : <button key={i} onMouseDown={(e) => e.preventDefault()} style={{ minWidth: 32, height: 32, border: 0, background: 'transparent', borderRadius: 'var(--radius-md)', cursor: 'pointer', font: (t[0] === 'bold' ? '700' : t[0] === 'italic' ? '400' : '600') + ' 13px var(--font-sans)', fontStyle: t[0] === 'italic' ? 'italic' : 'normal', textDecoration: t[0] === 'underline' ? 'underline' : 'none', color: 'var(--text-body)', display: 'grid', placeItems: 'center', padding: '0 6px' }}
+              : <button key={i} type="button" aria-label={t[3] || t[1]} onMouseDown={(e) => e.preventDefault()} onClick={t[2]} style={{ minWidth: 32, height: 32, border: 0, background: 'transparent', borderRadius: 'var(--radius-md)', cursor: 'pointer', font: (t[0] === 'bold' ? '700' : t[0] === 'italic' ? '400' : '600') + ' 13px var(--font-sans)', fontStyle: t[0] === 'italic' ? 'italic' : 'normal', textDecoration: t[0] === 'underline' ? 'underline' : 'none', color: 'var(--text-body)', display: 'grid', placeItems: 'center', padding: '0 6px' }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-100)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                   {t[1] || <Icon name={t[0]} size={16} />}
                 </button>)}
           </div>
-          <div ref={ref} contentEditable suppressContentEditableWarning onInput={(e) => setCount(e.currentTarget.innerText.length)}
+          <div ref={ref} contentEditable suppressContentEditableWarning onInput={(e) => { if (e.currentTarget.innerText.length > 10000) e.currentTarget.innerText = e.currentTarget.innerText.slice(0, 10000); setCount(e.currentTarget.innerText.length); }}
             style={{ minHeight: 320, padding: '18px 20px', font: 'var(--type-body)', lineHeight: 1.7, color: 'var(--text-body)', outline: 'none' }}
             onFocus={(e) => (e.currentTarget.parentNode.style.borderColor = 'var(--color-primary)')}
             onBlur={(e) => (e.currentTarget.parentNode.style.borderColor = 'var(--border-default)')} />
@@ -395,7 +437,9 @@
       </div>
     );
   }
-  function VariantSection() {
+  function VariantSection({ zeroRef }) {
+    const [imgAttr, setImgAttr] = React.useState(0);
+    const [valueImg, setValueImg] = React.useState({});
     const [groups, setGroups] = React.useState([
       { name: 'Màu sắc', values: ['Đen', 'Trắng'] },
       { name: 'Switch', values: ['Blue', 'Red'] },
@@ -412,6 +456,8 @@
     const key = (r) => r.join('|');
     const cellVal = (r, field, dflt) => { const c = cells[key(r)] || {}; return c[field] !== undefined ? c[field] : dflt; };
     const setCell = (r, field, val) => setCells((c) => ({ ...c, [key(r)]: { ...(c[key(r)] || {}), [field]: val } }));
+    const overLimit = rows.length > 50;
+    zeroRef.current = { zero: rows.filter((r) => Number(cellVal(r, 'price', 0)) === 0 && Number(cellVal(r, 'stock', 0)) === 0).length, overLimit };
     const applyAll = () => { const next = {}; rows.forEach((r) => { next[key(r)] = { price: bulk.price, stock: bulk.stock }; }); setCells(next); };
     return (
       <div style={card}>
@@ -426,6 +472,22 @@
             <TagInput values={g.values} onAdd={(v) => addValue(i, v)} onRemove={(v) => removeValue(i, v)} />
           </div>
         ))}
+        {active.length > 0 && <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '13px 15px', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <span style={{ font: '600 12px var(--font-sans)', color: 'var(--text-muted)' }}>Ảnh theo phân loại</span>
+            <div style={{ width: 180 }}><Select value={String(imgAttr)} onChange={(e) => setImgAttr(Number(e.target.value))}>{active.map((g, i) => <option key={i} value={i}>{g.name || 'Nhóm ' + (i + 1)}</option>)}</Select></div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {(active[imgAttr] || active[0]).values.map((v) => (
+              <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>
+                <input type="file" hidden accept="image/jpeg,image/png" onChange={(e) => { const f = e.target.files[0]; e.target.value = ''; if (f) setValueImg((m) => ({ ...m, [v]: URL.createObjectURL(f) })); }} />
+                {valueImg[v] ? <img src={valueImg[v]} alt="" width="36" height="36" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} /> : <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', border: '1.5px dashed var(--border-strong)', display: 'grid', placeItems: 'center', color: 'var(--text-subtle)' }}><Icon name="image-plus" size={16} /></span>}
+                {v}
+              </label>
+            ))}
+          </div>
+        </div>}
+        {overLimit && <div style={{ color: 'var(--red-600)', font: 'var(--type-caption)', marginBottom: 10 }}>Mỗi sản phẩm tối đa 50 phân loại (đang có {rows.length}).</div>}
         {active.length === 0 ? (
           <div style={{ marginTop: 6 }}>
             <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 12 }}>Thêm phân loại hàng nếu sản phẩm có nhiều biến thể (màu, size…). Hoặc nhập giá &amp; tồn kho đơn lẻ:</div>
@@ -530,10 +592,18 @@
     const [reReview, setReReview] = React.useState(false);
     const [cancelOpen, setCancelOpen] = React.useState(false);
     const viewOnly = product && (product.state === 'PENDING_APPROVAL');
-    const publish = () => {
-      if (docs.length === 0) { setDocsError(true); window.scrollTo(0, 0); return; }
+    const specsRef = React.useRef([]);
+    const zeroRef = React.useRef({ zero: 0, overLimit: false });
+    const [specErr, setSpecErr] = React.useState(false);
+    const [zeroAsk, setZeroAsk] = React.useState(false);
+    const done = () => onSaved(product ? 'Đã gửi duyệt. Gemini sàng lọc rồi chuyển nhân viên kiểm duyệt.' : 'Đã gửi duyệt sản phẩm. Gemini sàng lọc rồi chuyển nhân viên kiểm duyệt.');
+    const publish = (skipZero) => {
+      if (requiresDocs(category) && docs.length === 0) { setDocsError(true); window.scrollTo(0, 0); return; }
+      if (specsRef.current.length) { setSpecErr(true); return; }
+      if (zeroRef.current.overLimit) return;
+      if (skipZero !== true && zeroRef.current.zero > 0) { setZeroAsk(true); return; }
       if (editingLive) { setReReview(true); return; }
-      onSaved(product ? 'Cập nhật sản phẩm thành công!' : 'Tạo sản phẩm thành công!');
+      done();
     };
     return (
       <div style={{ maxWidth: 1180 }}>
@@ -541,15 +611,15 @@
         {product && product.state === 'REJECTED' && <div style={{ display: 'flex', gap: 12, background: 'var(--red-50, #FDECEA)', border: '1px solid var(--red-300, #F3B0A8)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}><Icon name="triangle-alert" size={22} style={{ color: 'var(--red-600)', flex: 'none' }} /><div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Sản phẩm bị từ chối</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginTop: 2 }}>Lý do: {product.rejectReason}. Sửa rồi gửi lại để được duyệt.</div></div></div>}
         <button onClick={() => (viewOnly ? onClose() : setCancelOpen(true))} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 14 }}><Icon name="chevron-left" size={16} /> Quay lại danh sách</button>
         <ImageUpload />
-        <LegalDocs docs={docs} setDocs={(u) => { setDocs(u); setDocsError(false); }} hasError={docsError} />
+        <LegalDocs docs={docs} setDocs={(u) => { setDocs(u); setDocsError(false); }} hasError={docsError} required={requiresDocs(category)} />
         <BasicInfo category={category} onCategory={setCategory} />
-        <SpecsTable rootCat={category[0]} />
+        <SpecsTable rootCat={category[0]} specsRef={specsRef} showMissing={specErr} />
         <RichDescription />
-        <VariantSection />
+        <VariantSection zeroRef={zeroRef} />
         <ShippingInfo />
         <div style={{ display: viewOnly ? 'none' : 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <Button variant="secondary" iconLeft="file-text" onClick={() => onSaved('Đã lưu nháp sản phẩm')}>Lưu nháp</Button>
-          <Button iconLeft="check" disabled={kycStatus !== 'VERIFIED'} onClick={publish}>{product ? 'Lưu & gửi duyệt' : 'Đăng bán'}</Button>
+          <Button iconLeft="check" disabled={kycStatus !== 'VERIFIED'} onClick={() => publish()}>{product ? 'Lưu & gửi duyệt' : 'Đăng bán'}</Button>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)' }}>
             {kycStatus === 'VERIFIED' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--mint-600)' }}><Icon name="shield-check" size={14} /> Shop đã VERIFIED — được phép đăng bán</span>}
             {kycStatus === 'PENDING' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--amber-600, #C77700)' }}><Icon name="clock" size={14} /> KYC đang chờ duyệt — chưa thể đăng bán</span>}
@@ -557,8 +627,12 @@
           </span>
         </div>
         <Modal open={reReview} onClose={() => setReReview(false)} width={420} title="Sản phẩm sẽ được kiểm duyệt lại"
-          footer={<><Button variant="ghost" onClick={() => setReReview(false)}>Huỷ</Button><Button onClick={() => onSaved('Cập nhật sản phẩm thành công!')}>Tiếp tục lưu</Button></>}>
-          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55 }}>Sản phẩm đang bán sẽ chuyển sang trạng thái chờ duyệt lại nếu bạn đổi tên, ảnh, danh mục hoặc giấy tờ. Thay đổi giá và tồn kho không cần <b>kiểm duyệt</b>.</div>
+          footer={<><Button variant="ghost" onClick={() => setReReview(false)}>Huỷ</Button><Button onClick={done}>Tiếp tục lưu</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55 }}>Sản phẩm đang bán sẽ chuyển sang trạng thái chờ duyệt lại nếu bạn đổi tên, ảnh, mô tả, danh mục, thương hiệu hoặc giấy tờ. Thay đổi giá và tồn kho không cần <b>kiểm duyệt</b>.</div>
+        </Modal>
+        <Modal open={zeroAsk} onClose={() => setZeroAsk(false)} width={420} title="Phân loại chưa có giá và tồn kho"
+          footer={<><Button variant="ghost" onClick={() => setZeroAsk(false)}>Quay lại sửa</Button><Button onClick={() => { setZeroAsk(false); publish(true); }}>Vẫn gửi duyệt</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55 }}>Có {zeroRef.current.zero} phân loại đang có giá 0₫ và tồn kho 0. Bạn có chắc muốn lưu?</div>
         </Modal>
         <Modal open={cancelOpen} onClose={() => setCancelOpen(false)} width={400} title="Hủy thay đổi?"
           footer={<><Button variant="ghost" onClick={() => setCancelOpen(false)}>Tiếp tục sửa</Button><Button variant="danger" onClick={onClose}>Đồng ý hủy</Button></>}>

@@ -55,7 +55,6 @@
     const [unread, setUnread] = React.useState(() => Object.fromEntries(THREADS.map((t) => [t.id, t.unread])));
     const [orderMenu, setOrderMenu] = React.useState(false);
     const imgRef = React.useRef(null);
-    const fileRef = React.useRef(null);
     const bodyRef = React.useRef(null);
     const cur = THREADS.find((t) => t.id === active);
     React.useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight; }, [threads, active]);
@@ -67,8 +66,7 @@
       setTimeout(() => setThreads((th) => ({ ...th, [id]: th[id].map((x) => (x === msg ? { ...x, st: 'seen' } : x)) })), 1200);
     };
     const send = () => { const t = draft.trim(); if (!t) return; push({ kind: 'text', text: t }); setDraft(''); };
-    const pick = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) push({ kind: 'image', src: URL.createObjectURL(f) }); };
-    const pickFile = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) push({ kind: 'text', text: '📎 ' + f.name }); };
+    const pick = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f && f.size > 5 * 1048576) { window.alert('Ảnh tối đa 5MB'); return; } if (f) push({ kind: 'image', src: URL.createObjectURL(f) }); };
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '300px minmax(0, 1fr)', gridTemplateRows: '100%', height: 620, background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
         {/* threads */}
@@ -104,9 +102,7 @@
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderTop: '1px solid var(--border-default)' }}>
             <input ref={imgRef} type="file" hidden accept="image/*" onChange={pick} />
-            <input ref={fileRef} type="file" hidden onChange={pickFile} />
             <button style={iconBtn} aria-label="Gửi ảnh" onClick={() => imgRef.current.click()}><Icon name="image" size={20} /></button>
-            <button style={iconBtn} aria-label="Đính kèm tệp" onClick={() => fileRef.current.click()}><Icon name="paperclip" size={20} /></button>
             <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} placeholder="Nhập tin nhắn…" style={{ flex: 1, height: 42, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-pill)', padding: '0 16px', font: 'var(--type-body)', outline: 'none' }} />
             <button style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff' }} aria-label="Gửi" onClick={send}><Icon name="send" size={20} /></button>
           </div>

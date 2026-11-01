@@ -182,7 +182,7 @@ function App() {
   else if (screen === 'tracking') body = <window.LZOrderTracking orderId={trackId} onBack={() => goAccount('orders')} onReview={review} onChat={chat} onBuyAgain={buyAgain} />;
   else if (screen === 'shop') body = <window.LZShop vendorId={shopId} onOpen={open} onSearch={runSearch} onChat={chat} />;
   else if (screen === 'search') body = <window.LZSearch query={query} scope={searchScope} shopId={searchShopId} onOpen={open} onScope={setSearchScope} onShop={openShop} />;
-  else if (screen === 'seller') body = <window.LZBecomeSeller onLogin={toLogin} onRegistered={() => { window.location.href = '../vendor/index.html?screen=kyc'; }} />;
+  else if (screen === 'seller') body = <window.LZBecomeSeller onLogin={toLogin} onRegistered={() => { window.location.href = '../vendor/index.html?screen=kyc&kyc=NOT_SUBMITTED'; }} />;
   else if (screen === 'page') body = <window.LZPolicyPage pageId={pageId} onNav={(id) => go('page', id)} />;
   else if (screen === 'category') body = <window.LZCategory categoryName={catName} onOpen={open} onHome={() => go('home')} onCategory={openCategory} />;
 

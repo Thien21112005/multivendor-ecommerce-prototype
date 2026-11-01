@@ -8,6 +8,7 @@
     monthRevenue: 45800000,
     monthGrowth: 18.4,
     pendingPayout: 5000000,
+    codPending: 1950000,  // COD not yet reconciled with the carrier
   };
 
   // Append-only ledger (newest first). gross − commission = net.
@@ -48,8 +49,8 @@
   ];
 
   // Payout account, shared between Cài đặt and the withdrawal form (UC-VND-07 → UC-ADM-04).
-  const BANK = { bank: 'Vietcombank', holder: 'TECHZONE OFFICIAL', number: '0071000006712', verified: true };
-  const KYC_NAME = 'TECHZONE OFFICIAL';
+  const BANK = { bank: 'Vietcombank', holder: 'DANG QUOC HUY', number: '0071000006712', verified: true };
+  const KYC_NAME = 'Đặng Quốc Huy';
 
   const downloadCsv = (name, rows) => {
     const text = rows.map((r) => r.map((v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
@@ -66,7 +67,7 @@
   const ORDERS = [
     { id: 'LZD-20260608-000041', customer: 'Trần T. Mai',  items: 2, total: 778000,   status: 'PAID',      ghn: 'ready_to_pick', when: '14:22 hôm nay' },
     { id: 'LZD-20260608-000040', customer: 'Nguyễn V. An', items: 1, total: 690000,   status: 'PAID',      ghn: 'ready_to_pick', when: '09:10 hôm nay' },
-    { id: 'LZD-20260608-000038', customer: 'Lê H. Phúc',   items: 3, total: 1459000,  status: 'SHIPPED',   ghn: 'transporting',  when: 'Hôm qua' },
+    { id: 'LZD-20260608-000038', customer: 'Lê H. Phúc',   items: 3, total: 1459000,  status: 'DELIVERING',   ghn: 'transporting',  when: 'Hôm qua' },
     { id: 'LZD-20260608-000039', customer: 'Phạm T. Hà',   items: 1, total: 1245000,  status: 'COMPLETED', ghn: 'delivered',     when: '2 ngày trước' },
     { id: 'LZD-20260608-000035', customer: 'Vũ M. Quân',   items: 1, total: 178000,   status: 'CANCELLED', ghn: 'cancel',        when: '3 ngày trước' },
   ];

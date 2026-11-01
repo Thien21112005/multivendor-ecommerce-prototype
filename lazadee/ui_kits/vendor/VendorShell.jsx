@@ -104,7 +104,7 @@
             <div style={{ width: 34, height: 34, borderRadius: 'var(--radius-sm)', background: 'var(--color-primary)', color: '#fff', display: 'grid', placeItems: 'center', font: '800 15px var(--font-sans)', flex: 'none' }}>T</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ font: '600 13px var(--font-sans)', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{SHOP.name}</div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: '11px var(--font-sans)', color: kyc === 'VERIFIED' ? 'var(--mint-500)' : kyc === 'REJECTED' ? 'var(--flash-500)' : 'var(--gold-500)' }}><Icon name={kyc === 'VERIFIED' ? 'badge-check' : kyc === 'REJECTED' ? 'triangle-alert' : 'clock'} size={12} /> {kyc === 'VERIFIED' ? 'Đã xác minh' : kyc === 'REJECTED' ? 'KYC bị từ chối' : 'KYC đang chờ'}</div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: '11px var(--font-sans)', color: kyc === 'VERIFIED' ? 'var(--mint-500)' : kyc === 'REJECTED' ? 'var(--flash-500)' : 'var(--gold-500)' }}><Icon name={kyc === 'VERIFIED' ? 'badge-check' : kyc === 'REJECTED' ? 'triangle-alert' : 'clock'} size={12} /> {kyc === 'VERIFIED' ? 'Đã xác minh' : kyc === 'REJECTED' ? 'KYC bị từ chối' : kyc === 'NOT_SUBMITTED' ? 'Chưa nộp KYC' : 'KYC đang chờ'}</div>
             </div>
           </div>
           <nav style={{ flex: 1, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
@@ -140,7 +140,7 @@
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4, padding: '4px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--surface-sunken)' }} title="Demo: chuyển trạng thái KYC để xem cổng khoá">
                 <span style={{ font: '600 10px var(--font-sans)', color: 'var(--text-subtle)', letterSpacing: '.04em' }}>KYC</span>
-                {['PENDING', 'VERIFIED', 'REJECTED'].map((s) => (
+                {['NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED'].map((s) => (
                   <button key={s} onClick={() => setKyc && setKyc(s)} style={{ height: 24, padding: '0 8px', borderRadius: 'var(--radius-pill)', border: 0, cursor: 'pointer', background: kyc === s ? 'var(--color-primary)' : 'transparent', color: kyc === s ? '#fff' : 'var(--text-muted)', font: '600 10px var(--font-sans)' }}>{s}</button>
                 ))}
               </div>
