@@ -124,7 +124,7 @@
             )}
             {shown.length === 0
               ? <div style={{ display: 'grid', placeItems: 'center', gap: 10, padding: '64px 0', background: '#fff', borderRadius: 'var(--radius-lg)', color: 'var(--text-subtle)' }}><Icon name="search" size={40} /><span style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có sản phẩm nào khớp bộ lọc</span><Button variant="outline" onClick={clearAll}>Xoá lọc</Button></div>
-              : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>{shown.map((p) => <ProductCard key={p.id} {...LZ.card(p)} onClick={() => onOpen(p.id)} />)}</div>}
+              : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>{shown.map((p) => <window.LZCardX key={p.id} p={p} onClick={() => onOpen(p.id)} />)}</div>}
             {pages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 24 }}>
                 {Array.from({ length: pages }).map((_, i) => <button key={i} onClick={() => { setPage(i + 1); window.scrollTo(0, 0); }} style={{ minWidth: 40, height: 40, borderRadius: 'var(--radius-md)', cursor: 'pointer', border: '1.5px solid ' + (page === i + 1 ? 'var(--color-primary)' : 'var(--border-default)'), background: page === i + 1 ? 'var(--color-primary)' : '#fff', color: page === i + 1 ? '#fff' : 'var(--text-body)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)' }}>{i + 1}</button>)}

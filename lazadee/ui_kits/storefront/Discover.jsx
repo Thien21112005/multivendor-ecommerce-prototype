@@ -55,7 +55,7 @@
 
         {/* grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
-          {items.map((p) => <ProductCard key={p._k} {...window.LZ.card(p)} onClick={() => onOpen(p.id)} />)}
+          {items.map((p) => <window.LZCardX key={p._k} p={p} onClick={() => onOpen(p.id)} />)}
         </div>
 
         {/* pagination */}

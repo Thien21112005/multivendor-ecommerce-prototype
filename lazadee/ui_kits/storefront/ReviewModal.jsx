@@ -2,14 +2,15 @@
    picker, previewed locally). */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Modal } = DS;
+  const { Icon, Button, Modal, Radio } = DS;
 
   function ReviewModal({ open, onClose, order, onSubmitted }) {
     const [stars, setStars] = React.useState(5);
     const [text, setText] = React.useState('');
     const [imgs, setImgs] = React.useState([]);
+    const [anon, setAnon] = React.useState(false);
     const fileRef = React.useRef(null);
-    React.useEffect(() => { if (open) { setStars(5); setText(''); setImgs([]); } }, [open]);
+    React.useEffect(() => { if (open) { setStars(5); setText(''); setImgs([]); setAnon(false); } }, [open]);
     if (!open || !order) return null;
     const item = order.items[0];
 
@@ -52,6 +53,10 @@
               {imgs.length > 0 && imgs.length < 5 && <div style={{ width: 64, height: 64, borderRadius: 8, border: '1px dashed var(--border-strong)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}><Icon name="plus" size={22} /></div>}
             </div>
             <input ref={fileRef} type="file" accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} style={{ display: 'none' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 18 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-body)', cursor: 'pointer' }}><Radio name="review-name" checked={!anon} onChange={() => setAnon(false)} />Hiển thị tên công khai</label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-body)', cursor: 'pointer' }}><Radio name="review-name" checked={anon} onChange={() => setAnon(true)} />Đánh giá ẩn tên</label>
           </div>
           <Button size="lg" block onClick={onSubmitted}>Gửi đánh giá</Button>
         </div>

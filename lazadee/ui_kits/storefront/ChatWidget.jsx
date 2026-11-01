@@ -14,7 +14,7 @@
   const SEED = {
     techzone: [
       { from: 'shop', kind: 'text', text: 'Chào bạn 🧡 TechZone có thể giúp gì cho bạn hôm nay ạ?', time: '14:20' },
-      { from: 'shop', kind: 'product', title: 'Tai nghe Bluetooth ANC Pro 5', img: 'headphones', price: 389000, time: '14:20' },
+      { from: 'shop', kind: 'product', productId: 'p1', title: 'Tai nghe Bluetooth ANC Pro 5', img: 'headphones', price: 389000, time: '14:20' },
       { from: 'me', kind: 'text', text: 'Sản phẩm còn màu đen không shop?', time: '14:31' },
       { from: 'shop', kind: 'text', text: 'Dạ còn đủ màu đen bạn nhé! Freeship cho đơn từ 199k ạ.', time: '14:32' },
     ],
@@ -48,7 +48,9 @@
     'Đơn của bạn dự kiến giao trong 2–3 ngày, freeship toàn quốc ạ.',
     'Bạn để lại số điện thoại, shop tư vấn kỹ hơn nha!',
   ];
-  const lastText = (m) => { if (!m) return ''; return m.kind === 'text' ? m.text : m.kind === 'image' ? '[Hình ảnh]' : '[Sản phẩm]'; };
+  const lastText = (m) => { if (!m) return ''; return m.kind === 'text' ? m.text : m.kind === 'image' ? '[Hình ảnh]' : m.kind === 'order' ? '[Đơn hàng]' : '[Sản phẩm]'; };
+  const ST_LABEL = { sending: 'Đang gửi…', received: 'Đã nhận', seen: 'Đã xem' };
+  const IMG_PATH = (m) => m.src || '../../assets/img/' + m.img + '.jpg';
   function now() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
   function ShopMark({ id, size }) {
@@ -64,21 +66,27 @@
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 7, flexDirection: mine ? 'row-reverse' : 'row' }}>
           {!mine && <ShopMark id={shopId} size={26} />}
           {m.kind === 'text' && <div style={{ ...base, background: mine ? 'var(--color-primary)' : '#fff', color: mine ? '#fff' : 'var(--text-body)', border: mine ? 'none' : '1px solid var(--border-subtle)' }}>{m.text}</div>}
-          {m.kind === 'image' && <img src={'../../assets/img/' + m.img + '.jpg'} alt="" style={{ width: 140, height: 140, objectFit: 'cover', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }} />}
+          {m.kind === 'order' && (
+            <div style={{ width: 210, background: '#fff', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', padding: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}><Icon name="package" size={15} style={{ color: 'var(--color-primary)' }} />Đơn hàng</div>
+              <div className="code" style={{ font: '12px var(--font-mono)', color: 'var(--text-muted)', marginTop: 3 }}>{m.order}</div>
+            </div>
+          )}
+          {m.kind === 'image' && <img src={IMG_PATH(m)} alt="Ảnh trong tin nhắn" style={{ width: 140, height: 140, objectFit: 'cover', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)' }} />}
           {m.kind === 'product' && (
             <div style={{ width: 210, background: '#fff', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <div style={{ display: 'flex', gap: 9, padding: 9 }}>
-                <img src={'../../assets/img/' + m.img + '.jpg'} alt="" style={{ width: 48, height: 48, borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} />
+                <img src={IMG_PATH(m)} alt="" style={{ width: 48, height: 48, borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} />
                 <div style={{ minWidth: 0 }}>
                   <div style={{ font: 'var(--type-caption)', color: 'var(--text-body)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{m.title}</div>
                   <div style={{ font: '700 13px var(--font-sans)', color: 'var(--text-price)', marginTop: 2 }}>{fmtVND(m.price)}</div>
                 </div>
               </div>
-              <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '6px 10px', font: 'var(--weight-semibold) var(--text-xs) var(--font-sans)', color: 'var(--text-link)', textAlign: 'center', cursor: 'pointer' }}>Xem sản phẩm</div>
+              <div onClick={() => m.productId && window.dispatchEvent(new CustomEvent('lz_open_product', { detail: { id: m.productId } }))} style={{ borderTop: '1px solid var(--border-subtle)', padding: '6px 10px', font: 'var(--weight-semibold) var(--text-xs) var(--font-sans)', color: 'var(--text-link)', textAlign: 'center', cursor: 'pointer' }}>Xem sản phẩm</div>
             </div>
           )}
         </div>
-        <span style={{ font: '10px var(--font-sans)', color: 'var(--text-subtle)', margin: mine ? '3px 33px 0 0' : '3px 0 0 33px' }}>{m.time}</span>
+        <span style={{ font: '10px var(--font-sans)', color: 'var(--text-subtle)', margin: mine ? '3px 33px 0 0' : '3px 0 0 33px' }}>{m.time}{mine && m.st ? ' · ' + ST_LABEL[m.st] : ''}</span>
       </div>
     );
   }
@@ -88,21 +96,46 @@
     const [view, setView] = React.useState('list');          // list | thread
     const [activeShop, setActiveShop] = React.useState(null);
     const [threads, setThreads] = React.useState(SEED);
+    const [ids, setIds] = React.useState(ORDER);
+    const [orderMenu, setOrderMenu] = React.useState(false);
+    const imgRef = React.useRef(null);
+    const seq = React.useRef(0);
     const [meta, setMeta] = React.useState(META);
     const [draft, setDraft] = React.useState('');
     const [typing, setTyping] = React.useState(false);
     const bodyRef = React.useRef(null);
     const replyIdx = React.useRef(0);
 
-    const totalUnread = ORDER.reduce((n, id) => n + (meta[id] ? meta[id].unread : 0), 0);
+    const totalUnread = ids.reduce((n, id) => n + (meta[id] ? meta[id].unread : 0), 0);
+    const mark = (id, key, st) => setThreads((th) => ({ ...th, [id]: th[id].map((x) => (x.key === key ? { ...x, st } : x)) }));
+    // sent → received by the server → seen once the shop replies
+    const pushMine = (id, m) => {
+      const key = ++seq.current, stamp = now();
+      setThreads((th) => ({ ...th, [id]: [...(th[id] || []), { from: 'me', time: stamp, st: 'sending', key, ...m }] }));
+      setMeta((mt) => ({ ...mt, [id]: { ...mt[id], time: stamp } }));
+      setTimeout(() => mark(id, key, 'received'), 400);
+      setTyping(true);
+      setTimeout(() => {
+        const r = REPLIES[replyIdx.current % REPLIES.length]; replyIdx.current++;
+        const rt = now();
+        setTyping(false);
+        setThreads((th) => ({ ...th, [id]: [...th[id].map((x) => (x.key === key ? { ...x, st: 'seen' } : x)), { from: 'shop', kind: 'text', text: r, time: rt }] }));
+        setMeta((mt) => ({ ...mt, [id]: { ...mt[id], time: rt } }));
+      }, 1100);
+    };
 
     // other screens open a thread via: window.dispatchEvent(new CustomEvent('open_chat', { detail: { vendorId } }))
     React.useEffect(() => {
       const onOpen = (e) => {
-        const id = e.detail && e.detail.vendorId;
+        const { vendorId: id, product, order } = e.detail || {};
         setOpen(true);
-        if (id && ORDER.includes(id)) { setActiveShop(id); setView('thread'); setMeta((mt) => ({ ...mt, [id]: { ...mt[id], unread: 0 } })); }
-        else setView('list');
+        if (!id) { setView('list'); return; }
+        setIds((x) => (x.includes(id) ? x : [id, ...x]));
+        setThreads((th) => (th[id] ? th : { ...th, [id]: [] }));
+        setMeta((mt) => ({ ...mt, [id]: { ...(mt[id] || { online: true, time: 'Mới' }), unread: 0 } }));
+        setActiveShop(id); setView('thread');
+        if (product) pushMine(id, { kind: 'product', productId: product.id, title: product.title, src: product.img, price: product.price });
+        if (order) pushMine(id, { kind: 'order', order });
       };
       window.addEventListener('open_chat', onOpen);
       return () => window.removeEventListener('open_chat', onOpen);
@@ -118,19 +151,11 @@
     const send = (text) => {
       const t = (text != null ? text : draft).trim();
       if (!t || !activeShop) return;
-      const id = activeShop, stamp = now();
-      setThreads((th) => ({ ...th, [id]: [...th[id], { from: 'me', kind: 'text', text: t, time: stamp }] }));
-      setMeta((mt) => ({ ...mt, [id]: { ...mt[id], time: stamp } }));
+      pushMine(activeShop, { kind: 'text', text: t });
       setDraft('');
-      setTyping(true);
-      setTimeout(() => {
-        const r = REPLIES[replyIdx.current % REPLIES.length]; replyIdx.current++;
-        const rt = now();
-        setTyping(false);
-        setThreads((th) => ({ ...th, [id]: [...th[id], { from: 'shop', kind: 'text', text: r, time: rt }] }));
-        setMeta((mt) => ({ ...mt, [id]: { ...mt[id], time: rt } }));
-      }, 1100);
     };
+    const pickImage = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f && activeShop) pushMine(activeShop, { kind: 'image', src: URL.createObjectURL(f) }); };
+    const shopOrders = activeShop ? window.LZ.ORDERS.filter((o) => o.vendorId === activeShop) : [];
 
     const s = activeShop ? shop(activeShop) : null;
 
@@ -149,7 +174,7 @@
                 </div>
                 {/* conversation list */}
                 <div style={{ flex: 1, overflowY: 'auto', background: '#fff' }}>
-                  {ORDER.map((id) => {
+                  {ids.map((id) => {
                     const sh = shop(id); const mt = meta[id]; const msgs = threads[id];
                     return (
                       <button key={id} onClick={() => openThread(id)} style={{ display: 'flex', gap: 11, alignItems: 'center', width: '100%', padding: '11px 14px', border: 0, borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', textAlign: 'left', background: '#fff' }}
@@ -217,7 +242,15 @@
 
                 {/* composer */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'var(--surface-page)', flex: 'none' }}>
-                  <button style={iconBtn} aria-label="Gửi ảnh"><Icon name="image" size={19} /></button>
+                  <input ref={imgRef} type="file" hidden accept="image/*" onChange={pickImage} />
+                  <button style={iconBtn} aria-label="Gửi ảnh" onClick={() => imgRef.current.click()}><Icon name="image" size={19} /></button>
+                  <div style={{ position: 'relative', flex: 'none' }}>
+                    <button style={iconBtn} aria-label="Gửi đơn hàng" aria-expanded={orderMenu} onClick={() => setOrderMenu((o) => !o)}><Icon name="package" size={19} /></button>
+                    {orderMenu && <div style={{ position: 'absolute', left: 0, bottom: 'calc(100% + 6px)', width: 200, background: '#fff', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', padding: 4 }}>
+                      {shopOrders.length === 0 && <div style={{ padding: '8px 10px', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Chưa có đơn với shop này</div>}
+                      {shopOrders.map((o) => <div key={o.id} onClick={() => { pushMine(activeShop, { kind: 'order', order: o.id }); setOrderMenu(false); }} className="code" style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm)', font: '12px var(--font-mono)', color: 'var(--text-body)', cursor: 'pointer' }}>{o.id}</div>)}
+                    </div>}
+                  </div>
                   <input value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') send(); }} placeholder="Nhập tin nhắn…" style={{ flex: 1, height: 40, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-pill)', padding: '0 15px', font: 'var(--type-body-sm)', outline: 'none', background: '#fff' }} />
                   <button onClick={() => send()} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff' }} aria-label="Gửi"><Icon name="send" size={18} /></button>
                 </div>
@@ -227,7 +260,7 @@
         )}
 
         {/* launcher */}
-        <button onClick={() => setOpen((o) => !o)} aria-label="Chat với shop"
+        <button onClick={() => { if (!window.LZ.loggedIn) { window.dispatchEvent(new CustomEvent('lz_require_login')); return; } setOpen((o) => !o); }} aria-label="Chat với shop"
           style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer', boxShadow: 'var(--shadow-lg)', display: 'grid', placeItems: 'center', transition: 'transform var(--dur-fast) var(--ease-out), background var(--dur-fast)' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--orange-600)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.transform = 'none'; }}>

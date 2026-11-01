@@ -27,6 +27,7 @@
 <script src="../../_ds_bundle.js"></script>
 <script type="text/babel" src="data.jsx"></script>
 <script type="text/babel" src="Header.jsx"></script>
+<script type="text/babel" src="Shared.jsx"></script>
 <script type="text/babel" src="Home.jsx"></script>
 <script type="text/babel" src="Discover.jsx"></script>
 <script type="text/babel" src="ProductDetail.jsx"></script>
@@ -73,6 +74,7 @@ function App() {
   // one voucher of each tier pre-applied so the 3-layer stack is visible from the first view
   const [voucherSel, setVoucherSel] = React.useState({ platform: 'v1', freeship: 'v2', shop: { techzone: 'v3' } });
   const [useXu, setUseXu] = React.useState(false);
+  window.LZ.loggedIn = loggedIn;
 
   const showToast = (message, type) => {
     setToast({ message, type: type || 'success' });
@@ -91,9 +93,13 @@ function App() {
       if (qp('cat')) setCatName(qp('cat'));
       setQuery(qp('q') || '');
     };
+    const onLoginNeeded = () => setLoginPrompt(true);
+    const onOpenProduct = (e) => { setProductId(e.detail.id); setScreen('product'); window.scrollTo(0, 0); };
     window.addEventListener('show_toast', onToast);
     window.addEventListener('popstate', onPop);
-    return () => { window.removeEventListener('show_toast', onToast); window.removeEventListener('popstate', onPop); };
+    window.addEventListener('lz_require_login', onLoginNeeded);
+    window.addEventListener('lz_open_product', onOpenProduct);
+    return () => { window.removeEventListener('show_toast', onToast); window.removeEventListener('popstate', onPop); window.removeEventListener('lz_require_login', onLoginNeeded); window.removeEventListener('lz_open_product', onOpenProduct); };
   }, []);
 
   // Keep the current screen in the URL so reload and browser back work.
@@ -135,7 +141,10 @@ function App() {
     showToast('Đã thêm các sản phẩm vào giỏ hàng');
     go('cart');
   };
-  const chat = (vendorId) => window.dispatchEvent(new CustomEvent('open_chat', { detail: { vendorId } }));
+  const chat = (vendorId, product, order) => {
+    if (!loggedIn) { requireLogin(); return; }
+    window.dispatchEvent(new CustomEvent('open_chat', { detail: { vendorId, product, order } }));
+  };
 
   const Header = window.LZHeader;
   const track = (id) => { setTrackId(id); go('tracking'); };
@@ -159,7 +168,7 @@ function App() {
   else if (screen === 'done') body = <OrderDone receipt={receipt} onHome={() => go('home')} onOrders={() => goAccount('orders')} onTrack={(id) => track(window.LZ.orderById(id) ? id : 'ORD-2412-0044')} />;
   else if (screen === 'payfail') body = <PaymentFailed onRetry={() => go('checkout')} onCart={() => go('cart')} onHome={() => go('home')} />;
   else if (screen === 'account') body = <window.LZAccount initialView={acctView} pendingNotif={pendingNotif} onClearPendingNotif={() => setPendingNotif(null)} reviewedIds={reviewedIds} onTrack={track} onOpen={open} onReview={review} onBuyAgain={buyAgain} onChat={chat} onShop={openShop} onGo={go} onViewChange={setAcctView} onLogout={logout} />;
-  else if (screen === 'tracking') body = <window.LZOrderTracking orderId={trackId} onBack={() => goAccount('orders')} onReview={review} onChat={chat} />;
+  else if (screen === 'tracking') body = <window.LZOrderTracking orderId={trackId} onBack={() => goAccount('orders')} onReview={review} onChat={chat} onBuyAgain={buyAgain} />;
   else if (screen === 'shop') body = <window.LZShop vendorId={shopId} onOpen={open} onSearch={runSearch} onChat={chat} />;
   else if (screen === 'search') body = <window.LZSearch query={query} scope={searchScope} shopId={searchShopId} onOpen={open} onScope={setSearchScope} onShop={openShop} />;
   else if (screen === 'seller') body = <window.LZBecomeSeller onLogin={toLogin} onRegistered={() => { window.location.href = '../vendor/index.html?screen=kyc'; }} />;
@@ -168,7 +177,7 @@ function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header cart={cart} cartCount={cartCount} loggedIn={loggedIn} onNav={go} onOpen={open} onOrders={() => goAccount('orders')} onNotifications={() => goAccount('notifications')} onOpenNotif={(n) => { setPendingNotif(n); goAccount('notifications'); }} query={query} onSearch={(q) => runSearch(q, null)} onCategory={openCategory} onRequireLogin={requireLogin} onLogin={toLogin} onLogout={logout} />
+      <Header cart={cart} cartCount={cartCount} loggedIn={loggedIn} onNav={go} onOpen={open} onOrders={() => goAccount('orders')} onNotifications={() => goAccount('notifications')} onOpenNotif={(n) => { setPendingNotif(n); goAccount('notifications'); }} query={query} onSearch={(q) => runSearch(q, null)} onCategory={openCategory} onShop={openShop} onRequireLogin={requireLogin} onLogin={toLogin} onLogout={logout} />
       <main style={{ flex: 1 }}>{body}</main>
       <Footer onNavPage={(id) => go('page', id)} />
       <window.LZChatWidget />
@@ -212,6 +221,7 @@ function OrderDone({ receipt, onHome, onOrders, onTrack }) {
   const r = receipt || SAMPLE_RECEIPT;
   const f = Money.format, p = r.price;
   const disc = p.platformDisc + p.freeshipDisc + p.shopDisc;
+  const cod = r.pay === 'cod';
   const row = { display: 'flex', justifyContent: 'space-between', marginBottom: 12, font: 'var(--type-body-sm)', color: 'var(--text-body)' };
   const kicker = { font: 'var(--type-caption)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 };
   return (
@@ -220,8 +230,8 @@ function OrderDone({ receipt, onHome, onOrders, onTrack }) {
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--green-50)', color: 'var(--green-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <Icon name="circle-check" size={42} strokeWidth={2} />
         </div>
-        <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Thanh toán thành công!</h1>
-        <p style={{ color: 'var(--text-muted)' }}>{r.orders.length > 1 ? 'Đơn hàng đã được tách theo từng nhà bán hàng.' : 'Cảm ơn bạn đã mua sắm tại Lazadee.'}</p>
+        <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>{cod ? 'Đặt hàng thành công!' : 'Thanh toán thành công!'}</h1>
+        <p style={{ color: 'var(--text-muted)' }}>{cod ? 'Bạn thanh toán tiền mặt cho nhân viên giao hàng khi nhận hàng.' : r.orders.length > 1 ? 'Đơn hàng đã được tách theo từng nhà bán hàng.' : 'Cảm ơn bạn đã mua sắm tại Lazadee.'}</p>
       </div>
       <div style={{ background: '#fff', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', padding: '24px 28px', boxShadow: 'var(--shadow-sm)', marginBottom: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border-subtle)', paddingBottom: 18, marginBottom: 18 }}>
@@ -247,7 +257,7 @@ function OrderDone({ receipt, onHome, onOrders, onTrack }) {
           <div style={row}><span>Phí vận chuyển</span><span>{f(p.shipping)}</span></div>
           {disc > 0 && <div style={{ ...row, color: 'var(--mint-600)' }}><span>Giảm giá (Voucher & Khuyến mãi)</span><span>−{f(disc)}</span></div>}
           {p.xuDiscount > 0 && <div style={{ ...row, color: 'var(--orange-600)' }}><span>Dùng Lazadee Xu</span><span>−{f(p.xuDiscount)}</span></div>}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--border-subtle)', font: '700 18px var(--font-sans)', color: 'var(--orange-600)' }}><span>Tổng thanh toán</span><span>{f(p.total)}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--border-subtle)', font: '700 18px var(--font-sans)', color: 'var(--orange-600)' }}><span>{cod ? 'Thu khi nhận hàng' : 'Tổng thanh toán'}</span><span>{f(p.total)}</span></div>
         </div>
       </div>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>

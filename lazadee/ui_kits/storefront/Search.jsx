@@ -5,7 +5,7 @@
    refine the grid. Reachable from the global header (all) or a shop (in-shop). */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Badge, Checkbox, ProductCard, VendorChip } = DS;
+  const { Icon, Button, Badge, Checkbox, VendorChip } = DS;
   const { V, PRODUCTS, CATEGORIES, productsOfVendor } = window.LZ;
   const fmt = (n) => n.toLocaleString('vi-VN') + '₫';
   const parseSold = (s) => { const n = parseFloat(String(s).replace(',', '.')); return /k/i.test(String(s)) ? n * 1000 : n; };
@@ -31,6 +31,7 @@
     const [sort, setSort] = React.useState('rel');
     const [priceAsc, setPriceAsc] = React.useState(true);
     const [cats, setCats] = React.useState([]);
+    const [brands, setBrands] = React.useState([]);
     const [band, setBand] = React.useState(null);
     const [minMax, setMinMax] = React.useState({ min: '', max: '' });
     const [mallOnly, setMallOnly] = React.useState(false);
@@ -42,6 +43,7 @@
 
     let res = base.filter((p) => !q || (p.title + ' ' + p.cat).toLowerCase().includes(q));
     if (cats.length) res = res.filter((p) => cats.includes(p.cat));
+    if (brands.length) res = res.filter((p) => brands.includes(V[p.v].name));
     if (mallOnly) res = res.filter((p) => p.mall || V[p.v].mall);
     if (freeOnly) res = res.filter((p) => p.freeship);
     if (rating) res = res.filter((p) => p.rating >= rating);
@@ -55,9 +57,12 @@
     else if (sort === 'new') res = [...res].reverse();
 
     const toggleCat = (c) => setCats((s) => s.includes(c) ? s.filter((x) => x !== c) : [...s, c]);
-    const clearAll = () => { setCats([]); setBand(null); setMinMax({ min: '', max: '' }); setMallOnly(false); setFreeOnly(false); setRating(0); };
+    const toggleBrand = (b) => setBrands((s) => (s.includes(b) ? s.filter((x) => x !== b) : [...s, b]));
+    const brandList = Array.from(new Set(base.map((p) => V[p.v].name)));
+    const clearAll = () => { setBrands([]); setCats([]); setBand(null); setMinMax({ min: '', max: '' }); setMallOnly(false); setFreeOnly(false); setRating(0); };
     const activeChips = [
       ...cats.map((c) => ({ k: 'cat:' + c, label: c, clear: () => toggleCat(c) })),
+      ...brands.map((b) => ({ k: 'brand:' + b, label: b, clear: () => toggleBrand(b) })),
       ...(activeBand ? [{ k: 'band', label: activeBand.label, clear: () => setBand(null) }] : []),
       ...(mallOnly ? [{ k: 'mall', label: 'Lazadee Mall', clear: () => setMallOnly(false) }] : []),
       ...(freeOnly ? [{ k: 'free', label: 'Freeship', clear: () => setFreeOnly(false) }] : []),
@@ -100,6 +105,12 @@
             {!inShop && <FilterGroup title="Theo danh mục">
               {CATEGORIES.slice(0, 8).map((c) => (
                 <label key={c.name} style={fRow}><Checkbox checked={cats.includes(c.name)} onChange={() => toggleCat(c.name)} /><span>{c.name}</span></label>
+              ))}
+            </FilterGroup>}
+
+            {!inShop && <FilterGroup title="Thương hiệu">
+              {brandList.map((b) => (
+                <label key={b} style={fRow}><Checkbox checked={brands.includes(b)} onChange={() => toggleBrand(b)} /><span>{b}</span></label>
               ))}
             </FilterGroup>}
 
@@ -163,13 +174,20 @@
               <div style={{ display: 'grid', placeItems: 'center', gap: 12, padding: '70px 0', background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', color: 'var(--text-subtle)' }}>
                 <Icon name="package" size={46} />
                 <div style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không tìm thấy sản phẩm nào khớp bộ lọc{inShop ? ' trong shop này' : ''}.</div>
+                <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-subtle)' }}>Thử từ khóa ngắn hơn, kiểm tra chính tả hoặc bỏ bớt bộ lọc.</div>
                 {inShop && <Button variant="outline" iconLeft="layout-grid" onClick={() => onScope('all')}>Mở rộng tìm toàn sàn</Button>}
+                <div style={{ width: '100%', padding: '12px 18px 0', boxSizing: 'border-box' }}>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 10 }}>Có thể bạn quan tâm</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
+                    {[...PRODUCTS].sort((a, b) => parseSold(b.sold) - parseSold(a.sold)).slice(0, 5).map((p) => <window.LZCardX key={p.id} p={p} onClick={() => onOpen(p.id)} />)}
+                  </div>
+                </div>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
                 {res.map((p) => (
                   <div key={p.id} style={{ position: 'relative' }}>
-                    <ProductCard {...window.LZ.card(p)} onClick={() => onOpen(p.id)} />
+                    <window.LZCardX p={p} onClick={() => onOpen(p.id)} />
                     {!inShop && (
                       <button onClick={() => onShop && onShop(p.v)} title={V[p.v].name}
                         style={{ position: 'absolute', left: 8, bottom: 8, display: 'inline-flex', alignItems: 'center', gap: 4, maxWidth: 'calc(100% - 16px)', height: 24, padding: '0 9px', borderRadius: 'var(--radius-pill)', border: 0, background: 'rgba(20,23,31,.78)', color: '#fff', font: '600 11px var(--font-sans)', cursor: 'pointer', backdropFilter: 'blur(2px)' }}>

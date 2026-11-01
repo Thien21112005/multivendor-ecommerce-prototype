@@ -47,7 +47,18 @@
     );
   }
 
+  // Banners saved in Admin → Banner trang chủ; without any, the seeded hero stays.
+  const adminBanners = (position) => {
+    let rows = [];
+    try { rows = JSON.parse(localStorage.getItem('lz_home_banners')) || []; } catch (e) {}
+    const now = Date.now();
+    return rows.filter((b) => b.on && b.position === position && (!b.startsAt || new Date(b.startsAt).getTime() <= now) && (!b.endsAt || new Date(b.endsAt).getTime() >= now)).sort((a, b) => a.order - b.order);
+  };
+  const followLink = (b, fallback) => { if (b && b.link) window.location.href = b.link; else fallback(); };
+
   function Home({ onOpen, onMore, onCategory }) {
+    const hero = adminBanners('HOME_TOP_CAROUSEL')[0];
+    const middle = adminBanners('HOME_MIDDLE')[0];
     // Fixed teaser grid (12 = 2 rows of 6). "Xem thêm" → full paginated discover page.
     const feed = Array.from({ length: 12 }, (_, i) => ({ ...PRODUCTS[i % PRODUCTS.length], _k: i }));
     const flash = PRODUCTS.filter((p) => p.flash).slice(0, 6);
@@ -57,16 +68,16 @@
         {/* hero */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 14, marginBottom: 22 }}>
           <div style={{ position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
-            <img src="../../assets/img/banner-sale.jpg" alt="" style={{ width: '100%', height: 320, objectFit: 'cover' }} />
+            <img src={hero ? hero.image : '../../assets/img/banner-sale.jpg'} alt="" style={{ width: '100%', height: 320, objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(20,23,31,.82) 0%, rgba(20,23,31,.25) 60%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 48px', color: '#fff' }}>
               <Badge variant="flash" icon="zap" style={{ alignSelf: 'flex-start', fontSize: 13 }}>SIÊU SALE 12.12</Badge>
-              <h1 style={{ font: '800 44px/1.05 var(--font-sans)', letterSpacing: '-0.02em', margin: '14px 0 8px', maxWidth: 460 }}>Giảm đến 60% toàn sàn</h1>
+              <h1 style={{ font: '800 44px/1.05 var(--font-sans)', letterSpacing: '-0.02em', margin: '14px 0 8px', maxWidth: 460 }}>{hero ? hero.title : 'Giảm đến 60% toàn sàn'}</h1>
               <p style={{ font: 'var(--text-lg)/1.4 var(--font-sans)', color: 'rgba(255,255,255,.85)', maxWidth: 380, marginBottom: 22 }}>Freeship 0₫ · Voucher tích luỹ · Hoàn xu tới 200k cho đơn đầu tiên.</p>
-              <Button size="lg" iconRight="arrow-right" style={{ alignSelf: 'flex-start' }} onClick={() => onOpen(flash[0].id)}>Săn deal ngay</Button>
+              <Button size="lg" iconRight="arrow-right" style={{ alignSelf: 'flex-start' }} onClick={() => followLink(hero, () => onOpen(flash[0].id))}>Săn deal ngay</Button>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 14 }}>
-            {[{ img: 'banner-tech', t: 'Công nghệ chính hãng', s: 'Trả góp 0%' }, { img: 'cosmetics', t: 'Làm đẹp cùng Beauty Box', s: 'Mua 1 tặng 1' }].map((b) => (
+            {[{ img: 'banner-tech', t: 'Công nghệ chính hãng', s: 'Bảo hành 12 tháng' }, { img: 'cosmetics', t: 'Làm đẹp cùng Beauty Box', s: 'Mua 1 tặng 1' }].map((b) => (
               <div key={b.img} style={{ position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
                 <img src={'../../assets/img/' + b.img + '.jpg'} alt="" style={{ width: '100%', height: 153, objectFit: 'cover' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(20,23,31,.7), transparent 70%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 16, color: '#fff' }}>
@@ -98,6 +109,8 @@
           <SaveVoucher kind="platform" amount="-12%" label="Siêu sale 12.12" code="SALE1212" />
         </div>
 
+        {middle && <img src={middle.image} alt={middle.title} onClick={() => followLink(middle, () => {})} style={{ display: 'block', width: '100%', height: 140, objectFit: 'cover', borderRadius: 'var(--radius-lg)', marginBottom: 24, cursor: middle.link ? 'pointer' : 'default' }} />}
+
         {/* flash sale */}
         <div className="lz-card" style={{ padding: '18px 20px', marginBottom: 28, borderTop: '3px solid var(--flash-500)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
@@ -106,17 +119,17 @@
               <span style={{ font: '800 22px var(--font-sans)', color: 'var(--flash-500)', letterSpacing: '-0.01em' }}>FLASH SALE</span>
             </div>
             <Countdown />
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text-link)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', cursor: 'pointer' }}>Xem tất cả <Icon name="chevron-right" size={16} /></span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text-link)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', cursor: 'pointer' }} onClick={onMore}>Xem tất cả <Icon name="chevron-right" size={16} /></span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
-            {flash.map((p) => <ProductCard key={p.id} {...window.LZ.card(p)} onClick={() => onOpen(p.id)} />)}
+            {flash.map((p) => <window.LZCardX key={p.id} p={p} flashBar onClick={() => onOpen(p.id)} />)}
           </div>
         </div>
 
         {/* daily discover */}
         <SectionHead title="Gợi ý hôm nay" action={<span style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-link)', cursor: 'pointer' }} onClick={onMore}>Xem thêm</span>} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
-          {feed.map((p) => <ProductCard key={p._k} {...window.LZ.card(p)} onClick={() => onOpen(p.id)} />)}
+          {feed.map((p) => <window.LZCardX key={p._k} p={p} onClick={() => onOpen(p.id)} />)}
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0 4px' }}>
           <Button size="lg" variant="outline" iconRight="chevron-down" onClick={onMore}>Xem thêm sản phẩm</Button>
@@ -130,4 +143,5 @@
   const catIcon = { width: 48, height: 48, borderRadius: '50%', background: 'var(--color-primary-tint)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 
   window.LZHome = Home;
+  window.LZSaveVoucher = SaveVoucher;
 })();

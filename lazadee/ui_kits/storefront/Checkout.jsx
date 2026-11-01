@@ -23,10 +23,8 @@
   );
   const PAYMENTS = [
     { id: 'vnpay', name: 'Cổng VNPAY', logo: 'vnpay.png', meta: 'Thẻ ATM / QR Code' },
-    { id: 'momo', name: 'Ví điện tử MoMo', logo: 'momo-logo.png' },
-    { id: 'zalopay', name: 'Ví ZaloPay', logo: 'zalopay-logo.png' },
-    { id: 'card', name: 'Thẻ Tín dụng / Ghi nợ Quốc tế', logo: 'card.svg', meta: 'Visa / Mastercard' },
-    { id: 'cod', name: 'Thanh toán tiền mặt (COD)', meta: 'Nhận hàng rồi thanh toán', off: '(Không khả dụng cho Đơn bảo chứng)' },
+    { id: 'vietqr', name: 'Chuyển khoản VietQR', icon: 'qr-code', meta: 'Tự xác nhận qua SePay' },
+    { id: 'cod', name: 'Thanh toán tiền mặt (COD)', meta: 'Nhận hàng rồi thanh toán' },
   ];
 
   function Checkout({ cart, voucherSel, setVoucherSel, useXu, setUseXu, onPlaced, onFailed, onBack }) {
@@ -37,6 +35,7 @@
     const [simFail, setSimFail] = React.useState(false);
     const [pay, setPay] = React.useState('vnpay');
     const [placing, setPlacing] = React.useState(false);
+    const [qrResult, setQrResult] = React.useState(null);
     const [lazOpen, setLazOpen] = React.useState(false);
     const [shopPicker, setShopPicker] = React.useState(null); // vendorId
     const [notes, setNotes] = React.useState({});
@@ -68,7 +67,10 @@
           const grand = Math.max(0, sub + V[vid].ship - (price.shopByVendor[vid] || 0) - (price.shipCutByVendor[vid] || 0) - lines.reduce((n, l) => n + (price.perLine[l.key] || 0), 0));
           return { id: 'ORD-2412-00' + (seq++), vendorId: vid, grandTotal: grand };
         });
-        onPlaced && onPlaced({ sessionId: 'CS-' + Date.now().toString(36).toUpperCase(), orders, price, keys: live.map((l) => l.key), pay });
+        const result = { sessionId: 'CS-' + Date.now().toString(36).toUpperCase(), orders, price, keys: live.map((l) => l.key), pay };
+        setPlacing(false);
+        if (pay === 'vietqr') setQrResult(result);
+        else onPlaced && onPlaced(result);
       }, 700);
     };
 
@@ -199,11 +201,11 @@
             {/* payment */}
             <div style={card}>
               <div style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 4 }}>Phương thức thanh toán</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 12 }}><Icon name="shield-check" size={14} style={{ color: 'var(--mint-600)' }} />Thanh toán qua cổng để giữ tiền bảo chứng (Escrow) · không hỗ trợ COD</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 12 }}><Icon name="shield-check" size={14} style={{ color: 'var(--mint-600)' }} />VNPAY và VietQR được giữ tạm trong Escrow · COD thu tiền khi giao hàng</div>
               {PAYMENTS.map((m) => (
                 <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', border: '1.5px solid ' + (pay === m.id ? 'var(--color-primary)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', marginBottom: 8, cursor: m.off ? 'not-allowed' : 'pointer', background: pay === m.id ? 'var(--color-primary-tint)' : '#fff', opacity: m.off ? 0.55 : 1 }}>
                   <Radio name="pay" checked={pay === m.id} disabled={!!m.off} onChange={() => !m.off && setPay(m.id)} />
-                  <span style={{ width: 30, height: 30, display: 'grid', placeItems: 'center', flex: 'none' }}>{m.logo ? <img src={'../../assets/payments/' + m.logo} alt="" style={{ width: 30, height: 30, objectFit: 'contain' }} /> : <CodLogo />}</span>
+                  <span style={{ width: 30, height: 30, display: 'grid', placeItems: 'center', flex: 'none' }}>{m.logo ? <img src={'../../assets/payments/' + m.logo} alt="" style={{ width: 30, height: 30, objectFit: 'contain' }} /> : m.icon ? <Icon name={m.icon} size={26} style={{ color: 'var(--blue-600)' }} /> : <CodLogo />}</span>
                   <span style={{ font: 'var(--weight-medium) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{m.name}{m.off && <span style={{ font: 'var(--type-caption)', color: 'var(--red-600)', marginLeft: 6 }}>{m.off}</span>}</span>
                   {m.meta && <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{m.meta}</span>}
                 </label>
@@ -231,7 +233,7 @@
                 <span style={{ font: '800 26px var(--font-sans)', color: 'var(--text-price)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(total)}</span>
               </div>
               <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', textAlign: 'right', marginTop: 2 }}>{groups.length} đơn · {cart.length} sản phẩm</div>
-              <Button block size="lg" style={{ marginTop: 16 }} disabled={!canPlace} onClick={place}>{placing ? 'Đang xử lý...' : 'Đặt hàng'}</Button>
+              <Button block size="lg" style={{ marginTop: 16 }} disabled={!canPlace} onClick={place}>{placing ? 'Đang xử lý...' : pay === 'cod' ? 'Đặt hàng' : pay === 'vietqr' ? 'Đặt hàng & lấy mã QR' : 'Đặt hàng & thanh toán VNPAY'}</Button>
               <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>Nhấn "Đặt hàng" đồng nghĩa bạn đồng ý với <a href="?screen=page&id=terms" target="_blank" rel="noreferrer">Điều khoản Lazadee</a></p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -245,6 +247,7 @@
           </div>
         </div>
 
+        <window.LZPayModal open={!!qrResult} amount={total} initial="vietqr" code={qrResult ? 'LZD' + qrResult.orders[0].id.replace(/\D/g, '') : ''} onClose={() => setQrResult(null)} onPaid={() => onPlaced && onPlaced(qrResult)} />
         {window.LZAddressModal && <window.LZAddressModal open={addrOpen} onClose={() => setAddrOpen(false)} selectedId={addr.id} onSelect={setAddr} />}
         <window.LZVoucherPicker open={lazOpen} onClose={() => setLazOpen(false)} title="Chọn Lazadee Voucher" lines={live} selected={voucherSel}
           onConfirm={(r) => setVoucherSel((s) => ({ ...s, ...r }))} />

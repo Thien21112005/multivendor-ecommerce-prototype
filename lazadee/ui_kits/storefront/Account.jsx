@@ -4,7 +4,7 @@
    shop_follows, vouchers, loyalty-coin ledger. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Avatar, StatusBadge, VendorChip, Tabs, Input, Radio, Checkbox, VoucherTag, Badge, Modal } = DS;
+  const { Icon, Button, Avatar, StatusBadge, VendorChip, Tabs, Input, Radio, Checkbox, VoucherTag, Badge, Modal, Select } = DS;
   const { USER, ADDRESSES, FOLLOWS, ORDERS, V, VOUCHERS, COIN_LOG, NOTIFICATIONS, DEVICES } = window.LZ;
   const fmt = (n) => (n < 0 ? '-' : '') + Math.abs(n).toLocaleString('vi-VN') + '₫';
   const PW_COLORS = ['var(--red-500)', 'var(--red-500)', 'var(--gold-500)', 'var(--mint-500)', 'var(--mint-600)'];
@@ -13,18 +13,22 @@
   const maskEmail = (e) => (e || '').replace(/^(.{2}).*(@.*)$/, '$1****$2');
 
   const STATUS_VI = {
-    PENDING_PAYMENT: 'Chờ thanh toán', PAID: 'Đã thanh toán', PROCESSING: 'Đang chuẩn bị',
+    PENDING_PAYMENT: 'Chờ thanh toán', PAID: 'Đã thanh toán', CONFIRMED: 'Đã xác nhận', PROCESSING: 'Đang chuẩn bị',
+    RETURN_REQUESTED: 'Đang trả hàng / hoàn tiền',
     SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', COMPLETED: 'Hoàn thành',
     CANCELLED: 'Đã huỷ', REFUNDED: 'Đã hoàn tiền',
   };
   const TABS = [
     { value: 'all', label: 'Tất cả' },
     { value: 'pay', label: 'Chờ thanh toán', match: ['PENDING_PAYMENT'] },
-    { value: 'ship', label: 'Vận chuyển', match: ['PAID', 'PROCESSING', 'SHIPPED'] },
+    { value: 'ship', label: 'Vận chuyển', match: ['PAID', 'CONFIRMED', 'PROCESSING', 'SHIPPED'] },
     { value: 'deliver', label: 'Chờ giao hàng', match: ['DELIVERED'] },
     { value: 'done', label: 'Hoàn thành', match: ['COMPLETED'] },
-    { value: 'cancel', label: 'Đã huỷ', match: ['CANCELLED', 'REFUNDED'] },
+    { value: 'return', label: 'Trả hàng / Hoàn tiền', match: ['RETURN_REQUESTED', 'REFUNDED'] },
+    { value: 'cancel', label: 'Đã huỷ', match: ['CANCELLED'] },
   ];
+  const CANCEL_REASONS = ['Đổi ý, không muốn mua nữa', 'Muốn đổi địa chỉ nhận hàng', 'Muốn đổi sản phẩm / phân loại', 'Tìm được giá tốt hơn', 'Lý do khác'];
+  const ACTIVE_STATUSES = ['PENDING_PAYMENT', 'PAID', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'RETURN_REQUESTED'];
 
   const MENU = [
     { group: 'Tài khoản của tôi', items: [
@@ -38,6 +42,7 @@
       { id: 'notifications', name: 'Thông báo', icon: 'bell' },
       { id: 'vouchers', name: 'Kho Voucher', icon: 'ticket' },
       { id: 'coins', name: 'Lazadee Xu', icon: 'star' },
+      { id: 'wishlist', name: 'Sản phẩm yêu thích', icon: 'heart' },
       { id: 'follow', name: 'Shop đang theo dõi', icon: 'store', badge: FOLLOWS.length },
     ] },
   ];
@@ -51,6 +56,8 @@
     const [notifs, setNotifs] = React.useState(NOTIFICATIONS);
     const [notifDetail, setNotifDetail] = React.useState(null);
     const [cancelIds, setCancelIds] = React.useState(null);
+    const [cancelWhy, setCancelWhy] = React.useState(CANCEL_REASONS[0]);
+    const [payIds, setPayIds] = React.useState(null);
     const [logoutOpen, setLogoutOpen] = React.useState(false);
     const [provider, setProvider] = React.useState(USER.authProvider || 'email'); // demo: 'email' | 'google'
     const hasPassword = provider === 'email';
@@ -62,13 +69,17 @@
       setOrders((os) => os.map((o) => (o.id === id ? { ...o, status: 'COMPLETED', completedAt: 'vừa xong' } : o)));
 
     // Mark a notification read, then route to its target.
-    const payOrders = (ids) => {
-      setOrders((os) => os.map((o) => (ids.includes(o.id) ? { ...o, status: 'PAID' } : o)));
+    const payOrders = (method) => {
+      const ids = payIds;
+      setOrders((os) => os.map((o) => (ids.includes(o.id) ? { ...o, status: 'PAID', pay: method === 'vietqr' ? 'VietQR' : 'VNPay' } : o)));
+      setPayIds(null);
       toast(ids.length > 1 ? 'Đã thanh toán nhóm đơn hàng (mô phỏng)' : 'Đã thanh toán đơn hàng (mô phỏng)');
     };
+    const payTotal = (payIds || []).reduce((n, id) => n + orders.find((o) => o.id === id).total, 0);
+    const cancelPaid = (cancelIds || []).some((id) => { const o = orders.find((x) => x.id === id); return o.status !== 'PENDING_PAYMENT' && o.pay !== 'COD'; });
     const doCancel = () => {
-      setOrders((os) => os.map((o) => (cancelIds.includes(o.id) ? { ...o, status: 'CANCELLED' } : o)));
-      toast(cancelIds.length > 1 ? 'Huỷ nhóm đơn hàng thành công' : 'Huỷ đơn hàng thành công');
+      setOrders((os) => os.map((o) => (cancelIds.includes(o.id) ? { ...o, status: 'CANCELLED', cancelReason: cancelWhy } : o)));
+      toast((cancelIds.length > 1 ? 'Huỷ nhóm đơn hàng thành công' : 'Huỷ đơn hàng thành công') + (cancelPaid ? '. Tiền được hoàn về phương thức đã thanh toán.' : ''));
       setCancelIds(null);
     };
 
@@ -140,7 +151,7 @@
 
           {/* ---- Main panel ---- */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
-            {view === 'orders' && <OrdersPanel orders={orders} reviewedIds={reviewedIds} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={confirmReceipt} onBuyAgain={onBuyAgain} onPay={payOrders} onCancel={setCancelIds} />}
+            {view === 'orders' && <OrdersPanel orders={orders} reviewedIds={reviewedIds} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={confirmReceipt} onBuyAgain={onBuyAgain} onPay={setPayIds} onCancel={(ids) => { setCancelWhy(CANCEL_REASONS[0]); setCancelIds(ids); }} />}
             {view === 'notifications' && <NotificationsPanel notifs={notifs} unread={notifUnread} onOpen={openNotif} onMarkAll={markAllRead} />}
             {view === 'profile' && <ProfilePanel key={provider} provider={provider} onSetPassword={() => setView('password')} onDeleted={onLogout} />}
             {view === 'address' && <AddressPanel onAdd={() => setAddrOpen(true)} />}
@@ -148,6 +159,7 @@
             {view === 'devices' && <DevicesPanel />}
             {view === 'vouchers' && <VouchersPanel onUse={() => onGo && onGo('cart')} />}
             {view === 'coins' && <CoinsPanel />}
+            {view === 'wishlist' && <WishlistPanel onOpen={onOpen} onBuyAgain={onBuyAgain} />}
             {view === 'follow' && <FollowsPanel onShop={onShop} />}
           </div>
         </div>
@@ -166,8 +178,11 @@
 
         <Modal open={!!cancelIds} onClose={() => setCancelIds(null)} title="Xác nhận huỷ đơn hàng"
           footer={<><Button variant="ghost" onClick={() => setCancelIds(null)}>Không</Button><Button variant="danger" onClick={doCancel}>Xác nhận huỷ</Button></>}>
-          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc muốn huỷ {cancelIds && cancelIds.length > 1 ? 'nhóm ' + cancelIds.length + ' đơn hàng' : 'đơn hàng'} này không? Quá trình này không thể hoàn tác, xu và voucher (nếu có) sẽ được hoàn lại.</div>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5, marginBottom: 12 }}>Bạn có chắc muốn huỷ {cancelIds && cancelIds.length > 1 ? 'nhóm ' + cancelIds.length + ' đơn hàng' : 'đơn hàng'} này không? Quá trình này không thể hoàn tác, xu và voucher (nếu có) sẽ được hoàn lại.{cancelPaid && ' Số tiền đã thanh toán được hoàn về phương thức gốc.'}</div>
+          <Select label="Lý do huỷ đơn" value={cancelWhy} onChange={(e) => setCancelWhy(e.target.value)}>{CANCEL_REASONS.map((r) => <option key={r}>{r}</option>)}</Select>
         </Modal>
+
+        <window.LZPayModal open={!!payIds} amount={payTotal} code={payIds ? 'LZD' + payIds[0].replace(/\D/g, '') : ''} onClose={() => setPayIds(null)} onPaid={payOrders} />
 
         <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="Đăng xuất"
           footer={<><Button variant="ghost" onClick={() => setLogoutOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="log-out" onClick={() => { setLogoutOpen(false); onLogout && onLogout(); }}>Đăng xuất</Button></>}>
@@ -267,7 +282,8 @@
           <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {o.tracking && o.tracking.shipStatus === 'DELIVERED' && o.status === 'DELIVERED' &&
               <span style={{ font: 'var(--type-caption)', color: 'var(--mint-600)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="truck" size={14} />Giao thành công</span>}
-            <StatusBadge status={o.status} label={STATUS_VI[o.status]} />
+            <Badge variant="neutral">{o.pay}</Badge>
+            <StatusBadge status={o.status === 'CONFIRMED' ? 'PROCESSING' : o.status} label={STATUS_VI[o.status]} />
           </span>
         </div>
         <div style={{ padding: '6px 16px' }}>
@@ -299,7 +315,8 @@
     const chat = <Button size="sm" variant="ghost" iconLeft="message-circle" onClick={t(onChat, o.vendorId)}>Liên hệ Shop</Button>;
     const again = <Button size="sm" variant="outline" onClick={() => onBuyAgain && onBuyAgain(o.items)}>Mua lại</Button>;
     if (o.status === 'PENDING_PAYMENT') return <><Button size="sm" onClick={() => onPay([o.id])}>Thanh toán ngay</Button><Button size="sm" variant="ghost" onClick={() => onCancel([o.id])}>Huỷ đơn</Button></>;
-    if (o.status === 'PAID' || o.status === 'PROCESSING') return <>{track}{chat}</>;
+    if (o.status === 'PAID' || o.status === 'CONFIRMED' || o.status === 'PROCESSING') return <>{track}{chat}<Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => onCancel([o.id])}>Huỷ đơn</Button></>;
+    if (o.status === 'RETURN_REQUESTED') return <><Button size="sm" iconLeft="undo-2" onClick={t(onTrack, o.id)}>Xem yêu cầu trả hàng</Button>{chat}</>;
     if (o.status === 'SHIPPED') return <><Button size="sm" iconLeft="truck" onClick={t(onTrack, o.id)}>Theo dõi đơn</Button>{chat}</>;
     if (o.status === 'DELIVERED') return <><Button size="sm" iconLeft="check" onClick={t(onConfirm, o.id)}>Đã nhận hàng</Button><Button size="sm" variant="outline" iconLeft="undo-2" onClick={t(onTrack, o.id)}>Trả hàng</Button>{track}</>;
     if (o.status === 'COMPLETED') return <>{reviewed ? <Button size="sm" iconLeft="star" disabled>Đã đánh giá</Button> : <Button size="sm" iconLeft="star" onClick={t(onReview, o.id)}>Đánh giá</Button>}{again}{chat}</>;
@@ -309,6 +326,8 @@
   /* ============================== PROFILE ============================== */
   function ProfilePanel({ provider, onSetPassword, onDeleted }) {
     const [delOpen, setDelOpen] = React.useState(false);
+    const [delPending, setDelPending] = React.useState(!!USER.deleteRequested);
+    const [activeOrders, setActiveOrders] = React.useState(() => ORDERS.filter((o) => ACTIVE_STATUSES.includes(o.status)).map((o) => o.id));
     const [avatar, setAvatar] = React.useState(null);
     const fileRef = React.useRef(null);
     const pickAvatar = (e) => {
@@ -389,9 +408,12 @@
                 })}
               </div>
             </div>
+            {delPending && <div role="status" style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', borderRadius: 'var(--radius-md)', padding: '10px 12px', font: 'var(--type-body-sm)' }}><Icon name="clock" size={16} style={{ flex: 'none' }} />Tài khoản sẽ được ẩn danh sau 30 ngày. Bạn có thể hủy yêu cầu trong thời gian này.</div>}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
               <Button iconLeft="check" onClick={() => { if (!f.name.trim()) { toast('Vui lòng nhập Họ và tên trước khi lưu.', 'error'); return; } setSaved(true); setTimeout(() => setSaved(false), 2000); }}>Lưu thay đổi</Button>
-              <Button variant="danger" iconLeft="trash-2" onClick={() => setDelOpen(true)}>Xóa tài khoản</Button>
+              {delPending
+                ? <Button variant="outline" iconLeft="undo-2" onClick={() => { USER.deleteRequested = false; setDelPending(false); toast('Đã hủy yêu cầu xóa, tài khoản trở lại bình thường'); }}>Hủy yêu cầu xóa</Button>
+                : <Button variant="danger" iconLeft="trash-2" onClick={() => setDelOpen(true)}>Xóa tài khoản</Button>}
               {saved && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--mint-600)', font: 'var(--type-body-sm)' }}><Icon name="circle-check" size={16} />Đã lưu hồ sơ</span>}
             </div>
           </div>
@@ -403,10 +425,14 @@
           </div>
         </div>
         <Modal open={delOpen} onClose={() => setDelOpen(false)} title="Xóa tài khoản"
-          footer={<><Button variant="ghost" onClick={() => setDelOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setDelOpen(false); toast('Đã xóa tài khoản (mô phỏng)'); onDeleted && onDeleted(); }}>Xóa tài khoản</Button></>}>
+          footer={activeOrders.length
+            ? <><Button variant="ghost" onClick={() => setDelOpen(false)}>Đóng</Button><Button variant="secondary" onClick={() => setActiveOrders([])}>Mô phỏng: đã hoàn tất các đơn</Button></>
+            : <><Button variant="ghost" onClick={() => setDelOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setDelOpen(false); USER.deleteRequested = true; setDelPending(true); toast('Đã ghi nhận yêu cầu xóa tài khoản'); }}>Xóa tài khoản</Button></>}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', width: 'min(420px, 80vw)' }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="triangle-alert" size={20} /></div>
-            <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Hành động này không thể hoàn tác. Toàn bộ hồ sơ, voucher và Xu của <b>{USER.name}</b> sẽ bị xóa.</div>
+            <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>{activeOrders.length
+              ? <>Bạn còn đơn đang xử lý, cần hoàn tất trước khi xóa tài khoản:<ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>{activeOrders.map((id) => <li key={id} className="code">{id}</li>)}</ul></>
+              : <>Hành động này không thể hoàn tác sau 30 ngày. Hồ sơ của <b>{USER.name}</b> sẽ được ẩn danh, voucher và Xu bị hủy. Trong 30 ngày, đăng nhập lại và bấm "Hủy yêu cầu xóa" để giữ tài khoản.</>}</div>
           </div>
         </Modal>
       </section>
@@ -671,7 +697,16 @@
   }
 
   /* ============================== COINS ============================== */
+  const XU_REWARDS = [{ xu: 500, value: 5000 }, { xu: 1000, value: 10000 }, { xu: 2000, value: 20000 }];
+  function UntilMidnight() {
+    const secs = () => { const n = new Date(), m = new Date(n); m.setHours(24, 0, 0, 0); return Math.floor((m - n) / 1000); };
+    const [t, setT] = React.useState(secs);
+    React.useEffect(() => { const i = setInterval(() => setT(secs()), 1000); return () => clearInterval(i); }, []);
+    const p = (x) => String(x).padStart(2, '0');
+    return <span className="code">{p(Math.floor(t / 3600))}:{p(Math.floor(t / 60) % 60)}:{p(t % 60)}</span>;
+  }
   function CoinsPanel() {
+    const [redeem, setRedeem] = React.useState(false);
     const [streak, setStreak] = React.useState(3);
     const [checked, setChecked] = React.useState(false);
     const [balance, setBalance] = React.useState(USER.coins);
@@ -681,6 +716,13 @@
       setLog((l) => [{ type: 'earn', label: 'Điểm danh hằng ngày', amount: 100, at: 'Hôm nay' }, ...l]);
       toast('Điểm danh thành công! +100 Xu');
     };
+    const redeemXu = (r) => {
+      setBalance((b) => b - r.xu); USER.coins -= r.xu;
+      const code = 'XU' + r.value / 1000 + 'K' + (VOUCHERS.length + 1);
+      VOUCHERS.push({ id: 'x' + (VOUCHERS.length + 1), code, kind: 'platform', amount: '-' + r.value / 1000 + 'k', label: 'Giảm ' + fmt(r.value), cond: 'Đơn từ 50.000₫', expiry: '31/12/2026', validFrom: 'Hôm nay', scope: 'Toàn sàn', type: 'FIXED', value: r.value, min: 50000, saved: true, status: 'active', used: 0, limit: 1, sponsor: 'Đổi từ Lazadee Xu', content: 'Đổi từ ' + r.xu + ' Xu, dùng 1 lần.' });
+      setLog((l) => [{ type: 'spend', label: 'Đổi voucher ' + code, amount: -r.xu, at: 'Hôm nay' }, ...l]);
+      setRedeem(false); toast('Đã đổi voucher ' + code + ', xem trong Kho Voucher');
+    };
     return (
       <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ ...card, background: 'linear-gradient(120deg, var(--gold-600, #E09600), var(--gold-500, #FFB100))', color: '#fff', display: 'flex', alignItems: 'center', gap: 18 }}>
@@ -688,14 +730,15 @@
           <div style={{ flex: 1 }}>
             <div style={{ font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.9)' }}>Số dư Lazadee Xu</div>
             <div style={{ font: '800 34px var(--font-sans)', lineHeight: 1.1 }}>{balance.toLocaleString('vi-VN')} <span style={{ fontSize: 18, fontWeight: 600 }}>Xu</span></div>
-            <div style={{ font: 'var(--type-caption)', color: 'rgba(255,255,255,.85)', marginTop: 2 }}>1 Xu = 1₫ khi thanh toán · Xu hết hạn sau 12 tháng</div>
+            <div style={{ font: 'var(--type-caption)', color: 'rgba(255,255,255,.85)', marginTop: 2 }}>1 Xu = 1₫ khi thanh toán · Xu hết hạn sau 12 tháng · <b>150 Xu</b> sắp hết hạn trong 30 ngày tới</div>
           </div>
-          <Button variant="secondary" iconLeft="gift">Đổi quà</Button>
+          <Button variant="secondary" iconLeft="gift" onClick={() => setRedeem(true)}>Đổi quà</Button>
         </div>
         <div style={card}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <PanelHead icon="calendar" title="Điểm danh nhận Xu" />
-            <Button style={{ marginLeft: 'auto' }} variant={checked ? 'outline' : 'primary'} iconLeft={checked ? 'check' : 'calendar'} disabled={checked} onClick={checkin}>{checked ? 'Đã điểm danh' : 'Điểm danh nhận Xu'}</Button>
+            {checked && <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Điểm danh lại sau <UntilMidnight /></span>}
+            <Button style={{ marginLeft: checked ? 12 : 'auto' }} variant={checked ? 'outline' : 'primary'} iconLeft={checked ? 'check' : 'calendar'} disabled={checked} onClick={checkin}>{checked ? 'Đã điểm danh' : 'Điểm danh nhận Xu'}</Button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             {[1, 2, 3, 4, 5, 6, 7].map((d) => {
@@ -724,6 +767,46 @@
             ))}
           </div>
         </section>
+        <Modal open={redeem} onClose={() => setRedeem(false)} width={440} title="Đổi Xu lấy voucher" footer={<Button variant="ghost" onClick={() => setRedeem(false)}>Đóng</Button>}>
+          <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 10 }}>Số dư: <b style={{ color: 'var(--text-strong)' }}>{balance.toLocaleString('vi-VN')} Xu</b></div>
+          {XU_REWARDS.map((r) => (
+            <div key={r.xu} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderTop: '1px solid var(--border-subtle)' }}>
+              <Icon name="ticket" size={20} style={{ color: 'var(--color-primary)' }} />
+              <div style={{ flex: 1 }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Voucher giảm {fmt(r.value)}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{r.xu.toLocaleString('vi-VN')} Xu · Đơn từ 50.000₫</div></div>
+              <Button size="sm" disabled={balance < r.xu} onClick={() => redeemXu(r)}>{balance < r.xu ? 'Chưa đủ Xu' : 'Đổi'}</Button>
+            </div>
+          ))}
+        </Modal>
+      </section>
+    );
+  }
+
+  /* ============================== WISHLIST ============================== */
+  function WishlistPanel({ onOpen, onBuyAgain }) {
+    const LZ = window.LZ;
+    const [ids, setIds] = React.useState(LZ.wishlist.list());
+    React.useEffect(() => LZ.wishlist.subscribe(() => setIds(LZ.wishlist.list())), []);
+    const addCart = (p) => onBuyAgain && onBuyAgain([{ productId: p.id, title: p.title, img: p.img, price: p.price, qty: 1, variant: LZ.variantOptions(p).map((g) => g.values[0]).join(' / ') }]);
+    return (
+      <section style={card}>
+        <PanelHead icon="heart" title={'Sản phẩm yêu thích (' + ids.length + ')'} sub="Bấm tim trên sản phẩm để lưu lại xem sau" />
+        {ids.length === 0 && <Empty icon="heart" text="Bạn chưa có sản phẩm yêu thích nào." />}
+        <div style={{ marginTop: 12 }}>
+          {ids.map((id) => {
+            const p = LZ.byId(id);
+            return (
+              <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderTop: '1px solid var(--border-subtle)' }}>
+                <img src={p.img} alt="" width="64" height="64" onClick={() => onOpen(id)} style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', cursor: 'pointer', flex: 'none' }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div onClick={() => onOpen(id)} style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-price)', marginTop: 3 }}>{fmt(p.price)}</div>
+                </div>
+                <Button size="sm" variant="ghost" iconLeft="heart" onClick={() => LZ.wishlist.toggle(id)}>Bỏ thích</Button>
+                <Button size="sm" iconLeft="shopping-cart" disabled={!!V[p.v].vacation} onClick={() => addCart(p)}>Thêm vào giỏ</Button>
+              </div>
+            );
+          })}
+        </div>
       </section>
     );
   }

@@ -3,20 +3,27 @@
    address snapshot, and the return/refund request flow with proof media (UC-9). */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, StatusBadge, VendorChip, Modal, Checkbox, Select } = DS;
+  const { Icon, Button, StatusBadge, VendorChip, Modal, Checkbox, Select, Badge, Radio } = DS;
   const { ORDERS, V } = window.LZ;
   const fmt = (n) => (n < 0 ? '-' : '') + Math.abs(n).toLocaleString('vi-VN') + '₫';
 
   const STEPS = [
     { key: 'placed', label: 'Đặt hàng', icon: 'file-text' },
     { key: 'paid', label: 'Đã thanh toán', icon: 'wallet' },
+    { key: 'confirmed', label: 'Shop xác nhận', icon: 'badge-check' },
     { key: 'prep', label: 'Chờ lấy hàng', icon: 'package' },
     { key: 'ship', label: 'Đang vận chuyển', icon: 'truck' },
     { key: 'delivered', label: 'Đã giao', icon: 'house' },
     { key: 'completed', label: 'Hoàn thành', icon: 'badge-check' },
   ];
-  const STEP_OF = { PENDING_PAYMENT: 0, PAID: 1, PROCESSING: 2, SHIPPED: 3, DELIVERED: 4, COMPLETED: 5, CANCELLED: 1, REFUNDED: 1 };
-  const STATUS_VI = { PAID: 'Đã thanh toán', PROCESSING: 'Đang chuẩn bị', SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', COMPLETED: 'Hoàn thành', CANCELLED: 'Đã huỷ', REFUNDED: 'Đã hoàn tiền' };
+  const STEP_OF = { PENDING_PAYMENT: 0, PAID: 1, CONFIRMED: 2, PROCESSING: 3, SHIPPED: 4, DELIVERED: 5, COMPLETED: 6, CANCELLED: 1, REFUNDED: 5, RETURN_REQUESTED: 5 };
+  const STATUS_VI = { PENDING_PAYMENT: 'Chờ thanh toán', PAID: 'Đã thanh toán', CONFIRMED: 'Đã xác nhận', PROCESSING: 'Đang chuẩn bị', SHIPPED: 'Đang giao', DELIVERED: 'Đã giao', COMPLETED: 'Hoàn thành', CANCELLED: 'Đã huỷ', REFUNDED: 'Đã hoàn tiền', RETURN_REQUESTED: 'Đang trả hàng / hoàn tiền' };
+  const REFUND_STATE = {
+    REQUESTED: ['warning', 'Chờ shop phản hồi', 'Shop có 48 giờ để phản hồi. Quá hạn, hệ thống tự đồng ý theo phương án bạn chọn.'],
+    AWAITING_EVIDENCE: ['primary', 'Shop cần thêm bằng chứng', 'Shop đề nghị: "Vui lòng quay rõ phần sản phẩm bị lỗi". Bạn có 48 giờ để bổ sung.'],
+    SHOP_REJECTED: ['danger', 'Shop đã từ chối', 'Bạn có 48 giờ để chấp nhận hoặc khiếu nại lên Sàn.'],
+    DISPUTED: ['danger', 'Sàn đang phân xử', 'Nhân viên Lazadee đang xem xét bằng chứng của hai bên.'],
+  };
   const EV_ICON = { PAID: 'wallet', PROCESSING: 'package', AWAITING_PICKUP: 'package', PICKED_UP: 'truck', IN_TRANSIT: 'truck', OUT_FOR_DELIVERY: 'truck', DELIVERED: 'circle-check' };
   const CARRIER_LABEL = {
     GHN: 'Giao Hàng Nhanh',
@@ -26,11 +33,17 @@
     LAZADEE_EXPRESS: 'Lazadee Express (FBL)',
   };
 
-  function OrderTracking({ orderId, onBack, onChat, onReview }) {
+  function OrderTracking({ orderId, onBack, onChat, onReview, onBuyAgain }) {
     const order = (ORDERS.find((o) => o.id === orderId)) || ORDERS.find((o) => o.status === 'SHIPPED') || ORDERS[0];
     const [status, setStatus] = React.useState(order.status);
     const [returnOpen, setReturnOpen] = React.useState(false);
     const [copied, setCopied] = React.useState(false);
+    const [refund, setRefund] = React.useState(order.refund);
+    const updateRefund = (patch) => { const next = { ...refund, ...patch }; order.refund = next; setRefund(next); };
+    const moreRef = React.useRef(null);
+    const [moreProof, setMoreProof] = React.useState([]);
+    const submitReturn = (r) => { order.status = 'RETURN_REQUESTED'; order.refund = { id: 'RFN-0' + order.id.slice(-3), state: 'REQUESTED', ...r }; setRefund(order.refund); setStatus('RETURN_REQUESTED'); setReturnOpen(false); };
+    const canReturn = (status === 'DELIVERED' || status === 'COMPLETED') && !order.returnClosed;
     const v = V[order.vendorId];
     const tr = order.tracking;
     const step = STEP_OF[status];
@@ -47,7 +60,7 @@
             <span style={{ width: 1, height: 16, background: 'var(--border-strong)' }} />
             <span style={{ font: 'var(--weight-semibold) var(--text-md) var(--font-sans)', color: 'var(--text-strong)' }}>Mã đơn</span>
             <span className="code" style={{ font: '14px var(--font-mono)', color: 'var(--text-body)' }}>{order.id}</span>
-            <span style={{ marginLeft: 'auto' }}><StatusBadge status={status} label={STATUS_VI[status]} /></span>
+            <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}><Badge variant="neutral">{order.pay}</Badge><StatusBadge status={status === 'CONFIRMED' ? 'PROCESSING' : status} label={STATUS_VI[status]} /></span>
           </div>
 
           {/* stepper */}
@@ -62,7 +75,7 @@
                     <div style={{ width: 46, height: 46, borderRadius: '50%', display: 'grid', placeItems: 'center', background: done ? 'var(--mint-500)' : cur ? 'var(--orange-500)' : '#fff', color: done || cur ? '#fff' : 'var(--text-subtle)', border: done || cur ? 'none' : '2px solid var(--gray-200)', position: 'relative', zIndex: 2, boxShadow: cur ? 'var(--shadow-sm)' : 'none' }}>
                       <Icon name={done ? 'check' : s.icon} size={done ? 20 : 19} strokeWidth={done ? 3 : 2} />
                     </div>
-                    <div style={{ font: cur ? 'var(--weight-bold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)', color: cur ? 'var(--text-strong)' : done ? 'var(--text-body)' : 'var(--text-subtle)', marginTop: 10, textAlign: 'center' }}>{s.label}</div>
+                    <div style={{ font: cur ? 'var(--weight-bold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)', color: cur ? 'var(--text-strong)' : done ? 'var(--text-body)' : 'var(--text-subtle)', marginTop: 10, textAlign: 'center' }}>{s.key === 'paid' && order.pay === 'COD' ? 'Thanh toán khi nhận' : s.label}</div>
                   </div>
                 );
               })}
@@ -96,11 +109,42 @@
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>
                   {status === 'COMPLETED'
                     ? <>Đơn đã <b>hoàn thành</b>. Tiền trong escrow đã được giải ngân cho người bán (sau khi trừ hoa hồng sàn).</>
+                    : order.pay === 'COD'
+                      ? <>Bạn thanh toán tiền mặt khi nhận hàng. Tiền COD được đối soát với đơn vị vận chuyển rồi mới giải ngân cho người bán.</>
                     : status === 'DELIVERED'
                       ? <>Tiền đang được <b>giữ tạm (escrow)</b>. Bấm <b>"Đã nhận hàng"</b> để giải ngân cho người bán, hoặc hệ thống tự hoàn tất sau <b>72 giờ</b> (vào {tr && tr.releaseAt ? tr.releaseAt : 'sau 3 ngày'}) nếu không có yêu cầu trả hàng.</>
                       : <>Thanh toán của bạn đang được <b>giữ tạm trong escrow</b> và chỉ chuyển cho người bán sau khi bạn xác nhận đã nhận hàng — đảm bảo an toàn cho giao dịch.</>}
                 </div>
               </div>
+
+              {status === 'RETURN_REQUESTED' && refund && (
+                <section style={card}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <Icon name="undo-2" size={18} style={{ color: 'var(--orange-500)' }} />
+                    <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: 0 }}>Yêu cầu {refund.id}</h2>
+                    <Badge variant={REFUND_STATE[refund.state][0]} style={{ marginLeft: 'auto' }}>{REFUND_STATE[refund.state][1]}</Badge>
+                  </div>
+                  <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.7 }}>
+                    <div>Phương án: <b>{refund.type === 'REFUND_ONLY' ? 'Hoàn tiền ngay, không cần trả hàng' : 'Trả hàng và hoàn tiền'}</b> · {fmt(refund.amount)}</div>
+                    <div>Lý do: {refund.reason}</div>
+                    <div style={{ color: 'var(--text-muted)', marginTop: 4 }}>{REFUND_STATE[refund.state][2]}</div>
+                    {order.pay === 'COD' && <div style={{ color: 'var(--text-muted)' }}>Đơn COD không có giao dịch thẻ để hoàn: sau khi được duyệt, tiền chuyển về tài khoản ngân hàng của bạn sau khi đối soát với đơn vị vận chuyển.</div>}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {refund.state === 'REQUESTED' && <>
+                      <Button size="sm" variant="ghost" onClick={() => updateRefund({ state: 'AWAITING_EVIDENCE' })}>Mô phỏng: Shop yêu cầu bổ sung</Button>
+                      <Button size="sm" variant="ghost" onClick={() => updateRefund({ state: 'SHOP_REJECTED' })}>Mô phỏng: Shop từ chối</Button>
+                    </>}
+                    {refund.state === 'AWAITING_EVIDENCE' && <>
+                      <input ref={moreRef} type="file" hidden multiple accept="image/*,video/mp4" onChange={(e) => { setMoreProof((a) => [...a, ...Array.from(e.target.files).map((f) => f.name)]); e.target.value = ''; }} />
+                      <Button size="sm" variant="outline" iconLeft="upload" onClick={() => moreRef.current.click()}>Tải thêm ảnh/video</Button>
+                      {moreProof.length > 0 && <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{moreProof.join(', ')}</span>}
+                      <Button size="sm" disabled={!moreProof.length} onClick={() => { updateRefund({ state: 'REQUESTED' }); setMoreProof([]); }}>Gửi bổ sung</Button>
+                    </>}
+                    {refund.state === 'SHOP_REJECTED' && <Button size="sm" iconLeft="triangle-alert" onClick={() => updateRefund({ state: 'DISPUTED' })}>Khiếu nại lên Sàn</Button>}
+                  </div>
+                </section>
+              )}
 
               {/* timeline */}
               {tr && tr.events && tr.events.length > 0 && (
@@ -144,7 +188,7 @@
               <section style={card}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 4, borderBottom: '1px solid var(--border-subtle)' }}>
                   <VendorChip name={v.name} mall={v.mall} />
-                  <Button size="sm" variant="ghost" iconLeft="message-circle" style={{ marginLeft: 'auto' }} onClick={() => onChat && onChat(order.id)}>Chat</Button>
+                  <Button size="sm" variant="ghost" iconLeft="message-circle" style={{ marginLeft: 'auto' }} onClick={() => onChat && onChat(order.vendorId, null, order.id)}>Chat</Button>
                 </div>
                 {order.items.map((it, i) => (
                   <div key={i} style={{ display: 'flex', gap: 12, padding: '11px 0', borderBottom: i < order.items.length - 1 ? '1px solid var(--border-subtle)' : 0 }}>
@@ -170,14 +214,15 @@
               {/* actions */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                 {status === 'DELIVERED' && <>
-                  <Button block size="lg" iconLeft="check" onClick={() => setStatus('COMPLETED')}>Đã nhận hàng</Button>
-                  <Button block variant="outline" iconLeft="undo-2" onClick={() => setReturnOpen(true)}>Yêu cầu Trả hàng / Hoàn tiền</Button>
+                  <Button block size="lg" iconLeft="check" onClick={() => { order.status = 'COMPLETED'; setStatus('COMPLETED'); }}>Đã nhận hàng</Button>
                 </>}
+                {canReturn && <Button block variant="outline" iconLeft="undo-2" onClick={() => setReturnOpen(true)}>Yêu cầu Trả hàng / Hoàn tiền</Button>}
+                {status === 'COMPLETED' && order.returnClosed && <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', textAlign: 'center' }}>Đơn hàng đã quá thời hạn 7 ngày bảo vệ khiếu nại</div>}
                 {status === 'SHIPPED' && <Button block variant="outline" iconLeft="map-pin" disabled>Đang trên đường giao đến bạn</Button>}
                 {(status === 'PAID' || status === 'PROCESSING') && <Button block variant="outline" iconLeft="clock" disabled>Người bán đang chuẩn bị hàng</Button>}
                 {status === 'COMPLETED' && <>
                   <Button block size="lg" iconLeft="star" onClick={() => onReview && onReview(order.id)}>Đánh giá sản phẩm</Button>
-                  <Button block variant="outline" iconLeft="shopping-cart">Mua lại</Button>
+                  <Button block variant="outline" iconLeft="shopping-cart" onClick={() => onBuyAgain && onBuyAgain(order.items)}>Mua lại</Button>
                 </>}
                 {status === 'REFUNDED' && order.refund && <div style={{ ...card, padding: '14px 16px' }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Đã hoàn tiền {fmt(order.refund.amount)}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>Lý do: {order.refund.reason} · {order.refund.resolvedAt}</div></div>}
               </div>
@@ -185,7 +230,7 @@
           </div>
         </div>
 
-        <ReturnModal open={returnOpen} onClose={() => setReturnOpen(false)} order={order} onSubmit={() => { setReturnOpen(false); setStatus('REFUNDED'); }} />
+        <ReturnModal open={returnOpen} onClose={() => setReturnOpen(false)} order={order} onSubmit={submitReturn} />
       </div>
     );
   }
@@ -193,11 +238,32 @@
   function ReturnModal({ open, onClose, order, onSubmit }) {
     const [sel, setSel] = React.useState(() => order.items.map((_, i) => i));
     const toggle = (i) => setSel((s) => (s.includes(i) ? s.filter((x) => x !== i) : [...s, i]));
+    const [type, setType] = React.useState('RETURN_AND_REFUND');
+    const [reason, setReason] = React.useState('Hàng không đúng mô tả');
+    const [files, setFiles] = React.useState([]);
+    const [fileErr, setFileErr] = React.useState('');
+    const fileRef = React.useRef(null);
+    const addFiles = (list) => {
+      const picked = Array.from(list);
+      if (picked.some((f) => f.size > 10 * 1048576)) { setFileErr('Mỗi tệp tối đa 10MB'); return; }
+      setFileErr(''); setFiles((a) => [...a, ...picked.map((f) => ({ name: f.name, url: f.type.startsWith('image/') ? URL.createObjectURL(f) : null }))]);
+    };
     const refundAmt = order.items.reduce((n, it, i) => (sel.includes(i) ? n + it.price * it.qty : n), 0);
     return (
-      <Modal open={open} onClose={onClose} title="Yêu cầu Trả hàng / Hoàn tiền"
-        footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button iconLeft="undo-2" disabled={sel.length === 0} onClick={onSubmit}>Gửi yêu cầu</Button></>}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 'min(560px, 80vw)' }}>
+      <Modal open={open} onClose={onClose} width={620} title="Yêu cầu Trả hàng / Hoàn tiền"
+        footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button iconLeft="undo-2" disabled={sel.length === 0 || files.length === 0} onClick={() => onSubmit({ type, reason, amount: refundAmt })}>Gửi yêu cầu</Button></>}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={lab}>Phương án bạn muốn</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+              {[['RETURN_AND_REFUND', 'Trả hàng và Hoàn tiền', 'Gửi hàng về shop rồi nhận lại tiền'], ['REFUND_ONLY', 'Hoàn tiền ngay không cần trả hàng', 'Khi hàng thiếu hoặc hư hỏng một phần']].map(([id, name, desc]) => (
+                <label key={id} style={{ display: 'flex', gap: 9, padding: '10px 12px', border: '1.5px solid ' + (type === id ? 'var(--color-primary)' : 'var(--border-default)'), background: type === id ? 'var(--color-primary-tint)' : '#fff', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
+                  <Radio name="refund-type" checked={type === id} onChange={() => setType(id)} />
+                  <span><span style={{ display: 'block', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{name}</span><span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{desc}</span></span>
+                </label>
+              ))}
+            </div>
+          </div>
           <div>
             <label style={lab}>Chọn sản phẩm cần trả</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
@@ -214,7 +280,7 @@
           <div>
             <label style={lab}>Lý do trả hàng</label>
             <div style={{ marginTop: 6 }}>
-              <Select>
+              <Select value={reason} onChange={(e) => setReason(e.target.value)}>
                 <option>Hàng không đúng mô tả</option>
                 <option>Hàng bị lỗi / hư hỏng</option>
                 <option>Giao sai sản phẩm / sai phân loại</option>
@@ -225,10 +291,19 @@
           </div>
           <div>
             <label style={lab}>Bằng chứng (ảnh / video)</label>
-            <div style={{ marginTop: 6, border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', padding: '22px 16px', textAlign: 'center', background: 'var(--surface-sunken)' }}>
+            <input ref={fileRef} type="file" hidden multiple accept="image/jpeg,image/png,video/mp4" onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
+            <div onClick={() => fileRef.current.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }} style={{ marginTop: 6, border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', padding: '22px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--surface-sunken)', cursor: 'pointer' }}>
               <Icon name="upload" size={26} style={{ color: 'var(--text-subtle)' }} />
               <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 6 }}>Kéo thả hoặc bấm để tải lên · tối đa 10MB / tệp (JPG, PNG, MP4)</div>
             </div>
+            {fileErr && <div style={{ color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 5 }}>{fileErr}</div>}
+            {files.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>{files.map((f, i) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, maxWidth: 200, padding: 4, paddingRight: 8, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', font: 'var(--type-caption)', color: 'var(--text-body)' }}>
+                {f.url ? <img src={f.url} alt="" width="28" height="28" style={{ objectFit: 'cover', borderRadius: 4 }} /> : <Icon name="file-text" size={18} />}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                <button onClick={() => setFiles((a) => a.filter((_, j) => j !== i))} aria-label="Xoá tệp" style={{ border: 0, background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 0 }}><Icon name="x" size={13} /></button>
+              </span>
+            ))}</div>}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--orange-50)', borderRadius: 'var(--radius-md)' }}>
             <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Số tiền hoàn dự kiến</span>
@@ -236,7 +311,7 @@
           </div>
           <div style={{ display: 'flex', gap: 9, font: 'var(--type-caption)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
             <Icon name="shield-check" size={16} style={{ color: 'var(--blue-600)', flex: 'none', marginTop: 1 }} />
-            Yêu cầu sẽ được Bộ phận hỗ trợ Lazadee xem xét. Trong thời gian này, tiền vẫn được giữ trong escrow và chưa giải ngân cho người bán.
+            Shop có 48 giờ để phản hồi yêu cầu. Trong thời gian này, tiền vẫn được giữ trong escrow và chưa giải ngân cho người bán.
           </div>
         </div>
       </Modal>

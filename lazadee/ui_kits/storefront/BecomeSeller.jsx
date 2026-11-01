@@ -3,7 +3,7 @@
    a quick shop-registration form. Submitting starts KYC (status PENDING). */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Input, Select, Checkbox, Badge } = DS;
+  const { Icon, Button, Input, Select, Checkbox, Badge, Modal } = DS;
   const { USER } = window.LZ;
 
   const BENEFITS = [
@@ -23,6 +23,9 @@
     const isLoggedIn = !!USER;
     const [f, setF] = React.useState({ shop: '', owner: isLoggedIn ? USER.name : '', email: isLoggedIn ? USER.email : '', phone: isLoggedIn ? USER.phone : '', cat: CATS[0], type: 'Cá nhân', agree: false });
     const [err, setErr] = React.useState({});
+    const [otpOpen, setOtpOpen] = React.useState(false);
+    const [otp, setOtp] = React.useState('');
+    const [otpErr, setOtpErr] = React.useState('');
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
     const submit = () => {
       const e = {};
@@ -32,8 +35,9 @@
       if (!/^0\d{8,10}$/.test(f.phone.replace(/\s/g, ''))) e.phone = 'Số điện thoại không hợp lệ';
       if (!f.agree) e.agree = true;
       setErr(e);
-      if (Object.keys(e).length === 0) onRegistered && onRegistered(f);
+      if (Object.keys(e).length === 0) { setOtp(''); setOtpErr(''); setOtpOpen(true); }
     };
+    const confirmOtp = () => { if (otp !== '123456') { setOtpErr('Mã OTP không đúng'); return; } setOtpOpen(false); onRegistered && onRegistered(f); };
 
     return (
       <div style={{ background: 'var(--surface-page)', minHeight: '100%' }}>
@@ -84,6 +88,12 @@
             </div>
           </div>
         </div>
+
+        <Modal open={otpOpen} onClose={() => setOtpOpen(false)} width={420} title="Xác minh Email mở Shop"
+          footer={<><Button variant="ghost" onClick={() => setOtpOpen(false)}>Huỷ</Button><Button disabled={otp.length < 6} onClick={confirmOtp}>Xác nhận</Button></>}>
+          <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', margin: '0 0 12px' }}>Mã 6 số đã gửi tới <b>{f.email}</b> (demo: <span className="code">123456</span>).</p>
+          <Input label="Mã OTP" value={otp} error={otpErr} onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setOtpErr(''); }} />
+        </Modal>
 
         {/* benefits + steps */}
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 56px' }}>

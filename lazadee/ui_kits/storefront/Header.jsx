@@ -5,14 +5,29 @@
   const { CATEGORIES, USER, NOTIFICATIONS } = window.LZ;
   const { Avatar } = DS;
 
-  function Header({ cart = [], cartCount = 0, loggedIn = true, onNav, onOpen, onOrders, onNotifications, onOpenNotif, query, onSearch, onCategory, onRequireLogin, onLogin, onLogout }) {
+  function Header({ cart = [], cartCount = 0, loggedIn = true, onNav, onOpen, onOrders, onNotifications, onOpenNotif, query, onSearch, onCategory, onShop, onRequireLogin, onLogin, onLogout }) {
     const [q, setQ] = React.useState(query || '');
     const [notifOpen, setNotifOpen] = React.useState(false);
     const [cartOpen, setCartOpen] = React.useState(false);
     const [userOpen, setUserOpen] = React.useState(false);
     const [logoutOpen, setLogoutOpen] = React.useState(false);
     const notifCount = loggedIn ? NOTIFICATIONS.filter((n) => n.unread).length : 0;
-    const submit = () => onSearch && onSearch(q);
+    const [sug, setSug] = React.useState([]);
+    const [sugOpen, setSugOpen] = React.useState(false);
+    React.useEffect(() => {
+      const t = q.trim().toLowerCase();
+      if (t.length < 2) { setSug([]); return undefined; }
+      const h = setTimeout(() => {
+        const LZ = window.LZ, hit = (s) => s.toLowerCase().includes(t);
+        setSug([
+          ...CATEGORIES.filter((c) => hit(c.name)).slice(0, 2).map((c) => ({ key: 'c' + c.name, icon: c.icon, label: c.name, hint: 'Danh mục', go: () => onCategory(c.name) })),
+          ...LZ.vendorList().filter((v) => hit(v.name)).slice(0, 2).map((v) => ({ key: 'v' + v.id, icon: 'store', label: v.name, hint: 'Shop', go: () => onShop && onShop(v.id) })),
+          ...LZ.PRODUCTS.filter((p) => hit(p.title)).slice(0, 5).map((p) => ({ key: p.id, img: p.img, label: p.title, go: () => onOpen(p.id) })),
+        ]);
+      }, 250);
+      return () => clearTimeout(h);
+    }, [q]);
+    const submit = () => { setSugOpen(false); onSearch && onSearch(q); };
     return (
       <header style={{ position: 'sticky', top: 0, zIndex: 100 }}>
         {/* utility bar */}
@@ -21,7 +36,7 @@
             <div style={{ display: 'flex', gap: 18, fontSize: 12 }}>
               <span style={ut} onClick={() => { window.location.href = '../vendor/index.html'; }}>Kênh người bán</span>
               <span style={ut} onClick={() => onNav && onNav('seller')}>Trở thành Người bán</span>
-              <span style={ut}>Tải ứng dụng</span>
+              <span style={ut} onClick={() => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message: 'Ứng dụng di động sẽ ra mắt ở giai đoạn sau' } }))}>Tải ứng dụng</span>
             </div>
             <div style={{ display: 'flex', gap: 18, fontSize: 12, alignItems: 'center' }}>
               <span style={ut} onClick={() => (loggedIn ? onOrders() : onRequireLogin())}><Icon name="package" size={14} /> Đơn mua</span>
@@ -39,8 +54,20 @@
               <span style={{ font: '800 26px/1 var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>lazadee</span>
             </a>
             <div style={{ flex: 1, maxWidth: 720 }}>
-              <div style={{ display: 'flex', background: '#fff', borderRadius: 'var(--radius-sm)', padding: 3, alignItems: 'center' }}>
-                <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()}
+              <div style={{ position: 'relative', display: 'flex', background: '#fff', borderRadius: 'var(--radius-sm)', padding: 3, alignItems: 'center' }}>
+                {sugOpen && sug.length > 0 && (
+                  <div role="listbox" style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', padding: 4, zIndex: 120 }}>
+                    {sug.map((s) => (
+                      <div key={s.key} role="option" aria-selected="false" onMouseDown={(e) => { e.preventDefault(); setSugOpen(false); s.go(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--text-body)' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+                        {s.img ? <img src={s.img} alt="" width="32" height="32" style={{ borderRadius: 4, objectFit: 'cover', flex: 'none' }} /> : <Icon name={s.icon} size={18} style={{ color: 'var(--text-muted)', flex: 'none' }} />}
+                        <span style={{ flex: 1, minWidth: 0, font: 'var(--type-body-sm)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
+                        {s.hint && <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{s.hint}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <input value={q} aria-label="Tìm kiếm" onChange={(e) => { setQ(e.target.value); setSugOpen(true); }} onFocus={() => setSugOpen(true)} onBlur={() => setSugOpen(false)} onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') setSugOpen(false); }}
                   placeholder="Tìm kiếm sản phẩm, thương hiệu, shop…"
                   style={{ flex: 1, border: 0, outline: 'none', height: 38, padding: '0 12px', font: 'var(--type-body)', background: 'transparent' }} />
                 <button onClick={submit} style={searchBtn}><Icon name="search" size={18} strokeWidth={2.4} /></button>

@@ -35,6 +35,13 @@
     P({ title: 'Đồng hồ cổ điển dây da nâu mặt tròn tối giản', img: 'watch2', price: 199000, original: 399000, discountPct: 50, rating: 4.6, sold: '2,3k', v: 'boutique', cat: 'Phụ kiện', flash: true }),
   ];
 
+  // Mock sale state: Flash Sale slots, pre-order lead time, shops on vacation, favourite shops.
+  const FLASH_SLOTS = { p1: [45, 50], p3: [120, 200], p9: [18, 60], p12: [76, 100], p16: [50, 50], p20: [9, 30] };
+  PRODUCTS.forEach((p) => { const f = FLASH_SLOTS[p.id]; if (f) { p.flashSold = f[0]; p.flashTotal = f[1]; } });
+  PRODUCTS.find((p) => p.id === 'p11').preOrderDays = 14;
+  V.shoe.favorite = true; V.home.favorite = true;
+  V.travel.vacation = { until: '15/07/2026', message: 'Shop đang tạm nghỉ, sẽ trả lời bạn khi mở lại nhé!' };
+
   const CATEGORIES = [
     { name: 'Điện tử', icon: 'zap' }, { name: 'Thời trang', icon: 'shopping-bag' },
     { name: 'Làm đẹp', icon: 'star' }, { name: 'Nhà cửa', icon: 'house' },
@@ -100,8 +107,8 @@
     { type: 'earn', label: 'Hoàn xu đơn ORD-2412-0021', amount: 80, at: '20/05/2026' },
   ];
 
-  /* ---- Orders (status ENUM: PENDING_PAYMENT, PAID, PROCESSING, SHIPPED,
-     DELIVERED, COMPLETED, CANCELLED, REFUNDED). Each order = one vendor
+  /* ---- Orders (status ENUM: PENDING_PAYMENT, PAID, CONFIRMED, PROCESSING, SHIPPED,
+     DELIVERED, COMPLETED, RETURN_REQUESTED, CANCELLED, REFUNDED). Each order = one vendor
      (multi-vendor cart split). tracking mirrors shipment_trackings +
      append-only shipment_events for the timeline. ---- */
   const byId = (id) => PRODUCTS.find((p) => p.id === id);
@@ -149,7 +156,26 @@
         ev('DELIVERED', 'Giao hàng thành công', 'Q.1, TP. HCM', '30/05 15:10'),
         ev('PAID', 'Đơn hàng đã thanh toán', 'Lazadee', '28/05 20:01'),
       ] },
-      address: ADDRESSES[0], completedAt: '02/06/2026 15:10',
+      address: ADDRESSES[0], completedAt: '02/06/2026 15:10', returnClosed: true,
+    },
+    {
+      id: 'ORD-2412-0047', vendorId: 'techzone', status: 'CONFIRMED', pay: 'VietQR', placedAt: '11/06/2026 08:15',
+      items: [oi('p17', 'Đen', 1, 320000)],
+      subtotal: 320000, shipping: 25000, discount: 0, total: 345000,
+      tracking: null, address: ADDRESSES[0],
+    },
+    {
+      id: 'ORD-2412-0046', vendorId: 'beauty', status: 'PROCESSING', pay: 'COD', placedAt: '10/06/2026 19:42',
+      items: [oi('p19', '50ml', 1, 420000)],
+      subtotal: 420000, shipping: 16000, discount: 0, total: 436000,
+      tracking: null, address: ADDRESSES[0],
+    },
+    {
+      id: 'ORD-2412-0028', vendorId: 'techzone', status: 'RETURN_REQUESTED', pay: 'COD', placedAt: '01/06/2026 10:30',
+      items: [oi('p18', 'Blue switch', 1, 459000)],
+      subtotal: 459000, shipping: 25000, discount: 0, total: 484000,
+      tracking: { carrier: 'GHN', code: 'VN880077120', eta: '04/06/2026', deliveredAt: '04/06/2026 16:02', shipStatus: 'DELIVERED', events: [ev('DELIVERED', 'Giao hàng thành công', 'Q.1, TP. HCM', '04/06 16:02')] },
+      address: ADDRESSES[0], refund: { id: 'RFN-0233', state: 'REQUESTED', type: 'RETURN_AND_REFUND', reason: 'Sản phẩm lỗi', amount: 459000 },
     },
     {
       id: 'ORD-2412-0029', sessionId: 'CS-8F21A', vendorId: 'home', status: 'PENDING_PAYMENT', placedAt: '10/06/2026 09:40',
@@ -177,6 +203,8 @@
       address: ADDRESSES[0], refund: { id: 'RFN-0212', reason: 'Hàng không đúng mô tả', amount: 265000, resolvedAt: '24/05/2026' },
     },
   ];
+
+  ORDERS.forEach((o) => { if (!o.pay) o.pay = o.id === 'ORD-2412-0041' ? 'VietQR' : 'VNPay'; });
 
   /* ---- Notifications (reuses the 4 from the header bell dropdown, typed for the
      Notification Center page). type ∈ order | promo | system | chat. ---- */
@@ -264,7 +292,24 @@
     'Phụ kiện': [{ key: 'Màu sắc', values: ['Đen', 'Nâu'] }, { key: 'Dung tích', values: ['25L', '30L'] }],
   };
 
+  // Wishlist survives reloads and notifies every card that shows the heart.
+  const WISH_KEY = 'lz_wishlist';
+  const readWish = () => { try { return JSON.parse(localStorage.getItem(WISH_KEY)) || ['p2', 'p13']; } catch (e) { return ['p2', 'p13']; } };
+  let wish = readWish();
+  const wishSubs = new Set();
+  const wishlist = {
+    list: () => wish.slice(),
+    has: (id) => wish.includes(id),
+    toggle: (id) => {
+      wish = wish.includes(id) ? wish.filter((x) => x !== id) : [...wish, id];
+      try { localStorage.setItem(WISH_KEY, JSON.stringify(wish)); } catch (e) {}
+      wishSubs.forEach((f) => f());
+    },
+    subscribe: (f) => { wishSubs.add(f); return () => wishSubs.delete(f); },
+  };
+
   window.LZ = {
+    wishlist, loggedIn: true,
     V, PRODUCTS, CATEGORIES, USER, ADDRESSES, FOLLOWS, ORDERS, PROVINCES, DISTRICTS, VOUCHERS, COIN_LOG, NOTIFICATIONS, DEVICES, CATEGORY_META,
     byId, voucherCheck, voucherDiscount, priceCart,
     variantOptions: (p) => (p && VARIANT_GROUPS[p.cat]) || [{ key: 'Phân loại', values: ['Tiêu chuẩn'] }],

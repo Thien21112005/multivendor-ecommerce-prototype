@@ -20,6 +20,9 @@
 .lz-btn--secondary{background:var(--surface-card);color:var(--color-primary);border-color:var(--color-primary)}
 .lz-btn--secondary:hover{background:var(--color-primary-tint)}
 .lz-btn--secondary:active{background:var(--orange-100)}
+.lz-btn--outline{background:var(--surface-card);color:var(--text-body);border-color:var(--border-strong)}
+.lz-btn--outline:hover{background:var(--gray-50);border-color:var(--color-primary);color:var(--color-primary)}
+.lz-btn--outline:active{background:var(--gray-100)}
 .lz-btn--ghost{background:transparent;color:var(--text-body);border-color:transparent}
 .lz-btn--ghost:hover{background:var(--gray-100)}
 .lz-btn--ghost:active{background:var(--gray-200)}

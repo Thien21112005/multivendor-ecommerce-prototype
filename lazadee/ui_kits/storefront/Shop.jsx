@@ -4,8 +4,8 @@
    category tabs + the vendor's product grid. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, Badge, VoucherTag, ProductCard, Tabs } = DS;
-  const { V, productsOfVendor, CATEGORIES } = window.LZ;
+  const { Icon, Button, Badge, Tabs, Modal } = DS;
+  const { V, productsOfVendor, CATEGORIES, FOLLOWS, VOUCHERS } = window.LZ;
 
   function Stat({ value, label, gold }) {
     return (
@@ -20,7 +20,10 @@
     const vid = vendorId && V[vendorId] ? vendorId : 'techzone';
     const v = V[vid];
     const products = productsOfVendor(vid);
-    const [follow, setFollow] = React.useState(false);
+    const [follow, setFollow] = React.useState(FOLLOWS.includes(vid));
+    const [unfollowOpen, setUnfollowOpen] = React.useState(false);
+    const setFollowing = (on) => { const i = FOLLOWS.indexOf(vid); if (on && i < 0) FOLLOWS.push(vid); if (!on && i >= 0) FOLLOWS.splice(i, 1); setFollow(on); };
+    const vouchers = VOUCHERS.filter((x) => x.vendorId === vid && x.status === 'active');
     const [q, setQ] = React.useState('');
     const [tab, setTab] = React.useState('all');
 
@@ -58,6 +61,8 @@
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <h1 style={{ font: '800 24px var(--font-sans)', letterSpacing: '-0.01em', margin: 0, color: 'var(--text-strong)' }}>{v.name}</h1>
                   {v.mall && <Badge variant="solid">MALL</Badge>}
+                  {v.favorite && <Badge variant="primary">Shop Yêu Thích</Badge>}
+                  {v.vacation && <Badge variant="neutral" icon="clock">Shop đang tạm nghỉ</Badge>}
                 </div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 5 }}>
                   <span style={{ color: 'var(--mint-500)' }}>●</span> Online · Tham gia từ {v.joined} · Phản hồi {v.responseTime}
@@ -65,7 +70,7 @@
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 3 }}>{v.desc}</div>
               </div>
               <div style={{ display: 'flex', gap: 11 }}>
-                <Button variant={follow ? 'outline' : 'secondary'} iconLeft={follow ? 'check' : 'plus'} onClick={() => setFollow(!follow)}>{follow ? 'Đang theo dõi' : 'Theo dõi'}</Button>
+                <Button variant={follow ? 'outline' : 'secondary'} iconLeft={follow ? 'check' : 'plus'} onClick={() => (follow ? setUnfollowOpen(true) : setFollowing(true))}>{follow ? 'Đang theo dõi' : 'Theo dõi'}</Button>
                 <Button variant="outline" iconLeft="message-circle" onClick={() => onChat && onChat(vid)}>Chat ngay</Button>
               </div>
             </div>
@@ -73,6 +78,7 @@
         </div>
 
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 56px' }}>
+          {v.vacation && <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--gray-100)', borderRadius: 'var(--radius-lg)', padding: '12px 16px', marginBottom: 14, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Icon name="clock" size={17} />{v.vacation.message} Dự kiến mở lại ngày {v.vacation.until}.</div>}
           {/* ---- In-shop search ---- */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', borderRadius: 'var(--radius-lg)', padding: '12px 16px', boxShadow: 'var(--shadow-sm)', marginBottom: 14, flexWrap: 'wrap' }}>
             <Icon name="store" size={18} style={{ color: 'var(--color-primary)' }} />
@@ -88,11 +94,9 @@
           </div>
 
           {/* ---- Shop vouchers ---- */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
-            <VoucherTag kind="shop" amount="-15%" label={`Voucher ${v.name} · tối đa 50k`} />
-            <VoucherTag kind="shop" amount="-30k" label="Đơn từ 250.000₫" />
-            <VoucherTag kind="freeship" amount="0₫" label="Miễn phí ship đơn từ 99k" />
-          </div>
+          {vouchers.length > 0 && <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+            {vouchers.map((x) => <window.LZSaveVoucher key={x.id} kind={x.kind} amount={x.amount} label={x.cond} code={x.code} />)}
+          </div>}
 
           {/* ---- Category tabs ---- */}
           <div style={{ background: '#fff', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0', padding: '4px 16px 0', boxShadow: 'var(--shadow-sm)' }}>
@@ -102,10 +106,15 @@
           {/* ---- Product grid ---- */}
           <div style={{ background: '#fff', borderRadius: '0 0 var(--radius-lg) var(--radius-lg)', padding: '18px 16px', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
-              {shown.map((p) => <ProductCard key={p.id} {...window.LZ.card(p)} onClick={() => onOpen(p.id)} />)}
+              {shown.map((p) => <window.LZCardX key={p.id} p={p} onClick={() => onOpen(p.id)} />)}
             </div>
+            {shown.length === 0 && <div style={{ padding: '48px 0', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Shop chưa có sản phẩm nào ở mục này.</div>}
           </div>
         </div>
+        <Modal open={unfollowOpen} onClose={() => setUnfollowOpen(false)} title="Hủy theo dõi Shop?"
+          footer={<><Button variant="ghost" onClick={() => setUnfollowOpen(false)}>Không</Button><Button variant="danger" onClick={() => { setFollowing(false); setUnfollowOpen(false); }}>Hủy theo dõi</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>Bạn sẽ không nhận được khuyến mãi từ <b>{v.name}</b> nữa.</div>
+        </Modal>
       </div>
     );
   }

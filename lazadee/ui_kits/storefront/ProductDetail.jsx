@@ -1,7 +1,7 @@
 /* Lazadee product detail: gallery, SKU variants, vendor, reviews. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Button, IconButton, Badge, PriceVND, Rating, VendorChip, QuantityStepper, StatusBadge, Money } = DS;
+  const { Icon, Button, IconButton, Badge, PriceVND, Rating, VendorChip, QuantityStepper, StatusBadge, Money, Modal, Select } = DS;
   const formatVND = Money.format;
   const { byId, V, PRODUCTS } = window.LZ;
 
@@ -18,9 +18,10 @@
   const REVIEWS = [
     { id: 'r1', name: 'Nguyễn Minh', when: '2026-05-28', rating: 5, variant: 'Đen / Bản Pro', text: 'Sản phẩm đúng mô tả, chất lượng tốt, đóng gói cẩn thận. Giao hàng nhanh trong 2 ngày. Sẽ ủng hộ shop lần sau!', imgs: ['headphones', 'banner-tech'], reply: 'Cảm ơn bạn đã tin tưởng TechZone! Shop rất vui khi sản phẩm làm bạn hài lòng 🧡' },
     { id: 'r2', name: 'Trần Thu Hà', when: '2026-05-21', rating: 4, variant: 'Trắng / Tiêu chuẩn', text: 'Pin trâu, âm thanh ổn trong tầm giá. Trừ 1 sao vì hộp hơi móp khi nhận nhưng sản phẩm vẫn nguyên vẹn.' },
-    { id: 'r3', name: 'Lê Hoàng', when: '2026-05-15', rating: 5, variant: 'Đen / Tiêu chuẩn', text: 'Chống ồn tốt, đeo êm tai. Đáng tiền!', imgs: ['speaker'] },
+    { id: 'r3', name: 'Lê Hoàng', when: '2026-05-15', rating: 5, variant: 'Đen / Tiêu chuẩn', text: 'Chống ồn tốt, đeo êm tai. Đáng tiền!', imgs: ['speaker'], anon: true },
     { id: 'r4', name: 'Phạm An', when: '2026-05-02', rating: 3, variant: 'Trắng / Tiêu chuẩn', text: 'Dùng tạm ổn, kết nối đôi lúc chập chờn. Shop hỗ trợ đổi hàng nhanh.' },
   ];
+  const REPORT_REASONS = ['Spam / chuyển hướng giao dịch', 'Ngôn từ thô tục, xúc phạm', 'Nội dung không liên quan sản phẩm'];
   const R_FILTERS = [
     { id: 'all', label: 'Tất cả', test: () => true },
     { id: '5', label: '5 Sao', test: (r) => r.rating === 5 },
@@ -43,13 +44,18 @@
     );
   }
 
-  function Review({ name, when, rating, variant, text, imgs, reply }) {
+  function Review({ name, when, rating, variant, text, imgs, reply, anon }) {
     const [helpful, setHelpful] = React.useState(false);
+    const [reportOpen, setReportOpen] = React.useState(false);
+    const [reported, setReported] = React.useState(false);
+    const [why, setWhy] = React.useState(REPORT_REASONS[0]);
+    const shown = anon ? name[0] + '***' + name[name.length - 1] : name;
+    const report = () => { if (!window.LZ.loggedIn) { window.dispatchEvent(new CustomEvent('lz_require_login')); return; } setReportOpen(true); };
     return (
       <div style={{ display: 'flex', gap: 12, padding: '18px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--gray-200)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)', fontWeight: 700, flex: 'none' }}>{name[0]}</div>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--gray-200)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)', fontWeight: 700, flex: 'none' }}>{shown[0]}</div>
         <div style={{ flex: 1 }}>
-          <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{name}</div>
+          <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{shown}{anon && <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginLeft: 6 }}>Đánh giá ẩn tên</span>}</div>
           <div style={{ margin: '3px 0 6px' }}><Rating value={rating} size={13} showNumber={false} /></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <Badge variant="success" icon="badge-check">Đã mua hàng</Badge>
@@ -67,12 +73,34 @@
             </div>
           )}
         </div>
-        <button onClick={() => setHelpful((h) => !h)} style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: helpful ? 'var(--color-primary)' : 'var(--text-muted)', font: 'var(--type-caption)', cursor: 'pointer' }}><Icon name="thumbs-up" size={14} /> Hữu ích ({24 + (helpful ? 1 : 0)})</button>
+        <div style={{ alignSelf: 'flex-start', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flex: 'none' }}>
+          <button onClick={() => setHelpful((h) => !h)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: helpful ? 'var(--color-primary)' : 'var(--text-muted)', font: 'var(--type-caption)', cursor: 'pointer' }}><Icon name="thumbs-up" size={14} /> Hữu ích ({24 + (helpful ? 1 : 0)})</button>
+          <button disabled={reported} onClick={report} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: 'var(--text-subtle)', font: 'var(--type-caption)', cursor: reported ? 'default' : 'pointer' }}><Icon name="triangle-alert" size={13} />{reported ? 'Đã báo cáo' : 'Báo cáo'}</button>
+        </div>
+        <Modal open={reportOpen} onClose={() => setReportOpen(false)} width={440} title="Báo cáo đánh giá"
+          footer={<><Button variant="ghost" onClick={() => setReportOpen(false)}>Huỷ</Button><Button variant="danger" onClick={() => { setReported(true); setReportOpen(false); toast('Đã gửi báo cáo tới bộ phận kiểm duyệt'); }}>Gửi báo cáo</Button></>}>
+          <Select label="Lý do" value={why} onChange={(e) => setWhy(e.target.value)}>{REPORT_REASONS.map((x) => <option key={x}>{x}</option>)}</Select>
+        </Modal>
       </div>
     );
   }
 
-  function ProductDetail({ id, onOpen, onAdd, onGoCart, onShop, onCategory, onHome, onChat, onRequireLogin, loggedIn = true }) {
+  function ProductGone({ onOpen, onHome }) {
+    const picks = [...PRODUCTS].sort((a, b) => b.rating - a.rating).slice(0, 6);
+    return (
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 60px' }}>
+        <div style={{ display: 'grid', placeItems: 'center', gap: 12, padding: '48px 0', background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', marginBottom: 24 }}>
+          <Icon name="package" size={46} style={{ color: 'var(--text-subtle)' }} />
+          <h1 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', margin: 0 }}>Sản phẩm không còn bán</h1>
+          <Button variant="outline" iconLeft="house" onClick={onHome}>Về trang chủ</Button>
+        </div>
+        <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 14 }}>Sản phẩm tương tự</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>{picks.map((x) => <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />)}</div>
+      </div>
+    );
+  }
+
+  function ProductDetailInner({ id, onOpen, onAdd, onGoCart, onShop, onCategory, onHome, onChat, onRequireLogin, loggedIn = true }) {
     const p = byId(id) || PRODUCTS[0];
     const vendor = V[p.v];
     const gallery = [p.img, '../../assets/img/banner-tech.jpg', '../../assets/img/keyboard.jpg', '../../assets/img/speaker.jpg'].filter(Boolean);
@@ -83,7 +111,19 @@
     const [follow, setFollow] = React.useState(false);
     const [lightbox, setLightbox] = React.useState(false);
     const [rFilter, setRFilter] = React.useState('all');
-    const [liked, setLiked] = React.useState(false);
+    const [, forceWish] = React.useState(0);
+    React.useEffect(() => window.LZ.wishlist.subscribe(() => forceWish((x) => x + 1)), []);
+    const liked = window.LZ.wishlist.has(p.id);
+    const vacation = vendor.vacation;
+    const flashOut = p.flash && p.flashTotal && p.flashSold >= p.flashTotal;
+    const toggleLike = () => { if (!loggedIn) { onRequireLogin(); return; } window.LZ.wishlist.toggle(p.id); toast(liked ? 'Đã bỏ khỏi danh sách yêu thích' : 'Đã thêm vào danh sách yêu thích'); };
+    const share = async () => {
+      const u = new URL(location.href);
+      u.search = '?screen=product&product=' + p.id + (color !== null || size !== null ? '&v=' + (color === null ? '' : color) + '-' + (size === null ? '' : size) : '') + '&src=share';
+      if (navigator.share) { try { await navigator.share({ title: p.title, url: u.href }); } catch (e) {} return; }
+      try { await navigator.clipboard.writeText(u.href); } catch (e) {}
+      toast('Đã sao chép liên kết sản phẩm');
+    };
     const c = color === null ? null : COLORS[color], s = size === null ? null : SIZES[size];
     const price = p.price + (c ? c.delta : 0) + (s ? s.delta : 0);
     const stock = c ? c.stock : COLORS.reduce((n, x) => n + x.stock, 0);
@@ -92,7 +132,17 @@
     const rShown = REVIEWS.filter(R_FILTERS.find((f) => f.id === rFilter).test);
 
     React.useEffect(() => { setQty(1); }, [color, size]);
-    React.useEffect(() => { setActive(0); setColor(null); setSize(null); setRFilter('all'); window.scrollTo(0, 0); }, [id]);
+    React.useEffect(() => {
+      setActive(0); setColor(null); setSize(null); setRFilter('all'); window.scrollTo(0, 0);
+      // a shared link can pre-select the variant, then the parameters leave the URL
+      const u = new URL(location.href), shared = u.searchParams.get('v');
+      if (shared) {
+        const [ci, si] = shared.split('-');
+        if (COLORS[ci] && COLORS[ci].stock > 0) setColor(Number(ci));
+        if (SIZES[si]) setSize(Number(si));
+      }
+      if (shared || u.searchParams.get('src')) { u.searchParams.delete('v'); u.searchParams.delete('src'); history.replaceState({}, '', u); }
+    }, [id]);
 
     // returns the cart line, or null after warning when a variant group is still open
     const line = () => {
@@ -100,7 +150,11 @@
       if (!c || !s) { toast('Vui lòng chọn đầy đủ Phân loại hàng', 'error'); return null; }
       return { key: p.id + '|' + c.label + '/' + s.label, productId: p.id, vendorId: p.v, title: p.title, img: p.img, price, original: p.original, variant: c.label + ' / ' + s.label, qty, stock };
     };
-    const add = () => { if (!loggedIn) { onRequireLogin(); return null; } const l = line(); if (l) onAdd(l); return l; };
+    const add = () => {
+      if (!loggedIn) { onRequireLogin(); return null; }
+      if (flashOut) { toast('LZD-INV-4091: Đã hết suất Flash Sale', 'error'); return null; }
+      const l = line(); if (l) onAdd(l); return l;
+    };
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 24px 60px' }}>
@@ -122,8 +176,8 @@
               ))}
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-              <button style={{ ...shareBtn, color: liked ? 'var(--color-primary)' : 'var(--text-muted)' }} onClick={() => setLiked((x) => !x)}><Icon name="heart" size={16} style={{ fill: liked ? 'currentColor' : 'none' }} /> Yêu thích</button>
-              <button style={shareBtn} onClick={() => toast('Đã sao chép liên kết sản phẩm')}><Icon name="message-circle" size={16} /> Chia sẻ</button>
+              <button style={{ ...shareBtn, color: liked ? 'var(--color-primary)' : 'var(--text-muted)' }} aria-pressed={liked} onClick={toggleLike}><Icon name="heart" size={16} style={{ fill: liked ? 'currentColor' : 'none' }} /> {liked ? 'Đã yêu thích' : 'Yêu thích'}</button>
+              <button style={shareBtn} onClick={share}><Icon name="share-2" size={16} /> Chia sẻ</button>
             </div>
           </div>
 
@@ -132,6 +186,7 @@
             <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               {p.mall && <Badge variant="solid">MALL</Badge>}
               {p.flash && <Badge variant="flash" icon="zap">FLASH SALE</Badge>}
+              {p.preOrderDays && <Badge variant="primary" icon="clock">Đặt trước</Badge>}
               <Badge variant="outline">Chính hãng 100%</Badge>
             </div>
             <h1 style={{ font: 'var(--weight-semibold) 22px/1.3 var(--font-sans)', color: 'var(--text-strong)', marginBottom: 10 }}>{p.title}</h1>
@@ -146,6 +201,15 @@
               <PriceVND amount={price} original={p.original} size="lg" />
               <Badge variant="flash">-{p.discountPct}%</Badge>
             </div>
+
+            {p.flash && p.flashTotal && (
+              <div style={{ marginBottom: 18 }}>
+                <window.LZFlashBar p={p} />
+                <div style={{ font: 'var(--type-caption)', color: flashOut ? 'var(--red-600)' : 'var(--text-muted)', marginTop: 5 }}>{flashOut ? 'Đã hết suất Flash Sale (LZD-INV-4091)' : 'Giá Flash Sale áp dụng tối đa 1 suất cho mỗi tài khoản'}</div>
+              </div>
+            )}
+            {p.preOrderDays && <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--blue-50)', borderRadius: 'var(--radius-md)', padding: '8px 12px', font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 18 }}><Icon name="clock" size={15} style={{ color: 'var(--blue-600)' }} />Hàng đặt trước, shop chuẩn bị trong {p.preOrderDays} ngày trước khi giao.</div>}
+            {vacation && <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--gray-100)', borderRadius: 'var(--radius-md)', padding: '10px 12px', font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 18 }}><Icon name="clock" size={15} />Shop đang tạm nghỉ đến {vacation.until}. Bạn chưa thể đặt mua sản phẩm này.</div>}
 
             {/* variants */}
             <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr', gap: '14px 16px', alignItems: 'center', marginBottom: 18 }}>
@@ -165,7 +229,7 @@
               </div>
               <span style={vLabel}>Số lượng</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <QuantityStepper value={qty} max={Math.max(1, stock)} onChange={setQty} />
+                <QuantityStepper value={qty} max={p.flash && p.flashTotal ? 1 : Math.max(1, stock)} onChange={setQty} />
                 {soldOut
                   ? <StatusBadge status="ERROR" label="Hết hàng" dot={false} />
                   : <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Còn <b style={{ color: stock <= 5 ? 'var(--red-600)' : 'var(--text-body)' }}>{stock}</b> sản phẩm</span>}
@@ -180,8 +244,8 @@
 
             {/* actions */}
             <div style={{ display: 'flex', gap: 12 }}>
-              <Button variant="secondary" size="lg" iconLeft="shopping-cart" disabled={soldOut} onClick={add}>Thêm vào giỏ</Button>
-              <Button size="lg" disabled={soldOut} onClick={() => { const l = add(); if (l) onGoCart(l.key); }}>Mua ngay</Button>
+              <Button variant="secondary" size="lg" iconLeft="shopping-cart" disabled={soldOut || !!vacation} onClick={add}>Thêm vào giỏ</Button>
+              <Button size="lg" disabled={soldOut || !!vacation} onClick={() => { const l = add(); if (l) onGoCart(l.key); }}>{p.preOrderDays ? 'Đặt trước' : 'Mua ngay'}</Button>
             </div>
           </div>
         </div>
@@ -193,7 +257,8 @@
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ font: 'var(--weight-bold) var(--text-lg) var(--font-sans)', color: 'var(--text-strong)', cursor: 'pointer' }} onClick={() => onShop && onShop(p.v)}>{vendor.name}</span>
               {vendor.mall && <Badge variant="solid">MALL</Badge>}
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--mint-600)', font: 'var(--type-caption)' }}>● Online</span>
+              {vendor.favorite && <Badge variant="primary">Shop Yêu Thích</Badge>}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: vacation ? 'var(--text-muted)' : 'var(--mint-600)', font: 'var(--type-caption)' }}>{vacation ? 'Đang tạm nghỉ' : '● Online'}</span>
             </div>
             <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>{vendor.followers} người theo dõi · {vendor.location} · Đánh giá shop {vendor.rating}★</div>
           </div>
@@ -205,7 +270,7 @@
         </div>
 
         {/* Chi tiết sản phẩm + Mô tả */}
-        <SpecsTable p={p} vendor={vendor} onShop={onShop} />
+        <SpecsTable p={p} vendor={vendor} onShop={onShop} onCategory={onCategory} />
         <ProductDescription vendor={vendor} />
 
         {/* reviews */}
@@ -231,7 +296,7 @@
         <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', margin: '24px 0 14px' }}>Sản phẩm tương tự</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
           {similar.map((x) => (
-            <DS.ProductCard key={x.id} {...window.LZ.card(x)} onClick={() => onOpen(x.id)} />
+            <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />
           ))}
         </div>
         {similar.length === 0 && <div style={{ padding: '24px 0', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có sản phẩm tương tự.</div>}
@@ -240,9 +305,11 @@
     );
   }
 
-  function SpecsTable({ p, vendor, onShop }) {
+  function SpecsTable({ p, vendor, onShop, onCategory }) {
+    const LZ = window.LZ;
+    const sub = LZ.subCategoriesOf(p.cat).find((s) => LZ.productsOfCategory(p.cat, s).some((x) => x.id === p.id));
     const SPECS = [
-      { key: 'Danh Mục', type: 'breadcrumb', crumbs: ['Điện tử', 'Tai nghe & Loa', 'Tai nghe Bluetooth'] },
+      { key: 'Danh Mục', type: 'breadcrumb', crumbs: sub ? [p.cat, sub] : [p.cat] },
       { key: 'Thương hiệu', value: vendor.name, type: 'link', onClick: () => onShop && onShop(p.v) },
       { key: 'Chất liệu', value: 'Nhựa ABS + Polycarbonate' },
       { key: 'Loại kết nối', value: 'Bluetooth 5.3, USB-C' },
@@ -265,7 +332,7 @@
                 <td style={{ width: 180, padding: '12px 16px 12px 0', font: 'var(--type-body-sm)', color: 'var(--text-muted)', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{sp.key}</td>
                 <td style={{ padding: '12px 0', font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>
                   {sp.type === 'breadcrumb'
-                    ? <span>{sp.crumbs.map((c, j) => <React.Fragment key={j}>{j > 0 && <span style={{ color: 'var(--text-subtle)' }}> › </span>}<a style={link}>{c}</a></React.Fragment>)}</span>
+                    ? <span>{sp.crumbs.map((c, j) => <React.Fragment key={j}>{j > 0 && <span style={{ color: 'var(--text-subtle)' }}> › </span>}<a style={link} onClick={() => onCategory && onCategory(c)}>{c}</a></React.Fragment>)}</span>
                     : sp.type === 'link'
                       ? <a style={link} onClick={sp.onClick}>{sp.value}</a>
                       : sp.value}
@@ -339,5 +406,5 @@
     return { display: 'inline-flex', alignItems: 'center', gap: 7, minHeight: 38, padding: '0 14px', borderRadius: 'var(--radius-md)', cursor: disabled ? 'not-allowed' : 'pointer', font: 'var(--weight-medium) var(--text-sm) var(--font-sans)', background: '#fff', color: disabled ? 'var(--text-disabled)' : 'var(--text-body)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), boxShadow: on ? 'inset 0 0 0 1px var(--color-primary)' : 'none', opacity: disabled ? 0.55 : 1, position: 'relative' };
   }
 
-  window.LZProductDetail = ProductDetail;
+  window.LZProductDetail = (props) => (byId(props.id) ? <ProductDetailInner {...props} /> : <ProductGone onOpen={props.onOpen} onHome={props.onHome} />);
 })();
