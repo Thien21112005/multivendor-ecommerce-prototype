@@ -37,7 +37,7 @@ function Panel({ children, sub }) {
         <div style={{ display: 'flex', gap: 20, font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.8)' }}>
           <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="shield-check" size={16} /> Escrow</span>
           <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="truck" size={16} /> Freeship</span>
-          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="undo-2" size={16} /> Đổi trả 15 ngày</span>
+          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="undo-2" size={16} /> Đổi trả 7 ngày</span>
         </div>
       </div>
       {/* form side */}
@@ -93,6 +93,27 @@ function PasswordInput({ label, value, onChange, error, placeholder }) {
   );
 }
 
+const OTP_DEMO = '123456';
+// At least 8 characters with upper case, lower case, a digit and a special character (UC-AUTH-01).
+function passwordIssue(p) {
+  if (p.length < 8) return 'Mật khẩu tối thiểu 8 ký tự';
+  if (!/[A-Z]/.test(p)) return 'Cần ít nhất 1 chữ hoa';
+  if (!/[a-z]/.test(p)) return 'Cần ít nhất 1 chữ thường';
+  if (!/[0-9]/.test(p)) return 'Cần ít nhất 1 chữ số';
+  if (!/[^A-Za-z0-9]/.test(p)) return 'Cần ít nhất 1 ký tự đặc biệt';
+  return '';
+}
+function useCountdown(start, running) {
+  const [left, setLeft] = React.useState(start);
+  React.useEffect(() => {
+    if (!running) return undefined;
+    const i = setInterval(() => setLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(i);
+  }, [running]);
+  return [left, setLeft];
+}
+const mmss = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+
 function SsoDialog({ provider, onClose }) {
   const { Modal } = window.LazadeeDesignSystem_0477b7;
   return (
@@ -119,7 +140,8 @@ function Register({ onDone, onLogin }) {
     if (!/.+@.+\..+/.test(f.email)) e.email = 'Email không đúng định dạng';
     else if (f.email.toLowerCase() === 'mai.tran@gmail.com') e.email = 'Email này đã có tài khoản. Hãy đăng nhập hoặc dùng Quên mật khẩu.';
     if (!/^0\d{8,10}$/.test(f.phone.replace(/\s/g, ''))) e.phone = 'Số điện thoại không hợp lệ';
-    if (f.pw.length < 8) e.pw = 'Mật khẩu tối thiểu 8 ký tự';
+    const pwIssue = passwordIssue(f.pw);
+    if (pwIssue) e.pw = pwIssue;
     if (f.pw2 !== f.pw) e.pw2 = 'Mật khẩu nhập lại không khớp';
     if (!f.agree) e.agree = true;
     setErr(e);
@@ -133,7 +155,7 @@ function Register({ onDone, onLogin }) {
       <Input label="Email" iconLeft="mail" value={f.email} onChange={(e) => set('email', e.target.value)} error={err.email} placeholder="ban@email.com" />
       <Input label="Số điện thoại" iconLeft="phone" value={f.phone} onChange={(e) => set('phone', e.target.value)} error={err.phone} placeholder="0901 234 567" />
       <div>
-        <PasswordInput label="Mật khẩu" value={f.pw} onChange={(e) => set('pw', e.target.value)} error={err.pw} placeholder="Tối thiểu 8 ký tự" />
+        <PasswordInput label="Mật khẩu" value={f.pw} onChange={(e) => set('pw', e.target.value)} error={err.pw} placeholder="8+ ký tự, có chữ hoa, thường, số, ký tự đặc biệt" />
         {f.pw && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7 }}>
             <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (strength / 4 * 100) + '%', height: '100%', background: sColor, transition: 'width .2s' }} /></div>
@@ -166,25 +188,26 @@ function Register({ onDone, onLogin }) {
 function Forgot({ email, setEmail, onLogin }) {
   const [stage, setStage] = React.useState('email'); // email | otp | reset | done
   const [otp, setOtp] = React.useState('');
-  const [resend, setResend] = React.useState(42);
+  const [resend, setResend] = useCountdown(60, stage === 'otp');
   const [pw, setPw] = React.useState('');
   const [pw2, setPw2] = React.useState('');
   const [err, setErr] = React.useState({});
-
-  React.useEffect(() => {
-    if (stage !== 'otp') return;
-    const i = setInterval(() => setResend((s) => (s > 0 ? s - 1 : 0)), 1000);
-    return () => clearInterval(i);
-  }, [stage]);
+  const [tries, setTries] = React.useState(0);
+  const checkOtp = () => {
+    if (otp === OTP_DEMO) { setStage('reset'); setTries(0); return; }
+    const n = tries + 1;
+    setTries(n); setOtp('');
+    if (n >= 5) setStage('blocked');
+  };
 
   const strength = (() => { const p = pw; let s = 0; if (p.length >= 8) s++; if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++; return s; })();
   const sColor = ['var(--red-500)', 'var(--red-500)', 'var(--gold-500)', 'var(--mint-500)', 'var(--mint-600)'][strength];
   const sLabel = ['Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'][strength];
   const submitReset = () => {
     const e = {};
-    if (pw.length < 8) e.pw = 'Tối thiểu 8 ký tự';
-    else if (!/[0-9]/.test(pw)) e.pw = 'Cần ít nhất 1 chữ số';
-    else if (!/[^A-Za-z0-9]/.test(pw)) e.pw = 'Cần ít nhất 1 ký tự đặc biệt';
+    const issue = passwordIssue(pw);
+    if (issue) e.pw = issue;
+    else if (pw === 'Lazadee@123') e.pw = 'Mật khẩu mới phải khác mật khẩu gần nhất';
     if (pw2 !== pw) e.pw2 = 'Mật khẩu nhập lại không khớp';
     setErr(e);
     if (Object.keys(e).length === 0) setStage('done');
@@ -199,24 +222,25 @@ function Forgot({ email, setEmail, onLogin }) {
           <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Nhập email đăng ký để nhận mã xác thực đặt lại mật khẩu.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Input label="Email" iconLeft="mail" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="VD: ban@email.com" />
-            <Button block size="lg" onClick={() => { setStage('otp'); setResend(42); }}>Gửi mã xác thực</Button>
+            <Button block size="lg" onClick={() => { setStage('otp'); setResend(60); }}>Gửi mã xác thực</Button>
           </div>
         </>}
 
         {stage === 'otp' && <>
           <button onClick={() => setStage('email')} style={backBtn}><Icon name="chevron-left" size={16} /> Đổi email</button>
           <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Xác thực email</h2>
-          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mã xác thực đã được gửi đến <b style={{ color: 'var(--text-body)' }}>{email}</b>. (demo: <span className="code">123456</span>)</p>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Nếu email <b style={{ color: 'var(--text-body)' }}>{email}</b> tồn tại, mã OTP đã được gửi. Mã có hiệu lực 5 phút. (demo: <span className="code">123456</span>)</p>
           <OTPInput value={otp} onChange={setOtp} />
-          <Button block size="lg" style={{ marginTop: 20 }} disabled={otp.length < 6} onClick={() => setStage('reset')}>Xác nhận</Button>
+          <Button block size="lg" style={{ marginTop: 20 }} disabled={otp.length < 6} onClick={checkOtp}>Xác nhận</Button>
+          {tries > 0 && <div style={{ color: 'var(--red-600)', font: 'var(--type-body-sm)', marginTop: 12 }}>Mã không đúng. Còn <b>{5 - tries}</b> lần thử.</div>}
           <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 18 }}>
-            {resend > 0 ? <>Gửi lại mã sau <b className="code">{String(Math.floor(resend / 60)).padStart(2, '0')}:{String(resend % 60).padStart(2, '0')}</b></> : <a style={{ cursor: 'pointer' }} onClick={() => setResend(42)}>Gửi lại mã</a>}
+            {resend > 0 ? <>Gửi lại mã sau <b className="code">{mmss(resend)}</b></> : <a style={{ cursor: 'pointer' }} onClick={() => setResend(60)}>Gửi lại mã</a>}
           </p>
         </>}
 
         {stage === 'reset' && <>
           <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Đặt mật khẩu mới</h2>
-          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mật khẩu tối thiểu 8 ký tự, có chữ số và ký tự đặc biệt.</p>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mật khẩu tối thiểu 8 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <PasswordInput label="Mật khẩu mới" value={pw} onChange={(e) => setPw(e.target.value)} error={err.pw} placeholder="Tối thiểu 8 ký tự" />
@@ -229,6 +253,13 @@ function Forgot({ email, setEmail, onLogin }) {
             <Button block size="lg" onClick={submitReset}>Cập nhật mật khẩu</Button>
           </div>
         </>}
+
+        {stage === 'blocked' && <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', margin: '0 auto 22px' }}><Icon name="lock" size={40} /></div>
+          <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Tạm khóa khôi phục mật khẩu</h2>
+          <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Bạn đã nhập sai mã OTP 5 lần. Vui lòng thử lại sau 30 phút.</p>
+          <Button block size="lg" variant="secondary" onClick={onLogin}>Quay lại đăng nhập</Button>
+        </div>}
 
         {stage === 'done' && <div style={{ textAlign: 'center' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--mint-50)', color: 'var(--mint-600)', display: 'grid', placeItems: 'center', margin: '0 auto 22px' }}><Icon name="circle-check" size={42} /></div>
@@ -246,7 +277,10 @@ function Auth() {
   const [email, setEmail] = React.useState('ban@email.com');
   const [otp, setOtp] = React.useState('');
   const [attempts, setAttempts] = React.useState(0);
-  const [resend, setResend] = React.useState(42);
+  const [resend, setResend] = useCountdown(60, step === 'otp');
+  const [otpLeft, setOtpLeft] = useCountdown(300, step === 'otp');
+  const [lockLeft, setLockLeft] = useCountdown(15 * 60, step === 'locked');
+  const [lockedBy, setLockedBy] = React.useState('OTP');
   const [loginMode, setLoginMode] = React.useState('password'); // password | otp
   const [pw, setPw] = React.useState('');
   const [pwError, setPwError] = React.useState('');
@@ -261,21 +295,14 @@ function Auth() {
     if (pw === 'Lazadee@123') { window.location.href = '../storefront/index.html'; return; }
     const n = pwFails + 1;
     setPwFails(n); setPw('');
-    if (n >= 5) { setStep('locked'); return; }
+    if (n >= 5) { setLockedBy('mật khẩu'); setLockLeft(15 * 60); setStep('locked'); return; }
     setPwError('Email hoặc mật khẩu không chính xác. Còn ' + (5 - n) + ' lần thử.');
   };
 
-  React.useEffect(() => {
-    if (step !== 'otp') return;
-    const i = setInterval(() => setResend((s) => (s > 0 ? s - 1 : 0)), 1000);
-    return () => clearInterval(i);
-  }, [step]);
-
   const verify = () => {
-    // demo: any code != 000000 fails; track 5-attempt lock
-    if (otp === '123456') {
+    if (otpLeft === 0) { setOtp(''); return; }
+    if (otp === OTP_DEMO) {
       setOtp(''); setAttempts(0);
-      if (otpFor === 'register') { setStep('login'); setLoginMode('password'); setNotice({ title: 'Thành Công', text: 'Xác thực email thành công, vui lòng đăng nhập!', ok: true }); return; }
       window.location.href = '../storefront/index.html';
       return;
     }
@@ -284,7 +311,7 @@ function Auth() {
     setOtp('');
     if (n >= 5) {
       if (otpFor === 'register') { setStep('register'); setAttempts(0); setNotice({ title: 'Đăng Ký Thất Bại', text: 'Bạn đã nhập sai mã OTP quá 5 lần. Vui lòng đăng ký lại.', ok: false }); return; }
-      setStep('locked');
+      setLockedBy('mã OTP'); setLockLeft(15 * 60); setStep('locked');
     }
   };
 
@@ -311,7 +338,7 @@ function Auth() {
                 <Button block size="lg" disabled={!pw} onClick={loginPassword}>Đăng nhập</Button>
                 <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center' }}>Demo: mật khẩu <span className="code">Lazadee@123</span></div>
               </>
-            : <Button block size="lg" onClick={() => { setOtpFor('login'); setStep('otp'); setResend(42); }}>Gửi mã OTP</Button>}
+            : <Button block size="lg" onClick={() => { setOtpFor('login'); setStep('otp'); setResend(60); setOtpLeft(300); }}>Gửi mã OTP</Button>}
         </div>
         <div style={{ textAlign: 'right', marginTop: 10 }}>
           <a style={{ font: 'var(--type-body-sm)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('forgot')}>Quên mật khẩu?</a>
@@ -335,7 +362,7 @@ function Auth() {
         <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Đăng ký tài khoản</h2>
         <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 22 }}>Tạo tài khoản người mua Lazadee miễn phí.</p>
         {noticeBox}
-        <Register onDone={(mail) => { setNotice(null); setEmail(mail); setOtpFor('register'); setStep('otp'); setResend(42); }} onLogin={() => { setNotice(null); setStep('login'); }} />
+        <Register onDone={(mail) => { setNotice(null); setEmail(mail); setOtpFor('register'); setStep('otp'); setResend(60); setOtpLeft(300); }} onLogin={() => { setNotice(null); setStep('login'); }} />
       </div>
     </Panel>
   );
@@ -349,6 +376,7 @@ function Auth() {
         <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Nhập mã OTP</h2>
         <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 24 }}>Mã 6 số đã gửi tới địa chỉ email <b style={{ color: 'var(--text-body)' }}>{email}</b>. (demo: <span className="code">123456</span>)</p>
         <OTPInput value={otp} onChange={setOtp} />
+        <div style={{ font: 'var(--type-body-sm)', color: otpLeft === 0 ? 'var(--red-600)' : 'var(--text-muted)', marginTop: 12 }}>{otpLeft === 0 ? 'Mã OTP đã hết hiệu lực, vui lòng gửi lại mã.' : <>Mã hết hạn sau <b className="code">{mmss(otpLeft)}</b></>}</div>
         {attempts > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--red-600)', font: 'var(--type-body-sm)', marginTop: 14 }}>
             <Icon name="circle-alert" size={15} /> Mã không đúng. Còn <b style={{ margin: '0 3px' }}>{5 - attempts}</b> lần thử trước khi khoá.
@@ -356,7 +384,7 @@ function Auth() {
         )}
         <Button block size="lg" style={{ marginTop: 20 }} disabled={otp.length < 6} onClick={verify}>Xác nhận</Button>
         <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 18 }}>
-          {resend > 0 ? <>Gửi lại mã sau <b className="code">{String(Math.floor(resend / 60)).padStart(2, '0')}:{String(resend % 60).padStart(2, '0')}</b></> : <a style={{ cursor: 'pointer' }} onClick={() => setResend(42)}>Gửi lại mã OTP</a>}
+          {resend > 0 ? <>Gửi lại mã sau <b className="code">{mmss(resend)}</b></> : <a style={{ cursor: 'pointer' }} onClick={() => { setResend(60); setOtpLeft(300); }}>Gửi lại mã OTP</a>}
         </p>
       </div>
     </Panel>
@@ -368,9 +396,9 @@ function Auth() {
       <div style={{ maxWidth: 380, margin: '0 auto', width: '100%', textAlign: 'center' }}>
         <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', margin: '0 auto 22px' }}><Icon name="lock" size={40} /></div>
         <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Tài khoản tạm khoá</h2>
-        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 8 }}>Bạn đã nhập sai mã OTP <b style={{ color: 'var(--red-600)' }}>5 lần</b>. Vì lý do bảo mật, tài khoản bị khoá tạm thời.</p>
+        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 8 }}>Bạn đã nhập sai {lockedBy} <b style={{ color: 'var(--red-600)' }}>5 lần</b>. Vì lý do bảo mật, tài khoản bị khoá tạm thời.</p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--red-50)', color: 'var(--red-600)', borderRadius: 'var(--radius-md)', padding: '10px 16px', font: 'var(--weight-semibold) var(--text-base) var(--font-sans)', margin: '8px 0 24px' }}>
-          <Icon name="clock" size={18} /> Thử lại sau <span className="code">29:48</span>
+          <Icon name="clock" size={18} /> Thử lại sau <span className="code">{mmss(lockLeft)}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Button block size="lg" variant="secondary" iconLeft="shield-check">Xác minh qua email</Button>
