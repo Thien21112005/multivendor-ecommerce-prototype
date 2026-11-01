@@ -6,6 +6,36 @@
   const { NAV, CURRENT_USER, ROLE_PERMS } = window.LZA;
   const PREVIEW_ROLES = ['Super Admin', 'Moderator', 'Finance Staff', 'CS Staff'];
 
+  function AdminBell({ onNav }) {
+    const [open, setOpen] = React.useState(false);
+    const [items, setItems] = React.useState(window.LZA.NOTIFS);
+    const unread = items.filter((n) => n.unread).length;
+    const go = (n) => { setItems((xs) => xs.map((x) => (x.id === n.id ? { ...x, unread: false } : x))); setOpen(false); onNav(n.nav); };
+    return (
+      <div style={{ position: 'relative' }}>
+        <button style={{ ...ico, position: 'relative' }} aria-label="Thông báo" onClick={() => setOpen((o) => !o)}>
+          <Icon name="bell" size={20} />
+          {unread > 0 && <span style={{ position: 'absolute', top: 4, right: 4, background: 'var(--red-500)', color: '#fff', font: '700 10px var(--font-sans)', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread}</span>}
+        </button>
+        {open && <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
+          <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 340, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', zIndex: 95, border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border-default)', background: 'var(--surface-sunken)' }}>
+              <b style={{ font: '600 14px var(--font-sans)', color: 'var(--text-strong)' }}>Thông báo</b>
+              {unread > 0 && <button onClick={() => setItems((xs) => xs.map((x) => ({ ...x, unread: false })))} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', color: 'var(--blue-600)', font: '500 12px var(--font-sans)' }}>Đánh dấu đã đọc</button>}
+            </div>
+            {items.map((n) => (
+              <div key={n.id} onClick={() => go(n)} style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', background: n.unread ? 'var(--blue-50)' : '#fff' }}>
+                <span style={{ width: 38, height: 38, flex: 'none', borderRadius: 'var(--radius-sm)', background: 'var(--surface-sunken)', color: 'var(--text-muted)', display: 'grid', placeItems: 'center' }}><Icon name={n.icon} size={18} /></span>
+                <div style={{ minWidth: 0 }}><div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-strong)' }}>{n.title}</div><div style={{ font: '13px/1.4 var(--font-sans)', color: 'var(--text-body)', margin: '2px 0 4px' }}>{n.body}</div><div style={{ font: '11px var(--font-sans)', color: 'var(--text-muted)' }}>{n.date}</div></div>
+              </div>
+            ))}
+          </div>
+        </>}
+      </div>
+    );
+  }
+
   function AdminShell({ active, onNav, children }) {
     // Role preview (demo): switch the effective role to see nav gate.
     const [role, setRole] = React.useState(CURRENT_USER.role);
@@ -67,8 +97,8 @@
                   {PREVIEW_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
-              <button style={ico}><Icon name="bell" size={20} /></button>
-              <button style={ico}><Icon name="settings" size={20} /></button>
+              <AdminBell onNav={onNav} />
+              <button style={ico} aria-label="Tài khoản" onClick={() => onNav('account')}><Icon name="settings" size={20} /></button>
             </div>
           </header>
           <main style={{ flex: 1, padding: '24px 28px 60px', minWidth: 0 }}>

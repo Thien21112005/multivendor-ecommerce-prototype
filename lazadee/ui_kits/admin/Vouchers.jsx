@@ -25,14 +25,16 @@
     const [confirm, setConfirm] = React.useState(null);
     const filtered = list.filter((v) => tab === 'all' || (tab === 'active' ? v.status === 'ACTIVE' : tab === 'scheduled' ? v.status === 'SCHEDULED' : v.status === 'ENDED'));
     const setStatus = (code, status) => setList((l) => l.map((v) => (v.code === code ? { ...v, status } : v)));
+    const [del, setDel] = React.useState(null);
+    const usedTotal = list.reduce((n, v) => n + v.used, 0);
 
     return (
       <div style={{ maxWidth: 1180 }}>
         {/* KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
           <Kpi icon="ticket" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Voucher đang chạy" value={list.filter((v) => v.status === 'ACTIVE').length} />
-          <Kpi icon="chart-column" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lượt dùng tháng" value="12.320" />
-          <Kpi icon="receipt" tone={{ bg: 'var(--amber-50, #FEF3E2)', fg: 'var(--amber-600, #C77700)' }} label="Tổng giảm giá tháng" value="456.800.000₫" />
+          <Kpi icon="chart-column" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lượt dùng hệ thống" value={usedTotal.toLocaleString('vi-VN')} />
+          <Kpi icon="receipt" tone={{ bg: 'var(--amber-50, #FEF3E2)', fg: 'var(--amber-600, #C77700)' }} label="Tổng giảm giá đã dùng" value="456.800.000₫" />
           <Kpi icon="calendar" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Voucher sắp ra mắt" value={list.filter((v) => v.status === 'SCHEDULED').length} />
         </div>
 
@@ -70,7 +72,7 @@
                     <td style={td}><Badge variant={st.variant}>{st.label}</Badge></td>
                     <td style={{ ...td, textAlign: 'right' }}>
                       {v.status === 'ENDED'
-                        ? <Button size="sm" variant="ghost" onClick={() => setModal({ ...v, _dup: true })}>Nhân bản</Button>
+                        ? <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button size="sm" variant="ghost" onClick={() => setModal({ ...v, _dup: true })}>Nhân bản</Button><Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setDel(v)}>Xoá</Button></div>
                         : <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                             <Button size="sm" variant="ghost" onClick={() => setModal(v)}>Sửa</Button>
                             <Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => setConfirm(v)}>{v.status === 'SCHEDULED' ? 'Huỷ' : 'Tắt'}</Button>
@@ -84,6 +86,10 @@
         </div>
 
         {modal && <PlatformVoucherModal voucher={modal} onClose={() => setModal(null)} />}
+        {del && <Modal open onClose={() => setDel(null)} title="Xoá voucher"
+          footer={<><Button variant="ghost" onClick={() => setDel(null)}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setList((l) => l.filter((x) => x.code !== del.code)); setDel(null); }}>Xoá vĩnh viễn</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc chắn muốn xoá vĩnh viễn voucher <b className="code">{del.code}</b>? Hành động này không thể hoàn tác.</div>
+        </Modal>}
         {confirm && <Modal open onClose={() => setConfirm(null)} title={confirm.status === 'SCHEDULED' ? 'Huỷ voucher' : 'Tắt voucher'}
           footer={<><Button variant="ghost" onClick={() => setConfirm(null)}>Huỷ</Button><Button variant="danger" onClick={() => { setStatus(confirm.code, 'DISABLED'); setConfirm(null); }}>{confirm.status === 'SCHEDULED' ? 'Huỷ voucher' : 'Tắt voucher'}</Button></>}>
           <div style={{ width: 'min(420px, 80vw)', font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>{confirm.status === 'SCHEDULED' ? 'Huỷ' : 'Tắt'} voucher <b className="code">{confirm.code}</b>? Khách hàng sẽ không thể dùng mã này nữa.</div>
@@ -101,13 +107,15 @@
       value: voucher && voucher.value ? String(voucher.value) : '', cap: voucher && voucher.maxDiscount ? String(voucher.maxDiscount) : '',
       minOrder: voucher && voucher.minOrder ? String(voucher.minOrder) : '', total: voucher && voucher.total ? String(voucher.total) : '',
       perUser: voucher && voucher.perUser ? String(voucher.perUser) : '1', start: '', end: '', sponsor: (voucher && voucher.sponsor) || 'Lazadee', budget: '',
+      name: (voucher && voucher.name) || '', scope: 'all', scopeCat: 'Điện tử', exclude: 'Không loại trừ',
     });
     const [err, setErr] = React.useState({});
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
     const KINDS = [['percent', 'Giảm %', 'percent'], ['fixed', 'Giảm ₫', 'banknote'], ['freeship', 'Freeship', 'truck']];
     const submit = () => {
       const e = {};
-      if (!/^[A-Z0-9]{6,12}$/.test(f.code)) e.code = 'Mã 6–12 ký tự, chỉ chữ HOA và số';
+      if (!/^[A-Z0-9]{4,12}$/.test(f.code)) e.code = 'Mã 4–12 ký tự, chỉ chữ HOA và số';
+      if (!f.name.trim()) e.name = 'Vui lòng nhập tên chương trình';
       if (f.kind !== 'freeship') { if (!f.value || Number(f.value) <= 0) e.value = 'Giá trị phải > 0'; else if (f.kind === 'percent' && Number(f.value) > 100) e.value = 'Phần trăm ≤ 100'; }
       if (!f.total || Number(f.total) <= 0) e.total = 'Số lượng phải > 0';
       if (f.start && f.end && f.end <= f.start) e.end = 'Ngày kết thúc phải sau ngày bắt đầu';
@@ -119,13 +127,14 @@
         title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><Icon name="ticket" size={18} style={{ color: 'var(--color-primary)' }} />{editing ? `Chỉnh sửa voucher ${voucher.code}` : 'Tạo Voucher Sàn'}</span>}
         footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button iconLeft="check" onClick={submit}>{editing ? 'Lưu thay đổi' : 'Tạo voucher'}</Button></>}>
         <div style={{ width: 'min(540px, 84vw)', display: 'flex', flexDirection: 'column', gap: 15 }}>
+          <Input label="Tên chương trình voucher" value={f.name} onChange={(e) => set('name', e.target.value)} placeholder="VD: Siêu Sale Giữa Tháng" error={err.name} />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <label style={lab}>Mã voucher</label>
               <button onClick={() => set('code', genCode())} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name="refresh-cw" size={13} />Tự tạo</button>
             </div>
             <Input value={f.code} onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="VD: LAZADEE50" error={err.code} />
-            {!err.code && <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 5 }}>6–12 ký tự, chỉ chữ HOA và số.</div>}
+            {!err.code && <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 5 }}>4–12 ký tự, chỉ chữ HOA và số.</div>}
           </div>
           <div>
             <label style={lab}>Loại giảm giá</label>
@@ -159,9 +168,12 @@
             {err.end && <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 5 }}><Icon name="circle-alert" size={13} />{err.end}</div>}
           </div>
           <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end' }}>
-            <div style={{ flex: 1 }}><label style={lab}>Phạm vi</label><div style={{ marginTop: 6 }}><Badge variant="primary" icon="store">Toàn sàn</Badge></div></div>
+            <div style={{ flex: 1 }}><Select label="Phạm vi" value={f.scope === 'cat' ? 'Danh mục cụ thể' : 'Toàn sàn'} onChange={(e) => set('scope', e.target.value === 'Toàn sàn' ? 'all' : 'cat')}><option>Toàn sàn</option><option>Danh mục cụ thể</option></Select></div>
             <div style={{ flex: 1 }}><Select label="Nhà tài trợ" value={f.sponsor} onChange={(e) => set('sponsor', e.target.value)}><option>Lazadee</option><option>Co-sponsor với Shop</option></Select></div>
           </div>
+          {f.scope === 'cat'
+            ? <Select label="Danh mục được áp dụng" value={f.scopeCat} onChange={(e) => set('scopeCat', e.target.value)}>{['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé'].map((c) => <option key={c}>{c}</option>)}</Select>
+            : <Select label="Ngoại trừ (Không áp dụng giảm giá)" value={f.exclude} onChange={(e) => set('exclude', e.target.value)}>{['Không loại trừ', 'Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé'].map((c) => <option key={c}>{c}</option>)}</Select>}
         </div>
       </Modal>
     );

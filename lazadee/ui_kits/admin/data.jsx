@@ -1,6 +1,7 @@
 /* Mock data for the Lazadee Staff/Admin panel. */
 (function () {
   const NAV = [
+    { id: 'overview', name: 'Tổng quan', icon: 'layout-dashboard', perm: 'dashboard.view' },
     { id: 'kyc', name: 'Duyệt KYC', icon: 'user-check', badge: 3, perm: 'kyc.review' },
     { id: 'refunds', name: 'Trả hàng & Hoàn tiền', icon: 'undo-2', badge: 2, perm: 'refund.arbitrate' },
     { id: 'reviews', name: 'Kiểm duyệt đánh giá', icon: 'star', perm: 'review.moderate' },
@@ -9,13 +10,17 @@
     { id: 'ledger', name: 'Sổ cái tài chính', icon: 'scale', perm: 'finance.view' },
     { id: 'audit', name: 'Nhật ký hệ thống', icon: 'file-text', perm: 'audit.view' },
     { id: 'catalog', name: 'Danh mục toàn sàn', icon: 'boxes', perm: 'catalog.manage' },
+    { id: 'product_moderation', name: 'Duyệt Sản phẩm', icon: 'clipboard-check', badge: 3, perm: 'catalog.manage' },
     { id: 'vouchers', name: 'Voucher sàn', icon: 'ticket', badge: 2, perm: 'voucher.manage' },
+    { id: 'notifications', name: 'Thông báo sàn', icon: 'bell', perm: 'notif.manage' },
     { id: 'rbac', name: 'Phân quyền nhân viên', icon: 'shield-check', perm: 'rbac.manage' },
     { id: 'account', name: 'Tài khoản', icon: 'settings' },
   ];
 
   // Permission catalog (code → mô tả) used by RBAC editor + nav gating.
   const PERMS = [
+    { code: 'dashboard.view', desc: 'Xem trang Tổng quan (Dashboard)' },
+    { code: 'notif.manage', desc: 'Quản lý và gửi thông báo toàn sàn' },
     { code: 'kyc.review', desc: 'Duyệt / từ chối hồ sơ KYC người bán' },
     { code: 'refund.arbitrate', desc: 'Xem và phân xử yêu cầu hoàn tiền' },
     { code: 'payout.process', desc: 'Duyệt yêu cầu rút tiền vendor' },
@@ -32,8 +37,8 @@
   // Default permission preset per role.
   const ROLE_PERMS = {
     'Super Admin': ALL_PERMS.slice(),
-    'Moderator': ['kyc.review', 'refund.arbitrate', 'review.moderate', 'catalog.manage'],
-    'Finance Staff': ['payout.process', 'commission.update', 'voucher.manage', 'finance.view'],
+    'Moderator': ['kyc.review', 'refund.arbitrate', 'review.moderate', 'catalog.manage', 'notif.manage'],
+    'Finance Staff': ['dashboard.view', 'payout.process', 'commission.update', 'voucher.manage', 'finance.view'],
     'CS Staff': ['refund.arbitrate', 'review.moderate'],
   };
 
@@ -114,5 +119,50 @@
     { ts: '20/06/2026 15:12:50', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'ORD-2412-0033 · 536.000₫', ip: '10.0.2.7', result: 'OK' },
   ];
 
-  window.LZA = { NAV, KYC, REFUNDS, REVIEWS, WITHDRAWALS, LEDGER, STAFF, ROLES, AUDIT, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, PLATFORM_VOUCHERS };
+  const DASHBOARD = {
+    gmv: 18426500000, gmvGrowth: 12.6, escrow: 3264800000, liabilities: 1187300000, refunds: 42650000, refundCount: 12, pendingKyc: 3, pendingProducts: 3,
+    months: ['06/2026', '05/2026', '04/2026'],
+    commission: { '06/2026': 921325000, '05/2026': 843800000, '04/2026': 790450000 },
+    voucherCost: { '06/2026': 456800000, '05/2026': 398200000, '04/2026': 372100000 },
+    chart: {
+      week: [['T2', 412], ['T3', 468], ['T4', 439], ['T5', 521], ['T6', 604], ['T7', 742], ['CN', 688]].map(([d, m]) => ({ d, v: m * 1e6 })),
+      month: [['01/06', 412], ['05/06', 455], ['10/06', 498], ['15/06', 622], ['20/06', 580], ['25/06', 690], ['30/06', 745]].map(([d, m]) => ({ d, v: m * 1e6 })),
+      year: [8.2, 9.1, 10.4, 11.8, 12.6, 18.4].map((b, i) => ({ d: 'T' + (i + 1), v: b * 1e9 })),
+    },
+    vendors: [
+      { name: 'TechZone Official', cat: 'Điện tử', sold: 18420, rating: 4.9, growth: 42, rev: 512400000 },
+      { name: 'Beauty Box', cat: 'Làm đẹp', sold: 26310, rating: 4.9, growth: 38, rev: 318900000 },
+      { name: 'Boutique Sài Gòn', cat: 'Thời trang', sold: 15280, rating: 4.8, growth: 31, rev: 204500000 },
+      { name: 'Shoe Republic', cat: 'Thời trang', sold: 9640, rating: 4.7, growth: 27, rev: 176200000 },
+      { name: 'Home & Living', cat: 'Nhà cửa', sold: 7120, rating: 4.6, growth: 24, rev: 121800000 },
+      { name: 'TravelGear', cat: 'Phụ kiện', sold: 4890, rating: 4.5, growth: 21, rev: 84300000 },
+      { name: 'GadgetHub VN', cat: 'Điện tử', sold: 3510, rating: 4.6, growth: 18, rev: 76900000 },
+    ],
+  };
+
+  const MODERATORS = [{ name: 'Lê Minh Tú', active: true }, { name: 'Nguyễn Thảo Vy', active: true }, { name: 'Trần Quốc Đạt', active: false }];
+  const MODERATION = [
+    { id: 1284, name: 'Đèn bàn LED cảm ứng 3 chế độ sáng', img: 'lamp', vendor: 'Home & Living', state: 'PENDING_APPROVAL', moderator: 'Lê Minh Tú', created: '08/06/2026 15:20', category: 'Nhà cửa > Nội thất > Đèn', brand: 'No Brand', condition: 'Mới', origin: 'Việt Nam', desc: 'Đèn bàn LED cảm ứng, 3 mức sáng, sạc USB-C, pin 8 giờ.', weight: 450, size: '18 × 18 × 40 cm', shipsFrom: 'Hà Nội', payer: 'Người mua', docs: ['hoa-don-nhap-hang.pdf'], skus: [['LAMP-WHT', 'Trắng', 149000, 60], ['LAMP-BLK', 'Đen', 149000, 42]] },
+    { id: 1283, name: 'Nước hoa mini chính hãng 10ml', img: 'perfume', vendor: 'Beauty Box', state: 'FLAGGED', moderator: 'Nguyễn Thảo Vy', aiReason: 'Ảnh sản phẩm trùng logo thương hiệu lớn nhưng giấy ủy quyền chưa khớp tên shop. Cần người kiểm tra.', created: '08/06/2026 11:05', category: 'Làm đẹp > Nước hoa', brand: 'Eau de Parfum', condition: 'Mới', origin: 'Pháp', desc: 'Nước hoa mini 10ml, hương hoa cỏ, lưu hương 6 giờ.', weight: 80, size: '4 × 4 × 10 cm', shipsFrom: 'TP. HCM', payer: 'Shop', docs: ['giay-uy-quyen.pdf', 'phieu-cong-bo-my-pham.pdf'], skus: [['PF-10', '10ml', 129000, 300]] },
+    { id: 1279, name: 'Tai nghe Bluetooth ANC Pro 5 (cập nhật ảnh)', img: 'headphones', vendor: 'TechZone Official', state: 'REQUEUED', moderator: 'Lê Minh Tú', created: '07/06/2026 19:12', category: 'Điện tử > Tai nghe & Loa > Tai nghe Bluetooth', brand: 'Sony', condition: 'Mới', origin: 'Trung Quốc', desc: 'Shop đổi ảnh và tên sản phẩm nên cần duyệt lại. Giá và tồn kho không đổi.', weight: 250, size: '20 × 18 × 8 cm', shipsFrom: 'TP. HCM', payer: 'Người mua', docs: ['ce-certificate.pdf'], skus: [['ANC5-BLK', 'Đen', 389000, 38], ['ANC5-WHT', 'Trắng', 389000, 12]] },
+    { id: 1270, name: 'Bàn phím cơ RGB switch blue', img: 'keyboard', vendor: 'TechZone Official', state: 'PUBLISHED', moderator: 'Lê Minh Tú', created: '05/06/2026 09:30', category: 'Điện tử > Máy tính & Laptop > Bàn phím', brand: 'Logitech', condition: 'Mới', origin: 'Trung Quốc', desc: 'Bàn phím cơ 87 phím, switch blue, LED RGB.', weight: 900, size: '36 × 14 × 4 cm', shipsFrom: 'TP. HCM', payer: 'Người mua', docs: ['hoa-don-nhap-hang.pdf'], skus: [['KB-BLUE', 'Blue switch', 459000, 54]] },
+    { id: 1266, name: 'Sạc nhanh 65W không rõ nguồn gốc', img: 'phone', vendor: 'Cheap Electronics', state: 'REJECTED', moderator: null, aiReason: 'Không có giấy tờ chứng nhận hợp quy cho thiết bị sạc; ảnh có dấu hiệu lấy từ website khác.', created: '04/06/2026 14:45', category: 'Điện tử > Điện thoại & Phụ kiện > Sạc & Cáp', brand: 'No Brand', condition: 'Mới', origin: 'Đang cập nhật', desc: 'Sạc nhanh 65W GaN.', weight: 120, size: '6 × 6 × 3 cm', shipsFrom: 'Bình Dương', payer: 'Người mua', docs: [], skus: [['CHG-65', 'Trắng', 89000, 500]] },
+  ];
+
+  const PLATFORM_NOTIFS = [
+    { id: 'PN-1048', title: 'Siêu sale 12.12 giảm tới 50%', content: 'Chương trình Siêu sale 12.12 bắt đầu từ 00:00. Lưu voucher ngay để không bỏ lỡ ưu đãi lớn nhất năm.', target: 'BUYER', by: 'Admin (1)', at: '08/06/2026 09:00', reads: 48210, reach: 120400, image: '../../assets/img/banner-sale.jpg' },
+    { id: 'PN-1047', title: 'Nâng cấp hệ thống 02:00 – 04:00', content: 'Một số dịch vụ có thể gián đoạn trong khung giờ bảo trì. Đơn hàng và ví Escrow không bị ảnh hưởng.', target: 'ALL', by: 'Admin (1)', at: '07/06/2026 09:00', reads: 73560, reach: 248300, image: '' },
+    { id: 'PN-1046', title: 'Cập nhật biểu phí hoa hồng từ 01/07', content: 'Phí hoa hồng ngành Làm đẹp điều chỉnh từ 6% lên 7%. Xem chi tiết tại Bảng hoa hồng & Phí dịch vụ.', target: 'SELLER', by: 'Admin (2)', at: '05/06/2026 16:30', reads: 2140, reach: 3120, image: '' },
+    { id: 'PN-1045', title: 'Đăng ký Flash Sale khung giờ vàng', content: 'Người bán đăng ký tối đa 20 sản phẩm tham gia Flash Sale trước ngày 10/06.', target: 'SELLER', by: 'Admin (2)', at: '03/06/2026 10:00', reads: 1860, reach: 3120, image: '../../assets/img/banner-tech.jpg' },
+    { id: 'PN-1044', title: 'Điểm danh nhận Xu mỗi ngày', content: 'Điểm danh 7 ngày liên tiếp để nhận tới 700 Lazadee Xu.', target: 'BUYER', by: 'Admin (1)', at: '01/06/2026 08:00', reads: 35420, reach: 118900, image: '' },
+    { id: 'PN-1043', title: 'Chính sách đổi trả mới', content: 'Lazadee cập nhật chính sách đổi trả và hoàn tiền áp dụng cho toàn sàn.', target: 'ALL', by: 'Admin (1)', at: '28/05/2026 14:00', reads: 61200, reach: 240100, image: '' },
+  ];
+
+  const NOTIFS = [
+    { id: 'an1', title: 'Hồ sơ KYC mới cần duyệt', body: 'Boutique Sài Gòn vừa nộp hồ sơ KYC (Hộ kinh doanh).', date: '08/06/2026 10:24', unread: true, icon: 'user-check', nav: 'kyc' },
+    { id: 'an2', title: 'Sản phẩm AI nghi ngờ', body: '"Nước hoa mini chính hãng 10ml" cần người kiểm tra giấy ủy quyền.', date: '08/06/2026 11:05', unread: true, icon: 'triangle-alert', nav: 'product_moderation' },
+    { id: 'an3', title: 'Yêu cầu rút tiền mới', body: 'TechZone Official yêu cầu rút 5.000.000₫.', date: '07/06/2026 16:40', unread: false, icon: 'hand-coins', nav: 'withdrawals' },
+  ];
+
+  window.LZA = { DASHBOARD, MODERATION, MODERATORS, PLATFORM_NOTIFS, NOTIFS, NAV, KYC, REFUNDS, REVIEWS, WITHDRAWALS, LEDGER, STAFF, ROLES, AUDIT, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, PLATFORM_VOUCHERS };
 })();

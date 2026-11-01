@@ -28,6 +28,9 @@
 <script type="text/babel" src="Catalog.jsx"></script>
 <script type="text/babel" src="AuditLog.jsx"></script>
 <script type="text/babel" src="Vouchers.jsx"></script>
+<script type="text/babel" src="Dashboard.jsx"></script>
+<script type="text/babel" src="ProductModeration.jsx"></script>
+<script type="text/babel" src="PlatformNotifications.jsx"></script>
 <script type="text/babel">
 const { Icon } = window.LazadeeDesignSystem_0477b7;
 function Placeholder({ name }) {
@@ -39,9 +42,11 @@ function Placeholder({ name }) {
   );
 }
 function App() {
-  const [active, setActive] = React.useState(new URLSearchParams(location.search).get('screen') || 'kyc');
+  const [active, setActiveRaw] = React.useState(new URLSearchParams(location.search).get('screen') || 'overview');
+  const setActive = (id) => { setActiveRaw(id); const u = new URL(location.href); u.searchParams.set('screen', id); history.replaceState({}, '', u); window.scrollTo(0, 0); };
   const Shell = window.LZAShell;
   const map = {
+    overview: window.LZADashboard, product_moderation: window.LZAModeration, notifications: window.LZANotifications,
     kyc: window.LZAKyc, refunds: window.LZARefunds, reviews: window.LZAReviews,
     withdrawals: window.LZAWithdrawals, commission: window.LZACommission, ledger: window.LZALedger, rbac: window.LZARbac,
     catalog: window.LZACatalog,

@@ -121,17 +121,24 @@
     const [inviting, setInviting] = React.useState(false);
     const save = (email, patch) => setStaff((list) => list.map((s) => (s.email === email ? { ...s, ...patch } : s)));
     const addStaff = (s) => { setStaff((list) => [...list, s]); setInviting(false); };
+    const [q, setQ] = React.useState('');
+    const [delStaff, setDelStaff] = React.useState(null);
+    const shownStaff = staff.filter((s) => (s.name + ' ' + s.email).toLowerCase().includes(q.trim().toLowerCase()));
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Phân quyền theo vai trò (RBAC). {staff.length} nhân viên · {ROLES.length} vai trò. Di chuột lên mã quyền để xem mô tả.</span>
-          <Button size="sm" iconLeft="plus-circle" style={{ marginLeft: 'auto' }} onClick={() => setInviting(true)}>Mời nhân viên</Button>
+          <Button size="sm" iconLeft="plus-circle" style={{ marginLeft: 'auto' }} onClick={() => setInviting(true)}>Thêm nhân viên mới</Button>
+        </div>
+        <div style={{ position: 'relative', maxWidth: 380, marginBottom: 12 }}>
+          <span style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-subtle)', display: 'flex' }}><Icon name="search" size={16} /></span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm kiếm theo tên hoặc email..." style={{ width: '100%', height: 40, paddingLeft: 36, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none', boxSizing: 'border-box', background: '#fff' }} />
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
             <thead><tr style={hrow}><th style={th}>Nhân viên</th><th style={th}>Vai trò</th><th style={th}>Quyền</th><th style={th}>Trạng thái</th><th style={{ ...th, textAlign: 'right' }}></th></tr></thead>
             <tbody>
-              {staff.map((s) => {
+              {shownStaff.map((s) => {
                 const perms = s.perms.includes('all') ? ['Toàn quyền'] : s.perms;
                 return (
                   <tr key={s.email} style={brow}>
@@ -139,7 +146,7 @@
                     <td style={td}><Badge variant={s.role === 'Super Admin' ? 'primary' : 'outline'}>{s.role}</Badge></td>
                     <td style={td}><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', maxWidth: 300 }}>{perms.map((p) => <span key={p} title={PERM_DESC[p] || (p === 'Toàn quyền' ? 'Có tất cả quyền trong hệ thống' : p)} className="code" style={{ font: '11px var(--font-mono)', background: 'var(--gray-100)', color: 'var(--text-body)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', cursor: 'help' }}>{p}</span>)}</div></td>
                     <td style={td}>{s.pending ? <Badge variant="warning" icon="clock">Chờ kích hoạt</Badge> : s.active ? <Badge variant="success">Hoạt động</Badge> : <Badge variant="neutral">Tạm khoá</Badge>}</td>
-                    <td style={{ ...td, textAlign: 'right' }}><Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(s)}>Sửa</Button></td>
+                    <td style={{ ...td, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(s)}>Sửa</Button><Button variant="ghost" size="sm" iconLeft="lock" onClick={() => save(s.email, { active: !s.active })}>{s.active ? 'Khóa' : 'Mở khóa'}</Button><Button variant="ghost" size="sm" iconLeft="trash-2" style={{ color: 'var(--red-600)' }} onClick={() => setDelStaff(s)}>Xóa</Button></div></td>
                   </tr>
                 );
               })}
@@ -148,6 +155,10 @@
         </div>
         {editing && <RbacEditor staff={editing} onClose={() => setEditing(null)} onSave={(patch) => { save(editing.email, patch); setEditing(null); }} />}
         {inviting && <InviteStaff onClose={() => setInviting(false)} onInvite={addStaff} />}
+        {delStaff && <Modal open onClose={() => setDelStaff(null)} title="Xóa tài khoản nhân viên"
+          footer={<><Button variant="ghost" onClick={() => setDelStaff(null)}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setStaff((l) => l.filter((x) => x.email !== delStaff.email)); setDelStaff(null); }}>Xóa tài khoản</Button></>}>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}><b style={{ color: 'var(--red-600)' }}>CẢNH BÁO:</b> Hành động này sẽ xoá hoàn toàn tài khoản và quyền của nhân viên <b>{delStaff.name}</b>. Bạn có chắc chắn?</div>
+        </Modal>}
       </div>
     );
   }

@@ -36,6 +36,8 @@
     const [cat, setCat] = React.useState('all');
     const [range, setRange] = React.useState('7 ngày qua');
     const [q, setQ] = React.useState('');
+    const [from, setFrom] = React.useState('');
+    const [to, setTo] = React.useState('');
     const list = AUDIT.filter((r) => (cat === 'all' || r.cat === cat))
       .filter((r) => !q.trim() || (r.actor + ' ' + r.action + ' ' + r.target + ' ' + r.ip).toLowerCase().includes(q.trim().toLowerCase()));
     const failed = AUDIT.filter((r) => r.result === 'DENIED').length;
@@ -55,6 +57,10 @@
             <label style={lab}>Khoảng thời gian</label>
             <div style={{ marginTop: 6 }}><Select value={range} onChange={(e) => setRange(e.target.value)}><option>Hôm nay</option><option>7 ngày qua</option><option>30 ngày qua</option><option>Tuỳ chọn…</option></Select></div>
           </div>
+          {range === 'Tuỳ chọn…' && <>
+            <div><label style={lab}>Từ ngày</label><input type="date" value={from} onChange={(e) => setFrom(e.target.value)} style={{ display: 'block', marginTop: 6, height: 44, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '0 10px', font: 'var(--type-body-sm)', outline: 'none' }} /></div>
+            <div><label style={lab}>Đến ngày</label><input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} style={{ display: 'block', marginTop: 6, height: 44, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '0 10px', font: 'var(--type-body-sm)', outline: 'none' }} /></div>
+          </>}
           <div style={{ width: 200 }}>
             <label style={lab}>Loại hành động</label>
             <div style={{ marginTop: 6 }}><Select value={cat} onChange={(e) => setCat(e.target.value)}>{CATS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}</Select></div>
