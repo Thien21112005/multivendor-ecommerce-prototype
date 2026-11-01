@@ -341,7 +341,7 @@
               <Button variant="secondary" iconLeft="refresh-cw" onClick={() => set('slug', slugify(f.name))}>Auto</Button>
             </div>
           </div>
-          <div><label style={clab}>Danh mục cha</label><div style={{ marginTop: 6 }}><Select value={f.parent} onChange={(e) => set('parent', e.target.value)}><option value="">— Danh mục gốc (root)</option>{tree.map((t) => <React.Fragment key={t.id}><option value={t.id}>{t.name}</option>{t.subs.map((s) => <option key={s.name} value={'sub:' + s.name}>{t.name} › {s.name}</option>)}</React.Fragment>)}</Select></div></div>
+          <div><label style={clab}>Danh mục cha</label><div style={{ marginTop: 6 }}><Select value={f.parent} onChange={(e) => set('parent', e.target.value)}><option value="">— Danh mục gốc (root)</option>{tree.flatMap((t) => [<option key={t.id} value={t.id}>{t.name}</option>, ...t.subs.map((s) => <option key={t.id + s.name} value={'sub:' + s.name}>{t.name + ' › ' + s.name}</option>)])}</Select></div></div>
           <div>
             <label style={clab}>Icon</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
