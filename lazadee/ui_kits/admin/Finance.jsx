@@ -3,7 +3,7 @@
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, StatusBadge, Avatar, Switch, Input, Money } = DS;
-  const { WITHDRAWALS, LEDGER, STAFF, ROLES, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER } = window.LZA;
+  const { WITHDRAWALS, LEDGER, STAFF, ROLES, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, downloadCsv } = window.LZA;
   const { Modal, Select, Checkbox } = DS;
   const APW_COLORS = ['var(--red-500)', 'var(--red-500)', 'var(--gold-500)', 'var(--mint-500)', 'var(--mint-600)'];
   const APW_LABELS = ['Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
@@ -11,11 +11,32 @@
   const formatVND = Money.format;
 
   /* ---------- Withdrawals ---------- */
+  // Mock QR tile: not scannable, stands in for the VietQR image the bank app would read.
+  function FakeQr({ seed, size = 148 }) {
+    let h = 7; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    const n = 21, cells = [];
+    const finder = (x, y) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      if (finder(x, y)) continue;
+      h = (h * 1103515245 + 12345) >>> 0;
+      if ((h >>> 16) & 1) cells.push(<rect key={x + '-' + y} x={x} y={y} width="1" height="1" />);
+    }
+    const eye = (x, y) => <g key={x + '.' + y}><rect x={x} y={y} width="7" height="7" /><rect x={x + 1} y={y + 1} width="5" height="5" fill="#fff" /><rect x={x + 2} y={y + 2} width="3" height="3" /></g>;
+    return <svg viewBox={'0 0 ' + n + ' ' + n} width={size} height={size} role="img" aria-label="Mã VietQR mô phỏng" shapeRendering="crispEdges" style={{ background: '#fff', padding: 8, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', boxSizing: 'content-box' }}>{cells}{eye(0, 0)}{eye(n - 7, 0)}{eye(0, n - 7)}</svg>;
+  }
+  const W_REASONS = ['Tài khoản nhận không khớp hồ sơ', 'Shop có khiếu nại đang mở', 'Nghi ngờ giao dịch bất thường', 'Lý do khác'];
+
   function Withdrawals() {
     const [done, setDone] = React.useState({});
+    const [reject, setReject] = React.useState(null);
+    const [reason, setReason] = React.useState(W_REASONS[0]);
+    const [pay, setPay] = React.useState(null);
+    const [manual, setManual] = React.useState(false);
+    const [bankRef, setBankRef] = React.useState('');
     const st = (w) => done[w.id] || w.state;
     const queue = WITHDRAWALS.filter((w) => st(w) === 'PENDING');
     const totalPending = queue.reduce((n, w) => n + w.amount, 0);
+    const settle = () => { setDone((d) => ({ ...d, [pay.id]: 'PAID' })); setPay(null); setManual(false); setBankRef(''); };
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
@@ -32,17 +53,18 @@
                   <tr key={w.id} style={brow}>
                     <td style={td}><span className="code" style={{ fontSize: 12 }}>{w.id}</span></td>
                     <td style={td}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Avatar name={w.shop} size={26} square />{w.shop}</div></td>
-                    <td style={{ ...td, color: 'var(--text-muted)' }} className="code">{w.bank}</td>
+                    <td style={{ ...td, color: 'var(--text-muted)' }} className="code">{w.bank} <Icon name="badge-check" size={13} style={{ color: 'var(--mint-600)' }} title="Đã xác minh chính chủ" /></td>
                     <td style={{ ...td, textAlign: 'right', fontWeight: 700 }}>{formatVND(w.amount)}</td>
                     <td style={td}><StatusBadge status={w.kyc === 'VERIFIED' ? 'VERIFIED' : 'PENDING'} label={w.kyc} dot={false} /></td>
                     <td style={{ ...td, color: 'var(--text-muted)', fontSize: 12 }}>{w.requested}</td>
                     <td style={{ ...td, textAlign: 'right' }}>
                       {st(w) === 'PAID' ? <Badge variant="success" icon="circle-check">Đã chi</Badge>
-                        : st(w) === 'DONE' ? <Badge variant="success" icon="circle-check">Đã duyệt chi</Badge>
+                        : st(w) === 'REJECTED' ? <Badge variant="danger" icon="ban">Đã từ chối, hoàn ví</Badge>
+                        : st(w) === 'APPROVED' ? <Button size="sm" variant="outline" iconLeft="clock" onClick={() => setPay(w)}>Chờ chuyển khoản</Button>
                         : blocked ? <Badge variant="danger" icon="lock">Chặn — KYC chưa duyệt</Badge>
                         : <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                            <Button variant="ghost" size="sm" onClick={() => setDone((d) => ({ ...d, [w.id]: 'REJECTED' }))}>Từ chối</Button>
-                            <Button size="sm" iconLeft="check" onClick={() => setDone((d) => ({ ...d, [w.id]: 'DONE' }))}>Duyệt chi</Button>
+                            <Button variant="ghost" size="sm" onClick={() => { setReason(W_REASONS[0]); setReject(w); }}>Từ chối</Button>
+                            <Button size="sm" iconLeft="check" onClick={() => { setDone((d) => ({ ...d, [w.id]: 'APPROVED' })); setPay(w); }}>Duyệt chi</Button>
                           </div>}
                     </td>
                   </tr>
@@ -51,52 +73,95 @@
             </tbody>
           </table>
         </div>
+
+        <Modal open={!!reject} onClose={() => setReject(null)} title={reject && 'Từ chối lệnh ' + reject.id}
+          footer={<><Button variant="ghost" onClick={() => setReject(null)}>Huỷ</Button><Button variant="danger" onClick={() => { setDone((d) => ({ ...d, [reject.id]: 'REJECTED' })); setReject(null); }}>Từ chối & hoàn ví</Button></>}>
+          {reject && <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Select label="Lý do từ chối" value={reason} onChange={(e) => setReason(e.target.value)}>{W_REASONS.map((r) => <option key={r}>{r}</option>)}</Select>
+            <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', lineHeight: 1.5 }}><b>{formatVND(reject.amount)}</b> sẽ trả lại số dư khả dụng của {reject.shop}.</div>
+          </div>}
+        </Modal>
+
+        <Modal open={!!pay} onClose={() => { setPay(null); setManual(false); }} width={520} title={pay && 'Chuyển khoản lệnh ' + pay.id}
+          footer={pay && <><Button variant="ghost" onClick={() => { setPay(null); setManual(false); }}>Đóng</Button>{manual ? <Button iconLeft="check" disabled={!bankRef.trim()} onClick={settle}>Xác nhận tay</Button> : <Button iconLeft="circle-check" onClick={settle}>Mô phỏng: SePay báo tiền đã ra</Button>}</>}>
+          {pay && <div>
+            <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+              <FakeQr seed={pay.id} />
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 7, font: 'var(--type-body-sm)' }}>
+                <div><span style={{ color: 'var(--text-muted)' }}>Tài khoản nhận: </span><b>{pay.bank}</b></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Số tiền: </span><b style={{ color: 'var(--text-price)' }}>{formatVND(pay.amount)}</b></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Nội dung bắt buộc: </span><b className="code">LZDWD{pay.id.replace(/\D/g, '')}</b></div>
+                <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Quét mã bằng app ngân hàng của sàn. Hệ thống tự hoàn tất khi SePay báo tiền ra khỏi tài khoản.</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border-subtle)' }}>
+              {!manual
+                ? <a onClick={() => setManual(true)} style={{ font: 'var(--type-caption)', color: 'var(--blue-600)', cursor: 'pointer', fontWeight: 600 }}>Sau 24 giờ chưa thấy webhook? Xác nhận tay</a>
+                : <Input label="Mã giao dịch ngân hàng" value={bankRef} onChange={(e) => setBankRef(e.target.value)} placeholder="VD: FT26170123456" />}
+            </div>
+          </div>}
+        </Modal>
       </div>
     );
   }
 
   /* ---------- Commission config ---------- */
   function Commission() {
-    const cats = [['Điện tử', 5], ['Thời trang', 8], ['Làm đẹp', 10], ['Nhà cửa', 6], ['Phụ kiện', 7], ['Bách hoá', 4]];
+    const [cats, setCats] = React.useState([['Điện tử', '5', true], ['Thời trang', '8', true], ['Làm đẹp', '10', true], ['Nhà cửa', '6', true], ['Phụ kiện', '7', true], ['Bách hoá', '4', true]]);
+    const [def, setDef] = React.useState('5');
+    const [toast, setToast] = React.useState('');
+    const say = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
+    const setCat = (i, patch) => setCats((c) => c.map((row, j) => (j === i ? [row[0], patch.v != null ? patch.v : row[1], patch.on != null ? patch.on : row[2]] : row)));
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: 22, marginBottom: 16 }}>
           <div style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 4 }}>Phí hoa hồng mặc định</div>
-          <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 16 }}>Áp dụng cho mọi giao dịch chưa có cấu hình riêng theo ngành hàng.</div>
+          <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 16 }}>Thứ tự áp dụng: hoa hồng riêng của shop → theo ngành hàng → mặc định.</div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
-            <div style={{ width: 140 }}><Input label="Phí sàn (%)" defaultValue="5" iconRight="percent" /></div>
-            <Button variant="secondary">Lưu mặc định</Button>
+            <div style={{ width: 140 }}><Input label="Phí sàn (%)" value={def} onChange={(e) => setDef(e.target.value.replace(/\D/g, ''))} iconRight="percent" /></div>
+            <Button variant="secondary" disabled={!def} onClick={() => say('Đã lưu phí hoa hồng mặc định!')}>Lưu mặc định</Button>
           </div>
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)', font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Hoa hồng theo ngành hàng</div>
-          {cats.map(([c, v]) => (
+          {cats.map(([c, v, on], i) => (
             <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-              <span style={{ flex: 1, font: 'var(--type-body)', color: 'var(--text-body)' }}>{c}</span>
-              <div style={{ width: 90 }}><Input defaultValue={String(v)} iconRight="percent" /></div>
-              <Switch defaultChecked />
+              <span style={{ flex: 1, font: 'var(--type-body)', color: on ? 'var(--text-body)' : 'var(--text-subtle)' }}>{c}</span>
+              <div style={{ width: 90 }}><Input value={v} onChange={(e) => setCat(i, { v: e.target.value.replace(/\D/g, '') })} iconRight="percent" /></div>
+              <Switch checked={on} onChange={() => setCat(i, { on: !on })} />
             </div>
           ))}
-          <div style={{ padding: 16, textAlign: 'right' }}><Button>Lưu cấu hình</Button></div>
+          <div style={{ padding: 16, textAlign: 'right' }}><Button onClick={() => say('Đã lưu tất cả thay đổi cấu hình')}>Lưu cấu hình</Button></div>
         </div>
+        {toast && <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 200 }}>{toast}</div>}
       </div>
     );
   }
 
   /* ---------- Append-only ledger ---------- */
   function Ledger() {
+    const [q, setQ] = React.useState('');
+    const [ev, setEv] = React.useState('Tất cả sự kiện');
+    const events = ['Tất cả sự kiện', ...Array.from(new Set(LEDGER.map((r) => r.event)))];
+    const rows = LEDGER.filter((r) => ev === 'Tất cả sự kiện' || r.event === ev).filter((r) => (r.ref + ' ' + r.account).toLowerCase().includes(q.trim().toLowerCase()));
+    const exportCsv = () => downloadCsv('so-cai-tai-chinh.csv', [['Seq', 'Thời gian', 'Sự kiện', 'Tham chiếu', 'Tài khoản', 'Nợ', 'Có'], ...rows.map((r) => [r.seq, r.ts, r.event, r.ref, r.account, r.debit, r.credit])]);
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
           <Badge variant="neutral"><Icon name="lock" size={11} /> Append-only · bất biến</Badge>
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Mỗi dòng là một bút toán không thể sửa/xoá. Điều chỉnh = thêm bút toán đảo.</span>
-          <Button variant="secondary" size="sm" iconLeft="download" style={{ marginLeft: 'auto' }}>Xuất sổ cái</Button>
+          <Button variant="secondary" size="sm" iconLeft="download" style={{ marginLeft: 'auto' }} onClick={exportCsv}>Xuất sổ cái</Button>
+        </div>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <div style={{ flex: 1, maxWidth: 360 }}><Input iconLeft="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Mã tham chiếu, tài khoản..." /></div>
+          <div style={{ width: 220 }}><Select value={ev} onChange={(e) => setEv(e.target.value)}>{events.map((x) => <option key={x}>{x}</option>)}</Select></div>
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
             <thead><tr style={hrow}><th style={th}>Seq</th><th style={th}>Thời gian</th><th style={th}>Sự kiện</th><th style={th}>Tham chiếu</th><th style={th}>Tài khoản</th><th style={{ ...th, textAlign: 'right' }}>Nợ</th><th style={{ ...th, textAlign: 'right' }}>Có</th></tr></thead>
             <tbody>
-              {LEDGER.map((r) => (
+              {rows.length === 0 && <tr><td colSpan="7" style={{ padding: 32, textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có bút toán nào khớp bộ lọc.</td></tr>}
+              {rows.map((r) => (
                 <tr key={r.seq} style={brow}>
                   <td style={{ ...td, color: 'var(--text-subtle)' }} className="code">#{r.seq}</td>
                   <td style={{ ...td, color: 'var(--text-muted)', fontSize: 12 }} className="code">{r.ts}</td>
@@ -123,12 +188,16 @@
     const addStaff = (s) => { setStaff((list) => [...list, s]); setInviting(false); };
     const [q, setQ] = React.useState('');
     const [delStaff, setDelStaff] = React.useState(null);
+    const [lockStaff, setLockStaff] = React.useState(null);
+    const [lockWhy, setLockWhy] = React.useState('');
+    const [toast, setToast] = React.useState('');
+    const say = (m) => { setToast(m); setTimeout(() => setToast(''), 2400); };
     const shownStaff = staff.filter((s) => (s.name + ' ' + s.email).toLowerCase().includes(q.trim().toLowerCase()));
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Phân quyền theo vai trò (RBAC). {staff.length} nhân viên · {ROLES.length} vai trò. Di chuột lên mã quyền để xem mô tả.</span>
-          <Button size="sm" iconLeft="plus-circle" style={{ marginLeft: 'auto' }} onClick={() => setInviting(true)}>Thêm nhân viên mới</Button>
+          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>{staff.length} nhân viên · 3 chức danh + Admin · {ALL_PERMS.length} mã quyền. Di chuột lên mã quyền để xem mô tả.</span>
+          <Button size="sm" iconLeft="plus-circle" style={{ marginLeft: 'auto' }} onClick={() => setInviting(true)}>Mời nhân viên mới</Button>
         </div>
         <div style={{ position: 'relative', maxWidth: 380, marginBottom: 12 }}>
           <span style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-subtle)', display: 'flex' }}><Icon name="search" size={16} /></span>
@@ -136,17 +205,23 @@
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
-            <thead><tr style={hrow}><th style={th}>Nhân viên</th><th style={th}>Vai trò</th><th style={th}>Quyền</th><th style={th}>Trạng thái</th><th style={{ ...th, textAlign: 'right' }}></th></tr></thead>
+            <thead><tr style={hrow}><th style={th}>Nhân viên</th><th style={th}>Chức danh</th><th style={th}>Quyền</th><th style={th}>Trạng thái</th><th style={{ ...th, textAlign: 'right' }}></th></tr></thead>
             <tbody>
               {shownStaff.map((s) => {
-                const perms = s.perms.includes('all') ? ['Toàn quyền'] : s.perms;
+                const isAdmin = s.role === 'Admin';
+                const perms = isAdmin ? ['Toàn quyền'] : s.perms;
                 return (
                   <tr key={s.email} style={brow}>
                     <td style={td}><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Avatar name={s.name} size={34} /><div><div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-strong)' }}>{s.name}</div><div className="code" style={{ font: '11px var(--font-mono)', color: 'var(--text-muted)' }}>{s.email}</div></div></div></td>
-                    <td style={td}><Badge variant={s.role === 'Super Admin' ? 'primary' : 'outline'}>{s.role}</Badge></td>
+                    <td style={td}><Badge variant={isAdmin ? 'primary' : 'outline'}>{s.role}</Badge></td>
                     <td style={td}><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', maxWidth: 300 }}>{perms.map((p) => <span key={p} title={PERM_DESC[p] || (p === 'Toàn quyền' ? 'Có tất cả quyền trong hệ thống' : p)} className="code" style={{ font: '11px var(--font-mono)', background: 'var(--gray-100)', color: 'var(--text-body)', padding: '2px 6px', borderRadius: 'var(--radius-xs)', cursor: 'help' }}>{p}</span>)}</div></td>
                     <td style={td}>{s.pending ? <Badge variant="warning" icon="clock">Chờ kích hoạt</Badge> : s.active ? <Badge variant="success">Hoạt động</Badge> : <Badge variant="neutral">Tạm khoá</Badge>}</td>
-                    <td style={{ ...td, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}><Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(s)}>Sửa</Button><Button variant="ghost" size="sm" iconLeft="lock" onClick={() => save(s.email, { active: !s.active })}>{s.active ? 'Khóa' : 'Mở khóa'}</Button><Button variant="ghost" size="sm" iconLeft="trash-2" style={{ color: 'var(--red-600)' }} onClick={() => setDelStaff(s)}>Xóa</Button></div></td>
+                    <td style={{ ...td, textAlign: 'right' }}>{isAdmin ? <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Tài khoản của bạn</span> : <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                      {s.pending && <Button variant="ghost" size="sm" iconLeft="send" onClick={() => say('Đã gửi lại lời mời tới ' + s.email)}>Gửi lại lời mời</Button>}
+                      <Button variant="ghost" size="sm" iconLeft="pencil" onClick={() => setEditing(s)}>Sửa quyền</Button>
+                      {!s.pending && <Button variant="ghost" size="sm" iconLeft="lock" onClick={() => { if (s.active) { setLockWhy(''); setLockStaff(s); } else { save(s.email, { active: true }); say('Mở khóa tài khoản thành công!'); } }}>{s.active ? 'Khóa' : 'Mở khóa'}</Button>}
+                      <Button variant="ghost" size="sm" iconLeft="trash-2" style={{ color: 'var(--red-600)' }} onClick={() => setDelStaff(s)}>Xóa</Button>
+                    </div>}</td>
                   </tr>
                 );
               })}
@@ -154,7 +229,12 @@
           </table>
         </div>
         {editing && <RbacEditor staff={editing} onClose={() => setEditing(null)} onSave={(patch) => { save(editing.email, patch); setEditing(null); }} />}
-        {inviting && <InviteStaff onClose={() => setInviting(false)} onInvite={addStaff} />}
+        {inviting && <InviteStaff existing={staff.map((s) => s.email)} onClose={() => setInviting(false)} onInvite={addStaff} />}
+        {lockStaff && <Modal open onClose={() => setLockStaff(null)} title={'Khóa tài khoản — ' + lockStaff.name}
+          footer={<><Button variant="ghost" onClick={() => setLockStaff(null)}>Huỷ</Button><Button variant="danger" iconLeft="lock" disabled={!lockWhy.trim()} onClick={() => { save(lockStaff.email, { active: false }); setLockStaff(null); say('Khóa tài khoản thành công!'); }}>Xác nhận khóa</Button></>}>
+          <Input label="Lý do khóa" value={lockWhy} onChange={(e) => setLockWhy(e.target.value)} placeholder="VD: Nhân viên đã chấm dứt hợp đồng lao động" />
+        </Modal>}
+        {toast && <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--ink-900)', color: '#fff', padding: '11px 18px', borderRadius: 'var(--radius-pill)', font: 'var(--type-body-sm)', boxShadow: 'var(--shadow-lg)', zIndex: 200 }}>{toast}</div>}
         {delStaff && <Modal open onClose={() => setDelStaff(null)} title="Xóa tài khoản nhân viên"
           footer={<><Button variant="ghost" onClick={() => setDelStaff(null)}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" onClick={() => { setStaff((l) => l.filter((x) => x.email !== delStaff.email)); setDelStaff(null); }}>Xóa tài khoản</Button></>}>
           <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}><b style={{ color: 'var(--red-600)' }}>CẢNH BÁO:</b> Hành động này sẽ xoá hoàn toàn tài khoản và quyền của nhân viên <b>{delStaff.name}</b>. Bạn có chắc chắn?</div>
@@ -163,18 +243,19 @@
     );
   }
 
-  function InviteStaff({ onClose, onInvite }) {
+  function InviteStaff({ existing, onClose, onInvite }) {
     const [f, setF] = React.useState({ name: '', email: '', role: 'Moderator' });
     const [perms, setPerms] = React.useState((ROLE_PERMS['Moderator'] || []).slice());
     const [sent, setSent] = React.useState(false);
     const [err, setErr] = React.useState({});
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
-    const pickRole = (r) => { set('role', r); setPerms((ROLE_PERMS[r] || []).slice()); };
-    const toggle = (code) => setPerms((p) => (p.includes(code) ? p.filter((x) => x !== code) : [...p, code]));
+    const pickRole = (r) => { set('role', r); if (ROLE_PERMS[r]) setPerms(ROLE_PERMS[r].slice()); };
+    const toggle = (code) => { if (code === 'MANAGE_RBAC') return; setPerms((p) => (p.includes(code) ? p.filter((x) => x !== code) : [...p, code])); };
     const submit = () => {
       const e = {};
       if (!f.name.trim()) e.name = 'Nhập họ tên';
-      if (!/.+@.+\..+/.test(f.email)) e.email = 'Email không hợp lệ';
+      if (!/^[^@\s]+@lazadee\.vn$/i.test(f.email.trim())) e.email = 'Email công việc phải có đuôi @lazadee.vn';
+      else if (existing.includes(f.email.trim().toLowerCase())) e.email = 'Email đã được sử dụng';
       setErr(e);
       if (Object.keys(e).length === 0) {
         onInvite({ name: f.name.trim(), email: f.email.trim(), role: f.role, perms: perms.slice(), active: false, pending: true });
@@ -190,16 +271,16 @@
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Input label="Họ và tên" value={f.name} onChange={(e) => set('name', e.target.value)} error={err.name} placeholder="Nguyễn Văn A" />
-            <div><label style={lab}>Vai trò</label><div style={{ marginTop: 6 }}><Select value={f.role} onChange={(e) => pickRole(e.target.value)}>{EDIT_ROLES.map((r) => <option key={r}>{r}</option>)}</Select></div></div>
+            <div><label style={lab}>Chức danh</label><div style={{ marginTop: 6 }}><Select value={f.role} onChange={(e) => pickRole(e.target.value)}>{EDIT_ROLES.map((r) => <option key={r}>{r}</option>)}</Select></div></div>
           </div>
           <Input label="Email công việc" iconLeft="mail" value={f.email} onChange={(e) => set('email', e.target.value)} error={err.email} placeholder="ten@lazadee.vn" />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              <label style={lab}>Quyền cấp theo vai trò</label>
+              <label style={lab}>Quyền cấp theo chức danh</label>
               <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{perms.length}/{ALL_PERMS.length} quyền</span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {PERMS.map((p) => {
+              {PERMS.filter((p) => p.code !== 'MANAGE_RBAC').map((p) => {
                 const on = perms.includes(p.code);
                 return (
                   <button key={p.code} onClick={() => toggle(p.code)} title={p.desc} className="code" style={{ font: '11px var(--font-mono)', padding: '4px 9px', borderRadius: 'var(--radius-pill)', border: '1px solid ' + (on ? 'var(--blue-500)' : 'var(--border-default)'), background: on ? 'var(--blue-50)' : '#fff', color: on ? 'var(--blue-600)' : 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
@@ -214,14 +295,15 @@
     );
   }
 
-  const EDIT_ROLES = ['Super Admin', 'Moderator', 'Finance Staff', 'CS Staff'];
+  const EDIT_ROLES = ['Moderator', 'CS Specialist', 'Finance Officer', 'Tùy chỉnh'];
   function RbacEditor({ staff, onClose, onSave }) {
-    const initRole = EDIT_ROLES.includes(staff.role) ? staff.role : 'Moderator';
+    const initRole = EDIT_ROLES.includes(staff.role) ? staff.role : 'Tùy chỉnh';
     const [role, setRole] = React.useState(initRole);
-    const [perms, setPerms] = React.useState(() => (staff.perms.includes('all') ? ALL_PERMS.slice() : staff.perms.slice()));
+    const [perms, setPerms] = React.useState(() => staff.perms.slice());
     const [active, setActive] = React.useState(staff.active);
-    const pickRole = (r) => { setRole(r); setPerms((ROLE_PERMS[r] || []).slice()); };
-    const toggle = (code) => setPerms((p) => (p.includes(code) ? p.filter((x) => x !== code) : [...p, code]));
+    const pickRole = (r) => { setRole(r); if (ROLE_PERMS[r]) setPerms(ROLE_PERMS[r].slice()); };
+    const toggle = (code) => { if (code === 'MANAGE_RBAC') return; setPerms((p) => (p.includes(code) ? p.filter((x) => x !== code) : [...p, code])); };
+    const conflict = perms.includes('PROCESS_PAYOUT') && perms.includes('UPDATE_COMMISSION');
     return (
       <Modal open onClose={onClose} title={`Chỉnh quyền — ${staff.name}`} width={560}
         footer={<div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
@@ -233,9 +315,9 @@
         </div>}>
         <div style={{ width: 'min(520px, 82vw)', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={lab}>Vai trò</label>
+            <label style={lab}>Chức danh</label>
             <div style={{ marginTop: 6 }}><Select value={role} onChange={(e) => pickRole(e.target.value)}>{EDIT_ROLES.map((r) => <option key={r}>{r}</option>)}</Select></div>
-            <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 6 }}>Chọn vai trò sẽ tự động tích các quyền mặc định — bạn có thể tuỳ chỉnh bên dưới.</div>
+            <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 6 }}>Chọn chức danh sẽ nạp bộ quyền mặc định — bạn có thể tuỳ chỉnh bên dưới.</div>
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
@@ -246,8 +328,8 @@
               {PERMS.map((p, i) => {
                 const on = perms.includes(p.code);
                 return (
-                  <label key={p.code} style={{ display: 'flex', alignItems: 'flex-start', gap: 11, padding: '11px 14px', cursor: 'pointer', background: on ? 'var(--blue-50)' : '#fff', borderTop: i ? '1px solid var(--border-subtle)' : 'none' }}>
-                    <Checkbox checked={on} onChange={() => toggle(p.code)} />
+                  <label key={p.code} style={{ display: 'flex', alignItems: 'flex-start', gap: 11, padding: '11px 14px', cursor: p.code === 'MANAGE_RBAC' ? 'not-allowed' : 'pointer', opacity: p.code === 'MANAGE_RBAC' ? 0.55 : 1, background: on ? 'var(--blue-50)' : '#fff', borderTop: i ? '1px solid var(--border-subtle)' : 'none' }}>
+                    <Checkbox checked={on} disabled={p.code === 'MANAGE_RBAC'} onChange={() => toggle(p.code)} />
                     <div style={{ minWidth: 0 }}>
                       <div className="code" style={{ font: '12px var(--font-mono)', color: on ? 'var(--blue-600)' : 'var(--text-strong)', fontWeight: 600 }}>{p.code}</div>
                       <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 1 }}>{p.desc}</div>
@@ -257,6 +339,7 @@
               })}
             </div>
           </div>
+          {conflict && <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '10px 14px', font: 'var(--type-body-sm)' }}><Icon name="triangle-alert" size={16} style={{ flex: 'none' }} />Một người giữ cả PROCESS_PAYOUT và UPDATE_COMMISSION vi phạm tách biệt nhiệm vụ. Vẫn lưu được và sẽ ghi log.</div>}
           {!active && <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'var(--surface-sunken)', borderRadius: 'var(--radius-md)', padding: '10px 14px' }}>
             <Icon name="lock" size={16} style={{ color: 'var(--text-muted)' }} />
             <span style={{ flex: 1, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Tài khoản đang tạm khoá.</span>
@@ -270,6 +353,12 @@
   /* ---------- Admin account / profile (VĐ-3) ---------- */
   function AccountAdmin() {
     const u = CURRENT_USER;
+    const [name, setName] = React.useState(u.name);
+    const [avatar, setAvatar] = React.useState(null);
+    const [editName, setEditName] = React.useState(false);
+    const [signedOut, setSignedOut] = React.useState(false);
+    const fileRef = React.useRef(null);
+    const pickAvatar = (e) => { const file = e.target.files[0]; e.target.value = ''; if (file && file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) setAvatar(URL.createObjectURL(file)); };
     const [f, setF] = React.useState({ cur: '', nw: '', cf: '' });
     const [err, setErr] = React.useState({});
     const [stage, setStage] = React.useState('form');
@@ -291,10 +380,13 @@
         {/* profile */}
         <div style={cardBox}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Avatar name={u.name} size={64} />
+            <div onClick={() => fileRef.current.click()} title="Đổi ảnh đại diện" style={{ cursor: 'pointer' }}><Avatar name={name} src={avatar} size={64} /></div>
+            <input ref={fileRef} type="file" hidden accept="image/*" onChange={pickAvatar} />
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: 0 }}>{u.name}</h2>
+                {editName
+                  ? <><div style={{ width: 240 }}><Input value={name} onChange={(e) => setName(e.target.value)} /></div><Button size="sm" disabled={!name.trim()} onClick={() => setEditName(false)}>Lưu</Button></>
+                  : <><h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: 0 }}>{name}</h2><Button size="sm" variant="ghost" iconLeft="pencil" onClick={() => setEditName(true)}>Sửa</Button></>}
                 <Badge variant="primary">{u.role}</Badge>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
@@ -346,7 +438,7 @@
         <div style={cardBox}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <SecHead icon="lock" title="Phiên đăng nhập" />
-            <Button variant="outline" size="sm" iconLeft="log-out" style={{ marginLeft: 'auto' }}>Đăng xuất tất cả</Button>
+            <Button variant="outline" size="sm" iconLeft="log-out" style={{ marginLeft: 'auto' }} disabled={signedOut} onClick={() => setSignedOut(true)}>{signedOut ? 'Đã thu hồi phiên khác' : 'Đăng xuất tất cả'}</Button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, border: '1px solid var(--mint-300, #BCEDD8)', background: 'var(--mint-50)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginTop: 14 }}>
             <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'var(--mint-500)', color: '#fff', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="layout-dashboard" size={22} /></div>

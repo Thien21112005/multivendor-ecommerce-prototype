@@ -4,9 +4,29 @@
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, Modal, Input, Select } = DS;
   const { PLATFORM_NOTIFS } = window.LZA;
-  const TARGET = { ALL: 'Tất cả người dùng', SELLER: 'Chỉ Vendor', BUYER: 'Chỉ Customer' };
-  const T_VARIANT = { ALL: 'primary', SELLER: 'warning', BUYER: 'mint' };
-  const FILTER = { 'Tất cả đối tượng': null, 'Chỉ Vendor': 'SELLER', 'Chỉ Customer': 'BUYER' };
+  const TARGET = { ALL: 'Tất cả người dùng', SELLER: 'Chỉ Vendor', BUYER: 'Chỉ Customer', SPECIFIC: 'Người dùng cụ thể' };
+  const plain = (html) => String(html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+  // Minimal rich-text box: bold, italic, link. Mock only, content stays in this browser.
+  function RichBox({ value, onChange }) {
+    const ref = React.useRef(null);
+    React.useEffect(() => { if (ref.current) ref.current.innerHTML = value || ''; }, []);
+    const cmd = (name, arg) => { ref.current.focus(); document.execCommand(name, false, arg); onChange(ref.current.innerHTML); };
+    const link = () => { const url = window.prompt('Nhập URL liên kết:', 'https://'); if (url && /^https?:\/\//.test(url)) cmd('createLink', url); };
+    const btn = { minWidth: 32, height: 30, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', cursor: 'pointer', font: '600 13px var(--font-sans)', color: 'var(--text-body)' };
+    return (
+      <div style={{ marginTop: 6, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: 6, padding: 6, background: 'var(--gray-25)', borderBottom: '1px solid var(--border-subtle)' }}>
+          <button type="button" aria-label="In đậm" style={btn} onClick={() => cmd('bold')}><b>B</b></button>
+          <button type="button" aria-label="In nghiêng" style={btn} onClick={() => cmd('italic')}><i>I</i></button>
+          <button type="button" aria-label="Chèn liên kết" style={{ ...btn, padding: '0 8px' }} onClick={link}>Liên kết</button>
+        </div>
+        <div ref={ref} role="textbox" aria-label="Nội dung chi tiết" contentEditable suppressContentEditableWarning data-placeholder="Nhập nội dung đầy đủ..." onInput={(e) => onChange(e.currentTarget.innerHTML)} style={{ minHeight: 96, padding: '9px 12px', font: 'var(--type-body)', outline: 'none', color: 'var(--text-body)' }} />
+      </div>
+    );
+  }
+  const T_VARIANT = { ALL: 'primary', SELLER: 'warning', BUYER: 'mint', SPECIFIC: 'neutral' };
+  const FILTER = { 'Tất cả đối tượng': null, 'Chỉ Vendor': 'SELLER', 'Chỉ Customer': 'BUYER', 'Người dùng cụ thể': 'SPECIFIC' };
   const PAGE = 5;
   const short = (n) => (n < 1000 ? String(n) : n < 1e6 ? '~' + (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : '~' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M');
 
@@ -31,7 +51,7 @@
     const [err, setErr] = React.useState('');
     const fileRef = React.useRef(null);
 
-    const list = rows.filter((n) => !FILTER[filter] || n.target === FILTER[filter]).filter((n) => (n.title + ' ' + n.content).toLowerCase().includes(q.trim().toLowerCase()));
+    const list = rows.filter((n) => !FILTER[filter] || n.target === FILTER[filter]).filter((n) => (n.title + ' ' + plain(n.content)).toLowerCase().includes(q.trim().toLowerCase()));
     const pages = Math.max(1, Math.ceil(list.length / PAGE));
     const shown = list.slice((page - 1) * PAGE, page * PAGE);
 
@@ -77,7 +97,7 @@
               {shown.map((n) => (
                 <tr key={n.id} onClick={() => setDetail(n)} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)', cursor: 'pointer' }} onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-25)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                   <td style={c}><span className="code" style={{ fontSize: 12 }}>{n.id}</span></td>
-                  <td style={{ ...c, maxWidth: 320 }}><div style={{ fontWeight: 600, color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.content}</div></td>
+                  <td style={{ ...c, maxWidth: 320 }}><div style={{ fontWeight: 600, color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plain(n.content)}</div></td>
                   <td style={c}>{n.image ? <img src={n.image} alt="" width="36" height="36" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} /> : <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: 'var(--gray-100)', color: 'var(--text-subtle)', display: 'grid', placeItems: 'center' }}><Icon name="image" size={16} /></span>}</td>
                   <td style={c}><Badge variant={T_VARIANT[n.target]}>{TARGET[n.target]}</Badge></td>
                   <td style={c}>{n.by}</td>
@@ -106,17 +126,18 @@
               <div><div style={lab2}>Thời gian gửi</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{detail.at}</div></div>
             </div>
             {detail.image && <img src={detail.image} alt="" style={{ width: '100%', borderRadius: 'var(--radius-md)' }} />}
-            <div><div style={lab2}>Nội dung</div><div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.6 }}>{detail.content}</div></div>
+            <div><div style={lab2}>Nội dung</div><div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: detail.content }} /></div>
           </div>}
         </Modal>
 
         <Modal open={!!form} onClose={() => setForm(null)} width={560} title={form && form.id ? 'Sửa thông báo toàn sàn' : 'Tạo thông báo toàn sàn (Broadcast)'}
-          footer={form && <><Button variant="ghost" onClick={() => setForm(null)}>Hủy</Button><Button iconLeft="send" disabled={!form.title.trim() || !form.content.trim()} onClick={() => setConfirm(true)}>{form.id ? 'Cập nhật' : 'Phát thông báo'}</Button></>}>
+          footer={form && <><Button variant="ghost" onClick={() => setForm(null)}>Hủy</Button><Button iconLeft="send" disabled={!form.title.trim() || !plain(form.content) || (form.target === 'SPECIFIC' && !(form.emails || '').trim())} onClick={() => setConfirm(true)}>{form.id ? 'Cập nhật' : 'Phát thông báo'}</Button></>}>
           {form && <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={lab}>Đối tượng nhận (Target Audience)</label>
               <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>{Object.entries(TARGET).map(([k, v]) => <label key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><input type="radio" name="target" checked={form.target === k} onChange={() => setForm({ ...form, target: k })} style={{ accentColor: 'var(--blue-500)' }} />{v}</label>)}</div>
             </div>
+            {form.target === 'SPECIFIC' && <Input label="Email người nhận (cách nhau bằng dấu phẩy)" value={form.emails || ''} onChange={(e) => setForm({ ...form, emails: e.target.value })} placeholder="mai.tran@gmail.com, an.nguyen@gmail.com" />}
             <Input label="Tiêu đề (Title)" value={form.title} maxLength={100} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Nhập tiêu đề thông báo (Tối đa 100 ký tự)" />
             <div>
               <label style={lab}>Hình ảnh đính kèm (không bắt buộc)</label>
@@ -128,7 +149,7 @@
             </div>
             <div>
               <label style={lab}>Nội dung chi tiết</label>
-              <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={4} placeholder="Nhập nội dung đầy đủ..." style={{ width: '100%', marginTop: 6, padding: '9px 12px', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body)', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+              <RichBox key={form.id || 'new'} value={form.content} onChange={(v) => setForm((x) => ({ ...x, content: v }))} />
             </div>
           </div>}
         </Modal>

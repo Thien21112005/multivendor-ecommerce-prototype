@@ -1,45 +1,49 @@
 /* Mock data for the Lazadee Staff/Admin panel. */
 (function () {
   const NAV = [
-    { id: 'overview', name: 'Tổng quan', icon: 'layout-dashboard', perm: 'dashboard.view' },
-    { id: 'kyc', name: 'Duyệt KYC', icon: 'user-check', badge: 3, perm: 'kyc.review' },
-    { id: 'refunds', name: 'Trả hàng & Hoàn tiền', icon: 'undo-2', badge: 2, perm: 'refund.arbitrate' },
-    { id: 'reviews', name: 'Kiểm duyệt đánh giá', icon: 'star', perm: 'review.moderate' },
-    { id: 'withdrawals', name: 'Xử lý rút tiền', icon: 'hand-coins', badge: 4, perm: 'payout.process' },
-    { id: 'commission', name: 'Cấu hình hoa hồng', icon: 'percent', perm: 'commission.update' },
-    { id: 'ledger', name: 'Sổ cái tài chính', icon: 'scale', perm: 'finance.view' },
-    { id: 'audit', name: 'Nhật ký hệ thống', icon: 'file-text', perm: 'audit.view' },
-    { id: 'catalog', name: 'Danh mục toàn sàn', icon: 'boxes', perm: 'catalog.manage' },
-    { id: 'product_moderation', name: 'Duyệt Sản phẩm', icon: 'clipboard-check', badge: 3, perm: 'catalog.manage' },
-    { id: 'vouchers', name: 'Voucher sàn', icon: 'ticket', badge: 2, perm: 'voucher.manage' },
-    { id: 'notifications', name: 'Thông báo sàn', icon: 'bell', perm: 'notif.manage' },
-    { id: 'rbac', name: 'Phân quyền nhân viên', icon: 'shield-check', perm: 'rbac.manage' },
+    { id: 'overview', name: 'Tổng quan', icon: 'layout-dashboard', perm: 'VIEW_DASHBOARD' },
+    { id: 'kyc', name: 'Duyệt KYC', icon: 'user-check', badge: 3, perm: 'REVIEW_KYC' },
+    { id: 'refunds', name: 'Trả hàng & Hoàn tiền', icon: 'undo-2', badge: 2, perm: 'HANDLE_DISPUTE' },
+    { id: 'reviews', name: 'Kiểm duyệt đánh giá', icon: 'star', perm: 'MODERATE_REVIEW' },
+    { id: 'withdrawals', name: 'Xử lý rút tiền', icon: 'hand-coins', badge: 4, perm: 'PROCESS_PAYOUT' },
+    { id: 'commission', name: 'Cấu hình hoa hồng', icon: 'percent', perm: 'UPDATE_COMMISSION' },
+    { id: 'ledger', name: 'Sổ cái tài chính', icon: 'scale', perm: 'VIEW_FINANCE' },
+    { id: 'audit', name: 'Nhật ký hệ thống', icon: 'file-text', perm: 'VIEW_AUDIT_LOG' },
+    { id: 'catalog', name: 'Danh mục toàn sàn', icon: 'boxes', perm: 'MANAGE_CATALOG' },
+    { id: 'product_moderation', name: 'Duyệt Sản phẩm', icon: 'clipboard-check', badge: 3, perm: 'MANAGE_CATALOG' },
+    { id: 'users', name: 'Người dùng', icon: 'user', perm: 'MANAGE_USER' },
+    { id: 'vouchers', name: 'Voucher sàn', icon: 'ticket', badge: 2, perm: 'MANAGE_VOUCHER' },
+    { id: 'flash_sale', name: 'Flash Sale', icon: 'zap', perm: 'MANAGE_VOUCHER' },
+    { id: 'banners', name: 'Banner trang chủ', icon: 'image', perm: 'MANAGE_VOUCHER' },
+    { id: 'notifications', name: 'Thông báo sàn', icon: 'bell', perm: 'MANAGE_PLATFORM_NOTIFICATION' },
+    { id: 'rbac', name: 'Phân quyền nhân viên', icon: 'shield-check', perm: 'MANAGE_RBAC' },
     { id: 'account', name: 'Tài khoản', icon: 'settings' },
   ];
 
   // Permission catalog (code → mô tả) used by RBAC editor + nav gating.
   const PERMS = [
-    { code: 'dashboard.view', desc: 'Xem trang Tổng quan (Dashboard)' },
-    { code: 'notif.manage', desc: 'Quản lý và gửi thông báo toàn sàn' },
-    { code: 'kyc.review', desc: 'Duyệt / từ chối hồ sơ KYC người bán' },
-    { code: 'refund.arbitrate', desc: 'Xem và phân xử yêu cầu hoàn tiền' },
-    { code: 'payout.process', desc: 'Duyệt yêu cầu rút tiền vendor' },
-    { code: 'catalog.manage', desc: 'Quản lý danh mục sản phẩm toàn sàn' },
-    { code: 'review.moderate', desc: 'Ẩn/hiện đánh giá vi phạm' },
-    { code: 'commission.update', desc: 'Thay đổi tỉ lệ hoa hồng' },
-    { code: 'voucher.manage', desc: 'Tạo & quản lý voucher sàn' },
-    { code: 'rbac.manage', desc: 'Quản lý vai trò & quyền nhân viên' },
-    { code: 'finance.view', desc: 'Xem sổ cái & báo cáo tài chính' },
-    { code: 'audit.view', desc: 'Xem nhật ký hoạt động hệ thống' },
+    { code: 'VIEW_DASHBOARD', desc: 'Xem trang Tổng quan' },
+    { code: 'REVIEW_KYC', desc: 'Duyệt / từ chối hồ sơ KYC người bán' },
+    { code: 'MANAGE_CATALOG', desc: 'Danh mục, thuộc tính, duyệt sản phẩm, đề xuất danh mục' },
+    { code: 'MODERATE_REVIEW', desc: 'Kiểm duyệt đánh giá' },
+    { code: 'HANDLE_DISPUTE', desc: 'Trả hàng & hoàn tiền' },
+    { code: 'PROCESS_PAYOUT', desc: 'Rút tiền, đối soát COD' },
+    { code: 'UPDATE_COMMISSION', desc: 'Cấu hình hoa hồng' },
+    { code: 'VIEW_FINANCE', desc: 'Xem sổ cái tài chính' },
+    { code: 'MANAGE_VOUCHER', desc: 'Voucher sàn, Flash Sale, banner' },
+    { code: 'MANAGE_PLATFORM_NOTIFICATION', desc: 'Thông báo sàn' },
+    { code: 'VIEW_AUDIT_LOG', desc: 'Xem nhật ký hệ thống' },
+    { code: 'MANAGE_USER', desc: 'Khóa / mở khóa khách hàng và shop' },
+    { code: 'MANAGE_RBAC', desc: 'Nhân viên & phân quyền (chỉ Admin)' },
   ];
   const ALL_PERMS = PERMS.map((p) => p.code);
   const PERM_DESC = PERMS.reduce((m, p) => { m[p.code] = p.desc; return m; }, {});
-  // Default permission preset per role.
+  // Default permission preset per staff title (Document_Vi 3.6).
   const ROLE_PERMS = {
-    'Super Admin': ALL_PERMS.slice(),
-    'Moderator': ['kyc.review', 'refund.arbitrate', 'review.moderate', 'catalog.manage', 'notif.manage'],
-    'Finance Staff': ['dashboard.view', 'payout.process', 'commission.update', 'voucher.manage', 'finance.view'],
-    'CS Staff': ['refund.arbitrate', 'review.moderate'],
+    'Admin': ALL_PERMS.slice(),
+    'Moderator': ['VIEW_DASHBOARD', 'REVIEW_KYC', 'MANAGE_CATALOG', 'MODERATE_REVIEW'],
+    'CS Specialist': ['VIEW_DASHBOARD', 'MODERATE_REVIEW', 'HANDLE_DISPUTE'],
+    'Finance Officer': ['VIEW_DASHBOARD', 'PROCESS_PAYOUT', 'UPDATE_COMMISSION', 'VIEW_FINANCE', 'MANAGE_VOUCHER'],
   };
 
   const KYC = [
@@ -83,16 +87,73 @@
   ];
 
   const STAFF = [
-    { name: 'Đặng Hải Yến', email: 'yen.dh@lazadee.vn', role: 'Super Admin', perms: ['all'], active: true },
-    { name: 'Ngô Tấn Phát', email: 'phat.nt@lazadee.vn', role: 'KYC Reviewer', perms: ['kyc.review', 'catalog.read'], active: true },
-    { name: 'Trịnh Mỹ Linh', email: 'linh.tm@lazadee.vn', role: 'Finance', perms: ['payout.process', 'ledger.read', 'commission.config'], active: true },
-    { name: 'Vương Đại Nghĩa', email: 'nghia.vd@lazadee.vn', role: 'Moderator', perms: ['review.moderate', 'refund.arbitrate'], active: false },
+    { name: 'Đặng Hải Yến', email: 'yen.dh@lazadee.vn', role: 'Admin', perms: ALL_PERMS.slice(), active: true },
+    { name: 'Ngô Tấn Phát', email: 'phat.nt@lazadee.vn', role: 'Moderator', perms: ROLE_PERMS['Moderator'].slice(), active: true },
+    { name: 'Trịnh Mỹ Linh', email: 'linh.tm@lazadee.vn', role: 'Finance Officer', perms: ROLE_PERMS['Finance Officer'].slice(), active: true },
+    { name: 'Vương Đại Nghĩa', email: 'nghia.vd@lazadee.vn', role: 'CS Specialist', perms: ROLE_PERMS['CS Specialist'].slice(), active: false },
+    { name: 'Hồ Thanh Trúc', email: 'truc.ht@lazadee.vn', role: 'CS Specialist', perms: ROLE_PERMS['CS Specialist'].slice(), active: false, pending: true },
   ];
 
-  const ROLES = ['Super Admin', 'KYC Reviewer', 'Finance', 'Moderator', 'Support'];
+  const ROLES = ['Admin', 'Moderator', 'CS Specialist', 'Finance Officer'];
 
   // The signed-in admin (demo). Drives nav gating + role preview.
-  const CURRENT_USER = { name: 'Đặng Hải Yến', email: 'yen.dh@lazadee.vn', role: 'Super Admin', perms: ALL_PERMS.slice() };
+  const CURRENT_USER = { name: 'Đặng Hải Yến', email: 'yen.dh@lazadee.vn', role: 'Admin', perms: ALL_PERMS.slice() };
+
+  const USERS = [
+    { id: 'U-20411', name: 'Trần Thị Mai', email: 'mai.tran@gmail.com', phone: '0901 234 567', role: 'CUSTOMER', orders: 48, warnings: 0, status: 'ACTIVE' },
+    { id: 'U-20398', name: 'Nguyễn Văn An', email: 'an.nguyen@gmail.com', phone: '0912 887 001', role: 'CUSTOMER', orders: 12, warnings: 0, status: 'ACTIVE' },
+    { id: 'U-20377', name: 'Lê Hoàng Phúc', email: 'phuc.le@yahoo.com', phone: '0978 112 340', role: 'CUSTOMER', orders: 31, warnings: 3, status: 'SUSPENDED', reason: 'Hoàn hàng bất thường nhiều lần', until: '7 ngày' },
+    { id: 'U-10021', name: 'Đặng Quốc Huy', shop: 'TechZone Official', email: 'shop@techzone.vn', phone: '0912 345 678', role: 'VENDOR', orders: 18420, warnings: 0, status: 'ACTIVE' },
+    { id: 'U-10044', name: 'Phạm Thị Lan', shop: 'Boutique Sài Gòn', email: 'lan@boutiquesg.vn', phone: '0933 450 112', role: 'VENDOR', orders: 15280, warnings: 1, status: 'ACTIVE' },
+    { id: 'U-10087', name: 'Lý Văn Tèo', shop: 'Cheap Electronics', email: 'teo@cheapelec.vn', phone: '0966 220 991', role: 'VENDOR', orders: 214, warnings: 5, status: 'LOCKED', reason: 'Người bán gian lận hàng giả', until: null },
+  ];
+
+  const BANNER_POSITIONS = [
+    { id: 'HOME_TOP_CAROUSEL', label: 'Đầu trang chủ' },
+    { id: 'HOME_MIDDLE', label: 'Giữa trang chủ' },
+    { id: 'CATEGORY_TOP', label: 'Đầu trang danh mục' },
+    { id: 'FLASH_SALE_TOP', label: 'Khu Flash Sale' },
+    { id: 'POPUP', label: 'Popup' },
+  ];
+  const BANNERS = [
+    { id: 'BN-101', title: 'Giảm đến 60% toàn sàn', image: '../../assets/img/banner-sale.jpg', link: '/?screen=discover', position: 'HOME_TOP_CAROUSEL', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 182400, clicks: 9860 },
+    { id: 'BN-102', title: 'Công nghệ chính hãng', image: '../../assets/img/banner-tech.jpg', link: '/?screen=category&cat=Điện tử', position: 'HOME_MIDDLE', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 96300, clicks: 3120 },
+    { id: 'BN-103', title: 'Làm đẹp cùng Beauty Box', image: '../../assets/img/cosmetics.jpg', link: '/?screen=shop&shop=beauty', position: 'CATEGORY_TOP', category: 'Làm đẹp', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 41200, clicks: 1980 },
+    { id: 'BN-104', title: 'Tết 2026 giảm sâu', image: '../../assets/img/banner-sale.jpg', link: '/?screen=discover', position: 'POPUP', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2026-02-15', on: true, views: 310000, clicks: 12400 },
+  ];
+
+  const FLASH_CAMPAIGNS = [
+    { id: 'FS-2103', name: 'FLASH SALE 12.12', startsAt: '12/12/2026 00:00', endsAt: '12/12/2026 02:00', max: 20, deadline: '10/12/2026', status: 'DRAFT', items: [
+      { sku: 'ANC5-BLK', name: 'Tai nghe ANC Pro 5', shop: 'TechZone Official', price: 389000, flashPrice: 299000, stock: 50, status: 'PENDING' },
+      { sku: 'SRM-30', name: 'Serum Vitamin C 30ml', shop: 'Beauty Box', price: 178000, flashPrice: 129000, stock: 120, status: 'APPROVED' },
+      { sku: 'TEE-M', name: 'Áo thun cotton basic', shop: 'Boutique Sài Gòn', price: 89000, flashPrice: 82000, stock: 200, status: 'PENDING' },
+    ] },
+    { id: 'FS-2102', name: 'Khung giờ vàng 20h', startsAt: '20/06/2026 20:00', endsAt: '20/06/2026 22:00', max: 20, deadline: '18/06/2026', status: 'ACTIVE', items: [
+      { sku: 'MUG-WHT', name: 'Cốc sứ tối giản 350ml', shop: 'Home & Living', price: 59000, flashPrice: 39000, stock: 80, status: 'APPROVED' },
+    ] },
+    { id: 'FS-2101', name: 'Sale đầu tháng 6', startsAt: '01/06/2026 00:00', endsAt: '01/06/2026 03:00', max: 20, deadline: '28/05/2026', status: 'ENDED', items: [] },
+  ];
+
+  const CATEGORY_ATTRS = {
+    'dien-tu': [
+      { code: 'warranty', name: 'Bảo hành', type: 'ENUM', values: ['6 tháng', '12 tháng', '24 tháng'], unit: '', required: true, filterable: true, axis: false, on: true },
+      { code: 'color', name: 'Màu sắc', type: 'MULTI_ENUM', values: ['Đen', 'Trắng', 'Xanh'], unit: '', required: false, filterable: true, axis: true, on: true },
+      { code: 'battery', name: 'Thời lượng pin', type: 'NUMBER', values: [], unit: 'giờ', required: false, filterable: false, axis: false, on: true },
+    ],
+    'thoi-trang': [
+      { code: 'material', name: 'Chất liệu', type: 'TEXT', values: [], unit: '', required: true, filterable: true, axis: false, on: true },
+      { code: 'size', name: 'Kích cỡ', type: 'ENUM', values: ['S', 'M', 'L', 'XL'], unit: '', required: true, filterable: true, axis: true, on: true },
+    ],
+    'lam-dep': [{ code: 'expiry', name: 'Hạn sử dụng', type: 'DATE', values: [], unit: '', required: true, filterable: false, axis: false, on: true }],
+    'nha-cua': [], 'me-be': [], 'voucher': [],
+  };
+
+  const downloadCsv = (name, rows) => {
+    const text = rows.map((r) => r.map((v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   // Platform-wide vouchers (sàn-sponsored). type: percent | fixed | freeship.
   const PLATFORM_VOUCHERS = [
@@ -104,18 +165,18 @@
 
   // Append-only audit trail of sensitive actions (immutable). Newest first.
   const AUDIT = [
-    { ts: '22/06/2026 09:42:11', actor: 'phat.nt@lazadee.vn', role: 'KYC Reviewer', action: 'KYC_APPROVED', cat: 'kyc', target: 'KYC-1037 · TravelGear', ip: '113.161.40.12', result: 'OK' },
+    { ts: '22/06/2026 09:42:11', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_APPROVED', cat: 'kyc', target: 'KYC-1037 · TravelGear', ip: '113.161.40.12', result: 'OK' },
     { ts: '22/06/2026 09:15:03', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'ORD-2412-0039 · 1.245.000₫', ip: '10.0.2.7', result: 'OK' },
-    { ts: '22/06/2026 08:51:46', actor: 'linh.tm@lazadee.vn', role: 'Finance', action: 'PAYOUT_APPROVED', cat: 'finance', target: 'PAYOUT-0012 · 5.000.000₫', ip: '113.161.40.88', result: 'OK' },
+    { ts: '22/06/2026 08:51:46', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'PAYOUT_APPROVED', cat: 'finance', target: 'PAYOUT-0012 · 5.000.000₫', ip: '113.161.40.88', result: 'OK' },
     { ts: '22/06/2026 08:33:20', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'yen.dh@lazadee.vn (sai mật khẩu ×3)', ip: '45.119.82.201', result: 'DENIED' },
     { ts: '21/06/2026 22:07:55', actor: 'nghia.vd@lazadee.vn', role: 'Moderator', action: 'REVIEW_HIDDEN', cat: 'moderation', target: 'RV-9910 · ngôn từ phản cảm', ip: '171.244.10.5', result: 'OK' },
-    { ts: '21/06/2026 18:46:12', actor: 'linh.tm@lazadee.vn', role: 'Finance', action: 'COMMISSION_UPDATED', cat: 'config', target: 'Làm đẹp: 9% → 10%', ip: '113.161.40.88', result: 'OK' },
+    { ts: '21/06/2026 18:46:12', actor: 'linh.tm@lazadee.vn', role: 'Finance Officer', action: 'COMMISSION_UPDATED', cat: 'config', target: 'Làm đẹp: 9% → 10%', ip: '113.161.40.88', result: 'OK' },
     { ts: '21/06/2026 16:30:41', actor: 'system', role: 'System', action: 'REFUND_PROCESSED', cat: 'finance', target: 'RFN-0229 · 389.000₫', ip: '10.0.2.7', result: 'OK' },
-    { ts: '21/06/2026 14:02:09', actor: 'yen.dh@lazadee.vn', role: 'Super Admin', action: 'RBAC_ROLE_CHANGED', cat: 'security', target: 'phat.nt → KYC Reviewer', ip: '113.161.40.12', result: 'OK' },
-    { ts: '20/06/2026 10:30:18', actor: 'yen.dh@lazadee.vn', role: 'Super Admin', action: 'PERMISSION_REVOKED', cat: 'security', target: 'nghia.vd — thu hồi quyền refund.arbitrate', ip: '113.161.40.12', result: 'OK' },
+    { ts: '21/06/2026 14:02:09', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'RBAC_ROLE_CHANGED', cat: 'security', target: 'phat.nt → KYC Reviewer', ip: '113.161.40.12', result: 'OK' },
+    { ts: '20/06/2026 10:30:18', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'PERMISSION_REVOKED', cat: 'security', target: 'nghia.vd — thu hồi quyền refund.arbitrate', ip: '113.161.40.12', result: 'OK' },
     { ts: '21/06/2026 11:18:33', actor: 'unknown', role: '—', action: 'LOGIN_FAILED', cat: 'auth', target: 'admin@lazadee.vn (tài khoản không tồn tại)', ip: '193.32.126.44', result: 'DENIED' },
-    { ts: '21/06/2026 09:00:00', actor: 'yen.dh@lazadee.vn', role: 'Super Admin', action: 'STAFF_INVITED', cat: 'security', target: 'support1@lazadee.vn', ip: '113.161.40.12', result: 'OK' },
-    { ts: '20/06/2026 20:44:17', actor: 'phat.nt@lazadee.vn', role: 'KYC Reviewer', action: 'KYC_REJECTED', cat: 'kyc', target: 'KYC-1033 · ảnh giấy tờ mờ', ip: '171.244.10.5', result: 'OK' },
+    { ts: '21/06/2026 09:00:00', actor: 'yen.dh@lazadee.vn', role: 'Admin', action: 'STAFF_INVITED', cat: 'security', target: 'support1@lazadee.vn', ip: '113.161.40.12', result: 'OK' },
+    { ts: '20/06/2026 20:44:17', actor: 'phat.nt@lazadee.vn', role: 'Moderator', action: 'KYC_REJECTED', cat: 'kyc', target: 'KYC-1033 · ảnh giấy tờ mờ', ip: '171.244.10.5', result: 'OK' },
     { ts: '20/06/2026 15:12:50', actor: 'system', role: 'System', action: 'ESCROW_RELEASED', cat: 'finance', target: 'ORD-2412-0033 · 536.000₫', ip: '10.0.2.7', result: 'OK' },
   ];
 
@@ -164,5 +225,5 @@
     { id: 'an3', title: 'Yêu cầu rút tiền mới', body: 'TechZone Official yêu cầu rút 5.000.000₫.', date: '07/06/2026 16:40', unread: false, icon: 'hand-coins', nav: 'withdrawals' },
   ];
 
-  window.LZA = { DASHBOARD, MODERATION, MODERATORS, PLATFORM_NOTIFS, NOTIFS, NAV, KYC, REFUNDS, REVIEWS, WITHDRAWALS, LEDGER, STAFF, ROLES, AUDIT, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, PLATFORM_VOUCHERS };
+  window.LZA = { USERS, BANNERS, BANNER_POSITIONS, FLASH_CAMPAIGNS, CATEGORY_ATTRS, downloadCsv, DASHBOARD, MODERATION, MODERATORS, PLATFORM_NOTIFS, NOTIFS, NAV, KYC, REFUNDS, REVIEWS, WITHDRAWALS, LEDGER, STAFF, ROLES, AUDIT, PERMS, ALL_PERMS, PERM_DESC, ROLE_PERMS, CURRENT_USER, PLATFORM_VOUCHERS };
 })();

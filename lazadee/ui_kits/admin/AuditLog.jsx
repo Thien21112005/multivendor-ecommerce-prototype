@@ -5,7 +5,7 @@
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, Select, Input } = DS;
-  const { AUDIT } = window.LZA;
+  const { AUDIT, downloadCsv } = window.LZA;
 
   const CATS = [
     { id: 'all', label: 'Tất cả' },
@@ -48,7 +48,7 @@
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
           <Badge variant="neutral"><Icon name="lock" size={11} /> Append-only · bất biến</Badge>
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Nhật ký ghi nhận mọi hành động nhạy cảm. Bản ghi không thể sửa hoặc xoá — phục vụ điều tra &amp; tuân thủ.</span>
-          <Button variant="secondary" size="sm" iconLeft="download" style={{ marginLeft: 'auto' }}>Xuất nhật ký</Button>
+          <Button variant="secondary" size="sm" iconLeft="download" style={{ marginLeft: 'auto' }} onClick={() => downloadCsv('nhat-ky-he-thong.csv', [['Thời gian', 'User', 'Vai trò', 'Hành động', 'Chi tiết', 'IP', 'Kết quả'], ...list.map((r) => [r.ts, r.actor, r.role, r.action, r.target, r.ip, r.result])])}>Xuất nhật ký</Button>
         </div>
 
         {/* filter bar */}
@@ -79,6 +79,7 @@
           <table style={{ width: '100%', minWidth: 980, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
             <thead><tr style={hrow}><th style={th}>Thời gian</th><th style={th}>User / Vai trò</th><th style={th}>Hành động</th><th style={th}>Chi tiết</th><th style={th}>IP</th><th style={th}>Kết quả</th></tr></thead>
             <tbody>
+              {list.length === 0 && <tr><td colSpan="8" style={{ padding: 36, textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có bản ghi nào khớp bộ lọc.</td></tr>}
               {list.map((r, i) => {
                 const tone = CAT_TONE[r.cat] || CAT_TONE.config;
                 return (

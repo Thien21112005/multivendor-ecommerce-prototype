@@ -4,7 +4,7 @@
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Avatar, Badge } = DS;
   const { NAV, CURRENT_USER, ROLE_PERMS } = window.LZA;
-  const PREVIEW_ROLES = ['Super Admin', 'Moderator', 'Finance Staff', 'CS Staff'];
+  const PREVIEW_ROLES = ['Admin', 'Moderator', 'CS Specialist', 'Finance Officer'];
 
   function AdminBell({ onNav }) {
     const [open, setOpen] = React.useState(false);
@@ -107,7 +107,7 @@
                   <div>
                     <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}><Icon name="lock" size={42} /></div>
                     <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 10 }}>Bạn không có quyền truy cập</h2>
-                    <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', maxWidth: 420, margin: '0 auto' }}>Màn “{activeNav.name}” yêu cầu quyền <span className="code" style={{ color: 'var(--text-body)' }}>{activeNav.perm}</span>. Liên hệ Super Admin để được cấp quyền.</p>
+                    <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', maxWidth: 420, margin: '0 auto' }}>Màn “{activeNav.name}” yêu cầu quyền <span className="code" style={{ color: 'var(--text-body)' }}>{activeNav.perm}</span>. Liên hệ Admin để được cấp quyền.</p>
                   </div>
                 </div>
               : children}

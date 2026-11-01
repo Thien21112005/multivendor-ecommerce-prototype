@@ -3,8 +3,8 @@
    and paging. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Avatar, Button } = DS;
-  const { DASHBOARD } = window.LZA;
+  const { Icon, Avatar, Button, Select } = DS;
+  const { DASHBOARD, downloadCsv } = window.LZA;
   const vnd = (n) => n.toLocaleString('vi-VN') + '₫';
 
   function MonthPick({ value, onChange }) {
@@ -72,8 +72,11 @@
     const [range, setRange] = React.useState('week');
     const [q, setQ] = React.useState('');
     const [page, setPage] = React.useState(1);
+    const [cat, setCat] = React.useState('Tất cả ngành hàng');
     const D = DASHBOARD;
-    const vendors = D.vendors.filter((v) => v.name.toLowerCase().includes(q.trim().toLowerCase()));
+    const cats = ['Tất cả ngành hàng', ...Array.from(new Set(D.vendors.map((v) => v.cat)))];
+    const vendors = D.vendors.filter((v) => cat === 'Tất cả ngành hàng' || v.cat === cat).filter((v) => v.name.toLowerCase().includes(q.trim().toLowerCase()));
+    const exportCsv = () => downloadCsv('tong-quan-doanh-thu.csv', [['Vendor', 'Ngành hàng', 'Sản phẩm bán ra', 'Đánh giá', 'Tăng trưởng %', 'Lợi nhuận'], ...vendors.map((v) => [v.name, v.cat, v.sold, v.rating, v.growth, v.rev])]);
     const pages = Math.max(1, Math.ceil(vendors.length / PAGE));
     const shown = vendors.slice((page - 1) * PAGE, page * PAGE);
     return (
@@ -92,6 +95,7 @@
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Biểu đồ tăng trưởng</span>
+            <Button size="sm" variant="ghost" iconLeft="download" style={{ marginLeft: 12 }} onClick={exportCsv}>Xuất CSV</Button>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 4, background: 'var(--gray-50)', padding: 4, borderRadius: 6 }}>
               {[['week', 'Tuần này'], ['month', 'Tháng 6'], ['year', 'Năm 2026']].map(([id, label]) => <button key={id} onClick={() => setRange(id)} style={{ border: 0, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', font: '500 12px var(--font-sans)', background: range === id ? '#fff' : 'transparent', color: range === id ? 'var(--text-strong)' : 'var(--text-muted)', boxShadow: range === id ? 'var(--shadow-sm)' : 'none' }}>{label}</button>)}
             </div>
@@ -102,7 +106,8 @@
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
             <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Vendor tiềm năng bứt phá</span>
-            <div style={{ position: 'relative', marginLeft: 'auto', width: 240 }}>
+            <div style={{ marginLeft: 'auto', width: 190 }}><Select value={cat} onChange={(e) => { setCat(e.target.value); setPage(1); }}>{cats.map((x) => <option key={x}>{x}</option>)}</Select></div>
+            <div style={{ position: 'relative', marginLeft: 10, width: 220 }}>
               <span style={{ position: 'absolute', left: 10, top: 10, color: 'var(--text-subtle)', display: 'flex' }}><Icon name="search" size={16} /></span>
               <input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Nhập tên shop" style={{ width: '100%', height: 36, paddingLeft: 32, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none', boxSizing: 'border-box' }} />
             </div>

@@ -48,6 +48,7 @@
 
   function KYCReview() {
     const [viewer, setViewer] = React.useState(null);
+    const [shopRate, setShopRate] = React.useState({});
     const [reasonNote, setReasonNote] = React.useState('');
     const [tab, setTab] = React.useState('PENDING');
     const list = KYC.filter((k) => tab === 'ALL' || k.status === tab);
@@ -110,6 +111,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ font: 'var(--weight-bold) var(--text-xl) var(--font-sans)', color: 'var(--text-strong)' }}>{sel.shop}</span>
                 {(() => { const [v, l] = RISK[sel.risk]; return <Badge variant={v}>{l}</Badge>; })()}
+                {sel.id === 'KYC-1041' && <Badge variant="outline" icon="eye">Hậu kiểm ngẫu nhiên</Badge>}
               </div>
               <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 4 }}>Chủ sở hữu: <b style={{ color: 'var(--text-body)' }}>{sel.owner}</b> · Loại hình: {sel.type} · Nộp lúc {sel.submitted}</div>
               <div style={{ marginTop: 8 }}><StatusBadge status={status(sel)} /></div>
@@ -161,6 +163,10 @@
                   <div>
                     <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 8 }}>Dữ liệu kê khai</div>
                     {[['Loại hình', sel.type], ['Số CCCD (kê khai)', '0790•••••' + sel.id.slice(-3)], ['Người đại diện', sel.owner]].map(([k, v]) => <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '3px 0', font: 'var(--type-body-sm)' }}><span style={{ color: 'var(--text-muted)' }}>{k}</span><span style={{ color: 'var(--text-body)', fontWeight: 500 }}>{v}</span></div>)}
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '6px 0 0', font: 'var(--type-body-sm)' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Hoa hồng riêng của shop</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><input aria-label="Hoa hồng riêng của shop" value={shopRate[sel.id] || ''} onChange={(e) => setShopRate((m) => ({ ...m, [sel.id]: e.target.value.replace(/\D/g, '') }))} placeholder="Theo ngành" style={{ width: 84, height: 30, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '0 8px', font: 'var(--type-body-sm)', outline: 'none', textAlign: 'right' }} />%</span>
+                    </label>
                   </div>
                 </div>
                 {o.errors.length > 0 && <div style={{ marginTop: 12 }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)', marginBottom: 4 }}>Lỗi phát hiện</div>{o.errors.map((e) => <div key={e} style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--type-body-sm)', color: 'var(--text-body)', padding: '2px 0' }}><Icon name="triangle-alert" size={14} style={{ color: 'var(--red-600)' }} />{e}</div>)}</div>}
