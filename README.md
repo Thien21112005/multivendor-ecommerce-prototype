@@ -1,6 +1,6 @@
 # Lazadee Platform Prototype — Unified Interactive Marketplace Shell
 
-> **Repository:** `lazadee-prototype`  
+> **Repository:** `multivendor-ecommerce-prototype`  
 > **Platform:** Lazadee Multi-Vendor E-Commerce Platform  
 > **Language Support:** [Tiếng Việt](#tiếng-việt) | [English](#english)
 
@@ -188,13 +188,10 @@ prototype/
 ## 6. Hướng dẫn cài đặt & Trải nghiệm
 
 ### Mở trực tiếp trên Trình duyệt:
-- Nhấp đúp vào `prototype/index.html` trên máy tính.
+- Trình duyệt chặn nạp file JSX qua `file://`, nên hãy chạy bằng máy chủ tĩnh như bên dưới.
 
 ### Chạy bằng máy chủ tĩnh Python:
 ```bash
-# Di chuyển vào thư mục prototype
-cd prototype
-
 # Khởi chạy server tại cổng 8000
 python -m http.server 8000
 ```
@@ -207,6 +204,21 @@ Mở trình duyệt và truy cập: `http://localhost:8000`
 - Đăng nhập & OTP (Auth): `http://localhost:8000/#auth`
 
 ---
+---
+
+## 7. Dữ liệu mock & các màn hình bổ sung
+
+Toàn bộ prototype chạy bằng dữ liệu mock ngay trên trình duyệt, không cần backend. Dữ liệu nằm trong `data.jsx` của từng UI kit (`pages-data.js` cho trang chính sách).
+
+| Phân hệ | Bổ sung |
+| :--- | :--- |
+| Storefront | Hộp chọn voucher (nhập mã hoặc chọn từ danh sách, voucher chưa đủ điều kiện hiện lý do), voucher theo từng shop, mini-cart, xóa nhiều sản phẩm, đổi phân loại trong giỏ, biên nhận theo phiên, trang danh mục, 28 trang chính sách, nhóm đơn cùng phiên, điểm danh Xu, lịch sử và chi tiết voucher, xóa tài khoản |
+| Seller Center | Chuông thông báo, Tổng quan 8 chỉ số, đơn theo trạng thái GHN, giấy tờ chứng thực sản phẩm, selfie KYC từ camera, địa chỉ lấy hàng, tin nhắn tự động, tài khoản nhận tiền, Danh mục toàn sàn |
+| Admin Console | Tổng quan tài chính, Duyệt Sản phẩm (phân tích AI, hồ sơ pháp lý, phân công nhân viên), Thông báo sàn, trình xem tài liệu KYC, kết quả xác thực tự động, tạo voucher theo danh mục và loại trừ, tìm / khóa / xóa nhân viên |
+| Auth | Đăng nhập bằng mật khẩu hoặc OTP, kiểm tra trùng email khi đăng ký |
+
+Tài khoản demo: mật khẩu `Lazadee@123`, mã OTP `123456`. Thêm `?guest=1` vào URL Storefront để xem trạng thái chưa đăng nhập.
+
 ---
 
 # English
@@ -377,9 +389,6 @@ prototype/
 
 ### Static Python Server:
 ```bash
-# Navigate to prototype root
-cd prototype
-
 # Launch server on port 8000
 python -m http.server 8000
 ```
@@ -390,3 +399,11 @@ Open `http://localhost:8000` in your web browser.
 - Merchant Center: `http://localhost:8000/#vendor`
 - Admin Console: `http://localhost:8000/#admin`
 - Authentication: `http://localhost:8000/#auth`
+
+---
+
+## 7. Mock data & additional screens
+
+The whole prototype runs on in-browser mock data with no backend. Data lives in each UI kit's `data.jsx` (`pages-data.js` for policy pages).
+
+Demo credentials: password `Lazadee@123`, OTP `123456`. Add `?guest=1` to the Storefront URL to see the signed-out state.
