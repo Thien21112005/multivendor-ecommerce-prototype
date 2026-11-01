@@ -12,7 +12,7 @@
     .static-content-html strong { font-weight: var(--weight-bold); color: var(--text-strong); }
     .static-content-html a { color: var(--color-primary); text-decoration: none; font-weight: var(--weight-semibold); }
     .static-content-html a:hover { text-decoration: underline; }
-    .static-content-html .alert-box { background: var(--amber-50); border-left: 4px solid var(--amber-500, #f59e0b); padding: 20px 24px; border-radius: 0 8px 8px 0; margin: 32px 0; }
+    .static-content-html .alert-box { background: var(--amber-50); border: 1px solid var(--gold-400); padding: 20px 24px; border-radius: 12px; margin: 32px 0; }
     .static-content-html .alert-box h4 { color: var(--amber-600); margin: 0 0 8px; font-size: 16px; }
     .static-content-html .alert-box p { color: var(--text-body); margin: 0; }
     .static-content-html .info-box { background: var(--blue-50); border: 1px solid var(--blue-200); padding: 24px; border-radius: 12px; margin: 32px 0; }

@@ -18,7 +18,7 @@
   const TABS = { PENDING: ['PENDING_APPROVAL', 'FLAGGED', 'REQUEUED'], PUBLISHED: ['PUBLISHED'], REJECTED: ['REJECTED'] };
 
   function Toast({ text }) {
-    return text ? <div role="status" style={{ position: 'fixed', top: 24, right: 24, zIndex: 1000, display: 'flex', alignItems: 'center', gap: 10, background: '#fff', borderLeft: '4px solid var(--blue-500)', padding: '12px 18px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)', font: 'var(--weight-medium) 14px var(--font-sans)', color: 'var(--text-strong)' }}><Icon name="info" size={18} style={{ color: 'var(--blue-500)' }} />{text}</div> : null;
+    return text ? <div role="status" style={{ position: 'fixed', top: 24, right: 24, zIndex: 1000, display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid var(--border-default)', padding: '12px 18px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)', font: 'var(--weight-medium) 14px var(--font-sans)', color: 'var(--text-strong)' }}><Icon name="info" size={18} style={{ color: 'var(--blue-500)' }} />{text}</div> : null;
   }
 
   function Detail({ p, onBack, onDecide }) {
