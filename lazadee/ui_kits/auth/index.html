@@ -66,13 +66,13 @@ function OTPInput({ value, onChange, locked }) {
   );
 }
 
-function SocialButton({ brand }) {
+function SocialButton({ brand, onPick }) {
   const cfg = {
     google: { label: 'Google', svg: <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg> },
     apple: { label: 'Apple', svg: <svg width="17" height="18" viewBox="0 0 17 18"><path fill="#000" d="M14.07 13.9c-.26.6-.57 1.16-.93 1.67-.5.7-.9 1.18-1.22 1.45-.49.45-1.02.68-1.59.7-.4 0-.9-.12-1.46-.35-.57-.23-1.1-.34-1.58-.34-.5 0-1.04.11-1.63.34-.59.24-1.06.36-1.42.37-.55.02-1.09-.22-1.62-.71-.34-.29-.76-.79-1.27-1.5-.54-.76-.99-1.64-1.34-2.64C.92 13.05.7 11.98.7 10.95c0-1.18.26-2.2.77-3.05a4.5 4.5 0 0 1 1.6-1.62 4.32 4.32 0 0 1 2.17-.61c.42 0 .98.13 1.67.39.69.26 1.13.39 1.32.39.14 0 .63-.15 1.46-.46.78-.28 1.45-.4 1.99-.36 1.47.12 2.58.7 3.31 1.75-1.32.8-1.97 1.92-1.96 3.35.01 1.12.42 2.05 1.22 2.79.36.34.77.61 1.22.8-.1.29-.2.56-.32.83zM11.6 1.4c0 .88-.32 1.7-.96 2.46-.78.9-1.72 1.42-2.74 1.34a2.76 2.76 0 0 1-.02-.33c0-.84.37-1.74 1.02-2.48.33-.37.74-.68 1.24-.93.5-.24.97-.38 1.42-.4.02.11.04.23.04.34z"/></svg> },
   }[brand];
   return (
-    <button style={{ flex: 1, height: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, border: '1.5px solid var(--border-default)', background: '#fff', borderRadius: 'var(--radius-md)', cursor: 'pointer', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>
+    <button onClick={() => onPick(cfg.label)} style={{ flex: 1, height: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9, border: '1.5px solid var(--border-default)', background: '#fff', borderRadius: 'var(--radius-md)', cursor: 'pointer', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>
       {cfg.svg}{cfg.label}
     </button>
   );
@@ -93,7 +93,18 @@ function PasswordInput({ label, value, onChange, error, placeholder }) {
   );
 }
 
+function SsoDialog({ provider, onClose }) {
+  const { Modal } = window.LazadeeDesignSystem_0477b7;
+  return (
+    <Modal open={!!provider} onClose={onClose} width={400} title={'Tiếp tục với ' + provider}
+      footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={() => { window.location.href = '../storefront/index.html'; }}>Tiếp tục</Button></>}>
+      <p style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5, margin: 0 }}>Mô phỏng cửa sổ đăng nhập {provider}. Lazadee sẽ nhận tên, email và ảnh đại diện từ tài khoản <b>mai.tran@gmail.com</b>. Email chưa có tài khoản thì hệ thống tự tạo tài khoản mới.</p>
+    </Modal>
+  );
+}
+
 function Register({ onDone, onLogin }) {
+  const [sso, setSso] = React.useState(null);
   const [f, setF] = React.useState({ name: '', email: '', phone: '', pw: '', pw2: '', agree: false });
   const [err, setErr] = React.useState({});
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
@@ -106,7 +117,7 @@ function Register({ onDone, onLogin }) {
     const e = {};
     if (!f.name.trim()) e.name = 'Nhập họ và tên';
     if (!/.+@.+\..+/.test(f.email)) e.email = 'Email không đúng định dạng';
-    else if (f.email.toLowerCase() === 'mai.tran@gmail.com') e.email = 'Email đã tồn tại';
+    else if (f.email.toLowerCase() === 'mai.tran@gmail.com') e.email = 'Email này đã có tài khoản. Hãy đăng nhập hoặc dùng Quên mật khẩu.';
     if (!/^0\d{8,10}$/.test(f.phone.replace(/\s/g, ''))) e.phone = 'Số điện thoại không hợp lệ';
     if (f.pw.length < 8) e.pw = 'Mật khẩu tối thiểu 8 ký tự';
     if (f.pw2 !== f.pw) e.pw2 = 'Mật khẩu nhập lại không khớp';
@@ -143,9 +154,10 @@ function Register({ onDone, onLogin }) {
         <span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} /><span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Hoặc đăng ký với</span><span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} />
       </div>
       <div style={{ display: 'flex', gap: 10 }}>
-        <SocialButton brand="google" />
-        <SocialButton brand="apple" />
+        <SocialButton brand="google" onPick={setSso} />
+        <SocialButton brand="apple" onPick={setSso} />
       </div>
+      <SsoDialog provider={sso} onClose={() => setSso(null)} />
       <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 4 }}>Đã có tài khoản? <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={onLogin}>Đăng nhập</a></p>
     </div>
   );
@@ -241,6 +253,7 @@ function Auth() {
   const [pwFails, setPwFails] = React.useState(0);
   const [otpFor, setOtpFor] = React.useState('login'); // login | register
   const [notice, setNotice] = React.useState(null); // { title, text, ok }
+  const [sso, setSso] = React.useState(null);
 
   // mock: Lazadee@123 logs in; 5 wrong passwords lock the account
   const loginPassword = () => {
@@ -249,7 +262,7 @@ function Auth() {
     const n = pwFails + 1;
     setPwFails(n); setPw('');
     if (n >= 5) { setStep('locked'); return; }
-    setPwError('Email hoặc mật khẩu không đúng. Còn ' + (5 - n) + ' lần thử.');
+    setPwError('Email hoặc mật khẩu không chính xác. Còn ' + (5 - n) + ' lần thử.');
   };
 
   React.useEffect(() => {
@@ -307,9 +320,10 @@ function Auth() {
           <span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} /><span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>HOẶC</span><span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} />
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <SocialButton brand="google" />
-          <SocialButton brand="apple" />
+          <SocialButton brand="google" onPick={setSso} />
+          <SocialButton brand="apple" onPick={setSso} />
         </div>
+        <SsoDialog provider={sso} onClose={() => setSso(null)} />
         <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 28 }}>Chưa có tài khoản? <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('register')}>Đăng ký người mua</a> · <a href="../storefront/index.html?screen=seller" style={{ color: 'var(--orange-600)', cursor: 'pointer' }}>Mở shop</a></p>
       </div>
     </Panel>
