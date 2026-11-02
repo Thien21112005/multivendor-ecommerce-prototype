@@ -74,7 +74,7 @@
           {lines.length === 0
             ? <div style={{ padding: '56px 20px', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Chưa có bảng kê. Tải tệp CSV của hãng với 3 cột: mã vận đơn, số tiền, phí thu hộ.</div>
             : <>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '12px 20px', background: totalOk ? 'var(--mint-50)' : 'var(--red-50, #FDECEA)', font: 'var(--type-body-sm)', color: 'var(--text-body)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '12px 20px', background: totalOk ? 'var(--mint-50)' : 'var(--red-50)', font: 'var(--type-body-sm)', color: 'var(--text-body)', flexWrap: 'wrap' }}>
                 <Icon name={totalOk ? 'circle-check' : 'triangle-alert'} size={17} style={{ color: totalOk ? 'var(--mint-600)' : 'var(--red-600)', flex: 'none' }} />
                 <span>{cur.file}: tổng {fmt(gross)} − phí {fmt(fees)} = <b>{fmt(gross - fees)}</b>{totalOk ? ', khớp số tiền đã nhận.' : ', lệch ' + fmt(Math.abs(gross - fees - cur.received)) + ' so với số tiền đã nhận.'}</span>
               </div>

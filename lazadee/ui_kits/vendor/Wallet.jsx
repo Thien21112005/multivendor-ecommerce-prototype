@@ -27,7 +27,7 @@
           ? <><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={next}>Tiếp tục</Button></>
           : <><Button variant="ghost" onClick={() => setStep('form')}>Quay lại</Button><Button iconLeft="check" disabled={otp.length < 6} onClick={confirm}>Xác nhận rút tiền</Button></>}>
         {!BANK.number
-          ? <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn chưa có tài khoản nhận tiền đã xác minh. <a onClick={onGoSettings} style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }}>Thêm ở Cài đặt</a> trước khi rút.</div>
+          ? <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn chưa có tài khoản nhận tiền đã xác minh. <a onClick={onGoSettings} style={{ color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }}>Thêm ở Cài đặt</a> trước khi rút.</div>
           : <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', font: 'var(--type-body-sm)' }}><span style={{ color: 'var(--text-muted)' }}>Số dư khả dụng</span><b style={{ fontVariantNumeric: 'tabular-nums' }}>{formatVND(balance)}</b></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
@@ -38,7 +38,7 @@
               {step === 'form'
                 ? <div>
                     <Input label="Số tiền cần rút (₫)" value={amount} onChange={(e) => { setAmount(e.target.value.replace(/\D/g, '')); setErr(''); }} error={err} placeholder="Tối thiểu 100.000" />
-                    <button onClick={() => setAmount(String(balance))} style={{ marginTop: 6, border: 0, padding: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>Rút toàn bộ</button>
+                    <button onClick={() => setAmount(String(balance))} style={{ marginTop: 6, border: 0, padding: 0, background: 'transparent', color: 'var(--brand-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>Rút toàn bộ</button>
                   </div>
                 : <div><Input label={'Mã OTP gửi tới email để xác nhận rút ' + formatVND(n) + ' (demo: 123456)'} value={otp} error={otpErr} onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setOtpErr(''); }} placeholder="Nhập đủ 6 số" /></div>}
             </div>}
@@ -98,7 +98,7 @@
               <span style={{ font: '600 13px var(--font-sans)', color: 'var(--amber-600)' }}>Đang giữ (Escrow)</span>
             </div>
             <div style={{ font: '800 30px var(--font-sans)', margin: '12px 0 4px', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(WALLET.held)}</div>
-            <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)' }}>Giải ngân khi đơn chuyển COMPLETED</div>
+            <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)' }}>Chuyển vào số dư khi khách xác nhận nhận hàng, hoặc sau 7 ngày</div>
             <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 6, font: '12px var(--font-sans)', color: 'var(--amber-600)' }}>
               <Icon name="clock" size={14} /> Tự động giải ngân sau khi khách xác nhận
             </div>
@@ -107,10 +107,10 @@
           <div style={{ ...bal, border: '1px solid var(--border-subtle)', background: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon name="chart-column" size={18} style={{ color: 'var(--color-primary)' }} />
-              <span style={{ font: '600 13px var(--font-sans)', color: 'var(--text-muted)' }}>Doanh thu tháng 6</span>
+              <span style={{ font: '600 13px var(--font-sans)', color: 'var(--text-muted)' }}>Doanh thu 30 ngày qua</span>
             </div>
-            <div style={{ font: '800 30px var(--font-sans)', margin: '12px 0 4px', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(WALLET.monthRevenue)}</div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: '600 12px var(--font-sans)', color: 'var(--green-600)' }}><Icon name="arrow-up-right" size={14} /> +{WALLET.monthGrowth}% so với tháng trước</div>
+            <div style={{ font: '800 30px var(--font-sans)', margin: '12px 0 4px', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(WALLET.revenue30)}</div>
+            <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)' }}><window.TRDash.Delta cur={WALLET.revenue30} prev={WALLET.prevRevenue30} against="so với 30 ngày trước" /></div>
           </div>
         </div>
 
@@ -185,7 +185,7 @@
                     <td style={{ ...td, textAlign: 'center' }}>
                       {r.bucket === 'HELD' && <StatusBadge status="HELD" label="Escrow" dot={false} />}
                       {r.bucket === 'AVAILABLE' && <StatusBadge status="AVAILABLE" label="Khả dụng" dot={false} />}
-                      {r.bucket === 'PAYOUT' && <Badge variant="neutral">Đã rút</Badge>}
+                      {r.bucket === 'PAYOUT' && (r.label.includes('chờ duyệt') ? <Badge variant="warning">Chờ duyệt</Badge> : <Badge variant="neutral">Đã rút</Badge>)}
                       {r.bucket === 'REFUND' && <Badge variant="danger">Hoàn</Badge>}
                     </td>
                   </tr>

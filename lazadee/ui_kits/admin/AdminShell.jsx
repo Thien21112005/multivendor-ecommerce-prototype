@@ -13,7 +13,7 @@
     const go = (n) => { setItems((xs) => xs.map((x) => (x.id === n.id ? { ...x, unread: false } : x))); setOpen(false); onNav(n.nav); };
     return (
       <div style={{ position: 'relative' }}>
-        <button style={{ ...ico, position: 'relative' }} aria-label="Thông báo" onClick={() => setOpen((o) => !o)}>
+        <button style={{ ...ico, position: 'relative' }} aria-label={unread > 0 ? 'Thông báo, ' + unread + ' chưa đọc' : 'Thông báo'} onClick={() => setOpen((o) => !o)}>
           <Icon name="bell" size={20} />
           {unread > 0 && <span style={{ position: 'absolute', top: 4, right: 4, background: 'var(--red-500)', color: '#fff', font: '700 10px var(--font-sans)', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread}</span>}
         </button>
@@ -50,11 +50,11 @@
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '18px 18px 14px' }}>
             <img src="../../assets/logomark.svg" width="30" height="30" alt="" />
             <div style={{ lineHeight: 1.05 }}>
-              <div style={{ font: '800 17px var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>lazadee</div>
-              <div style={{ font: '600 9px var(--font-sans)', letterSpacing: '.14em', color: 'var(--blue-500)', textTransform: 'uppercase' }}>Admin Console</div>
+              <div style={{ font: '800 17px var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>Genie</div>
+              <div style={{ font: '600 11px var(--font-sans)', letterSpacing: '.08em', color: 'var(--blue-300)', textTransform: 'uppercase' }}>Admin Console</div>
             </div>
           </div>
-          <div style={{ margin: '0 12px 12px', padding: '8px 12px', background: 'rgba(37,99,235,.14)', border: '1px solid rgba(37,99,235,.3)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ margin: '0 12px 12px', padding: '8px 12px', background: 'rgba(11, 127, 171,.14)', border: '1px solid rgba(11, 127, 171,.3)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Icon name="shield-check" size={15} style={{ color: 'var(--blue-500)' }} />
             <span style={{ font: '600 11px var(--font-sans)', color: 'rgba(255,255,255,.82)' }}>Quyền: {role}</span>
           </div>
@@ -64,12 +64,12 @@
               return (
                 <button key={n.id} onClick={() => onNav(n.id)} style={{
                   display: 'flex', flex: 'none', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, borderRadius: 'var(--radius-md)', border: 0, cursor: 'pointer', textAlign: 'left',
-                  background: on ? 'var(--blue-500)' : 'transparent', color: on ? '#fff' : 'rgba(255,255,255,.62)',
+                  background: on ? 'rgba(255,255,255,.1)' : 'transparent', color: on ? '#fff' : 'rgba(255,255,255,.62)',
                   font: (on ? '600' : '500') + ' 13.5px var(--font-sans)',
                 }}>
-                  <Icon name={n.icon} size={18} />
+                  <Icon name={n.icon} size={18} style={on ? { color: 'var(--color-accent)' } : undefined} />
                   <span style={{ flex: 1 }}>{n.name}</span>
-                  {n.badge && <span style={{ background: on ? 'rgba(255,255,255,.25)' : 'var(--flash-500)', color: '#fff', font: '700 11px var(--font-sans)', minWidth: 18, height: 18, borderRadius: 9, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{n.badge}</span>}
+                  {n.badge && <span style={{ background: 'var(--color-accent)', color: 'var(--color-on-accent)', font: '700 11px var(--font-sans)', minWidth: 18, height: 18, borderRadius: 9, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{n.badge}</span>}
                 </button>
               );
             })}
@@ -93,7 +93,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--surface-sunken)' }} title="Demo: xem sidebar với vai trò khác">
                 <Icon name="eye" size={15} style={{ color: 'var(--text-muted)' }} />
                 <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Xem với vai trò:</span>
-                <select value={role} onChange={(e) => setRole(e.target.value)} style={{ border: 0, background: 'transparent', font: '600 13px var(--font-sans)', color: 'var(--blue-600)', cursor: 'pointer', outline: 'none' }}>
+                <select aria-label="Xem với vai trò" value={role} onChange={(e) => setRole(e.target.value)} style={{ border: 0, background: 'transparent', font: '600 13px var(--font-sans)', color: 'var(--blue-600)', cursor: 'pointer' }}>
                   {PREVIEW_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
@@ -106,12 +106,12 @@
             {denied
               ? <div style={{ display: 'grid', placeItems: 'center', minHeight: 420, textAlign: 'center' }}>
                   <div>
-                    <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}><Icon name="lock" size={42} /></div>
+                    <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}><Icon name="lock" size={42} /></div>
                     <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 10 }}>Bạn không có quyền truy cập</h2>
                     <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', maxWidth: 420, margin: '0 auto' }}>Màn “{activeNav.name}” yêu cầu quyền <span className="code" style={{ color: 'var(--text-body)' }}>{activeNav.perm}</span>. Liên hệ Admin để được cấp quyền.</p>
                   </div>
                 </div>
-              : children}
+              : React.isValidElement(children) ? React.cloneElement(children, { perms }) : children}
           </main>
         </div>
       </div>

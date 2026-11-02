@@ -82,7 +82,7 @@
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
           <Stat icon="send" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Đã gửi tháng này" value={rows.length} />
           <Stat icon="user" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Lượt tiếp cận (Reach)" value={short(rows.reduce((n, r) => n + r.reach, 0))} />
-          <Stat icon="eye" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Tổng lượt đọc" value={rows.reduce((n, r) => n + r.reads, 0).toLocaleString('vi-VN')} />
+          <Stat icon="eye" tone={{ bg: 'var(--brand-50)', fg: 'var(--brand-600)' }} label="Tổng lượt đọc" value={rows.reduce((n, r) => n + r.reads, 0).toLocaleString('vi-VN')} />
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -147,7 +147,7 @@
             <div>
               <label style={lab}>Hình ảnh đính kèm (không bắt buộc)</label>
               {form.image
-                ? <div style={{ position: 'relative', marginTop: 8 }}><img src={form.image} alt="Xem trước" style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /><button aria-label="Xóa ảnh" onClick={() => setForm({ ...form, image: '' })} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', border: 0, background: 'rgba(0,0,0,.6)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={16} /></button></div>
+                ? <div style={{ position: 'relative', marginTop: 8 }}><img src={form.image} alt="Xem trước" style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /><button aria-label="Xóa ảnh" onClick={() => setForm({ ...form, image: '' })} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', border: 0, background: 'var(--surface-overlay)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={16} /></button></div>
                 : <div onClick={() => fileRef.current.click()} style={{ marginTop: 8, padding: '22px 0', textAlign: 'center', border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', background: 'var(--gray-25)', cursor: 'pointer', color: 'var(--text-muted)' }}><Icon name="upload" size={24} /><div style={{ font: 'var(--type-body-sm)', marginTop: 6 }}>Bấm để chọn ảnh</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>JPG, PNG (Tối đa 5MB)</div></div>}
               <input ref={fileRef} type="file" hidden accept="image/*" onChange={pickImage} />
               {err && <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, color: 'var(--red-600)', font: 'var(--type-caption)' }}><Icon name="circle-alert" size={13} />{err}</div>}

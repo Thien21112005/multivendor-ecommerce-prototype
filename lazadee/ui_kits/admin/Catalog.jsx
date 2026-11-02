@@ -1,4 +1,4 @@
-/* Lazadee Admin — global catalog management (Quản lý danh mục toàn sàn).
+/* Genie Admin — global catalog management (Quản lý danh mục toàn sàn).
    Two-level category tree with product/shop counts, visibility, and the default
    commission per category (ties into Commission config). Add / edit / hide
    categories and approve seller-suggested ones. */
@@ -165,7 +165,7 @@
         {/* KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
           <Kpi icon="boxes" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Danh mục gốc" value={tree.length} />
-          <Kpi icon="package" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Danh mục con" value={tree.reduce((n, t) => n + t.subs.length, 0)} />
+          <Kpi icon="package" tone={{ bg: 'var(--brand-50)', fg: 'var(--brand-600)' }} label="Danh mục con" value={tree.reduce((n, t) => n + t.subs.length, 0)} />
           <Kpi icon="package" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Tổng sản phẩm" value={totalProducts.toLocaleString('vi-VN')} />
           <Kpi icon="clock" tone={{ bg: 'var(--amber-50)', fg: 'var(--amber-600)' }} label="Chờ duyệt" value={pending.length} />
         </div>
@@ -219,7 +219,7 @@
                       <tr key={i} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
                         <td style={td}><button onClick={() => setProductView(s.name)} style={{ display: 'flex', alignItems: 'center', gap: 8, border: 0, background: 'transparent', cursor: 'pointer', color: 'var(--blue-600)', font: '600 13px var(--font-sans)' }}><Icon name="chevron-right" size={15} style={{ color: 'var(--text-subtle)' }} />{s.name}</button>{(s.leaves || []).length > 0 && <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginLeft: 23, whiteSpace: 'normal' }}>{s.leaves.join(' · ')}</div>}</td>
                         <td style={{ ...td, textAlign: 'right' }}>{s.products.toLocaleString('vi-VN')}</td>
-                        <td style={{ ...td, textAlign: 'right' }}><span style={{ font: '600 12px var(--font-sans)', color: 'var(--orange-600)', background: 'var(--orange-50)', borderRadius: 'var(--radius-pill)', padding: '2px 10px' }}>{s.comm}%</span></td>
+                        <td style={{ ...td, textAlign: 'right' }}><span style={{ font: '600 12px var(--font-sans)', color: 'var(--brand-600)', background: 'var(--brand-50)', borderRadius: 'var(--radius-pill)', padding: '2px 10px' }}>{s.comm}%</span></td>
                         <td style={{ ...td, textAlign: 'right' }}><Button size="sm" variant="ghost" onClick={() => setProductView(s.name)}>Xem SP</Button></td>
                       </tr>
                     ))}

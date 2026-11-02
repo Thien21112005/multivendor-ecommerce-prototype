@@ -15,7 +15,7 @@
     const read = (n) => { setItems((xs) => xs.map((x) => (x.id === n.id ? { ...x, unread: false } : x))); setDetail(n); setOpen(false); };
     return (
       <div style={{ position: 'relative' }} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
-        <button style={{ ...ico, position: 'relative' }} aria-label="Thông báo" onClick={() => setOpen((o) => !o)}>
+        <button style={{ ...ico, position: 'relative' }} aria-label={unread > 0 ? 'Thông báo, ' + unread + ' chưa đọc' : 'Thông báo'} onClick={() => setOpen((o) => !o)}>
           <Icon name="bell" size={20} />
           {unread > 0 && <span style={{ position: 'absolute', top: 4, right: 4, background: 'var(--red-500)', color: '#fff', font: '700 10px var(--font-sans)', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread}</span>}
         </button>
@@ -71,7 +71,7 @@
             <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
             <div {...hover} style={row} onClick={() => { window.location.href = '../storefront/index.html'; }}>
               <Avatar name="Kênh người mua" size={32} />
-              <div style={{ flex: 1, minWidth: 0 }}><div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-strong)' }}>Kênh người mua</div><div style={{ font: '11px var(--font-sans)', color: 'var(--text-subtle)' }}>Trở về Lazadee</div></div>
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ font: '600 13px var(--font-sans)', color: 'var(--text-strong)' }}>Kênh người mua</div><div style={{ font: '11px var(--font-sans)', color: 'var(--text-subtle)' }}>Trở về Genie</div></div>
               <Icon name="refresh-cw" size={14} style={{ color: 'var(--text-muted)' }} />
             </div>
             <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
@@ -95,8 +95,8 @@
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '18px 18px 16px' }}>
             <img src="../../assets/logomark.svg" width="32" height="32" alt="" />
             <div style={{ lineHeight: 1.05 }}>
-              <div style={{ font: '800 18px var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>lazadee</div>
-              <div style={{ font: '600 9px var(--font-sans)', letterSpacing: '.14em', color: 'var(--orange-400)', textTransform: 'uppercase' }}>Seller Center</div>
+              <div style={{ font: '800 18px var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>Genie</div>
+              <div style={{ font: '600 11px var(--font-sans)', letterSpacing: '.08em', color: 'var(--brand-300)', textTransform: 'uppercase' }}>Seller Center</div>
             </div>
           </div>
           {/* shop chip */}
@@ -104,7 +104,7 @@
             <div style={{ width: 34, height: 34, borderRadius: 'var(--radius-sm)', background: 'var(--color-primary)', color: '#fff', display: 'grid', placeItems: 'center', font: '800 15px var(--font-sans)', flex: 'none' }}>T</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ font: '600 13px var(--font-sans)', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{SHOP.name}</div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: '11px var(--font-sans)', color: kyc === 'VERIFIED' ? 'var(--mint-500)' : kyc === 'REJECTED' ? 'var(--flash-500)' : 'var(--gold-500)' }}><Icon name={kyc === 'VERIFIED' ? 'badge-check' : kyc === 'REJECTED' ? 'triangle-alert' : 'clock'} size={12} /> {kyc === 'VERIFIED' ? 'Đã xác minh' : kyc === 'REJECTED' ? 'KYC bị từ chối' : kyc === 'NOT_SUBMITTED' ? 'Chưa nộp KYC' : 'KYC đang chờ'}</div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: '11px var(--font-sans)', color: kyc === 'VERIFIED' ? 'var(--mint-100)' : kyc === 'REJECTED' ? 'var(--flash-100)' : 'var(--gold-400)' }}><Icon name={kyc === 'VERIFIED' ? 'badge-check' : kyc === 'REJECTED' ? 'triangle-alert' : 'clock'} size={12} /> {kyc === 'VERIFIED' ? 'Đã xác minh' : kyc === 'REJECTED' ? 'KYC bị từ chối' : kyc === 'NOT_SUBMITTED' ? 'Chưa nộp KYC' : 'KYC đang chờ'}</div>
             </div>
           </div>
           <nav style={{ flex: 1, minHeight: 0, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,.2) transparent' }}>
@@ -114,14 +114,14 @@
               return (
                 <button key={n.id} onClick={() => (ok ? onNav(n.id) : showToast('Hoàn tất xác minh KYC để sử dụng tính năng này'))} style={{
                   display: 'flex', flex: 'none', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, borderRadius: 'var(--radius-md)', border: 0, cursor: ok ? 'pointer' : 'not-allowed', textAlign: 'left',
-                  background: on ? 'var(--color-primary)' : 'transparent',
+                  background: on ? 'rgba(255,255,255,.1)' : 'transparent',
                   color: on ? '#fff' : ok ? 'rgba(255,255,255,.66)' : 'rgba(255,255,255,.3)',
                   font: (on ? '600' : '500') + ' 14px var(--font-sans)',
                 }}>
-                  <Icon name={n.icon} size={19} />
+                  <Icon name={n.icon} size={19} style={on ? { color: 'var(--color-accent)' } : undefined} />
                   <span style={{ flex: 1 }}>{n.name}</span>
                   {!ok && <Icon name="lock" size={14} style={{ opacity: .7 }} />}
-                  {ok && n.badge && <span style={{ background: on ? 'rgba(255,255,255,.25)' : 'var(--flash-500)', color: '#fff', font: '700 11px var(--font-sans)', minWidth: 18, height: 18, borderRadius: 9, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{n.badge}</span>}
+                  {ok && n.badge && <span style={{ background: 'var(--color-accent)', color: 'var(--color-on-accent)', font: '700 11px var(--font-sans)', minWidth: 18, height: 18, borderRadius: 9, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{n.badge}</span>}
                 </button>
               );
             })}
@@ -138,10 +138,10 @@
           <header style={{ height: 64, background: '#fff', borderBottom: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', gap: 16, padding: '0 28px', position: 'sticky', top: 0, zIndex: 50 }}>
             <h1 style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)' }}>{(NAV.find((n) => n.id === active) || {}).name}</h1>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4, padding: '4px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--surface-sunken)' }} title="Demo: chuyển trạng thái KYC để xem cổng khoá">
-                <span style={{ font: '600 10px var(--font-sans)', color: 'var(--text-subtle)', letterSpacing: '.04em' }}>KYC</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4, padding: '4px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--surface-sunken)' }} className="tr-kycdemo" title="Mô phỏng: chuyển trạng thái KYC để xem cổng khoá">
+                <span style={{ font: '600 11px var(--font-sans)', color: 'var(--text-muted)' }}>Mô phỏng KYC</span>
                 {['NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED'].map((s) => (
-                  <button key={s} onClick={() => setKyc && setKyc(s)} style={{ height: 24, padding: '0 8px', borderRadius: 'var(--radius-pill)', border: 0, cursor: 'pointer', background: kyc === s ? 'var(--color-primary)' : 'transparent', color: kyc === s ? '#fff' : 'var(--text-muted)', font: '600 10px var(--font-sans)' }}>{s}</button>
+                  <button key={s} onClick={() => setKyc && setKyc(s)} style={{ height: 24, padding: '0 8px', borderRadius: 'var(--radius-pill)', border: 0, cursor: 'pointer', background: kyc === s ? 'var(--color-primary)' : 'transparent', color: kyc === s ? '#fff' : 'var(--text-muted)', font: '600 11px var(--font-sans)' }}>{({ NOT_SUBMITTED: 'Chưa nộp', PENDING: 'Chờ duyệt', VERIFIED: 'Đã duyệt', REJECTED: 'Từ chối' })[s]}</button>
                 ))}
               </div>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>

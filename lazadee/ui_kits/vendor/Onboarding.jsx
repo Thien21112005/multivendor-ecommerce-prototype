@@ -86,7 +86,7 @@
     const banner = {
       NOT_SUBMITTED: { v: 'warning', icon: 'file-text', t: 'Chưa nộp hồ sơ KYC', s: 'Hoàn tất hồ sơ bên dưới để mở khóa đăng bán, đơn hàng và ví.' },
       PENDING: { v: 'warning', icon: 'clock', t: 'Hồ sơ đang chờ duyệt', s: 'AI đang thẩm định; hồ sơ nghi ngờ do nhân viên xử lý trong 24 giờ làm việc. Bạn chưa thể đăng bán cho đến khi được duyệt.' },
-      VERIFIED: { v: 'success', icon: 'badge-check', t: 'Hồ sơ đã được xác minh', s: 'Tài khoản của bạn đã VERIFIED — bạn có thể đăng bán sản phẩm và nhận thanh toán.' },
+      VERIFIED: { v: 'success', icon: 'badge-check', t: 'Hồ sơ đã được xác minh', s: 'Tài khoản của bạn đã được xác minh, bạn có thể đăng bán sản phẩm và nhận thanh toán.' },
       REJECTED: { v: 'danger', icon: 'triangle-alert', t: 'Hồ sơ bị từ chối', s: 'Lý do: Ảnh giấy tờ không hợp lệ. Vui lòng tải lại và gửi duyệt.' },
       SUPPLEMENT_REQUESTED: { v: 'warning', icon: 'file-text', t: 'Yêu cầu bổ sung hồ sơ', s: 'Vui lòng cung cấp CCCD hoặc Giấy phép kinh doanh để chúng tôi xác minh danh tính của bạn. Hạn bổ sung: 7 ngày.' },
     }[state];
@@ -94,10 +94,10 @@
     return (
       <div style={{ maxWidth: 1180 }}>
         {/* state preview toggle (demo only) */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, alignItems: 'center' }}>
-          <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>Xem trạng thái (demo):</span>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap', padding: '8px 12px', border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-lg)' }}>
+          <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Mô phỏng trạng thái KYC:</span>
           {['NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED', 'SUPPLEMENT_REQUESTED'].map((s) => (
-            <button key={s} onClick={() => setState(s)} style={{ height: 28, padding: '0 12px', borderRadius: 'var(--radius-pill)', border: '1px solid ' + (state === s ? 'var(--color-primary)' : 'var(--border-default)'), background: state === s ? 'var(--color-primary-tint)' : '#fff', color: state === s ? 'var(--orange-700)' : 'var(--text-muted)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>{s}</button>
+            <button key={s} onClick={() => setState(s)} style={{ height: 28, padding: '0 12px', borderRadius: 'var(--radius-pill)', border: '1px solid ' + (state === s ? 'var(--color-primary)' : 'var(--border-default)'), background: state === s ? 'var(--color-primary-tint)' : '#fff', color: state === s ? 'var(--brand-700)' : 'var(--text-muted)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}>{({ NOT_SUBMITTED: 'Chưa nộp', PENDING: 'Chờ duyệt', VERIFIED: 'Đã duyệt', REJECTED: 'Từ chối', SUPPLEMENT_REQUESTED: 'Cần bổ sung' })[s]}</button>
           ))}
         </div>
 
@@ -156,7 +156,7 @@
                 </div>
                 <label style={{ cursor: 'pointer' }}>
                   <input type="file" hidden accept=".pdf,image/jpeg,image/png" onChange={(e) => pick(d.key, e)} />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', borderRadius: 'var(--radius-md)', background: d.done ? 'transparent' : 'var(--orange-50)', color: d.done ? 'var(--text-body)' : 'var(--orange-700)', font: '600 13px var(--font-sans)' }}><Icon name={d.done ? 'refresh-cw' : 'upload'} size={14} />{d.done ? 'Thay đổi' : 'Chọn file'}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', borderRadius: 'var(--radius-md)', background: d.done ? 'transparent' : 'var(--brand-50)', color: d.done ? 'var(--text-body)' : 'var(--brand-700)', font: '600 13px var(--font-sans)' }}><Icon name={d.done ? 'refresh-cw' : 'upload'} size={14} />{d.done ? 'Thay đổi' : 'Chọn file'}</span>
                 </label>
               </div>
             ))}
@@ -183,7 +183,7 @@
         </div>
         <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '14px 18px', marginBottom: 16, cursor: 'pointer' }}>
           <input type="checkbox" checked={consent} onChange={() => setConsent((c) => !c)} style={{ accentColor: 'var(--color-primary)', marginTop: 3 }} />
-          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>Tôi đồng ý cho Lazadee xử lý dữ liệu sinh trắc học phục vụ KYC. Nếu không đồng ý, hệ thống bỏ qua so khớp khuôn mặt tự động và nhân viên sẽ đối chiếu ảnh trực tiếp.</span>
+          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>Tôi đồng ý cho Genie xử lý dữ liệu sinh trắc học phục vụ KYC. Nếu không đồng ý, hệ thống bỏ qua so khớp khuôn mặt tự động và nhân viên sẽ đối chiếu ảnh trực tiếp.</span>
         </label>
         {camOpen && <CameraModal onClose={() => setCamOpen(false)} onShot={(src) => { setSelfie(src); setCamOpen(false); }} />}
 

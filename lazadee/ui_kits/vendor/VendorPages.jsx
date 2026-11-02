@@ -1,4 +1,4 @@
-/* Lazadee Seller Center — extra screens: Khuyến mãi (shop vouchers + flash sale),
+/* Genie Seller Center — extra screens: Khuyến mãi (shop vouchers + flash sale),
    Đánh giá (rating summary + reply to reviews), Phân tích (KPIs, revenue trend,
    top products, traffic), Cài đặt (shop profile, shipping, payout, toggles). */
 (function () {
@@ -42,13 +42,13 @@
         </div>
 
         {/* flash sale banner */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'linear-gradient(110deg, var(--flash-600, #DB1F4E), var(--flash-500))', color: '#fff', borderRadius: 'var(--radius-lg)', padding: '18px 22px', marginBottom: 18 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="zap" size={26} /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'var(--color-accent-tint)', border: '1px solid var(--gold-100)', color: 'var(--text-strong)', borderRadius: 'var(--radius-lg)', padding: '18px 22px', marginBottom: 18 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-md)', background: 'var(--color-accent)', color: 'var(--color-on-accent)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="zap" size={26} /></div>
           <div style={{ flex: 1 }}>
             <div style={{ font: 'var(--weight-bold) var(--text-lg) var(--font-sans)' }}>FLASH SALE 12.12 — Đăng ký gian hàng</div>
-            <div style={{ font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.9)' }}>Hạn đăng ký: 10/06/2026 · Chọn tối đa 20 sản phẩm tham gia khung giờ vàng.</div>
+            <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Hạn đăng ký: 10/06/2026 · Chọn tối đa 20 sản phẩm tham gia khung giờ vàng.</div>
           </div>
-          <Button variant="secondary" onClick={() => { setFpErr({}); setFlashOpen(true); }}>{registered.length ? 'Đã đăng ký ' + registered.length + ' SP' : 'Đăng ký ngay'}</Button>
+          <Button onClick={() => { setFpErr({}); setFlashOpen(true); }}>{registered.length ? 'Đã đăng ký ' + registered.length + ' SP' : 'Đăng ký ngay'}</Button>
         </div>
         <Modal open={flashOpen} onClose={() => setFlashOpen(false)} width={520} title="Đăng ký Flash Sale 12.12"
           footer={<><Button variant="ghost" onClick={() => setFlashOpen(false)}>Đóng</Button><Button iconLeft="plus" onClick={registerFlash}>Thêm sản phẩm</Button></>}>
@@ -67,7 +67,7 @@
 
         {/* KPI mini */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
-          <MiniStat icon="ticket" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Voucher đang chạy" value="2" />
+          <MiniStat icon="ticket" tone={{ bg: 'var(--brand-50)', fg: 'var(--brand-600)' }} label="Voucher đang chạy" value="2" />
           <MiniStat icon="user" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lượt dùng tháng này" value="522" />
           <MiniStat icon="banknote" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Doanh thu từ KM" value={fmt(8400000)} />
         </div>
@@ -83,12 +83,12 @@
                   const st = V_STATE[v.state];
                   return (
                     <tr key={v.id} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
-                      <td style={td}><span className="code" style={{ fontWeight: 600, color: 'var(--orange-600)' }}>{v.id}</span></td>
+                      <td style={td}><span className="code" style={{ fontWeight: 600, color: 'var(--brand-600)' }}>{v.id}</span></td>
                       <td style={td}>{v.type} <b>{v.value}</b> {v.cap && <span style={{ color: 'var(--text-subtle)' }}>· {v.cap}</span>}</td>
                       <td style={{ ...td, color: 'var(--text-muted)' }}>{v.cond}</td>
                       <td style={td}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ width: 70, height: 6, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (v.used / v.total * 100) + '%', height: '100%', background: 'var(--orange-500)' }} /></div>
+                          <div style={{ width: 70, height: 6, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (v.used / v.total * 100) + '%', height: '100%', background: 'var(--brand-500)' }} /></div>
                           <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{v.used}/{v.total}</span>
                         </div>
                       </td>
@@ -118,7 +118,7 @@
       code: voucher && voucher.id ? (voucher._dup ? '' : voucher.id) : '',
       kind: (voucher && voucher.kind) || 'percent',
       value: '', cap: '', minOrder: '', total: '', perUser: '1', start: '', end: '',
-      scope: 'all', sponsor: 'Lazadee', budget: '', scopeCat: '', exclude: '',
+      scope: 'all', sponsor: 'Genie', budget: '', scopeCat: '', exclude: '',
     });
     const [err, setErr] = React.useState({});
     const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
@@ -140,7 +140,7 @@
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <label style={lab}>Mã voucher</label>
-              <button onClick={() => set('code', genCode())} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name="refresh-cw" size={13} />Tự tạo</button>
+              <button onClick={() => set('code', genCode())} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--brand-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name="refresh-cw" size={13} />Tự tạo</button>
             </div>
             <Input value={f.code} onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="VD: SUMMER2026" error={err.code} />
             {!err.code && <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 5 }}>6–12 ký tự, chỉ chữ HOA và số.</div>}
@@ -179,7 +179,7 @@
           {platform ? (
             <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end' }}>
               <div style={{ flex: 1 }}><label style={lab}>Phạm vi</label><div style={{ marginTop: 6 }}><Badge variant="primary" icon="store">Toàn sàn</Badge></div></div>
-              <div style={{ flex: 1 }}><Select label="Nhà tài trợ"><option>Lazadee</option><option>Co-sponsor với Shop</option></Select></div>
+              <div style={{ flex: 1 }}><Select label="Nhà tài trợ"><option>Genie</option><option>Co-sponsor với Shop</option></Select></div>
             </div>
           ) : (
             <div>
@@ -222,7 +222,7 @@
           {/* summary */}
           <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: 20, position: 'sticky', top: 88 }}>
             <div style={{ textAlign: 'center', paddingBottom: 14, borderBottom: '1px solid var(--border-subtle)', marginBottom: 14 }}>
-              <div style={{ font: '800 44px var(--font-sans)', color: 'var(--gold-600, #E09600)', lineHeight: 1 }}>{avg}</div>
+              <div style={{ font: '800 44px var(--font-sans)', color: 'var(--gold-600)', lineHeight: 1 }}>{avg}</div>
               <div style={{ marginTop: 6 }}><Rating value={parseFloat(avg)} /></div>
               <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 6 }}>{total.toLocaleString('vi-VN')} đánh giá</div>
             </div>
@@ -281,9 +281,9 @@
               </div>
             )}
             {r.replied ? (
-              <div style={{ display: 'flex', gap: 8, marginTop: 10, padding: '10px 12px', background: 'var(--orange-50)', borderRadius: 'var(--radius-md)' }}>
-                <Icon name="message-square" size={15} style={{ color: 'var(--orange-600)', flex: 'none', marginTop: 2 }} />
-                <div><span style={{ font: '600 12px var(--font-sans)', color: 'var(--orange-700)' }}>Phản hồi từ Shop: </span><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{r.reply}</span></div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10, padding: '10px 12px', background: 'var(--brand-50)', borderRadius: 'var(--radius-md)' }}>
+                <Icon name="message-square" size={15} style={{ color: 'var(--brand-600)', flex: 'none', marginTop: 2 }} />
+                <div><span style={{ font: '600 12px var(--font-sans)', color: 'var(--brand-700)' }}>Phản hồi từ Shop: </span><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{r.reply}</span></div>
               </div>
             ) : open ? (
               <div style={{ marginTop: 10 }}>
@@ -304,28 +304,23 @@
   }
 
   /* ============================== PHÂN TÍCH ============================== */
-  const RANGE = {
-    'Hôm nay': { sub: 'hôm nay', k: 0.14, trend: [{ d: '6h', v: 0.4 }, { d: '9h', v: 1.1 }, { d: '12h', v: 1.9 }, { d: '15h', v: 1.4 }, { d: '18h', v: 2.1 }, { d: '21h', v: 2.6 }] },
-    '7 ngày qua': { sub: 'trong 7 ngày qua', k: 1, trend: [{ d: 'T2', v: 4.2 }, { d: 'T3', v: 5.8 }, { d: 'T4', v: 5.1 }, { d: 'T5', v: 7.4 }, { d: 'T6', v: 9.2 }, { d: 'T7', v: 11.6 }, { d: 'CN', v: 8.9 }] },
-    '30 ngày qua': { sub: 'trong 30 ngày qua', k: 4.2, trend: [{ d: 'Tuần 1', v: 28.4 }, { d: 'Tuần 2', v: 34.1 }, { d: 'Tuần 3', v: 31.7 }, { d: 'Tuần 4', v: 45.8 }] },
-  };
+  // Sold × list price within the same 30 days as the revenue figure; the rest of the catalogue makes up the difference.
   const TOP = [
-    { name: 'Tai nghe ANC Pro 5', img: 'headphones', sold: 412, rev: 160068000, conv: 8.2 },
-    { name: 'Bàn phím cơ RGB', img: 'keyboard', sold: 198, rev: 90882000, conv: 6.1 },
-    { name: 'Watch S2 AMOLED', img: 'watch', sold: 156, rev: 107640000, conv: 5.4 },
-    { name: 'Loa bluetooth mini', img: 'speaker', sold: 143, rev: 45760000, conv: 4.8 },
-    { name: 'Máy ảnh Mirrorless X-100', img: 'camera', sold: 12, rev: 155880000, conv: 2.1 },
+    { name: 'Tai nghe ANC Pro 5', img: 'headphones', sold: 38, rev: 14782000, conv: 8.2 },
+    { name: 'Watch S2 AMOLED', img: 'watch', sold: 14, rev: 9660000, conv: 5.4 },
+    { name: 'Bàn phím cơ RGB', img: 'keyboard', sold: 18, rev: 8262000, conv: 6.1 },
+    { name: 'Loa bluetooth mini', img: 'speaker', sold: 12, rev: 3840000, conv: 4.8 },
+    { name: 'Webcam Full HD', img: 'camera', sold: 5, rev: 2700000, conv: 2.1 },
   ];
-  const SOURCES = [{ name: 'Tìm kiếm trong sàn', pct: 46, c: 'var(--orange-500)' }, { name: 'Trang chủ / Gợi ý', pct: 28, c: 'var(--blue-500)' }, { name: 'Khuyến mãi / Flash Sale', pct: 16, c: 'var(--flash-500)' }, { name: 'Link ngoài / Chia sẻ', pct: 10, c: 'var(--mint-500)' }];
+  const SOURCES = [{ name: 'Tìm kiếm trong sàn', pct: 46, c: 'var(--brand-500)' }, { name: 'Trang chủ / Gợi ý', pct: 28, c: 'var(--blue-500)' }, { name: 'Khuyến mãi / Flash Sale', pct: 16, c: 'var(--flash-500)' }, { name: 'Link ngoài / Chia sẻ', pct: 10, c: 'var(--mint-500)' }];
 
   function Stats() {
     const [range, setRange] = React.useState('7 ngày qua');
     const [from, setFrom] = React.useState('');
     const [to, setTo] = React.useState('');
-    const cur = RANGE[range] || RANGE['30 ngày qua'];
-    const TREND = cur.trend;
-    const scale = (n) => Math.round(n * cur.k);
-    const max = Math.max(...TREND.map((d) => d.v));
+    const { Delta, StatTile, TimeChart } = window.TRDash;
+    const cur = window.LZV.PERF[range] || window.LZV.PERF['30 ngày qua'];
+    const cr = (o, v) => (o / v) * 100;
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
@@ -335,29 +330,21 @@
             <div style={{ width: 180 }}><Select value={range} onChange={(e) => setRange(e.target.value)}><option>Hôm nay</option><option>7 ngày qua</option><option>30 ngày qua</option><option>Tùy chọn ngày</option></Select></div>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
-          <MiniStat icon="banknote" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Doanh thu" value={fmt(scale(45800000))} delta="+18,4%" />
-          <MiniStat icon="package" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Đơn hàng" value={scale(312).toLocaleString('vi-VN')} delta="+9,1%" />
-          <MiniStat icon="user" tone={{ bg: 'var(--purple-50)', fg: 'var(--purple-600, #6C2BD9)' }} label="Lượt truy cập" value={scale(8420).toLocaleString('vi-VN')} delta="+12%" />
-          <MiniStat icon="percent" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Tỉ lệ chuyển đổi" value="3,7%" delta="+0,4%" />
+        <div className="dash-tiles" style={{ marginBottom: 16 }}>
+          <StatTile label="Doanh thu" value={fmt(cur.rev)} note={<Delta cur={cur.rev} prev={cur.prevRev} against={cur.against} />} />
+          <StatTile label="Đơn hàng" value={cur.orders.toLocaleString('vi-VN')} note={<Delta cur={cur.orders} prev={cur.prevOrders} against={cur.against} />} />
+          <StatTile label="Lượt truy cập" value={cur.visits.toLocaleString('vi-VN')} note={<Delta cur={cur.visits} prev={cur.prevVisits} against={cur.against} />} />
+          <StatTile label="Tỉ lệ chuyển đổi" value={cr(cur.orders, cur.visits).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%'} note={<Delta cur={cr(cur.orders, cur.visits)} prev={cr(cur.prevOrders, cur.prevVisits)} against={cur.against} />} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
-          <MiniStat icon="ban" tone={{ bg: 'var(--red-50, #FDECEA)', fg: 'var(--red-600)' }} label="Tỉ lệ hủy của shop" value="1,8%" />
-          <MiniStat icon="triangle-alert" tone={{ bg: 'var(--amber-50)', fg: 'var(--amber-600)' }} label="Khiếu nại thua" value="1" />
-          <MiniStat icon="clock" tone={{ bg: 'var(--gray-100)', fg: 'var(--gray-600)' }} label="Đơn chậm xác nhận" value="2" />
+        <div className="dash-tiles" style={{ '--n': 3, marginBottom: 16 }}>
+          <StatTile label="Tỉ lệ hủy của shop (30 ngày)" value="1,8%" />
+          <StatTile label="Khiếu nại thua (30 ngày)" value="1" />
+          <StatTile label="Đơn chậm xác nhận (30 ngày)" value="2" />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 16, marginBottom: 16 }}>
-          <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px' }}>
-            <div style={{ display: 'flex', marginBottom: 18 }}><span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Doanh thu theo ngày</span><span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>triệu ₫</span></div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 170 }}>
-              {TREND.map((d, i) => (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
-                  <div style={{ font: '600 11px var(--font-sans)', color: 'var(--text-body)' }}>{d.v}</div>
-                  <div style={{ width: '100%', height: (d.v / max) * 130, borderRadius: '6px 6px 0 0', background: i === TREND.length - 2 ? 'var(--color-primary)' : 'var(--orange-200)' }} />
-                  <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)' }}>{d.d}</div>
-                </div>
-              ))}
-            </div>
+        <div className="dash-cols" style={{ marginBottom: 16 }}>
+          <div className="dash-sheet">
+            <div className="dash-head"><h3 className="dash-title">{cur.title}</h3><span className="dash-sub">{cur.sub}</span></div>
+            <TimeChart data={cur.points} kind="bar" name="Doanh thu" />
           </div>
           <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px' }}>
             <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Nguồn truy cập</span>
@@ -365,14 +352,14 @@
               {SOURCES.map((s) => (
                 <div key={s.name}>
                   <div style={{ display: 'flex', font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 5 }}><span style={{ flex: 1 }}>{s.name}</span><b>{s.pct}%</b></div>
-                  <div style={{ height: 8, borderRadius: 4, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: s.pct + '%', height: '100%', background: s.c }} /></div>
+                  <div style={{ height: 8, borderRadius: 4, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: s.pct + '%', height: '100%', background: 'var(--brand-500)' }} /></div>
                 </div>
               ))}
             </div>
           </div>
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
-          <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--border-subtle)', font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Sản phẩm bán chạy</div>
+          <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--border-subtle)', font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Sản phẩm bán chạy trong 30 ngày qua</div>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
               <thead><tr style={hrow}><th style={th}>Sản phẩm</th><th style={{ ...th, textAlign: 'right' }}>Đã bán</th><th style={{ ...th, textAlign: 'right' }}>Doanh thu</th><th style={{ ...th, textAlign: 'right' }}>Chuyển đổi</th></tr></thead>
@@ -381,8 +368,8 @@
                   <tr key={i} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
                     <td style={td}><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><img src={'../../assets/img/' + p.img + '.jpg'} alt="" width="36" height="36" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><span>{p.name}</span></div></td>
                     <td style={{ ...td, textAlign: 'right' }}>{p.sold}</td>
-                    <td style={{ ...td, textAlign: 'right', fontWeight: 600, color: 'var(--text-price)' }}>{fmt(p.rev)}</td>
-                    <td style={{ ...td, textAlign: 'right', color: 'var(--mint-600)' }}>{p.conv}%</td>
+                    <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{fmt(p.rev)}</td>
+                    <td style={{ ...td, textAlign: 'right', color: 'var(--mint-600)' }}>{p.conv.toLocaleString('vi-VN')}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -403,7 +390,7 @@
     const logoRef = React.useRef(null);
     const pickImg = (fn, maxMb) => (e) => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; if (f.size > maxMb * 1048576) { say('Ảnh vượt quá ' + maxMb + ' MB'); return; } fn(URL.createObjectURL(f)); };
     const [freeFrom, setFreeFrom] = React.useState('99000');
-    const [carriers, setCarriers] = React.useState({ 'GHN — Giao Hàng Nhanh': true, 'GHTK — Giao Hàng Tiết Kiệm': true, 'ViettelPost': false, 'J&T Express': false, 'Lazadee Express': false });
+    const [carriers, setCarriers] = React.useState({ 'GHN — Giao Hàng Nhanh': true, 'GHTK — Giao Hàng Tiết Kiệm': true, 'ViettelPost': false, 'J&T Express': false, 'Genie Express': false });
     const toggleCarrier = (name) => {
       if (carriers[name] && Object.values(carriers).filter(Boolean).length === 1) { say('Phải bật ít nhất 1 hãng vận chuyển'); return; }
       setCarriers((c) => ({ ...c, [name]: !c[name] }));
@@ -423,7 +410,7 @@
     const [vacOpen, setVacOpen] = React.useState(false);
     const [vacUntil, setVacUntil] = React.useState('');
     const [vacMsg, setVacMsg] = React.useState('Shop đang tạm nghỉ, sẽ trả lời bạn khi mở lại nhé!');
-    const [pendingOrders, setPendingOrders] = React.useState(['LZD-20260608-000046', 'LZD-20260608-000045']);
+    const [pendingOrders, setPendingOrders] = React.useState(['TR-20260608-000146', 'TR-20260608-000145']);
     const [ghnId, setGhnId] = React.useState('GHN-884120');
     const [bankStep, setBankStep] = React.useState('form');
     const [bankOtp, setBankOtp] = React.useState('');
@@ -466,7 +453,7 @@
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(20,23,31,.55), rgba(20,23,31,.1))' }} />
                 {/* logo overlapping a corner, like a real marketplace */}
                 <div style={{ position: 'absolute', left: 16, bottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 'var(--radius-md)', background: '#1E232E', color: '#fff', display: 'grid', placeItems: 'center', font: '800 26px var(--font-sans)', border: '3px solid #fff', boxShadow: 'var(--shadow-md)' }}>T</div>
+                  <div style={{ width: 56, height: 56, borderRadius: 'var(--radius-md)', background: 'var(--ink-800)', color: '#fff', display: 'grid', placeItems: 'center', font: '800 26px var(--font-sans)', border: '3px solid #fff', boxShadow: 'var(--shadow-md)' }}>T</div>
                   <span style={{ color: '#fff', font: 'var(--weight-bold) var(--text-base) var(--font-sans)', textShadow: '0 1px 3px rgba(0,0,0,.4)' }}>TechZone Official</span>
                 </div>
                 <div style={{ position: 'absolute', right: 12, top: 12 }}>
@@ -478,7 +465,7 @@
             </div>
             <div style={{ display: 'flex', gap: 18 }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 84, height: 84, borderRadius: 'var(--radius-lg)', background: '#1E232E', color: '#fff', display: 'grid', placeItems: 'center', font: '800 36px var(--font-sans)', overflow: 'hidden' }}>{logo ? <img src={logo} alt="Logo shop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'T'}</div>
+                <div style={{ width: 84, height: 84, borderRadius: 'var(--radius-lg)', background: 'var(--ink-800)', color: '#fff', display: 'grid', placeItems: 'center', font: '800 36px var(--font-sans)', overflow: 'hidden' }}>{logo ? <img src={logo} alt="Logo shop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'T'}</div>
                 <input ref={logoRef} type="file" hidden accept="image/jpeg,image/png" onChange={pickImg(setLogo, 1)} />
                 <Button size="sm" variant="outline" iconLeft="upload" onClick={() => logoRef.current.click()}>Đổi logo</Button>
               </div>
@@ -495,7 +482,7 @@
           {/* shipping */}
           <Section title="Vận chuyển" icon="truck">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {[['GHN — Giao Hàng Nhanh', 'Hãng mặc định'], ['GHTK — Giao Hàng Tiết Kiệm', 'Đối tác 3PL'], ['ViettelPost', 'Đối tác 3PL'], ['J&T Express', 'Đối tác 3PL'], ['Lazadee Express', 'Giao nội thành']].map(([name, desc]) => (
+              {[['GHN — Giao Hàng Nhanh', 'Hãng mặc định'], ['GHTK — Giao Hàng Tiết Kiệm', 'Đối tác 3PL'], ['ViettelPost', 'Đối tác 3PL'], ['J&T Express', 'Đối tác 3PL'], ['Genie Express', 'Giao nội thành']].map(([name, desc]) => (
                 <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 0', borderBottom: '1px solid var(--border-subtle)' }}>
                   <div style={{ flex: 1 }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{name}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{desc}</div></div>
                   <Switch checked={carriers[name]} onChange={() => toggleCarrier(name)} />
@@ -599,7 +586,7 @@
   function Section({ title, icon, children }) {
     return (
       <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}><Icon name={icon} size={18} style={{ color: 'var(--orange-500)' }} /><span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{title}</span></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}><Icon name={icon} size={18} style={{ color: 'var(--brand-500)' }} /><span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{title}</span></div>
         {children}
       </div>
     );
@@ -652,13 +639,13 @@
             {stage === 'form' && <div><Button iconLeft="check" onClick={submit}>Cập nhật mật khẩu</Button></div>}
             {stage === 'otp' && (
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--orange-500)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến email <b>tr****@gmail.com</b> (demo: 123456)</span></div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--brand-500)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến email <b>tr****@gmail.com</b> (demo: 123456)</span></div>
                 <VOtpBoxes onChange={setOtp} />
                 {err.otp && <div style={{ color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 8 }}>{err.otp}</div>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
                   <Button iconLeft="check" disabled={otp.length < 6} onClick={confirm}>Xác nhận</Button>
                   <Button variant="ghost" onClick={() => setStage('form')}>Huỷ</Button>
-                  <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{resend > 0 ? `Gửi lại OTP (còn ${resend}s)` : <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setResend(60)}>Gửi lại OTP</a>}</span>
+                  <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{resend > 0 ? `Gửi lại OTP (còn ${resend}s)` : <a style={{ color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setResend(60)}>Gửi lại OTP</a>}</span>
                 </div>
               </div>
             )}
@@ -701,22 +688,13 @@
   function SectionTitle({ icon, title, sub }) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}><Icon name={icon} size={22} style={{ color: 'var(--orange-500)' }} /><h1 style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)', margin: 0 }}>{title}</h1></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}><Icon name={icon} size={22} style={{ color: 'var(--brand-500)' }} /><h1 style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)', margin: 0 }}>{title}</h1></div>
         {sub && <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', margin: '5px 0 0 31px' }}>{sub}</p>}
       </div>
     );
   }
-  function MiniStat({ icon, tone, label, value, delta }) {
-    return (
-      <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '16px 18px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: tone.bg, color: tone.fg, display: 'grid', placeItems: 'center' }}><Icon name={icon} size={17} /></span>
-          <span style={{ font: '500 13px var(--font-sans)', color: 'var(--text-muted)' }}>{label}</span>
-        </div>
-        <div style={{ font: '800 24px var(--font-sans)', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-        {delta && <div style={{ display: 'inline-flex', alignItems: 'center', gap: 3, font: '600 12px var(--font-sans)', color: 'var(--green-600)', marginTop: 4 }}><Icon name="arrow-up-right" size={13} />{delta}</div>}
-      </div>
-    );
+  function MiniStat({ label, value, delta }) {
+    return <window.TRDash.StatTile label={label} value={value} note={delta} />;
   }
 
   const hrow = { font: '600 12px var(--font-sans)', color: 'var(--text-muted)', textAlign: 'left', background: 'var(--gray-25)' };

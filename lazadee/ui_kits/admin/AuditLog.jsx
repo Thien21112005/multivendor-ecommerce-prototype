@@ -1,4 +1,4 @@
-/* Lazadee Admin — Nhật ký hệ thống (Audit Logs). Append-only, immutable record
+/* Genie Admin — Nhật ký hệ thống (Audit Logs). Append-only, immutable record
    of sensitive actions (logins, KYC decisions, escrow/payout/refund movements,
    RBAC + config changes). Filter by time window + action category. Mirrors the
    Ledger's "Append-only · bất biến" governance framing. */
@@ -25,7 +25,7 @@
   };
   const CAT_TONE = {
     auth: { fg: 'var(--blue-600)', bg: 'var(--blue-50)', icon: 'lock' },
-    kyc: { fg: 'var(--orange-600)', bg: 'var(--orange-50)', icon: 'user-check' },
+    kyc: { fg: 'var(--brand-600)', bg: 'var(--brand-50)', icon: 'user-check' },
     finance: { fg: 'var(--mint-600)', bg: 'var(--mint-50)', icon: 'banknote' },
     moderation: { fg: 'var(--text-muted)', bg: 'var(--gray-100)', icon: 'star' },
     security: { fg: 'var(--flash-600)', bg: 'var(--flash-50)', icon: 'shield-check' },

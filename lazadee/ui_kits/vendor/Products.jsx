@@ -6,7 +6,7 @@
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, Input, Select, Switch, Money, Tabs, Modal } = DS;
   const formatVND = Money.format;
-  const IMG_TINT = ['var(--orange-100, #FFE6D9)', 'var(--blue-100, #DCE8FE)', 'var(--mint-100, #D6F5E6)', 'var(--gold-100, #FFEFC2)'];
+  const IMG_TINT = ['var(--brand-100)', 'var(--blue-100)', 'var(--mint-100)', 'var(--gold-100)'];
 
   const PRODUCTS = [
     { name: 'Tai nghe Bluetooth ANC Pro 5', img: 'headphones', skus: 4, price: 389000, stock: 38, sold: '2,1k', state: 'PUBLISHED' },
@@ -17,6 +17,7 @@
     { name: 'Bàn phím cơ RGB switch blue', img: 'keyboard', skus: 6, price: 459000, stock: 54, sold: '1,9k', state: 'DRAFT' },
     { name: 'Camera Mirrorless X-100 (bản mới)', img: 'camera', skus: 1, price: 12990000, stock: 8, sold: '—', state: 'DRAFT' },
   ];
+  window.LZV.PRODUCTS = PRODUCTS;
 
   const card = { background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: 22, marginBottom: 16 };
   const cardHead = (icon, title, right) => (
@@ -62,7 +63,7 @@
         <div draggable onDragStart={() => { dragFrom.current = index; }} onDragOver={(e) => e.preventDefault()} onDrop={() => drop(index)} style={{ position: 'relative', width: dim, height: dim, flex: 'none', cursor: 'grab', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: main ? '2px dashed var(--color-primary)' : '1.5px dashed var(--border-strong)' }}>
           {img.src ? <img src={img.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: img.tint, display: 'grid', placeItems: 'center' }}><Icon name="image" size={main ? 40 : 26} style={{ color: 'rgba(0,0,0,.28)' }} /></div>}
           {main && <span style={{ position: 'absolute', top: 6, left: 6, font: '700 10px var(--font-sans)', color: '#fff', background: 'var(--color-primary)', borderRadius: 'var(--radius-pill)', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: 3 }}><Icon name="star" size={11} />Ảnh chính</span>}
-          <button onClick={() => remove(img.id)} aria-label="Xoá ảnh" style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', border: 0, background: 'rgba(0,0,0,.6)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={14} /></button>
+          <button onClick={() => remove(img.id)} aria-label="Xoá ảnh" style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', border: 0, background: 'var(--surface-overlay)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={14} /></button>
         </div>
       );
     };
@@ -120,7 +121,7 @@
             <div key={d + i} style={{ position: 'relative', width: 120, height: 120, borderRadius: 'var(--radius-md)', border: '1.5px solid var(--border-strong)', background: 'var(--gray-50)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 8, boxSizing: 'border-box' }}>
               <Icon name="file-text" size={28} style={{ color: 'var(--text-muted)' }} />
               <span style={{ font: 'var(--type-caption)', color: 'var(--text-body)', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d}</span>
-              <button onClick={() => setDocs((x) => x.filter((_, j) => j !== i))} aria-label="Xoá giấy tờ" style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', border: 0, background: 'rgba(0,0,0,.6)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button>
+              <button onClick={() => setDocs((x) => x.filter((_, j) => j !== i))} aria-label="Xoá giấy tờ" style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', border: 0, background: 'var(--surface-overlay)', color: '#fff', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button>
             </div>
           ))}
           {docs.length < 4 && (
@@ -172,7 +173,7 @@
     const [l2, setL2] = React.useState(value[1] || null);
     const col = { width: 200, height: 280, overflowY: 'auto', background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' };
     const ItemRow = ({ label, active, hasChild, onClick }) => (
-      <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', width: '100%', border: 0, padding: '8px 14px', cursor: 'pointer', textAlign: 'left', font: (active ? '600' : '400') + ' 13px var(--font-sans)', background: active ? 'var(--color-primary-tint)' : 'transparent', color: active ? 'var(--orange-700)' : 'var(--text-body)' }}
+      <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', width: '100%', border: 0, padding: '8px 14px', cursor: 'pointer', textAlign: 'left', font: (active ? '600' : '400') + ' 13px var(--font-sans)', background: active ? 'var(--color-primary-tint)' : 'transparent', color: active ? 'var(--brand-700)' : 'var(--text-body)' }}
         onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--gray-50)'; }}
         onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
         <span style={{ flex: 1 }}>{label}</span>
@@ -208,7 +209,7 @@
             {l3arr.map((k) => <ItemRow key={k} label={k} active={value[2] === k} onClick={() => { onChange([l1, l2, k]); setOpen(false); }} />)}
           </div>}
         </div>
-        <div style={hint}>Chọn dần từ danh mục cha đến danh mục con. Danh mục cuối cùng xác định phí hoa hồng &amp; thông số gợi ý. Không có danh mục phù hợp? <a href="?screen=catalog" style={{ color: 'var(--orange-600)', fontWeight: 600 }}>Đề xuất danh mục mới</a></div>
+        <div style={hint}>Chọn dần từ danh mục cha đến danh mục con. Danh mục cuối cùng xác định phí hoa hồng &amp; thông số gợi ý. Không có danh mục phù hợp? <a href="?screen=catalog" style={{ color: 'var(--brand-600)', fontWeight: 600 }}>Đề xuất danh mục mới</a></div>
       </div>
     );
   }
@@ -237,12 +238,12 @@
             {matches.map((b) => (
               <button key={b} onClick={() => pick(b)} style={{ display: 'flex', alignItems: 'center', width: '100%', border: 0, background: 'transparent', padding: '9px 14px', cursor: 'pointer', textAlign: 'left', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-                <span style={{ flex: 1 }}>{b}</span>{value === b && <Icon name="check" size={14} style={{ color: 'var(--orange-600)' }} />}
+                <span style={{ flex: 1 }}>{b}</span>{value === b && <Icon name="check" size={14} style={{ color: 'var(--brand-600)' }} />}
               </button>
             ))}
             {q.trim() && !exact && (
-              <button onClick={() => pick(q.trim())} style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', border: 0, borderTop: matches.length ? '1px solid var(--border-subtle)' : 0, background: 'transparent', padding: '9px 14px', cursor: 'pointer', textAlign: 'left', font: '600 var(--text-sm) var(--font-sans)', color: 'var(--orange-600)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--orange-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+              <button onClick={() => pick(q.trim())} style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', border: 0, borderTop: matches.length ? '1px solid var(--border-subtle)' : 0, background: 'transparent', padding: '9px 14px', cursor: 'pointer', textAlign: 'left', font: '600 var(--text-sm) var(--font-sans)', color: 'var(--brand-600)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--brand-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                 <Icon name="plus" size={14} />Thêm “{q.trim()}” làm thương hiệu mới
               </button>
             )}
@@ -306,7 +307,7 @@
     const addSuggested = (k) => setSpecs((s) => [...s.filter((r) => r.key || r.value), { key: k, value: '' }]);
     const sugg = (SUGGESTED_SPECS[rootCat] || []).filter((s) => !specs.some((r) => r.key === s));
     const cellInput = { width: '100%', border: 'none', background: 'transparent', padding: '10px 12px', font: 'var(--type-body-sm)', outline: 'none', color: 'var(--text-strong)', boxSizing: 'border-box' };
-    const focusBg = (e) => (e.currentTarget.style.background = 'var(--blue-50, #EBF5FF)');
+    const focusBg = (e) => (e.currentTarget.style.background = 'var(--blue-50)');
     const blurBg = (e) => (e.currentTarget.style.background = 'transparent');
     return (
       <div style={card}>
@@ -314,7 +315,7 @@
         {sugg.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Gợi ý:</span>
-            {sugg.map((s) => <button key={s} onClick={() => addSuggested(s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, border: '1px dashed var(--border-strong)', background: '#fff', borderRadius: 'var(--radius-pill)', padding: '3px 10px', font: '600 12px var(--font-sans)', color: 'var(--orange-600)', cursor: 'pointer' }}><Icon name="plus" size={12} />{s}</button>)}
+            {sugg.map((s) => <button key={s} onClick={() => addSuggested(s)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, border: '1px dashed var(--border-strong)', background: '#fff', borderRadius: 'var(--radius-pill)', padding: '3px 10px', font: '600 12px var(--font-sans)', color: 'var(--brand-600)', cursor: 'pointer' }}><Icon name="plus" size={12} />{s}</button>)}
           </div>
         )}
         <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
@@ -360,7 +361,7 @@
       ['paperclip', null, () => { const url = window.prompt('Nhập URL liên kết:', 'https://'); if (url && /^https?:\/\//.test(url)) run('createLink', url); }, 'Chèn liên kết'],
       ['image', null, () => imgRef.current.click(), 'Chèn ảnh']];
     const pickImg = (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) run('insertImage', URL.createObjectURL(f)); };
-    const cColor = count > 9500 ? 'var(--red-600)' : count > 8000 ? 'var(--amber-600, #C77700)' : 'var(--text-subtle)';
+    const cColor = count > 9500 ? 'var(--red-600)' : count > 8000 ? 'var(--amber-600)' : 'var(--text-subtle)';
     return (
       <div style={card}>
         {cardHead('file-text', 'Mô tả chi tiết sản phẩm')}
@@ -409,11 +410,11 @@
             {matches.map((b) => (
               <button key={b} onClick={() => { onChange(b); setQ(b); setOpen(false); }} style={{ display: 'flex', alignItems: 'center', width: '100%', border: 0, background: 'transparent', padding: '8px 12px', cursor: 'pointer', textAlign: 'left', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-                <span style={{ flex: 1 }}>{b}</span>{value === b && <Icon name="check" size={14} style={{ color: 'var(--orange-600)' }} />}
+                <span style={{ flex: 1 }}>{b}</span>{value === b && <Icon name="check" size={14} style={{ color: 'var(--brand-600)' }} />}
               </button>
             ))}
             {q.trim() && !exact && (
-              <button onClick={() => { onChange(q.trim()); setOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', border: 0, borderTop: matches.length ? '1px solid var(--border-subtle)' : 0, background: 'transparent', padding: '8px 12px', cursor: 'pointer', textAlign: 'left', font: '600 13px var(--font-sans)', color: 'var(--orange-600)' }}>
+              <button onClick={() => { onChange(q.trim()); setOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', border: 0, borderTop: matches.length ? '1px solid var(--border-subtle)' : 0, background: 'transparent', padding: '8px 12px', cursor: 'pointer', textAlign: 'left', font: '600 13px var(--font-sans)', color: 'var(--brand-600)' }}>
                 <Icon name="pencil" size={13} />Tự đặt tên: “{q.trim()}”
               </button>
             )}
@@ -608,7 +609,7 @@
     return (
       <div style={{ maxWidth: 1180 }}>
         {viewOnly && <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--amber-50)', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: 14, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Icon name="clock" size={18} style={{ color: 'var(--amber-600)', flex: 'none' }} />Sản phẩm đang chờ duyệt. Bạn chỉ có thể xem thông tin, không sửa được.</div>}
-        {product && product.state === 'REJECTED' && <div style={{ display: 'flex', gap: 12, background: 'var(--red-50, #FDECEA)', border: '1px solid var(--red-300, #F3B0A8)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}><Icon name="triangle-alert" size={22} style={{ color: 'var(--red-600)', flex: 'none' }} /><div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Sản phẩm bị từ chối</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginTop: 2 }}>Lý do: {product.rejectReason}. Sửa rồi gửi lại để được duyệt.</div></div></div>}
+        {product && product.state === 'REJECTED' && <div style={{ display: 'flex', gap: 12, background: 'var(--red-50)', border: '1px solid var(--red-300, #F3B0A8)', borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 14 }}><Icon name="triangle-alert" size={22} style={{ color: 'var(--red-600)', flex: 'none' }} /><div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Sản phẩm bị từ chối</div><div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginTop: 2 }}>Lý do: {product.rejectReason}. Sửa rồi gửi lại để được duyệt.</div></div></div>}
         <button onClick={() => (viewOnly ? onClose() : setCancelOpen(true))} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 14 }}><Icon name="chevron-left" size={16} /> Quay lại danh sách</button>
         <ImageUpload />
         <LegalDocs docs={docs} setDocs={(u) => { setDocs(u); setDocsError(false); }} hasError={docsError} required={requiresDocs(category)} />
@@ -621,8 +622,8 @@
           <Button variant="secondary" iconLeft="file-text" onClick={() => onSaved('Đã lưu nháp sản phẩm')}>Lưu nháp</Button>
           <Button iconLeft="check" disabled={kycStatus !== 'VERIFIED'} onClick={() => publish()}>{product ? 'Lưu & gửi duyệt' : 'Đăng bán'}</Button>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)' }}>
-            {kycStatus === 'VERIFIED' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--mint-600)' }}><Icon name="shield-check" size={14} /> Shop đã VERIFIED — được phép đăng bán</span>}
-            {kycStatus === 'PENDING' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--amber-600, #C77700)' }}><Icon name="clock" size={14} /> KYC đang chờ duyệt — chưa thể đăng bán</span>}
+            {kycStatus === 'VERIFIED' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--mint-600)' }}><Icon name="shield-check" size={14} /> Shop đã được xác minh, được phép đăng bán</span>}
+            {kycStatus === 'PENDING' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--amber-600)' }}><Icon name="clock" size={14} /> KYC đang chờ duyệt — chưa thể đăng bán</span>}
             {kycStatus === 'REJECTED' && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--red-600)' }}><Icon name="triangle-alert" size={14} /> KYC bị từ chối — vui lòng nộp lại hồ sơ</span>}
           </span>
         </div>

@@ -1,4 +1,4 @@
-/* Lazadee Admin — Voucher sàn (platform-wide vouchers sponsored by Lazadee).
+/* Genie Admin — Voucher sàn (platform-wide vouchers sponsored by Genie).
    KPIs + status tabs + table with usage progress, sponsor, and a create/edit
    modal (reuses the shop voucher form pattern with platform-only fields:
    scope = Toàn sàn, sponsor select, budget cap). */
@@ -34,8 +34,8 @@
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
           <Kpi icon="ticket" tone={{ bg: 'var(--mint-50)', fg: 'var(--mint-600)' }} label="Voucher đang chạy" value={list.filter((v) => v.status === 'ACTIVE').length} />
           <Kpi icon="chart-column" tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} label="Lượt dùng hệ thống" value={usedTotal.toLocaleString('vi-VN')} />
-          <Kpi icon="receipt" tone={{ bg: 'var(--amber-50, #FEF3E2)', fg: 'var(--amber-600, #C77700)' }} label="Tổng giảm giá đã dùng" value="456.800.000₫" />
-          <Kpi icon="calendar" tone={{ bg: 'var(--orange-50)', fg: 'var(--orange-600)' }} label="Voucher sắp ra mắt" value={list.filter((v) => v.status === 'SCHEDULED').length} />
+          <Kpi icon="receipt" tone={{ bg: 'var(--amber-50)', fg: 'var(--amber-600)' }} label="Tổng giảm giá đã dùng" value="456.800.000₫" />
+          <Kpi icon="calendar" tone={{ bg: 'var(--brand-50)', fg: 'var(--brand-600)' }} label="Voucher sắp ra mắt" value={list.filter((v) => v.status === 'SCHEDULED').length} />
           <Kpi icon="banknote" tone={{ bg: 'var(--gray-100)', fg: 'var(--gray-600)' }} label="Ngân sách còn lại" value="543.200.000₫" />
         </div>
 
@@ -57,19 +57,19 @@
                 const pct = Math.min(100, Math.round(v.used / v.total * 100));
                 return (
                   <tr key={v.code} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
-                    <td style={td}><span className="code" style={{ fontWeight: 600, color: 'var(--orange-600)' }}>{v.code}</span></td>
+                    <td style={td}><span className="code" style={{ fontWeight: 600, color: 'var(--brand-600)' }}>{v.code}</span></td>
                     <td style={td}>{KIND[v.type]}</td>
                     <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{valueLabel(v)}</td>
                     <td style={{ ...td, textAlign: 'right' }}>{fmtV(v.minOrder)}</td>
                     <td style={{ ...td, textAlign: 'right' }}>{v.maxDiscount ? fmtV(v.maxDiscount) : '—'}</td>
                     <td style={td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 80, height: 6, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', background: pct >= 100 ? 'var(--text-subtle)' : 'var(--orange-500)' }} /></div>
+                        <div style={{ width: 80, height: 6, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: pct + '%', height: '100%', background: pct >= 100 ? 'var(--text-subtle)' : 'var(--brand-500)' }} /></div>
                         <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{(v.used / 1000).toFixed(v.used >= 1000 ? 1 : 0).replace('.0', '')}k/{(v.total / 1000)}k</span>
                       </div>
                     </td>
                     <td style={{ ...td, color: 'var(--text-muted)', fontSize: 12 }}>{v.start}<br />→ {v.end}</td>
-                    <td style={td}>{v.sponsor === 'Lazadee' ? <Badge variant="primary">Lazadee</Badge> : <Badge variant="neutral">Co-sponsor</Badge>}</td>
+                    <td style={td}>{v.sponsor === 'Genie' ? <Badge variant="primary">Genie</Badge> : <Badge variant="neutral">Co-sponsor</Badge>}</td>
                     <td style={td}><Badge variant={st.variant}>{st.label}</Badge></td>
                     <td style={{ ...td, textAlign: 'right' }}>
                       {v.status === 'ENDED'
@@ -108,7 +108,7 @@
       kind: (voucher && voucher.type) || 'percent',
       value: voucher && voucher.value ? String(voucher.value) : '', cap: voucher && voucher.maxDiscount ? String(voucher.maxDiscount) : '',
       minOrder: voucher && voucher.minOrder ? String(voucher.minOrder) : '', total: voucher && voucher.total ? String(voucher.total) : '',
-      perUser: voucher && voucher.perUser ? String(voucher.perUser) : '1', start: '', end: '', sponsor: (voucher && voucher.sponsor) || 'Lazadee', budget: '',
+      perUser: voucher && voucher.perUser ? String(voucher.perUser) : '1', start: '', end: '', sponsor: (voucher && voucher.sponsor) || 'Genie', budget: '',
       name: (voucher && voucher.name) || '', scope: 'all', scopeCat: 'Điện tử', exclude: 'Không loại trừ',
     });
     const [err, setErr] = React.useState({});
@@ -134,9 +134,9 @@
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <label style={lab}>Mã voucher</label>
-              <button onClick={() => set('code', genCode())} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name="refresh-cw" size={13} />Tự tạo</button>
+              <button onClick={() => set('code', genCode())} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--brand-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name="refresh-cw" size={13} />Tự tạo</button>
             </div>
-            <Input value={f.code} onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="VD: LAZADEE50" error={err.code} />
+            <Input value={f.code} onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="VD: GENIE50" error={err.code} />
             {!err.code && <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 5 }}>6–12 ký tự, chỉ chữ HOA và số.</div>}
           </div>
           <div>
@@ -172,9 +172,9 @@
           </div>
           <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end' }}>
             <div style={{ flex: 1 }}><Select label="Phạm vi" value={f.scope === 'cat' ? 'Danh mục cụ thể' : 'Toàn sàn'} onChange={(e) => set('scope', e.target.value === 'Toàn sàn' ? 'all' : 'cat')}><option>Toàn sàn</option><option>Danh mục cụ thể</option></Select></div>
-            <div style={{ flex: 1 }}><Select label="Nhà tài trợ" value={f.sponsor} onChange={(e) => set('sponsor', e.target.value)}><option>Lazadee</option><option>Co-sponsor với Shop</option></Select></div>
+            <div style={{ flex: 1 }}><Select label="Nhà tài trợ" value={f.sponsor} onChange={(e) => set('sponsor', e.target.value)}><option>Genie</option><option>Co-sponsor với Shop</option></Select></div>
           </div>
-          {f.sponsor !== 'Lazadee' && <Input label="Tỷ lệ sàn tài trợ (%)" value={f.share || ''} onChange={(e) => set('share', e.target.value.replace(/\D/g, '').slice(0, 3))} iconRight="percent" placeholder="50" />}
+          {f.sponsor !== 'Genie' && <Input label="Tỷ lệ sàn tài trợ (%)" value={f.share || ''} onChange={(e) => set('share', e.target.value.replace(/\D/g, '').slice(0, 3))} iconRight="percent" placeholder="50" />}
           {f.scope === 'cat'
             ? <Select label="Danh mục được áp dụng" value={f.scopeCat} onChange={(e) => set('scopeCat', e.target.value)}>{['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé'].map((c) => <option key={c}>{c}</option>)}</Select>
             : <Select label="Ngoại trừ (Không áp dụng giảm giá)" value={f.exclude} onChange={(e) => set('exclude', e.target.value)}>{['Không loại trừ', 'Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé'].map((c) => <option key={c}>{c}</option>)}</Select>}

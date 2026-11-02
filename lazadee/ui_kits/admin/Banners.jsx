@@ -1,15 +1,17 @@
 /* Admin: home banners by position with schedule, click-through rate and an instant
-   "Tắt ngay". Max 8 live per position; target links stay inside the platform. Saved to
-   localStorage so the storefront home in this browser shows the live top banner. */
+   "Tắt ngay". Max 8 live per position; target links stay inside the platform. Rows live in
+   the shared banner store (window.LZ.banners), which every storefront slot reads. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, Modal, Input, Select, Tabs } = DS;
-  const { BANNERS, BANNER_POSITIONS } = window.LZA;
-  const KEY = 'lz_home_banners';
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || BANNERS; } catch (e) { return BANNERS; } };
-  const persist = (rows) => { try { localStorage.setItem(KEY, JSON.stringify(rows)); } catch (e) { /* preview only */ } };
-  const today = () => new Date().toISOString().slice(0, 10);
-  const stateOf = (b) => (!b.on ? 'OFF' : b.endsAt < today() ? 'ENDED' : b.startsAt > today() ? 'SCHEDULED' : 'LIVE');
+  const { BANNER_POSITIONS } = window.LZA;
+  const store = window.LZ.banners;
+  const load = store.all;
+  const persist = store.save;
+  const stateOf = store.stateOf;
+  const posOf = (id) => BANNER_POSITIONS.find((p) => p.id === id) || {};
+  // Opens the storefront page where this banner shows, in a new tab.
+  const previewHref = (b) => '../storefront/index.html' + posOf(b.position).preview.replace(/cat=$/, 'cat=' + encodeURIComponent(b.category || ''));
   const ST = { LIVE: ['success', 'Đang hiển thị'], SCHEDULED: ['primary', 'Đã lên lịch'], ENDED: ['neutral', 'Đã kết thúc'], OFF: ['danger', 'Đã tắt'] };
   const EMPTY = { title: '', image: '', imageMobile: '', link: '', position: 'HOME_TOP_CAROUSEL', category: 'Điện tử', order: 1, startsAt: '', endsAt: '', on: true };
 
@@ -27,7 +29,7 @@
   ];
   const FLASH_LINK = '/?screen=home#flash-sale';
   const DISCOVER_LINK = '/?screen=discover';
-  const SITE = 'https://lazadee.vn';
+  const SITE = 'https://genie.example';
   const parseLink = (link) => {
     const u = new URL(link || '/', SITE);
     const q = u.searchParams;
@@ -138,7 +140,7 @@
       if (!form.image) e.image = 'Chọn ảnh desktop';
       const link = form.link.trim() && sitePath(form.link);
       if (!form.link.trim()) e.link = 'Chọn liên kết đích cho banner';
-      else if (!link) e.link = 'Liên kết đích phải thuộc miền lazadee.vn';
+      else if (!link) e.link = 'Liên kết đích phải thuộc miền genie.example';
       if (!form.startsAt || !form.endsAt) e.date = 'Chọn thời gian hiển thị';
       else if (form.endsAt <= form.startsAt) e.date = 'Ngày kết thúc phải sau ngày bắt đầu';
       if (form.position === 'CATEGORY_TOP' && !form.category) e.position = 'Chọn danh mục cho banner này';
@@ -169,12 +171,13 @@
                 return (
                   <tr key={b.id} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
                     <td style={c}><div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><img src={b.image} alt="" width="84" height="44" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><div style={{ maxWidth: 240 }}><div style={{ fontWeight: 600, color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{target.label}{target.name && ': '}{target.name && <span style={target.type === 'campaign' ? { fontFamily: 'var(--font-mono)' } : undefined}>{target.name}</span>}</div></div></div></td>
-                    <td style={c}>{(BANNER_POSITIONS.find((p) => p.id === b.position) || {}).label}{b.position === 'CATEGORY_TOP' && <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{b.category}</div>}</td>
+                    <td style={c}>{posOf(b.position).label}{b.position === 'CATEGORY_TOP' && <span style={{ color: 'var(--text-muted)' }}> · {b.category}</span>}<div style={{ maxWidth: 220, whiteSpace: 'normal', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{posOf(b.position).where}</div></td>
                     <td style={{ ...c, color: 'var(--text-muted)', fontSize: 12 }}>{b.startsAt}<br />→ {b.endsAt}</td>
                     <td style={{ ...c, textAlign: 'right' }}>{b.views.toLocaleString('vi-VN')} / {b.clicks.toLocaleString('vi-VN')}</td>
                     <td style={{ ...c, textAlign: 'right', fontWeight: 600 }}>{b.views ? (b.clicks / b.views * 100).toFixed(1).replace('.', ',') + '%' : '—'}</td>
                     <td style={c}><Badge variant={ST[s][0]}>{ST[s][1]}</Badge></td>
                     <td style={{ ...c, textAlign: 'right' }}><div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                      <a href={previewHref(b)} target="_blank" rel="noopener" style={viewLink} title={'Mở ' + posOf(b.position).label.toLowerCase() + ' trên storefront'}><Icon name="external-link" size={14} />Xem</a>
                       <Button size="sm" variant="ghost" iconLeft="pencil" onClick={() => { setErr({}); setForm({ ...b }); }}>Sửa</Button>
                       {b.on
                         ? <Button size="sm" variant="ghost" iconLeft="power" style={{ color: 'var(--red-600)' }} onClick={() => update(rows.map((x) => (x.id === b.id ? { ...x, on: false } : x)))}>Tắt ngay</Button>
@@ -208,7 +211,7 @@
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <Select label="Vị trí" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>{BANNER_POSITIONS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</Select>
-                {err.position && <Err text={err.position} />}
+                {err.position ? <Err text={err.position} /> : <div style={{ marginTop: 4, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{posOf(form.position).where}</div>}
               </div>
               {form.position === 'CATEGORY_TOP'
                 ? <Select label="Danh mục" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>{['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa', 'Phụ kiện'].map((x) => <option key={x}>{x}</option>)}</Select>
@@ -231,6 +234,7 @@
   const Err = ({ text }) => <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 5 }}><Icon name="circle-alert" size={13} />{text}</div>;
   const hrow = { font: '600 12px var(--font-sans)', color: 'var(--text-muted)', textAlign: 'left', background: 'var(--gray-25)' };
   const c = { padding: '11px 16px', whiteSpace: 'nowrap' };
+  const viewLink = { display: 'inline-flex', alignItems: 'center', gap: 6, height: 32, padding: '0 10px', borderRadius: 'var(--radius-md)', color: 'var(--text-link)', font: '600 13px var(--font-sans)', textDecoration: 'none' };
   const lab = { display: 'block', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' };
   const dateBox = { flex: 1, height: 42, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '0 10px', font: 'var(--type-body-sm)', outline: 'none' };
   window.LZABanners = Banners;

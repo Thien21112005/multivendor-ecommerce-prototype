@@ -93,7 +93,7 @@
                     </div>
                     <div style={{ font: '12px var(--font-sans)', color: 'var(--text-muted)', marginTop: 2 }}>{k.owner} · {k.type}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 7 }}>
-                      <StatusBadge status={status(k) === 'SUPPLEMENT_REQUESTED' ? 'PENDING' : status(k)} label={status(k) === 'PENDING' ? 'PENDING' : status(k) === 'SUPPLEMENT_REQUESTED' ? 'Chờ bổ sung' : status(k)} />
+                      <StatusBadge status={status(k) === 'SUPPLEMENT_REQUESTED' ? 'PENDING' : status(k)} label={status(k) === 'PENDING' ? 'Chờ duyệt' : status(k) === 'SUPPLEMENT_REQUESTED' ? 'Chờ bổ sung' : status(k)} />
                       <span className="code" style={{ font: '11px var(--font-mono)', color: 'var(--text-subtle)' }}>{k.id}</span>
                     </div>
                   </div>
@@ -146,7 +146,7 @@
                   <span style={{ marginLeft: 'auto' }}><Badge variant={o.status[0]}>{o.status[1]}</Badge></span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                  {o.checks.map(([k, ok]) => <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 'var(--radius-pill)', font: '600 12px var(--font-sans)', background: ok ? 'var(--mint-50)' : 'var(--red-50, #FDECEA)', color: ok ? 'var(--mint-600)' : 'var(--red-600)' }}><Icon name={ok ? 'check' : 'x'} size={13} />{k}</span>)}
+                  {o.checks.map(([k, ok]) => <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 'var(--radius-pill)', font: '600 12px var(--font-sans)', background: ok ? 'var(--mint-50)' : 'var(--red-50)', color: ok ? 'var(--mint-600)' : 'var(--red-600)' }}><Icon name={ok ? 'check' : 'x'} size={13} />{k}</span>)}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18 }}>
                   <div>
@@ -165,7 +165,7 @@
                     {[['Loại hình', sel.type], ['Số CCCD (kê khai)', '0790•••••' + sel.id.slice(-3)], ['Người đại diện', sel.owner]].map(([k, v]) => <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '3px 0', font: 'var(--type-body-sm)' }}><span style={{ color: 'var(--text-muted)' }}>{k}</span><span style={{ color: 'var(--text-body)', fontWeight: 500 }}>{v}</span></div>)}
                     <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '6px 0 0', font: 'var(--type-body-sm)' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Hoa hồng riêng của shop</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><input aria-label="Hoa hồng riêng của shop" value={shopRate[sel.id] || ''} onChange={(e) => setShopRate((m) => ({ ...m, [sel.id]: e.target.value.replace(/\D/g, '') }))} placeholder="Theo ngành" style={{ width: 84, height: 30, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '0 8px', font: 'var(--type-body-sm)', outline: 'none', textAlign: 'right' }} />%</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><input aria-label="Hoa hồng riêng của shop" value={shopRate[sel.id] || ''} onChange={(e) => setShopRate((m) => ({ ...m, [sel.id]: e.target.value.replace(/\D/g, '') }))} placeholder="Theo ngành" style={{ width: 104, height: 30, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '0 8px', font: 'var(--type-body-sm)', outline: 'none', textAlign: 'right' }} />%</span>
                     </label>
                   </div>
                 </div>
@@ -181,7 +181,7 @@
           )}
 
           <div style={{ display: 'flex', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '10px 14px', font: 'var(--type-body-sm)', marginBottom: 18 }}>
-            <Icon name="info" size={16} /> <span>Người bán <b>không thể đăng bán sản phẩm</b> cho đến khi hồ sơ được duyệt <b>VERIFIED</b>.</span>
+            <Icon name="info" size={16} /> <span>Người bán <b>không thể đăng bán sản phẩm</b> cho đến khi hồ sơ <b>được duyệt</b>.</span>
           </div>
 
           {/* actions */}
@@ -204,7 +204,7 @@
           )}
         </div>
 
-        <Modal open={supplement} onClose={() => setSupplement(false)} width={560} title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><Icon name="file-text" size={18} style={{ color: 'var(--amber-600, #C77700)' }} />Yêu cầu bổ sung — {sel.shop}</span>}
+        <Modal open={supplement} onClose={() => setSupplement(false)} width={560} title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><Icon name="file-text" size={18} style={{ color: 'var(--amber-600)' }} />Yêu cầu bổ sung — {sel.shop}</span>}
           footer={<>
             <Button variant="ghost" onClick={() => setSupplement(false)}>Huỷ</Button>
             <Button iconLeft="send" onClick={() => { if (suppDocs.length === 0) { setSuppErr(true); return; } setDecided((d) => ({ ...d, [sel.id]: 'SUPPLEMENT_REQUESTED' })); setSupplement(false); }}>Gửi yêu cầu bổ sung</Button>
@@ -213,7 +213,7 @@
             <label style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', display: 'block', marginBottom: 8 }}>Chọn giấy tờ cần bổ sung:</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 14 }}>
               {SUPP_DOCS.map((d) => (
-                <label key={d} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', background: suppDocs.includes(d) ? 'var(--amber-50, #FEF3E2)' : 'transparent', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>
+                <label key={d} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', background: suppDocs.includes(d) ? 'var(--amber-50)' : 'transparent', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>
                   <Checkbox checked={suppDocs.includes(d)} onChange={() => toggleSupp(d)} />{d}
                 </label>
               ))}

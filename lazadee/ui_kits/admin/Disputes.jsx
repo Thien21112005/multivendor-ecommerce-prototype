@@ -39,7 +39,7 @@
           <Field k="Số tiền hoàn" v={formatVND(gw.amount)} price />
           <Field k="Thời gian tạo" v={gw.createdAt} />
           {manual && <Field k="Chuyển tới" v={r.bank || 'Tài khoản khách cung cấp'} />}
-          {manual && <Field k="Nội dung bắt buộc" v={'LZDRF' + r.id.replace(/\D/g, '')} mono />}
+          {manual && <Field k="Nội dung bắt buộc" v={'TRRF' + r.id.replace(/\D/g, '')} mono />}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
             {manual
               ? <Button variant="secondary" size="sm" iconLeft="check" disabled={status === 'SUCCESS'} onClick={() => setStatus('SUCCESS')}>{status === 'SUCCESS' ? 'Đã chuyển khoản' : 'Đã chuyển khoản'}</Button>
@@ -48,7 +48,7 @@
         </div>
         {status === 'FAILED' && (
           <div style={{ margin: '0 14px 14px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'var(--red-50, #FDECEA)', border: '1px solid var(--red-200, #F3B0A8)', borderRadius: 'var(--radius-md)', padding: '11px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'var(--red-50)', border: '1px solid var(--red-200)', borderRadius: 'var(--radius-md)', padding: '11px 14px' }}>
               <Icon name="triangle-alert" size={18} style={{ color: 'var(--red-600)', flex: 'none', marginTop: 1 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--red-600)' }}>Hoàn tiền thất bại</div>
@@ -177,7 +177,7 @@
                 </span>
               </div>
               <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginBottom: 4 }}>Sản phẩm: {r.product} · <span className="code">{r.id}</span></div>
-              <p style={{ font: 'var(--type-body)', color: hidden ? 'var(--text-muted)' : 'var(--text-body)', padding: '8px 12px', background: 'var(--gray-50)', borderRadius: 'var(--radius-md)', borderLeft: '3px solid var(--red-500)' }}>{r.text}</p>
+              <p style={{ font: 'var(--type-body)', color: hidden ? 'var(--text-muted)' : 'var(--text-body)', padding: '8px 12px', background: 'var(--gray-50)', borderRadius: 'var(--radius-md)', border: '1px solid var(--red-200)' }}>{r.text}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
                 <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Cờ: {r.reason}</span>
                 <span style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>

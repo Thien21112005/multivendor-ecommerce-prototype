@@ -35,13 +35,17 @@
     const [bankRef, setBankRef] = React.useState('');
     const st = (w) => done[w.id] || w.state;
     const queue = WITHDRAWALS.filter((w) => st(w) === 'PENDING');
-    const totalPending = queue.reduce((n, w) => n + w.amount, 0);
+    const payable = queue.filter((w) => w.kyc === 'VERIFIED');
+    const totalPending = payable.reduce((n, w) => n + w.amount, 0);
+    const blockedTotal = queue.reduce((n, w) => n + w.amount, 0) - totalPending;
+    const [approve, setApprove] = React.useState(null);
     const settle = () => { setDone((d) => ({ ...d, [pay.id]: 'PAID' })); setPay(null); setManual(false); setBankRef(''); };
     return (
       <div style={{ maxWidth: 1180 }}>
         <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-          <Kpi icon="hand-coins" label="Chờ xử lý" value={queue.length + ' yêu cầu'} tone={{ bg: 'var(--amber-50)', fg: 'var(--amber-600)' }} />
-          <Kpi icon="banknote" label="Tổng tiền chờ chi" value={formatVND(totalPending)} tone={{ bg: 'var(--blue-50)', fg: 'var(--blue-600)' }} />
+          <Kpi label="Chờ xử lý" value={queue.length + ' yêu cầu'} />
+          <Kpi label="Có thể chi ngay" value={formatVND(totalPending)} />
+          <Kpi label="Bị chặn chờ hồ sơ KYC" value={formatVND(blockedTotal)} />
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
@@ -55,16 +59,16 @@
                     <td style={td}><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Avatar name={w.shop} size={26} square />{w.shop}</div></td>
                     <td style={{ ...td, color: 'var(--text-muted)' }} className="code">{w.bank} <Icon name="badge-check" size={13} style={{ color: 'var(--mint-600)' }} title="Đã xác minh chính chủ" /></td>
                     <td style={{ ...td, textAlign: 'right', fontWeight: 700 }}>{formatVND(w.amount)}</td>
-                    <td style={td}><StatusBadge status={w.kyc === 'VERIFIED' ? 'VERIFIED' : 'PENDING'} label={w.kyc} dot={false} /></td>
+                    <td style={td}><StatusBadge status={w.kyc === 'VERIFIED' ? 'VERIFIED' : 'PENDING'} label={w.kyc === 'VERIFIED' ? 'Đã duyệt' : w.kyc === 'SUPPLEMENT_REQUESTED' ? 'Cần bổ sung' : 'Chờ duyệt'} dot={false} /></td>
                     <td style={{ ...td, color: 'var(--text-muted)', fontSize: 12 }}>{w.requested}</td>
                     <td style={{ ...td, textAlign: 'right' }}>
                       {st(w) === 'PAID' ? <Badge variant="success" icon="circle-check">Đã chi</Badge>
                         : st(w) === 'REJECTED' ? <Badge variant="danger" icon="ban">Đã từ chối, hoàn ví</Badge>
                         : st(w) === 'APPROVED' ? <Button size="sm" variant="outline" iconLeft="clock" onClick={() => setPay(w)}>Chờ chuyển khoản</Button>
-                        : blocked ? <Badge variant="danger" icon="lock">Chặn — KYC chưa duyệt</Badge>
+                        : blocked ? <Badge variant="danger" icon="lock">Chặn, hồ sơ KYC cần bổ sung</Badge>
                         : <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                             <Button variant="ghost" size="sm" onClick={() => { setReason(W_REASONS[0]); setReject(w); }}>Từ chối</Button>
-                            <Button size="sm" iconLeft="check" onClick={() => { setDone((d) => ({ ...d, [w.id]: 'APPROVED' })); setPay(w); }}>Duyệt chi</Button>
+                            <Button size="sm" iconLeft="check" onClick={() => setApprove(w)}>Duyệt chi</Button>
                           </div>}
                     </td>
                   </tr>
@@ -73,6 +77,11 @@
             </tbody>
           </table>
         </div>
+
+        <Modal open={!!approve} onClose={() => setApprove(null)} width={460} title={approve && 'Duyệt chi lệnh ' + approve.id}
+          footer={<><Button variant="ghost" onClick={() => setApprove(null)}>Huỷ</Button><Button iconLeft="check" onClick={() => { setDone((d) => ({ ...d, [approve.id]: 'APPROVED' })); setPay(approve); setApprove(null); }}>Duyệt và mở chuyển khoản</Button></>}>
+          {approve && <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Chuyển <b>{formatVND(approve.amount)}</b> cho <b>{approve.shop}</b> vào tài khoản <span className="code">{approve.bank}</span>. Lệnh đã duyệt không thể huỷ, hãy kiểm tra đúng số tiền và tài khoản.</div>}
+        </Modal>
 
         <Modal open={!!reject} onClose={() => setReject(null)} title={reject && 'Từ chối lệnh ' + reject.id}
           footer={<><Button variant="ghost" onClick={() => setReject(null)}>Huỷ</Button><Button variant="danger" onClick={() => { setDone((d) => ({ ...d, [reject.id]: 'REJECTED' })); setReject(null); }}>Từ chối & hoàn ví</Button></>}>
@@ -90,7 +99,7 @@
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 7, font: 'var(--type-body-sm)' }}>
                 <div><span style={{ color: 'var(--text-muted)' }}>Tài khoản nhận: </span><b>{pay.bank}</b></div>
                 <div><span style={{ color: 'var(--text-muted)' }}>Số tiền: </span><b style={{ color: 'var(--text-price)' }}>{formatVND(pay.amount)}</b></div>
-                <div><span style={{ color: 'var(--text-muted)' }}>Nội dung bắt buộc: </span><b className="code">LZDWD{pay.id.replace(/\D/g, '')}</b></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>Nội dung bắt buộc: </span><b className="code">TRWD{pay.id.replace(/\D/g, '')}</b></div>
                 <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Quét mã bằng app ngân hàng của sàn. Hệ thống tự hoàn tất khi SePay báo tiền ra khỏi tài khoản.</div>
               </div>
             </div>
@@ -168,8 +177,8 @@
                   <td style={td}><Badge variant={EVENT[r.event] || 'neutral'}>{r.event}</Badge></td>
                   <td style={td}><span className="code" style={{ fontSize: 12 }}>{r.ref}</span></td>
                   <td style={{ ...td, color: 'var(--text-body)' }}>{r.account}</td>
-                  <td style={{ ...td, textAlign: 'right', color: r.debit ? 'var(--red-600)' : 'var(--text-disabled)', fontWeight: r.debit ? 600 : 400 }}>{r.debit ? formatVND(r.debit) : '—'}</td>
-                  <td style={{ ...td, textAlign: 'right', color: r.credit ? 'var(--green-600)' : 'var(--text-disabled)', fontWeight: r.credit ? 600 : 400 }}>{r.credit ? formatVND(r.credit) : '—'}</td>
+                  <td style={{ ...td, textAlign: 'right', color: r.debit ? 'var(--text-strong)' : 'var(--text-disabled)', fontWeight: r.debit ? 600 : 400 }}>{r.debit ? formatVND(r.debit) : '—'}</td>
+                  <td style={{ ...td, textAlign: 'right', color: r.credit ? 'var(--text-strong)' : 'var(--text-disabled)', fontWeight: r.credit ? 600 : 400 }}>{r.credit ? formatVND(r.credit) : '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -254,7 +263,7 @@
     const submit = () => {
       const e = {};
       if (!f.name.trim()) e.name = 'Nhập họ tên';
-      if (!/^[^@\s]+@lazadee\.vn$/i.test(f.email.trim())) e.email = 'Email công việc phải có đuôi @lazadee.vn';
+      if (!/^[^@\s]+@genie\.example$/i.test(f.email.trim())) e.email = 'Email công việc phải có đuôi @genie.example';
       else if (existing.includes(f.email.trim().toLowerCase())) e.email = 'Email đã được sử dụng';
       setErr(e);
       if (Object.keys(e).length === 0) {
@@ -273,7 +282,7 @@
             <Input label="Họ và tên" value={f.name} onChange={(e) => set('name', e.target.value)} error={err.name} placeholder="Nguyễn Văn A" />
             <div><label style={lab}>Chức danh</label><div style={{ marginTop: 6 }}><Select value={f.role} onChange={(e) => pickRole(e.target.value)}>{EDIT_ROLES.map((r) => <option key={r}>{r}</option>)}</Select></div></div>
           </div>
-          <Input label="Email công việc" iconLeft="mail" value={f.email} onChange={(e) => set('email', e.target.value)} error={err.email} placeholder="ten@lazadee.vn" />
+          <Input label="Email công việc" iconLeft="mail" value={f.email} onChange={(e) => set('email', e.target.value)} error={err.email} placeholder="ten@genie.example" />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
               <label style={lab}>Quyền cấp theo chức danh</label>
@@ -416,7 +425,7 @@
               {stage === 'form' && <div><Button iconLeft="check" onClick={submit}>Cập nhật mật khẩu</Button></div>}
               {stage === 'otp' && (
                 <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--blue-600)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến <b>ye****@lazadee.vn</b> (demo: 123456)</span></div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--blue-600)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến <b>ye****@genie.example</b> (demo: 123456)</span></div>
                   <AOtpBoxes onChange={setOtp} />
                   {err.otp && <div style={{ color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 8 }}>{err.otp}</div>}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
@@ -485,16 +494,8 @@
     return (<div style={{ display: 'flex', gap: 10 }}>{d.map((x, i) => (<input key={i} ref={(el) => (refs.current[i] = el)} inputMode="numeric" maxLength={1} value={x} onChange={(e) => set(i, e.target.value)} onKeyDown={(e) => key(i, e)} onFocus={(e) => (e.target.style.borderColor = 'var(--blue-500)')} onBlur={(e) => (e.target.style.borderColor = 'var(--border-default)')} style={{ width: 44, height: 52, textAlign: 'center', font: '800 22px var(--font-sans)', color: 'var(--text-strong)', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', outline: 'none', boxSizing: 'border-box' }} />))}</div>);
   }
 
-  function Kpi({ icon, label, value, tone }) {
-    return (
-      <div style={{ flex: 1, background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '16px 18px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: tone.bg, color: tone.fg, display: 'grid', placeItems: 'center' }}><Icon name={icon} size={17} /></span>
-          <span style={{ font: '500 13px var(--font-sans)', color: 'var(--text-muted)' }}>{label}</span>
-        </div>
-        <div style={{ font: '800 24px var(--font-sans)', color: 'var(--text-strong)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-      </div>
-    );
+  function Kpi({ label, value }) {
+    return <div style={{ flex: 1, minWidth: 0 }}><window.TRDash.StatTile label={label} value={value} /></div>;
   }
 
   const EVENT = { ESCROW_IN: 'warning', COMMISSION: 'primary', ESCROW_RELEASE: 'success', PAYOUT_ACCRUE: 'mint', PAYOUT_SETTLE: 'neutral', REFUND: 'danger', COD_REMIT: 'warning' };

@@ -1,12 +1,14 @@
 <!-- @dsCard group="Vendor Dashboard" viewport="1280x860" name="Vendor Seller Center" subtitle="Escrow wallet, commission ledger, order fulfillment, sales" -->
-<!-- @startingPoint section="Vendor Dashboard" subtitle="Lazadee Seller Center — escrow wallet & overview" viewport="1280x860" -->
+<!-- @startingPoint section="Vendor Dashboard" subtitle="Genie Seller Center — escrow wallet & overview" viewport="1280x860" -->
 <!doctype html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lazadee — Seller Center</title>
+<title>Genie — Seller Center</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/logomark.svg">
 <link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../dash.css">
 <style>
   html,body{margin:0;background:var(--surface-page)}
   *::-webkit-scrollbar{height:8px;width:8px}
@@ -21,6 +23,7 @@
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="../../i18n.js"></script>
 <script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="../../dash.jsx"></script>
 <script type="text/babel" src="data.jsx"></script>
 <script type="text/babel" src="VendorShell.jsx"></script>
 <script type="text/babel" src="Overview.jsx"></script>
@@ -48,7 +51,7 @@ function KycGate({ status, onGo }) {
   const rejected = status === 'REJECTED';
   return (
     <div style={{ maxWidth: 640, margin: '32px auto', textAlign: 'center' }}>
-      <div style={{ width: 84, height: 84, borderRadius: '50%', background: rejected ? 'var(--red-50, #FDECEA)' : 'var(--amber-50, #FEF3E2)', color: rejected ? 'var(--red-600)' : 'var(--amber-600, #C77700)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
+      <div style={{ width: 84, height: 84, borderRadius: '50%', background: rejected ? 'var(--red-50)' : 'var(--amber-50)', color: rejected ? 'var(--red-600)' : 'var(--amber-600)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
         <Icon name={rejected ? 'triangle-alert' : 'lock'} size={42} />
       </div>
       <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 10 }}>{rejected ? 'Hồ sơ KYC bị từ chối' : 'Tính năng bị khoá — chưa xác minh KYC'}</h2>

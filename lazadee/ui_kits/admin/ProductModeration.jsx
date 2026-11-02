@@ -52,7 +52,7 @@
           </div>
         )}
         {p.aiReason && (
-          <div style={{ display: 'flex', gap: 14, padding: 16, marginBottom: 16, borderRadius: 'var(--radius-md)', background: p.state === 'REJECTED' ? 'var(--red-50, #FDECEA)' : 'var(--amber-50)', border: '1px solid ' + (p.state === 'REJECTED' ? 'var(--red-300, #F3B0A8)' : 'var(--gold-400)') }}>
+          <div style={{ display: 'flex', gap: 14, padding: 16, marginBottom: 16, borderRadius: 'var(--radius-md)', background: p.state === 'REJECTED' ? 'var(--red-50)' : 'var(--amber-50)', border: '1px solid ' + (p.state === 'REJECTED' ? 'var(--red-300, #F3B0A8)' : 'var(--gold-400)') }}>
             <Icon name={aiRejected ? 'cpu' : 'triangle-alert'} size={22} style={{ color: p.state === 'REJECTED' ? 'var(--red-600)' : 'var(--amber-600)', flex: 'none' }} />
             <div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{aiRejected ? 'Lý do AI từ chối:' : p.state === 'REJECTED' ? 'Lý do từ chối:' : 'Phân tích từ AI (Nghi ngờ):'}</div><p style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', margin: '4px 0 0' }}>{p.aiReason}</p></div>
           </div>
