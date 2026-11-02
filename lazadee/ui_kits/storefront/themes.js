@@ -4,6 +4,7 @@
 (function () {
   var THEMES = [
     { id: 'dongho', name: 'Giấy điệp', note: 'Tranh Đông Hồ: đỏ son, vàng hoè, mực than', swatch: ['#B5381F', '#E9B23C', '#1E1814', '#F3EDE1'] },
+    { id: 'dongson', name: 'Trống đồng', note: 'Mặt trống Đông Sơn: đồng thau, vàng đồng, xanh gỉ đồng', swatch: ['#8E5A17', '#E0A93B', '#2B6B5E', '#F5F1E8'] },
     { id: 'polymer', name: 'Tiền polymer', note: 'Xanh ngọc, hồng, ô kính trong và hoa văn guilloche', swatch: ['#1F7356', '#E26A93', '#E3C15A', '#EEF4F1'] },
     { id: 'buudien', name: 'Tem bưu chính', note: 'Vàng bưu điện, mực navy, tem răng cưa và dấu bưu điện', swatch: ['#F5BE16', '#22335C', '#D9472B', '#EDEEE8'] },
     { id: 'saigon', name: 'Mái bạt Sài Gòn', note: 'Biển hiệu kẻ tay: xanh lá, vàng hướng dương, mái bạt sọc', swatch: ['#0F6E45', '#FFD024', '#D52B1E', '#FAF9F4'] },
