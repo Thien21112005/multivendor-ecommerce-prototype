@@ -55,7 +55,8 @@
   [style*="grid-template-columns: 1fr 480px"] > :first-child { display: none !important; }
   [style*="padding: 40px 48px"] { padding: 24px 16px !important; }
 
-  /* overlays fit the screen */
+  /* overlays fit the screen; the fixed track lets a modal's max-width: 100% take effect */
+  [style*="position: fixed"][style*="place-items: center"] { grid-template-columns: minmax(0, 1fr); padding: 8px !important; }
   [role="dialog"], [style*="position: fixed"] > [style*="width: 34"] { max-width: calc(100vw - 16px) !important; }
   [style*="width: 348px"] { width: calc(100vw - 40px) !important; }
   [style*="position: sticky"][style*="top:"] { position: static !important; }
