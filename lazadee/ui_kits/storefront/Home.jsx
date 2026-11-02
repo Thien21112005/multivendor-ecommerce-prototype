@@ -52,11 +52,12 @@
     // Admin → Banner: every position the storefront home shows.
     const live = window.LZ.banners.live;
     const top = live('HOME_TOP_CAROUSEL');
-    const middle = live('HOME_MIDDLE')[0];
+    const side = live('HOME_TOP_SIDE').slice(0, 2);
+    const middle = live('HOME_MIDDLE').slice(0, 2);
     const flashTop = live('FLASH_SALE_TOP')[0];
     const shelf = PRODUCTS.slice(0, 6);
-    const picks = Array.from({ length: 10 }, (_, i) => ({ ...PRODUCTS[(i + 6) % PRODUCTS.length], _k: i }));
-    const flash = PRODUCTS.filter((p) => p.flash).slice(0, 5);
+    const picks = Array.from({ length: 12 }, (_, i) => ({ ...PRODUCTS[(i + 6) % PRODUCTS.length], _k: i }));
+    const flash = PRODUCTS.filter((p) => p.flash).slice(0, 6);
     const shops = window.LZ.vendorList().slice(0, 6);
 
     return (
@@ -73,7 +74,14 @@
           </div>
         </section>
 
-        {top.length > 0 && <div className="tr-section tr-section--banner"><window.LZBannerCarousel items={top} /></div>}
+        {(top.length > 0 || side.length > 0) && (
+          <div className="tr-section tr-section--banner">
+            <div className={'tr-heroban' + (side.length && top.length ? '' : ' tr-heroban--solo')}>
+              {top.length > 0 && <window.LZBannerCarousel items={top} />}
+              {side.length > 0 && <div className="tr-heroban__side">{side.map((b) => <window.LZBanner key={b.id} b={b} />)}</div>}
+            </div>
+          </div>
+        )}
         <window.LZBannerPopup />
 
         <section className="tr-section">
@@ -86,7 +94,7 @@
           </div>
         </section>
 
-        {middle && <div className="tr-section tr-section--banner"><window.LZBanner b={middle} /></div>}
+        {middle.length > 0 && <div className="tr-section tr-section--banner"><div className={'tr-duo' + (middle.length === 1 ? ' tr-duo--solo' : '')}>{middle.map((b) => <window.LZBanner key={b.id} b={b} />)}</div></div>}
 
         <section id="flash-sale" className="tr-section tr-flash">
           <div className="tr-flash__in">
@@ -114,7 +122,7 @@
           <div className="tr-shops">
             {shops.map((v) => (
               <button key={v.id} className="tr-shop" onClick={() => onShop && onShop(v.id)}>
-                <window.LZSeal id={v.id} name={v.name} size={52} />
+                <window.LZSeal id={v.id} name={v.name} size={40} />
                 <span><b>{v.name}</b><small>{v.rating} sao · {v.followers} người theo dõi · {v.location}</small></span>
               </button>
             ))}

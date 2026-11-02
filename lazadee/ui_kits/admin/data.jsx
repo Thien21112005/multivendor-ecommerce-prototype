@@ -124,7 +124,8 @@
 
   const BANNER_POSITIONS = [
     { id: 'HOME_TOP_CAROUSEL', label: 'Đầu trang chủ', where: 'Băng chuyền ngay dưới đường ray tiền, tự chuyển 6 giây một banner', preview: '?screen=home' },
-    { id: 'HOME_MIDDLE', label: 'Giữa trang chủ', where: 'Giữa "Gợi ý cho bạn" và Flash Sale', preview: '?screen=home#flash-sale' },
+    { id: 'HOME_TOP_SIDE', label: 'Cạnh băng chuyền', where: 'Hai ô nhỏ bên phải băng chuyền đầu trang', preview: '?screen=home' },
+    { id: 'HOME_MIDDLE', label: 'Giữa trang chủ', where: 'Hai ô cạnh nhau giữa "Gợi ý cho bạn" và Flash Sale', preview: '?screen=home#flash-sale' },
     { id: 'CATEGORY_TOP', label: 'Đầu trang danh mục', where: 'Trên đầu trang của danh mục đã chọn', preview: '?screen=category&cat=' },
     { id: 'FLASH_SALE_TOP', label: 'Khu Flash Sale', where: 'Trong khối Flash Sale, trên danh sách sản phẩm', preview: '?screen=home#flash-sale' },
     { id: 'POPUP', label: 'Popup', where: 'Hộp nổi khi mở trang chủ, mỗi phiên một lần', preview: '?screen=home' },

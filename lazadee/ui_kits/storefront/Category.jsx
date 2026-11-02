@@ -63,12 +63,12 @@
     const catBanners = LZ.banners.live('CATEGORY_TOP', categoryName);
 
     return (
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 56px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '10px 24px 56px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 14 }}>
           <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer', color: 'var(--text-link)' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={14} /><span style={{ color: 'var(--text-body)', fontWeight: 600 }}>{categoryName}</span>
         </div>
 
-        {catBanners.length > 0 && <div style={{ marginBottom: 18 }}><window.LZBannerCarousel key={categoryName} items={catBanners} /></div>}
+        {catBanners.length > 0 && <div className="tr-catban" style={{ marginBottom: 14 }}><window.LZBannerCarousel key={categoryName} items={catBanners} /></div>}
 
         <div className="tr-cathead" style={{ background: 'var(--brand-50)', borderRadius: 'var(--radius-lg)', padding: '24px 28px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 22, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ width: 68, height: 68, borderRadius: 'var(--radius-lg)', background: '#fff', boxShadow: 'var(--shadow-sm)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name={meta.icon} size={32} style={{ color: 'var(--color-primary)' }} /></div>
@@ -92,7 +92,7 @@
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '232px minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
-          <aside className="tr-filters" data-open={filtersOpen ? 1 : 0} style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 18px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 96 }}>
+          <aside className="tr-filters" data-open={filtersOpen ? 1 : 0} style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 18px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 'calc(var(--top-h, 86px) + 12px)' }}>
             <button className="tr-filters__close" aria-label="Đóng bộ lọc" onClick={() => setFiltersOpen(false)}><Icon name="x" size={22} /></button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}><Icon name="list" size={16} /> Bộ lọc tìm kiếm</div>
             <Group title="Nơi bán & dịch vụ">
@@ -139,7 +139,7 @@
             )}
             {shown.length === 0
               ? <div style={{ display: 'grid', placeItems: 'center', gap: 10, padding: '64px 0', background: '#fff', borderRadius: 'var(--radius-lg)', color: 'var(--text-subtle)' }}><Icon name="search" size={40} /><span style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không có sản phẩm nào khớp bộ lọc</span><Button variant="outline" onClick={clearAll}>Xoá lọc</Button></div>
-              : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>{shown.map((p) => <window.LZCardX key={p.id} p={p} onClick={() => onOpen(p.id)} />)}</div>}
+              : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '12px 10px' }}>{shown.map((p) => <window.LZCardX key={p.id} p={p} onClick={() => onOpen(p.id)} />)}</div>}
             {pages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 24 }}>
                 {Array.from({ length: pages }).map((_, i) => <button key={i} onClick={() => { setPage(i + 1); window.scrollTo(0, 0); }} style={{ minWidth: 40, height: 40, borderRadius: 'var(--radius-md)', cursor: 'pointer', border: '1.5px solid ' + (page === i + 1 ? 'var(--color-primary)' : 'var(--border-default)'), background: page === i + 1 ? 'var(--color-primary)' : '#fff', color: page === i + 1 ? '#fff' : 'var(--text-body)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)' }}>{i + 1}</button>)}

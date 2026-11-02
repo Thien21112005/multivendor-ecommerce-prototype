@@ -251,23 +251,37 @@
     if (!b) return null;
     return <button className="tr-banner" onClick={() => followBanner(b)}><BannerPicture b={b} /></button>;
   }
-  // Every live banner of one position, in Admin order. Advances every 6 seconds, pauses while
-  // hovered or focused, and stays still under reduced motion.
+  // Every live banner of one position, in Admin order. Slides every 6 seconds (the active dot
+  // fills as the time runs), pauses while hovered or focused, follows a swipe or drag, and
+  // stays still under reduced motion.
+  const SLIDE_MS = 6000;
   function BannerCarousel({ items }) {
     const [i, setI] = React.useState(0);
     const [hold, setHold] = React.useState(false);
+    const drag = React.useRef(null);
     const n = items.length;
     const b = items[i % Math.max(n, 1)];
     useCountView(b);
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     React.useEffect(() => {
-      if (n < 2 || hold || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-      const t = setInterval(() => setI((x) => (x + 1) % n), 6000);
-      return () => clearInterval(t);
-    }, [n, hold]);
+      if (n < 2 || hold || still) return undefined;
+      const t = setTimeout(() => setI((x) => (x + 1) % n), SLIDE_MS);
+      return () => clearTimeout(t);
+    }, [n, hold, i]);
+    const step = (d) => setI((x) => (x + d + n) % n);
+    const down = (e) => { drag.current = { x: e.clientX, moved: false }; };
+    const up = (e) => {
+      if (!drag.current) return;
+      const dx = e.clientX - drag.current.x;
+      if (Math.abs(dx) > 40 && n > 1) { drag.current.moved = true; step(dx < 0 ? 1 : -1); }
+    };
+    // A drag that changed the slide is not also a click on the banner.
+    const swallow = (e) => { if (drag.current && drag.current.moved) { e.preventDefault(); e.stopPropagation(); } drag.current = null; };
     if (!n) return null;
     return (
-      <div className="tr-carousel" role="region" aria-roledescription="băng chuyền" aria-label="Banner trang chủ"
-        onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
+      <div className="tr-carousel" role="region" aria-roledescription="băng chuyền" aria-label="Banner trang chủ" data-hold={hold ? 1 : 0}
+        onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}
+        onPointerDown={down} onPointerUp={up} onClickCapture={swallow}>
         <div className="tr-carousel__track" style={{ transform: 'translateX(' + (-100 * (i % n)) + '%)' }}>
           {items.map((x, k) => (
             <button key={x.id} className="tr-banner" tabIndex={k === i % n ? 0 : -1} aria-hidden={k !== i % n} onClick={() => followBanner(x)}
@@ -275,10 +289,14 @@
           ))}
         </div>
         {n > 1 && <>
-          <button className="tr-carousel__nav tr-carousel__nav--prev" aria-label="Banner trước" onClick={() => setI((x) => (x - 1 + n) % n)}><Icon name="chevron-left" size={20} /></button>
-          <button className="tr-carousel__nav tr-carousel__nav--next" aria-label="Banner sau" onClick={() => setI((x) => (x + 1) % n)}><Icon name="chevron-right" size={20} /></button>
+          <button className="tr-carousel__nav tr-carousel__nav--prev" aria-label="Banner trước" onClick={() => step(-1)}><Icon name="chevron-left" size={20} /></button>
+          <button className="tr-carousel__nav tr-carousel__nav--next" aria-label="Banner sau" onClick={() => step(1)}><Icon name="chevron-right" size={20} /></button>
           <div className="tr-carousel__dots">
-            {items.map((x, k) => <button key={x.id} aria-label={'Banner ' + (k + 1)} aria-current={k === i % n ? 'true' : undefined} onClick={() => setI(k)} />)}
+            {items.map((x, k) => (
+              <button key={x.id} aria-label={'Banner ' + (k + 1)} aria-current={k === i % n ? 'true' : undefined} onClick={() => setI(k)}>
+                {k === i % n && !still && <i key={i} style={{ animationDuration: SLIDE_MS + 'ms' }} />}
+              </button>
+            ))}
           </div>
         </>}
       </div>
