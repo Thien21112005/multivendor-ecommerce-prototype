@@ -376,7 +376,7 @@
 [data-theme="dongson"] .tr-hero h1 { font-weight: 700; letter-spacing: -.025em; }
 [data-theme="dongson"] .tr-hero mark { background-image: linear-gradient(transparent 60%, rgba(224, 169, 59, .7) 60% 92%, transparent 92%); }
 [data-theme="dongson"] .tr-hero > p { color: #5E4A33; }
-[data-theme="dongson"] .tr-motif i:nth-child(1) { display: block; right: -110px; top: -150px; width: 520px; height: 520px; opacity: .6; background: url("../../assets/dongson-drum.svg") center / contain no-repeat; }
+[data-theme="dongson"] .tr-motif i:nth-child(1) { display: block; right: -110px; top: -150px; width: 520px; height: 520px; opacity: .7; will-change: transform; background: url("../../assets/dongson-drum.svg") center / contain no-repeat; }
 @media (prefers-reduced-motion: no-preference) { [data-theme="dongson"] .tr-motif i:nth-child(1) { animation: tr-turn 240s linear infinite; } }
 [data-theme="dongson"] .tr-shelf button { border-radius: var(--radius-xl); box-shadow: 0 0 0 1.5px #E5C68C, 0 0 0 5px #F5F1E8, 0 0 0 6.5px #E5C68C; }
 [data-theme="dongson"] .tr-shelf__tag { background: #2E1B05; color: #F1DCAA; box-shadow: none; }
@@ -397,6 +397,101 @@
 [data-theme="dongson"] .tr-foot h3, [data-theme="dongson"] .tr-foot__head { color: #E0A93B; }
 [data-theme="dongson"] .tr-foot__link { color: #E8D7B5; }
 
+/* ===========================================================================
+   7. Đèn thần: the name itself. A brass lamp stands at the right of the hero
+      and turquoise smoke curls up behind the liquid-glass bar, so the wish is
+      seen through the glass. Lagoon teal for actions, brass for money, a pale
+      mist ground. Baloo 2, round and friendly, for every heading.
+   =========================================================================== */
+[data-theme="genie"] {
+  --brand-50: #E7F6F5; --brand-100: #CDEDEA; --brand-200: #9DDBD6; --brand-300: #63C3BD; --brand-400: #2BA6A3;
+  --brand-500: #0F6E78; --brand-600: #0C5B63; --brand-700: #0A4A51; --brand-800: #083A40; --brand-900: #0E2E33;
+  --color-primary: #0F6E78; --color-primary-hover: #0C5B63; --color-primary-active: #0A4A51; --color-primary-tint: #E7F6F5;
+  --text-link: #0C5B63; --border-focus: #0F6E78; --focus-ring: 0 0 0 3px rgba(15, 110, 120, .35);
+  --gold-50: #FBF3E0; --gold-100: #F3DFAE; --gold-400: #E2B04A; --gold-500: #C99232; --gold-700: #6B4A0E;
+  --color-accent: #E2B04A; --color-accent-hover: #C99232; --color-on-accent: #2A1D05; --color-accent-ink: #6B4A0E; --color-accent-tint: #FBF3E0;
+  --surface-page: #F1F6F5; --paper-50: #F1F6F5;
+  --radius-lg: 16px; --radius-xl: 20px; --radius-2xl: 26px;
+  --font-display: 'Baloo 2', var(--font-sans);
+  --logo-body: #C99232; --logo-accent: #2BB3B1;
+  --coin: #E2B04A; --coin-ring: #0E2E33;
+  --top-bg: rgba(241, 246, 245, .86); --top-line: rgba(15, 110, 120, .16);
+  --in-motif: tr-rub;
+}
+@keyframes tr-rub { from { opacity: 0; transform: translateY(36px) scale(.9); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+[data-theme="genie"] .tr-sky { background: linear-gradient(180deg, #D6EFEC 0%, #E6F3F1 55%, #F1F6F5 100%); }
+[data-theme="genie"] .tr-pill { background: rgba(255, 255, 255, .58); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(15, 110, 120, .14), 0 16px 36px -16px rgba(14, 46, 51, .35); }
+[data-theme="genie"] .tr-cat { background: rgba(255, 255, 255, .55); border-color: rgba(15, 110, 120, .16); color: #0E2E33; }
+[data-theme="genie"] .tr-cat:hover { background: #0F6E78; border-color: #0F6E78; color: #fff; }
+[data-theme="genie"] .tr-hero { color: #0E2E33; }
+[data-theme="genie"] .tr-hero h1 { font-weight: 800; letter-spacing: -.015em; line-height: 1.12; }
+[data-theme="genie"] .tr-hero mark { background-image: linear-gradient(transparent 58%, rgba(226, 176, 74, .7) 58% 90%, transparent 90%); }
+[data-theme="genie"] .tr-hero > p { color: #2E5257; }
+[data-theme="genie"] .tr-motif i:nth-child(1) { display: block; right: 40px; top: -256px; width: 300px; height: 390px; background: url("../../assets/genie-lamp.svg") center bottom / contain no-repeat; }
+[data-theme="genie"] .tr-section__head h2 { font-weight: 800; letter-spacing: 0; }
+[data-theme="genie"] .tr-rail__fill { background: #0F6E78; }
+[data-theme="genie"] .tr-rail__stop[data-done="1"] .tr-rail__dot i { box-shadow: inset 0 0 0 3px #0F6E78; }
+[data-theme="genie"] .tr-card__main { box-shadow: 0 0 0 1px #D3E7E4; }
+[data-theme="genie"] .tr-flash__in { background: #FBF3E0; border-color: #F3DFAE; }
+[data-theme="genie"] .tr-clock { background: #0E2E33; color: #E2B04A; }
+[data-theme="genie"] .tr-ticket { border-color: #D3E7E4; }
+[data-theme="genie"] .tr-ticket__amt { background: #0F6E78; }
+[data-theme="genie"] .tr-ticket--shop .tr-ticket__amt { background: #0E2E33; color: #E2B04A; }
+[data-theme="genie"] .tr-foot { background: #0E2E33; color: #CFE6E3; }
+[data-theme="genie"] .tr-foot h3, [data-theme="genie"] .tr-foot__head { color: #E2B04A; }
+[data-theme="genie"] .tr-foot__link { color: #CFE6E3; }
+
+/* ===========================================================================
+   8. Phố Hội: an ochre wall in Hội An at dusk. The field is the wall itself,
+      silk lanterns sway from a wire across it, the bar is a white-washed sign
+      board, and yin-yang roof tiles edge the stuck band. Shutter teal for
+      actions, lotus silk for money, dark wood for type. Alegreya headings.
+   =========================================================================== */
+[data-theme="hoian"] {
+  --brand-50: #E8F2F0; --brand-100: #CFE4E1; --brand-200: #A0C9C4; --brand-300: #6AA9A2; --brand-400: #3E8A82;
+  --brand-500: #2C6E68; --brand-600: #245B56; --brand-700: #1D4945; --brand-800: #163835; --brand-900: #142B29;
+  --color-primary: #2C6E68; --color-primary-hover: #245B56; --color-primary-active: #1D4945; --color-primary-tint: #E8F2F0;
+  --text-link: #245B56; --border-focus: #2C6E68; --focus-ring: 0 0 0 3px rgba(44, 110, 104, .35);
+  --gold-50: #FBEFF4; --gold-100: #F3CADB; --gold-400: #B8326E; --gold-500: #9E2A5E; --gold-700: #7E1E4A;
+  --color-accent: #B8326E; --color-accent-hover: #9E2A5E; --color-on-accent: #FFFFFF; --color-accent-ink: #7E1E4A; --color-accent-tint: #FBEFF4;
+  --flash-500: #C8323C; --flash-600: #A3272F;
+  --surface-page: #F6F1E5; --paper-50: #F6F1E5;
+  --radius-lg: 10px; --radius-xl: 12px; --radius-2xl: 16px;
+  --font-display: 'Alegreya', var(--font-sans);
+  --logo-body: #2C6E68; --logo-accent: #B8326E;
+  --coin: #F2B13E; --coin-ring: #142B29;
+  --top-bg: #E8B54A; --top-line: rgba(90, 58, 38, .35);
+  --in-motif: tr-hang;
+}
+@keyframes tr-hang { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: none; } }
+[data-theme="hoian"] .tr-sky { background: #E8B54A; }
+[data-theme="hoian"] .tr-top[data-stuck="1"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; pointer-events: none;
+  background: radial-gradient(circle at 50% 0, #6B3E26 0 9px, transparent 9.5px) 0 0 / 22px 10px repeat-x; }
+[data-theme="hoian"] .tr-pill { background: #FFFBF2; -webkit-backdrop-filter: none; backdrop-filter: none; border: 1.5px solid #5A3A26; box-shadow: 0 10px 22px -14px rgba(58, 35, 18, .55); }
+[data-theme="hoian"] .tr-search { box-shadow: inset 0 0 0 1px rgba(90, 58, 38, .25); }
+[data-theme="hoian"] .tr-cat { background: rgba(255, 251, 242, .6); border-color: rgba(90, 58, 38, .28); color: #3A2312; }
+[data-theme="hoian"] .tr-cat:hover { background: #2C6E68; border-color: #2C6E68; color: #fff; }
+[data-theme="hoian"] .tr-hero { color: #3A2312; }
+[data-theme="hoian"] .tr-hero h1 { font-weight: 800; letter-spacing: -.01em; line-height: 1.1; }
+[data-theme="hoian"] .tr-hero mark { color: #FBF2DC; padding: 0 .14em; background-image: linear-gradient(#2C6E68, #2C6E68); }
+[data-theme="hoian"] .tr-hero > p { color: #4A2E18; }
+[data-theme="hoian"] .tr-motif i:nth-child(1) { display: block; right: -30px; top: -14px; width: 400px; height: 231px; background: url("../../assets/hoian-lanterns.svg") center top / contain no-repeat; }
+[data-theme="hoian"] .tr-shelf button { box-shadow: 0 0 0 3px #FFFBF2, 0 12px 24px -14px rgba(58, 35, 18, .6); }
+[data-theme="hoian"] .tr-stage .tr-rail.tr-glass { background: #FFFBF2; -webkit-backdrop-filter: none; backdrop-filter: none; border: 0; box-shadow: 0 0 0 1.5px #5A3A26, 0 18px 34px -18px rgba(58, 35, 18, .6); }
+[data-theme="hoian"] .tr-rail__fill { background: #2C6E68; }
+[data-theme="hoian"] .tr-rail__stop[data-done="1"] .tr-rail__dot i { box-shadow: inset 0 0 0 3px #2C6E68; }
+[data-theme="hoian"] .tr-section__head h2 { font-weight: 800; }
+[data-theme="hoian"] .tr-card__main { box-shadow: 0 0 0 1px #E6DCC6; }
+[data-theme="hoian"] .tr-flash__in { background: #FBEFF4; border-color: #F3CADB; }
+[data-theme="hoian"] .tr-clock { background: #3A2312; color: #F2B13E; }
+[data-theme="hoian"] .tr-ticket { border-color: #E6DCC6; }
+[data-theme="hoian"] .tr-ticket__amt { background: #2C6E68; }
+[data-theme="hoian"] .tr-ticket--shop .tr-ticket__amt { background: #5A3A26; }
+[data-theme="hoian"] .tr-shops { box-shadow: 0 0 0 1px #E6DCC6; }
+[data-theme="hoian"] .tr-foot { background: #2B1A0E; color: #EAD9BC; }
+[data-theme="hoian"] .tr-foot h3, [data-theme="hoian"] .tr-foot__head { color: #E8B54A; }
+[data-theme="hoian"] .tr-foot__link { color: #EAD9BC; }
+
 /* ---- Phones: motifs step back so the content leads ------------------------- */
 @media (max-width: 768px) {
   .tr-motif i { transform: scale(.55); transform-origin: top right; }
@@ -406,4 +501,6 @@
   [data-theme="buudien"] .tr-motif i:nth-child(2) { right: -150px; top: 40px; }
   [data-theme="dongho"] .tr-motif i:nth-child(2) { display: none; }
   [data-theme="dongson"] .tr-motif i:nth-child(1) { right: -260px; top: -150px; opacity: .45; }
+  [data-theme="genie"] .tr-motif i:nth-child(1) { right: -20px; top: -40px; width: 150px; height: 195px; opacity: .85; }
+  [data-theme="hoian"] .tr-motif i:nth-child(1) { right: -60px; top: -40px; width: 260px; height: 150px; opacity: .9; }
 }

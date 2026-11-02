@@ -3,6 +3,8 @@
    replays the intro so each one can be judged from its first frame. */
 (function () {
   var THEMES = [
+    { id: 'genie', name: 'Đèn thần', note: 'Đúng tên Genie: đèn đồng thau, khói ngọc lam sau lớp kính', swatch: ['#0F6E78', '#E2B04A', '#2BB3B1', '#F1F6F5'] },
+    { id: 'hoian', name: 'Phố Hội', note: 'Tường vàng Hội An, đèn lồng lụa, cửa chớp xanh, ngói âm dương', swatch: ['#E8B54A', '#2C6E68', '#B8326E', '#3A2312'] },
     { id: 'dongho', name: 'Giấy điệp', note: 'Tranh Đông Hồ: đỏ son, vàng hoè, mực than', swatch: ['#B5381F', '#E9B23C', '#1E1814', '#F3EDE1'] },
     { id: 'dongson', name: 'Trống đồng', note: 'Mặt trống Đông Sơn: đồng thau, vàng đồng, xanh gỉ đồng', swatch: ['#8E5A17', '#E0A93B', '#2B6B5E', '#F5F1E8'] },
     { id: 'polymer', name: 'Tiền polymer', note: 'Xanh ngọc, hồng, ô kính trong và hoa văn guilloche', swatch: ['#1F7356', '#E26A93', '#E3C15A', '#EEF4F1'] },
