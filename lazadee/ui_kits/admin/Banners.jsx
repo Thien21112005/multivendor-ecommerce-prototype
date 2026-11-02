@@ -63,8 +63,13 @@
     return { type, label: LINK_TYPES.find((t) => t.id === type).label, name: name || value };
   };
 
+  // A product link points at one listing, and every listing belongs to one shop, so the
+  // picker shows the shop and price beside each product and can narrow to one shop.
+  const vnd = (n) => n.toLocaleString('vi-VN') + '₫';
+  const shopOf = (p) => (V[p.v] || {}).name || '';
   function ProductPicker({ value, onChange }) {
     const [query, setQuery] = React.useState('');
+    const [shop, setShop] = React.useState('');
     const chosen = PRODUCTS.find((p) => p.id === value);
     if (chosen) {
       return (
@@ -72,23 +77,33 @@
           <label style={lab}>Sản phẩm</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, padding: '4px 4px 4px 8px', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
             <img src={chosen.image} alt="" width="32" height="32" style={{ objectFit: 'cover', borderRadius: 'var(--radius-sm)', flex: 'none' }} />
-            <span style={{ flex: 1, minWidth: 0, font: 'var(--type-body-sm)', color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{chosen.title}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', font: 'var(--type-body-sm)', color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{chosen.title}</span>
+              <span style={{ display: 'block', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{shopOf(chosen)} · {vnd(chosen.price)}</span>
+            </span>
             <Button size="sm" variant="ghost" onClick={() => { setQuery(''); onChange(''); }}>Đổi</Button>
           </div>
         </div>
       );
     }
     const q = plain(query.trim());
-    const found = q ? PRODUCTS.filter((p) => plain(p.title).includes(q)).slice(0, 5) : [];
+    const pool = PRODUCTS.filter((p) => !shop || p.v === shop);
+    const found = (q ? pool.filter((p) => plain(p.title + ' ' + shopOf(p)).includes(q)) : shop ? pool : []).slice(0, 8);
     return (
       <div>
-        <Input label="Sản phẩm" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm theo tên sản phẩm" />
-        {q && <div style={{ marginTop: 6, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 150px', gap: 8 }}>
+          <Input label="Sản phẩm" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tên sản phẩm hoặc shop" />
+          <Select label="Shop" value={shop} onChange={(e) => setShop(e.target.value)}>{[<option key="" value="">Tất cả shop</option>, ...SHOPS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)]}</Select>
+        </div>
+        {(q || shop) && <div style={{ marginTop: 6, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
           {found.length === 0 && <div style={{ padding: '10px 12px', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Không tìm thấy sản phẩm</div>}
           {found.map((p) => (
             <button key={p.id} type="button" onClick={() => onChange(p.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '6px 10px', border: 0, background: '#fff', cursor: 'pointer', textAlign: 'left' }}>
               <img src={p.image} alt="" width="32" height="32" style={{ objectFit: 'cover', borderRadius: 'var(--radius-sm)', flex: 'none' }} />
-              <span style={{ minWidth: 0, font: 'var(--type-body-sm)', color: 'var(--text-body)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', font: 'var(--type-body-sm)', color: 'var(--text-body)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+                <span style={{ display: 'block', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{shopOf(p)} · {vnd(p.price)}</span>
+              </span>
             </button>
           ))}
         </div>}
@@ -114,6 +129,11 @@
       </div>
     );
   }
+
+  // The next order number for a position: one after the largest in use, counted per
+  // category for category strips. Lower numbers show first.
+  const sameSlot = (b, f) => b.position === f.position && (f.position !== 'CATEGORY_TOP' || b.category === f.category) && b.id !== f.id;
+  const nextOrder = (rows, f) => rows.filter((b) => sameSlot(b, f)).reduce((m, b) => Math.max(m, b.order || 0), 0) + 1;
 
   function Banners() {
     const [rows, setRows] = React.useState(load);
@@ -158,7 +178,7 @@
           <div style={{ flex: 1, minWidth: 0 }}>
             <Tabs value={pos} onChange={setPos} items={[{ id: 'all', label: 'Tất cả' }, ...BANNER_POSITIONS.map((p) => ({ id: p.id, label: p.label }))]} />
           </div>
-          <Button iconLeft="plus" style={{ marginLeft: 12, flex: 'none' }} onClick={() => { setErr({}); setForm({ ...EMPTY }); }}>Thêm banner</Button>
+          <Button iconLeft="plus" style={{ marginLeft: 12, flex: 'none' }} onClick={() => { setErr({}); setForm({ ...EMPTY, order: nextOrder(rows, EMPTY) }); }}>Thêm banner</Button>
         </div>
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflowX: 'auto' }}>
           <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
@@ -210,12 +230,14 @@
             <LinkPicker link={form.link} error={err.link} onChange={(link) => { setForm({ ...form, link }); setErr({ ...err, link: null }); }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <Select label="Vị trí" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>{BANNER_POSITIONS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</Select>
+                <Select label="Vị trí" value={form.position} onChange={(e) => { const f = { ...form, position: e.target.value }; setForm(form.id ? f : { ...f, order: nextOrder(rows, f) }); }}>{BANNER_POSITIONS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</Select>
                 {err.position ? <Err text={err.position} /> : <div style={{ marginTop: 4, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{posOf(form.position).where}</div>}
               </div>
-              {form.position === 'CATEGORY_TOP'
-                ? <Select label="Danh mục" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>{['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa', 'Phụ kiện'].map((x) => <option key={x}>{x}</option>)}</Select>
-                : <Input label="Thứ tự" value={String(form.order)} onChange={(e) => setForm({ ...form, order: Number(e.target.value.replace(/\D/g, '')) || 1 })} />}
+              {form.position === 'CATEGORY_TOP' && <Select label="Danh mục" value={form.category} onChange={(e) => { const f = { ...form, category: e.target.value }; setForm(form.id ? f : { ...f, order: nextOrder(rows, f) }); }}>{['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa', 'Phụ kiện'].map((x) => <option key={x}>{x}</option>)}</Select>}
+              <div>
+                <Input label="Thứ tự" value={String(form.order)} onChange={(e) => setForm({ ...form, order: Number(e.target.value.replace(/\D/g, '')) || 1 })} />
+                <div style={{ marginTop: 4, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{(() => { const n = rows.filter((b) => sameSlot(b, form)).length; return n ? 'Đang có ' + n + ' banner ở ' + (form.position === 'CATEGORY_TOP' ? 'danh mục này' : 'vị trí này') + '; số nhỏ hiện trước' : 'Banner đầu tiên ở vị trí này'; })()}</div>
+              </div>
             </div>
             <div>
               <label style={lab}>Thời gian hiển thị</label>
