@@ -13,3 +13,7 @@ TLCN/
 .impeccable/live/
 .impeccable/review/
 .impeccable/config.local.json
+
+# taste-skill inspector output
+.taste-skill/
+tools/.banners-tmp/
