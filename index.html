@@ -3,11 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lazadee — Nền tảng đa người bán</title>
+<title>Genie — Nền tảng đa người bán</title>
+<link rel="icon" type="image/svg+xml" href="lazadee/assets/logomark.svg">
 <link rel="stylesheet" href="lazadee/styles.css">
 <style>
   html, body { margin: 0; height: 100%; background: #14171F; }
-  #app { height: 100vh; }
+  #app { height: 100dvh; }
+  /* Demo switcher: edge tab + floating dock. Kept out of the kit's way on purpose. */
+  .sh-handle { position: fixed; right: 16px; top: 50%; z-index: 40; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; width: 30px; padding: 10px 0; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; background: rgba(20,23,31,.88); color: rgba(255,255,255,.8); cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.28); opacity: .7; transition: opacity 120ms ease-out, width 120ms ease-out; }
+  .sh-handle:hover, .sh-handle:focus-visible, .sh-handle[aria-expanded="true"] { opacity: 1; width: 36px; }
+  .sh-handle:focus-visible, .sh-dock button:focus-visible { outline: 2px solid #FFC02E; outline-offset: 2px; }
+  .sh-dock { position: fixed; right: 58px; top: 50%; z-index: 41; transform: translateY(-50%); width: 300px; max-height: calc(100dvh - 32px); overflow-y: auto; scrollbar-width: thin; padding: 12px; border-radius: 16px; background: #14171F; color: #fff; box-shadow: 0 24px 48px rgba(0,0,0,.38); font-family: var(--font-sans); }
+  .sh-dock[hidden] { display: none; }
+  .sh-dock__brand { display: flex; align-items: center; gap: 8px; padding: 2px 2px 10px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .sh-dock__brand b { font: 800 17px var(--font-sans); letter-spacing: -.02em; }
+  .sh-dock__tag { font: 700 10px var(--font-sans); color: rgba(255,255,255,.55); border: 1px solid rgba(255,255,255,.18); border-radius: 4px; padding: 2px 6px; }
+  .sh-dock__close { margin-left: auto; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,.7); cursor: pointer; }
+  .sh-dock__close:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .sh-dock__list { display: grid; gap: 2px; padding: 8px 0; }
+  .sh-dock__item { display: flex; align-items: center; gap: 11px; min-height: 48px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: rgba(255,255,255,.7); text-align: left; cursor: pointer; }
+  .sh-dock__item:hover { background: rgba(255,255,255,.07); color: #fff; }
+  .sh-dock__item[aria-current="page"] { background: rgba(255,255,255,.1); color: #fff; }
+  .sh-dock__item[aria-current="page"] svg { color: #FFC02E; }
+  .sh-dock__item span { display: flex; flex-direction: column; line-height: 1.2; }
+  .sh-dock__item b { font: 600 14px var(--font-sans); }
+  .sh-dock__item small { font: 500 11px var(--font-sans); opacity: .7; }
+  .sh-dock__sec { padding: 10px 0; border-top: 1px solid rgba(255,255,255,.08); }
+  .sh-dock__sec h2 { margin: 0 0 8px; padding: 0 4px; font: 700 12px var(--font-sans); color: rgba(255,255,255,.6); }
+  .sh-dock__themes { display: grid; gap: 4px; }
+  .sh-theme { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: rgba(255,255,255,.75); text-align: left; cursor: pointer; }
+  .sh-theme:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .sh-theme[aria-checked="true"] { background: rgba(255,255,255,.1); border-color: rgba(255,192,46,.7); color: #fff; }
+  .sh-theme__sw { flex: none; display: grid; grid-template-columns: 1fr 1fr; width: 30px; height: 30px; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
+  .sh-theme__sw i { display: block; }
+  .sh-theme__name { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .sh-theme__name b { font: 600 13px var(--font-sans); }
+  .sh-theme__name small { font: 400 11px var(--font-sans); opacity: .65; }
+  .sh-dock__screens { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sh-dock__screens button { height: 32px; padding: 0 10px; border: 1px solid rgba(255,255,255,.16); border-radius: 8px; background: transparent; color: rgba(255,255,255,.8); font: 600 12px var(--font-sans); cursor: pointer; }
+  .sh-dock__screens button:hover { border-color: rgba(255,255,255,.4); color: #fff; }
+  .sh-dock__screens button[aria-pressed="true"] { background: #FFC02E; border-color: #FFC02E; color: #14171F; }
+  .sh-dock__foot { display: grid; gap: 6px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.08); }
+  .sh-dock__act { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid rgba(255,255,255,.16); border-radius: 10px; background: transparent; color: rgba(255,255,255,.85); font: 600 13px var(--font-sans); cursor: pointer; }
+  .sh-dock__act:hover { border-color: rgba(255,255,255,.4); color: #fff; }
+  @media (max-width: 768px) {
+    .sh-handle { top: auto; bottom: 120px; transform: none; }
+    .sh-dock { top: auto; bottom: 16px; right: 58px; transform: none; max-width: calc(100vw - 70px); }
+    aside.sh-guide { position: fixed !important; top: 0 !important; height: auto !important; }
+  }
   *::-webkit-scrollbar { height: 8px; width: 8px; }
   *::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
 </style>
@@ -18,6 +61,7 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="lazadee/_ds_bundle.js"></script>
+<script src="lazadee/ui_kits/storefront/themes.js"></script>
 <script type="text/babel" src="lazadee/tweaks-panel.jsx"></script>
 <script type="text/babel" src="lazadee/shell.jsx"></script>
 </body>
