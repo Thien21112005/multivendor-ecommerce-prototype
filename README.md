@@ -213,11 +213,11 @@ Toàn bộ prototype chạy bằng dữ liệu mock ngay trên trình duyệt, k
 | Phân hệ | Bổ sung |
 | :--- | :--- |
 | Storefront | Hộp chọn voucher (nhập mã hoặc chọn từ danh sách, voucher chưa đủ điều kiện hiện lý do), voucher theo từng shop, mini-cart, xóa nhiều sản phẩm, đổi phân loại trong giỏ, biên nhận theo phiên, trang danh mục, 28 trang chính sách, nhóm đơn cùng phiên, điểm danh Xu, lịch sử và chi tiết voucher, thanh toán VNPay / VietQR / COD, Sản phẩm yêu thích, gợi ý khi tìm kiếm, lọc thương hiệu, chia sẻ link kèm phân loại, tiến độ Flash Sale, nhãn Đặt trước và Shop đang tạm nghỉ, báo cáo đánh giá, đánh giá ẩn tên, chat kèm thẻ sản phẩm / đơn hàng, huỷ đơn có lý do, yêu cầu trả hàng có bằng chứng và khiếu nại lên Sàn, đổi Xu lấy voucher, xóa tài khoản sau 30 ngày |
-| Seller Center | Chuông thông báo, Tổng quan 8 chỉ số, đơn theo trạng thái GHN, giấy tờ chứng thực sản phẩm, selfie KYC từ camera, địa chỉ lấy hàng, tin nhắn tự động, tài khoản nhận tiền xác minh tên + OTP, Danh mục toàn sàn, rút tiền có OTP, xác nhận / từ chối đơn, so sánh hãng vận chuyển, phản hồi trả hàng trong 48 giờ, chế độ nghỉ, đăng ký Flash Sale, báo cáo đánh giá, chat hoạt động |
+| Seller Center | Chuông thông báo, Tổng quan xếp việc cần làm lên đầu, đơn theo trạng thái GHN, giấy tờ chứng thực sản phẩm, selfie KYC từ camera, địa chỉ lấy hàng, tin nhắn tự động, tài khoản nhận tiền xác minh tên + OTP, Danh mục toàn sàn, rút tiền có OTP, xác nhận / từ chối đơn, so sánh hãng vận chuyển, phản hồi trả hàng trong 48 giờ, chế độ nghỉ, đăng ký Flash Sale, báo cáo đánh giá, chat hoạt động |
 | Admin Console | Tổng quan tài chính, Duyệt Sản phẩm (phân tích AI, hồ sơ pháp lý, phân công nhân viên), Thông báo sàn, trình xem tài liệu KYC, kết quả xác thực tự động, tạo voucher theo danh mục và loại trừ, 3 chức danh nhân viên với 13 mã quyền, Quản lý người dùng, Banner trang chủ, chiến dịch Flash Sale, bộ thuộc tính theo ngành, duyệt chi kèm QR chuyển khoản, phân xử có biên bản, xuất CSV |
 | Auth | Đăng nhập bằng mật khẩu hoặc OTP, kiểm tra trùng email khi đăng ký, đăng nhập Google / Apple mô phỏng |
 
-Tài khoản demo: mật khẩu `Lazadee@123`, mã OTP `123456`. Thêm `?guest=1` vào URL Storefront để xem trạng thái chưa đăng nhập.
+Tài khoản demo: mật khẩu `Genie@123`, mã OTP `123456`. Thêm `?guest=1` vào URL Storefront để xem trạng thái chưa đăng nhập.
 
 Các phần chỉ mô phỏng: mã QR không quét được và không có giao dịch thật, SePay / VNPay / Google / Apple / GHN được giả lập bằng nút hoặc độ trễ, OTP không gửi đi đâu. Bản dịch tiếng Anh áp dụng cho chuỗi giao diện chính; nội dung trang chính sách, dữ liệu mẫu và một số hộp thoại, thông báo vẫn bằng tiếng Việt.
 
@@ -408,6 +408,6 @@ Open `http://localhost:8000` in your web browser.
 
 The whole prototype runs on in-browser mock data with no backend. Data lives in each UI kit's `data.jsx` (`pages-data.js` for policy pages).
 
-Demo credentials: password `Lazadee@123`, OTP `123456`. Add `?guest=1` to the Storefront URL to see the signed-out state.
+Demo credentials: password `Genie@123`, OTP `123456`. Add `?guest=1` to the Storefront URL to see the signed-out state.
 
 Simulated only: QR codes cannot be scanned and no money moves; SePay, VNPay, Google, Apple and GHN are stood in for by buttons or delays; OTPs are never sent. English covers the main interface strings; policy page content, mock data and some dialogs and toasts stay in Vietnamese.
