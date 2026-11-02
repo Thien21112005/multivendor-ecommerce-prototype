@@ -80,7 +80,7 @@
     ];
 
     return (
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 56px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '10px 24px 56px' }}>
         {/* ---- Scope switch ---- */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16, flexWrap: 'wrap' }}>
           <span style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>
@@ -109,7 +109,7 @@
 
         <div style={{ display: 'grid', gridTemplateColumns: '232px minmax(0, 1fr)', gap: 18, alignItems: 'start' }}>
           {/* ---- Filters ---- */}
-          <aside className="tr-filters" data-open={filtersOpen ? 1 : 0} style={{ background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', padding: '16px 16px 20px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 96 }}>
+          <aside className="tr-filters" data-open={filtersOpen ? 1 : 0} style={{ background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', padding: '16px 16px 20px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 'calc(var(--top-h, 86px) + 12px)' }}>
             <button className="tr-filters__close" aria-label="Đóng bộ lọc" onClick={() => setFiltersOpen(false)}><Icon name="x" size={22} /></button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}><Icon name="sliders-horizontal" size={17} style={{ color: 'var(--color-primary)' }} /><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Bộ lọc tìm kiếm</span></div>
 

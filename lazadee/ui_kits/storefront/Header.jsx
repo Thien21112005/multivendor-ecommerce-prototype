@@ -50,8 +50,22 @@
       return () => clearTimeout(h);
     }, [q]);
     const submit = () => { setSugOpen(false); onSearch && onSearch(q); };
+    // The bar and the category row stick together. Once the page moves they take the
+    // theme's solid band, so nothing scrolls through the gap above the bar; their
+    // height is published as --top-h for the sticky side panels below.
+    const top = React.useRef(null);
+    const [stuck, setStuck] = React.useState(false);
+    React.useEffect(() => {
+      const onScroll = () => setStuck(window.scrollY > 4);
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      const ro = new ResizeObserver(() => document.documentElement.style.setProperty('--top-h', Math.round(top.current.getBoundingClientRect().height) + 'px'));
+      ro.observe(top.current);
+      return () => { window.removeEventListener('scroll', onScroll); ro.disconnect(); };
+    }, []);
     return (
       <>
+      <div ref={top} className="tr-top" data-stuck={stuck ? 1 : 0}>
       <header className="tr-pillwrap">
         <div className="tr-pill tr-glass">
           <button className="tr-logo" onClick={() => onNav('home')} aria-label="Genie, về trang chủ">
@@ -98,7 +112,7 @@
             </div>
             <div style={{ position: 'relative', marginLeft: 4 }}>
               {loggedIn
-                ? <button className="tr-user" onClick={() => setUserOpen((o) => !o)} aria-haspopup="menu" aria-expanded={userOpen}><Avatar name={USER.name} src={USER.avatarUrl} size={34} /><span style={{ whiteSpace: 'nowrap' }}>{USER.name}</span></button>
+                ? <button className="tr-user" onClick={() => setUserOpen((o) => !o)} aria-haspopup="menu" aria-expanded={userOpen}><Avatar name={USER.name} src={USER.avatarUrl} size={30} /><span style={{ whiteSpace: 'nowrap' }}>{USER.name}</span></button>
                 : <Button onClick={onLogin}>Đăng nhập</Button>}
               {loggedIn && userOpen && <UserMenu onClose={() => setUserOpen(false)} onNav={onNav} onOrders={onOrders} onLogout={() => setLogoutOpen(true)} />}
             </div>
@@ -112,6 +126,7 @@
           </button>
         ))}
       </nav>
+      </div>
 
 
         <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="Đăng xuất"

@@ -30,7 +30,7 @@
     React.useEffect(() => { window.scrollTo(0, 0); }, [pageId]);
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 24px 72px', display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-        <aside style={{ width: 280, flex: 'none', position: 'sticky', top: 96, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '24px 18px', boxShadow: 'var(--shadow-sm)' }}>
+        <aside style={{ width: 280, flex: 'none', position: 'sticky', top: 'calc(var(--top-h, 86px) + 12px)', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '24px 18px', boxShadow: 'var(--shadow-sm)' }}>
           <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: '0 0 18px 10px' }}>Thông tin hỗ trợ</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {groups.map((g) => (

@@ -106,7 +106,7 @@
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '22px 24px 56px', display: 'grid', gridTemplateColumns: '232px minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
 
           {/* ---- Sidebar ---- */}
-          <aside className="tr-acct" style={{ position: 'sticky', top: 96 }}>
+          <aside className="tr-acct" style={{ position: 'sticky', top: 'calc(var(--top-h, 86px) + 12px)' }}>
             <div className="tr-acct__who" style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 16, borderBottom: '1px solid var(--border-subtle)', marginBottom: 16 }}>
               <Avatar name={USER.name} src={provider !== 'email' ? USER.avatarUrl : null} size={48} />
               <div style={{ minWidth: 0 }}>

@@ -238,7 +238,7 @@
           </div>
 
           {/* summary */}
-          <div style={{ position: 'sticky', top: 96 }}>
+          <div style={{ position: 'sticky', top: 'calc(var(--top-h, 86px) + 12px)' }}>
             <div style={{ ...card, marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '9px 12px', font: 'var(--type-body-sm)', marginBottom: 16 }}>
                 <Icon name="lock" size={16} /> <span>Tồn kho được giữ trong <Countdown secs={14 * 60 + 38} /></span>
