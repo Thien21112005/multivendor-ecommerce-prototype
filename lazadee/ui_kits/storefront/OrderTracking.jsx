@@ -1,4 +1,4 @@
-/* Lazadee order tracking — lifecycle stepper (order status ENUM), 3PL carrier +
+/* Genie order tracking — lifecycle stepper (order status ENUM), 3PL carrier +
    tracking_code, escrow release note (+7 days), append-only shipment_events timeline,
    address snapshot, and the return/refund request flow with proof media (UC-9). */
 (function () {
@@ -23,7 +23,7 @@
     AWAITING_EVIDENCE: ['primary', 'Shop cần thêm bằng chứng', 'Shop đề nghị: "Vui lòng quay rõ phần sản phẩm bị lỗi". Bạn có 48 giờ để bổ sung.'],
     SHOP_REJECTED: ['danger', 'Shop đã từ chối', 'Bạn có 48 giờ để chấp nhận hoặc khiếu nại lên Sàn. Quá hạn, yêu cầu tự đóng.'],
     AWAITING_RETURN_SHIPMENT: ['primary', 'Chờ gửi hàng hoàn', 'Shop đã đồng ý nhận lại hàng. Bạn có 7 ngày để giao hàng cho đơn vị vận chuyển, quá hạn yêu cầu tự đóng.'],
-    DISPUTED: ['danger', 'Sàn đang phân xử', 'Nhân viên Lazadee đang xem xét bằng chứng của hai bên.'],
+    DISPUTED: ['danger', 'Sàn đang phân xử', 'Nhân viên Genie đang xem xét bằng chứng của hai bên.'],
   };
   const EV_ICON = { PAID: 'wallet', PREPARING: 'package', AWAITING_PICKUP: 'package', PICKED_UP: 'truck', IN_TRANSIT: 'truck', OUT_FOR_DELIVERY: 'truck', DELIVERED: 'circle-check' };
   const CARRIER_LABEL = {
@@ -31,7 +31,7 @@
     GHTK: 'Giao Hàng Tiết Kiệm',
     ViettelPost: 'ViettelPost',
     JT_EXPRESS: 'J&T Express',
-    LAZADEE_EXPRESS: 'Lazadee Express (FBL)',
+    TRAO_EXPRESS: 'Genie Express',
   };
 
   function OrderTracking({ orderId, onBack, onChat, onReview, onBuyAgain }) {
@@ -66,14 +66,14 @@
 
           {/* stepper */}
           <section style={{ ...card, padding: '28px 28px 24px' }}>
-            <div style={{ display: 'flex', position: 'relative' }}>
+            <div className="tr-steps" style={{ display: 'flex', position: 'relative' }}>
               {STEPS.map((s, i) => {
                 const done = i < step, cur = i === step;
-                const color = done ? 'var(--mint-500)' : cur ? 'var(--orange-500)' : 'var(--gray-300)';
+                const color = done ? 'var(--mint-500)' : cur ? 'var(--brand-500)' : 'var(--gray-300)';
                 return (
-                  <div key={s.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                  <div key={s.key} data-current={cur ? 1 : 0} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
                     {i < STEPS.length - 1 && <div style={{ position: 'absolute', top: 22, left: '50%', width: '100%', height: 3, background: i < step ? 'var(--mint-500)' : 'var(--gray-200)' }} />}
-                    <div style={{ width: 46, height: 46, borderRadius: '50%', display: 'grid', placeItems: 'center', background: done ? 'var(--mint-500)' : cur ? 'var(--orange-500)' : '#fff', color: done || cur ? '#fff' : 'var(--text-subtle)', border: done || cur ? 'none' : '2px solid var(--gray-200)', position: 'relative', zIndex: 2, boxShadow: cur ? 'var(--shadow-sm)' : 'none' }}>
+                    <div style={{ width: 46, height: 46, borderRadius: '50%', display: 'grid', placeItems: 'center', background: done ? 'var(--mint-500)' : cur ? 'var(--brand-500)' : '#fff', color: done || cur ? '#fff' : 'var(--text-subtle)', border: done || cur ? 'none' : '2px solid var(--gray-200)', position: 'relative', zIndex: 2, boxShadow: cur ? 'var(--shadow-sm)' : 'none' }}>
                       <Icon name={done ? 'check' : s.icon} size={done ? 20 : 19} strokeWidth={done ? 3 : 2} />
                     </div>
                     <div style={{ font: cur ? 'var(--weight-bold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)', color: cur ? 'var(--text-strong)' : done ? 'var(--text-body)' : 'var(--text-subtle)', marginTop: 10, textAlign: 'center' }}>{s.key === 'paid' && order.pay === 'COD' ? 'Thanh toán khi nhận' : s.label}</div>
@@ -81,6 +81,7 @@
                 );
               })}
             </div>
+            <div className="tr-steps__now">Bước {Math.min(step + 1, STEPS.length)}/{STEPS.length}: <b>{(STEPS[step] || STEPS[STEPS.length - 1]).label}</b></div>
           </section>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: 18, marginTop: 18, alignItems: 'start' }}>
@@ -96,7 +97,7 @@
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
                         <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Mã vận đơn:</span>
                         <span className="code" style={{ font: '13px var(--font-mono)', color: 'var(--text-body)' }}>{tr.code}</span>
-                        <button onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--orange-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name={copied ? 'check' : 'copy'} size={13} />{copied ? 'Đã chép' : 'Sao chép'}</button>
+                        <button onClick={copy} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, border: 0, background: 'transparent', color: 'var(--brand-600)', font: '600 12px var(--font-sans)', cursor: 'pointer' }}><Icon name={copied ? 'check' : 'copy'} size={13} />{copied ? 'Đã chép' : 'Sao chép'}</button>
                       </div>
                     </div>
                     {tr.eta && <div style={{ textAlign: 'right' }}><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{tr.deliveredAt ? 'Đã giao lúc' : 'Dự kiến giao'}</div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: tr.deliveredAt ? 'var(--mint-600)' : 'var(--text-strong)' }}>{tr.deliveredAt || tr.eta}</div></div>}
@@ -109,19 +110,19 @@
                 <Icon name={status === 'COMPLETED' ? 'badge-check' : 'shield-check'} size={20} style={{ color: status === 'COMPLETED' ? 'var(--mint-600)' : 'var(--blue-600)', flex: 'none', marginTop: 1 }} />
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>
                   {status === 'COMPLETED'
-                    ? <>Đơn đã <b>hoàn thành</b>. Tiền trong escrow đã được giải ngân cho người bán (sau khi trừ hoa hồng sàn).</>
+                    ? <>Đơn đã <b>hoàn thành</b>. Genie đã chuyển tiền cho shop.</>
                     : order.pay === 'COD'
-                      ? <>Bạn thanh toán tiền mặt khi nhận hàng. Tiền COD được đối soát với đơn vị vận chuyển rồi mới giải ngân cho người bán.</>
+                      ? <>Bạn trả tiền mặt cho nhân viên giao hàng. Đơn vị vận chuyển chuyển khoản tiền này về Genie trước khi Genie trả cho shop.</>
                     : status === 'DELIVERED'
-                      ? <>Tiền đang được <b>giữ tạm (escrow)</b>. Bấm <b>"Đã nhận hàng"</b> để giải ngân cho người bán, hoặc hệ thống tự hoàn tất sau <b>7 ngày</b> (vào {tr && tr.releaseAt ? tr.releaseAt : 'sau 7 ngày'}) nếu không có yêu cầu trả hàng.</>
-                      : <>Thanh toán của bạn đang được <b>giữ tạm trong escrow</b> và chỉ chuyển cho người bán sau khi bạn xác nhận đã nhận hàng — đảm bảo an toàn cho giao dịch.</>}
+                      ? <>Genie đang <b>giữ tiền</b> của bạn. Bấm <b>"Đã nhận hàng"</b> để Genie chuyển tiền cho shop, hoặc tiền tự chuyển sau <b>7 ngày</b> (vào {tr && tr.releaseAt ? tr.releaseAt : 'sau 7 ngày'}) nếu không có yêu cầu trả hàng.</>
+                      : <>Genie đang <b>giữ tiền</b> của bạn và chỉ chuyển cho shop sau khi bạn xác nhận đã nhận hàng.</>}
                 </div>
               </div>
 
               {status === 'RETURN_REQUESTED' && refund && (
                 <section style={card}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                    <Icon name="undo-2" size={18} style={{ color: 'var(--orange-500)' }} />
+                    <Icon name="undo-2" size={18} style={{ color: 'var(--brand-500)' }} />
                     <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: 0 }}>Yêu cầu {refund.id}</h2>
                     <Badge variant={REFUND_STATE[refund.state][0]} style={{ marginLeft: 'auto' }}>{REFUND_STATE[refund.state][1]}</Badge>
                   </div>
@@ -156,7 +157,7 @@
               {tr && tr.events && tr.events.length > 0 && (
                 <section style={card}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                    <Icon name="map-pin" size={19} style={{ color: 'var(--orange-500)' }} />
+                    <Icon name="map-pin" size={19} style={{ color: 'var(--brand-500)' }} />
                     <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: 0 }}>Hành trình đơn hàng</h2>
                   </div>
                   <div>
@@ -186,14 +187,14 @@
             {/* ---- Right: address, items, summary, actions ---- */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <section style={card}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Icon name="map-pin" size={18} style={{ color: 'var(--orange-500)' }} /><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Địa chỉ nhận hàng</span></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}><Icon name="map-pin" size={18} style={{ color: 'var(--brand-500)' }} /><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Địa chỉ nhận hàng</span></div>
                 <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{order.address.recipient} · {order.address.phone}</div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 3, lineHeight: 1.5 }}>{order.address.line}, {order.address.ward}, {order.address.district}, {order.address.city}</div>
               </section>
 
               <section style={card}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 4, borderBottom: '1px solid var(--border-subtle)' }}>
-                  <VendorChip name={v.name} mall={v.mall} />
+                  <span className="tr-chip"><window.LZSeal id={v.id} name={v.name} size={30} /><VendorChip name={v.name} mall={v.mall} /></span>
                   <Button size="sm" variant="ghost" iconLeft="message-circle" style={{ marginLeft: 'auto' }} onClick={() => onChat && onChat(order.vendorId, null, order.id)}>Chat</Button>
                 </div>
                 {order.items.map((it, i) => (
@@ -220,7 +221,7 @@
               {/* actions */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                 {status === 'DELIVERED' && <>
-                  <Button block size="lg" iconLeft="check" onClick={() => { order.status = 'COMPLETED'; setStatus('COMPLETED'); }}>Đã nhận hàng</Button>
+                  <Button block size="lg" iconLeft="check" onClick={() => window.dispatchEvent(new CustomEvent('lz_confirm_receipt', { detail: { id: order.id, amount: order.total, onYes: () => { order.status = 'COMPLETED'; setStatus('COMPLETED'); } } }))}>Đã nhận hàng</Button>
                 </>}
                 {canReturn && <Button block variant="outline" iconLeft="undo-2" onClick={() => setReturnOpen(true)}>Yêu cầu Trả hàng / Hoàn tiền</Button>}
                 {status === 'COMPLETED' && order.returnClosed && <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', textAlign: 'center' }}>Đơn hàng đã quá thời hạn 7 ngày bảo vệ khiếu nại</div>}
@@ -285,7 +286,7 @@
                   <Checkbox checked={sel.includes(i)} onChange={() => toggle(i)} />
                   <img src={it.img} alt="" width="40" height="40" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', border: '1px solid var(--border-subtle)' }} />
                   <span style={{ flex: 1, font: 'var(--type-body-sm)', color: 'var(--text-body)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{it.title}</span>
-                  {it.qty > 1 && sel.includes(i) && <span onClick={(e) => e.preventDefault()}><QuantityStepper value={qtys[i]} min={1} max={it.qty} onChange={(q) => setQtys((a) => a.map((x, j) => (j === i ? q : x)))} /></span>}
+                  {it.qty > 1 && sel.includes(i) && <span role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={(e) => e.preventDefault()}><QuantityStepper value={qtys[i]} min={1} max={it.qty} onChange={(q) => setQtys((a) => a.map((x, j) => (j === i ? q : x)))} /></span>}
                   <span style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-price)' }}>{fmt(it.price)}</span>
                 </label>
               ))}
@@ -306,7 +307,7 @@
           <div>
             <label style={lab}>Bằng chứng: ít nhất 1 ảnh rõ nhãn vận đơn và 1 video mở hộp</label>
             <input ref={fileRef} type="file" hidden multiple accept="image/jpeg,image/png,video/mp4" onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
-            <div onClick={() => fileRef.current.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }} style={{ marginTop: 6, border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', padding: '22px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--surface-sunken)', cursor: 'pointer' }}>
+            <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => fileRef.current.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }} style={{ marginTop: 6, border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', padding: '22px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--surface-sunken)', cursor: 'pointer' }}>
               <Icon name="upload" size={26} style={{ color: 'var(--text-subtle)' }} />
               <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 6 }}>Kéo thả hoặc bấm để tải lên · tối đa 10MB / tệp (JPG, PNG, MP4)</div>
             </div>
@@ -331,13 +332,13 @@
               </div>
             </div>
           )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--orange-50)', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--brand-50)', borderRadius: 'var(--radius-md)' }}>
             <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Số tiền hoàn dự kiến</span>
             <span style={{ font: '800 20px var(--font-sans)', color: 'var(--text-price)' }}>{fmt(refundAmt)}</span>
           </div>
           <div style={{ display: 'flex', gap: 9, font: 'var(--type-caption)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
             <Icon name="shield-check" size={16} style={{ color: 'var(--blue-600)', flex: 'none', marginTop: 1 }} />
-            Shop có 48 giờ để phản hồi yêu cầu. Trong thời gian này, tiền vẫn được giữ trong escrow và chưa giải ngân cho người bán.
+            Shop có 48 giờ để phản hồi yêu cầu. Trong thời gian này, Genie vẫn giữ tiền và chưa chuyển cho shop.
           </div>
         </div>
       </Modal>

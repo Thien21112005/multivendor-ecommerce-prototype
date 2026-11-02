@@ -1,11 +1,12 @@
 <!-- @dsCard group="Auth" viewport="1280x820" name="OTP auth & account lock" subtitle="Login, OTP verify, and 5-failed-attempt account-lock states" -->
-<!-- @startingPoint section="Auth" subtitle="Lazadee OTP login, verify, and account-lock" viewport="1280x820" -->
+<!-- @startingPoint section="Auth" subtitle="Genie OTP login, verify, and account-lock" viewport="1280x820" -->
 <!doctype html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lazadee — Đăng nhập</title>
+<title>Genie — Đăng nhập</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/logomark.svg">
 <link rel="stylesheet" href="../../styles.css">
 <style>
   html,body{margin:0;background:var(--surface-page)}
@@ -26,17 +27,17 @@ function Panel({ children, sub }) {
   return (
     <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 480px' }}>
       {/* brand side */}
-      <div style={{ background: 'linear-gradient(150deg, var(--orange-500), var(--orange-700))', color: '#fff', padding: '56px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--brand-900)', color: '#fff', padding: '56px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img src="../../assets/logomark.svg" width="44" height="44" alt="" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.2))' }} />
-          <span style={{ font: '800 28px var(--font-sans)', letterSpacing: '-0.02em' }}>lazadee</span>
+          <span style={{ font: '800 28px var(--font-sans)', letterSpacing: '-0.02em' }}>Genie</span>
         </div>
         <div>
-          <h1 style={{ font: '800 40px/1.1 var(--font-sans)', letterSpacing: '-0.02em', maxWidth: 420, marginBottom: 16 }}>Mua sắm an tâm, thanh toán bảo chứng.</h1>
-          <p style={{ font: 'var(--text-lg)/1.5 var(--font-sans)', color: 'rgba(255,255,255,.85)', maxWidth: 380 }}>Hàng triệu sản phẩm từ người bán đã xác minh. Giữ tiền escrow đến khi bạn nhận hàng.</p>
+          <h1 style={{ font: '800 40px/1.1 var(--font-sans)', letterSpacing: '-0.02em', maxWidth: 420, marginBottom: 16 }}>Nhận hàng rồi, tiền mới đến shop.</h1>
+          <p style={{ font: 'var(--text-lg)/1.5 var(--font-sans)', color: 'rgba(255,255,255,.85)', maxWidth: 380 }}>Mọi shop đều đã xác minh danh tính. Genie giữ tiền của bạn đến khi bạn nhận hàng.</p>
         </div>
         <div style={{ display: 'flex', gap: 20, font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.8)' }}>
-          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="shield-check" size={16} /> Escrow</span>
+          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="shield-check" size={16} /> Giữ tiền đến khi nhận hàng</span>
           <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="truck" size={16} /> Freeship</span>
           <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="undo-2" size={16} /> Đổi trả 7 ngày</span>
         </div>
@@ -90,7 +91,7 @@ function PasswordInput({ label, value, onChange, error, placeholder }) {
       <div style={{ position: 'relative' }}>
         <input type={show ? 'text' : 'password'} value={value} onChange={onChange} placeholder={placeholder}
           style={{ width: '100%', height: 44, border: '1.5px solid ' + (error ? 'var(--red-500)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', padding: '0 42px 0 14px', font: 'var(--type-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--text-strong)' }} />
-        <button type="button" onClick={() => setShow((s) => !s)} style={{ position: 'absolute', right: 6, top: 6, width: 32, height: 32, border: 0, background: 'transparent', color: 'var(--text-subtle)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name={show ? 'eye-off' : 'eye'} size={18} /></button>
+        <button type="button" aria-label={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"} aria-pressed={show} onClick={() => setShow((s) => !s)} style={{ position: 'absolute', right: 6, top: 6, width: 32, height: 32, border: 0, background: 'transparent', color: 'var(--text-subtle)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name={show ? 'eye-off' : 'eye'} size={18} /></button>
       </div>
       {error && <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--red-600)', font: 'var(--type-caption)', marginTop: 5 }}><Icon name="circle-alert" size={13} />{error}</div>}
     </div>
@@ -123,7 +124,7 @@ function SsoDialog({ provider, onClose }) {
   return (
     <Modal open={!!provider} onClose={onClose} width={400} title={'Tiếp tục với ' + provider}
       footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={() => { window.location.href = '../storefront/index.html'; }}>Tiếp tục</Button></>}>
-      <p style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5, margin: 0 }}>Mô phỏng cửa sổ đăng nhập {provider}. Lazadee sẽ nhận tên, email và ảnh đại diện từ tài khoản <b>mai.tran@gmail.com</b>. Email chưa có tài khoản thì hệ thống tự tạo tài khoản mới.</p>
+      <p style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5, margin: 0 }}>Mô phỏng cửa sổ đăng nhập {provider}. Genie sẽ nhận tên, email và ảnh đại diện từ tài khoản <b>mai.tran@gmail.com</b>. Email chưa có tài khoản thì hệ thống tự tạo tài khoản mới.</p>
     </Modal>
   );
 }
@@ -173,7 +174,7 @@ function Register({ onDone, onLogin }) {
       </div>
       <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer' }}>
         <Checkbox checked={f.agree} onChange={() => set('agree', !f.agree)} />
-        <span style={{ font: 'var(--type-caption)', color: err.agree ? 'var(--red-600)' : 'var(--text-muted)', lineHeight: 1.5 }}>Tôi đồng ý với <a style={{ color: 'var(--orange-600)' }}>Điều khoản dịch vụ</a> và <a style={{ color: 'var(--orange-600)' }}>Chính sách bảo mật</a>.</span>
+        <span style={{ font: 'var(--type-caption)', color: err.agree ? 'var(--red-600)' : 'var(--text-muted)', lineHeight: 1.5 }}>Tôi đồng ý với <a style={{ color: 'var(--brand-600)' }}>Điều khoản dịch vụ</a> và <a style={{ color: 'var(--brand-600)' }}>Chính sách bảo mật</a>.</span>
       </label>
       <Button block size="lg" onClick={submit}>Đăng ký</Button>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '4px 0' }}>
@@ -184,7 +185,7 @@ function Register({ onDone, onLogin }) {
         <SocialButton brand="apple" onPick={setSso} />
       </div>
       <SsoDialog provider={sso} onClose={() => setSso(null)} />
-      <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 4 }}>Đã có tài khoản? <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={onLogin}>Đăng nhập</a></p>
+      <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 4 }}>Đã có tài khoản? <a style={{ color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }} onClick={onLogin}>Đăng nhập</a></p>
     </div>
   );
 }
@@ -211,7 +212,7 @@ function Forgot({ email, setEmail, onLogin }) {
     const e = {};
     const issue = passwordIssue(pw);
     if (issue) e.pw = issue;
-    else if (pw === 'Lazadee@123') e.pw = 'Mật khẩu mới phải khác mật khẩu gần nhất';
+    else if (pw === 'Genie@123') e.pw = 'Mật khẩu mới phải khác mật khẩu gần nhất';
     if (pw2 !== pw) e.pw2 = 'Mật khẩu nhập lại không khớp';
     setErr(e);
     if (Object.keys(e).length === 0) setStage('done');
@@ -293,10 +294,10 @@ function Auth() {
   const [notice, setNotice] = React.useState(null); // { title, text, ok }
   const [sso, setSso] = React.useState(null);
 
-  // mock: Lazadee@123 logs in; 5 wrong passwords lock the account
+  // mock: Genie@123 logs in; 5 wrong passwords lock the account
   const loginPassword = () => {
     if (!/.+@.+\..+/.test(email)) { setPwError('Email không đúng định dạng'); return; }
-    if (pw === 'Lazadee@123') { window.location.href = '../storefront/index.html'; return; }
+    if (pw === 'Genie@123') { window.location.href = '../storefront/index.html'; return; }
     const n = pwFails + 1;
     setPwFails(n); setPw('');
     if (n >= 5) { setLockedBy('mật khẩu'); setLockLeft(15 * 60); setStep('locked'); return; }
@@ -340,12 +341,12 @@ function Auth() {
             ? <>
                 <PasswordInput label="Mật khẩu" value={pw} onChange={(e) => { setPw(e.target.value); setPwError(''); }} error={pwError} placeholder="Mật khẩu của bạn" />
                 <Button block size="lg" disabled={!pw} onClick={loginPassword}>Đăng nhập</Button>
-                <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center' }}>Demo: mật khẩu <span className="code">Lazadee@123</span></div>
+                <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center' }}>Demo: mật khẩu <span className="code">Genie@123</span></div>
               </>
             : <Button block size="lg" onClick={() => { setOtpFor('login'); setStep('otp'); setResend(60); setOtpLeft(300); }}>Gửi mã OTP</Button>}
         </div>
         <div style={{ textAlign: 'right', marginTop: 10 }}>
-          <a style={{ font: 'var(--type-body-sm)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('forgot')}>Quên mật khẩu?</a>
+          <a style={{ font: 'var(--type-body-sm)', color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('forgot')}>Quên mật khẩu?</a>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0' }}>
           <span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} /><span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>HOẶC</span><span style={{ flex: 1, height: 1, background: 'var(--border-default)' }} />
@@ -355,7 +356,7 @@ function Auth() {
           <SocialButton brand="apple" onPick={setSso} />
         </div>
         <SsoDialog provider={sso} onClose={() => setSso(null)} />
-        <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 28 }}>Chưa có tài khoản? <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('register')}>Đăng ký người mua</a> · <a href="../storefront/index.html?screen=seller" style={{ color: 'var(--orange-600)', cursor: 'pointer' }}>Mở shop</a></p>
+        <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 28 }}>Chưa có tài khoản? <a style={{ color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setStep('register')}>Đăng ký người mua</a> · <a href="../storefront/index.html?screen=seller" style={{ color: 'var(--brand-600)', cursor: 'pointer' }}>Mở shop</a></p>
       </div>
     </Panel>
   );
@@ -364,7 +365,7 @@ function Auth() {
     <Panel>
       <div style={{ maxWidth: 384, margin: '0 auto', width: '100%' }}>
         <h2 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>Đăng ký tài khoản</h2>
-        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 22 }}>Tạo tài khoản người mua Lazadee miễn phí.</p>
+        <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', marginBottom: 22 }}>Tạo tài khoản người mua Genie miễn phí.</p>
         {noticeBox}
         <Register onDone={(mail) => { setNotice(null); setEmail(mail); setOtpFor('register'); setStep('otp'); setResend(60); setOtpLeft(300); }} onLogin={() => { setNotice(null); setStep('login'); }} />
       </div>

@@ -1,12 +1,19 @@
 <!-- @dsCard group="Storefront" viewport="1280x900" name="Customer storefront" subtitle="Home · product detail · multi-vendor cart · checkout" -->
-<!-- @startingPoint section="Storefront" subtitle="Lazadee customer storefront — home, product, cart, checkout" viewport="1280x900" -->
+<!-- @startingPoint section="Storefront" subtitle="Genie customer storefront — home, product, cart, checkout" viewport="1280x900" -->
 <!doctype html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lazadee — Storefront</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Genie — Storefront</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/logomark.svg">
 <link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="storefront.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Lexend:wght@400..800&family=Phudu:wght@500..900&family=Saira+Condensed:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="themes.css">
+<script src="themes.js"></script>
 <style>
   html,body{margin:0;background:var(--surface-page)}
   #app{min-height:100vh}
@@ -19,7 +26,8 @@
   @keyframes lzSlideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
-<body>
+<body class="tr">
+<a class="tr-skip" href="#tr-main">Bỏ qua tới nội dung chính</a>
 <div id="app"></div>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -81,6 +89,8 @@ function App() {
   // the system suggests the largest discount; the buyer can change it in the voucher picker
   const [voucherSel, setVoucherSel] = React.useState(() => window.LZ.bestVouchers(seedCart()));
   const [useXu, setUseXu] = React.useState(false);
+  const [receiptAsk, setReceiptAsk] = React.useState(null);
+  React.useEffect(() => { const on = (e) => setReceiptAsk(e.detail); window.addEventListener('lz_confirm_receipt', on); return () => window.removeEventListener('lz_confirm_receipt', on); }, []);
   window.LZ.loggedIn = loggedIn;
 
   const showToast = (message, type) => {
@@ -172,12 +182,12 @@ function App() {
   const checkoutLines = checkoutKeys ? cart.filter((l) => checkoutKeys.includes(l.key)) : cart;
 
   let body = null;
-  if (screen === 'home') body = <window.LZHome onOpen={open} onMore={() => go('discover')} onCategory={openCategory} />;
-  else if (screen === 'discover') body = <window.LZDiscover initialPage={2} onOpen={open} onHome={() => go('home')} />;
+  if (screen === 'home') body = <window.LZHome onOpen={open} onMore={() => go('discover')} onCategory={openCategory} onShop={openShop} />;
+  else if (screen === 'discover') body = <window.TRiscover initialPage={2} onOpen={open} onHome={() => go('home')} />;
   else if (screen === 'product') body = <window.LZProductDetail id={productId} loggedIn={loggedIn} onRequireLogin={requireLogin} onOpen={open} onAdd={addToCart} onGoCart={(key) => { setBuyNowKey(key); go('cart'); }} onShop={openShop} onCategory={openCategory} onHome={() => go('home')} onChat={chat} />;
   else if (screen === 'cart' || (screen === 'checkout' && !loggedIn)) body = <window.LZCart cart={cart} setCart={setCart} voucherSel={voucherSel} setVoucherSel={setVoucherSel} useXu={useXu} setUseXu={setUseXu} buyNowKey={buyNowKey} clearBuyNow={() => setBuyNowKey(null)} onCheckout={(keys) => { if (!loggedIn) { requireLogin(); return; } setCheckoutKeys(keys); go('checkout'); }} onContinue={() => go('home')} onOpen={open} onShop={openShop} onChat={chat} />;
   else if (screen === 'checkout') body = <window.LZCheckout cart={checkoutLines} voucherSel={voucherSel} setVoucherSel={setVoucherSel} useXu={useXu} setUseXu={setUseXu} onPlaced={(r) => { setReceipt(r); setCart((c) => c.filter((l) => !r.keys.includes(l.key))); go('done'); }} onFailed={() => go('payfail')} onBack={() => go('cart')} />;
-  else if (screen === 'done') body = <OrderDone receipt={receipt} onHome={() => go('home')} onOrders={() => goAccount('orders')} onTrack={(id) => track(window.LZ.orderById(id) ? id : 'LZD-20260608-000044')} />;
+  else if (screen === 'done') body = <OrderDone receipt={receipt} onHome={() => go('home')} onOrders={() => goAccount('orders')} onTrack={(id) => track(window.LZ.orderById(id) ? id : 'TR-20260608-000044')} />;
   else if (screen === 'payfail') body = <PaymentFailed onRetry={() => go('checkout')} onCart={() => go('cart')} onHome={() => go('home')} />;
   else if (screen === 'account') body = <window.LZAccount initialView={acctView} pendingNotif={pendingNotif} onClearPendingNotif={() => setPendingNotif(null)} reviewedIds={reviewedIds} onTrack={track} onOpen={open} onReview={review} onBuyAgain={buyAgain} onChat={chat} onShop={openShop} onGo={go} onViewChange={setAcctView} onLogout={logout} />;
   else if (screen === 'tracking') body = <window.LZOrderTracking orderId={trackId} onBack={() => goAccount('orders')} onReview={review} onChat={chat} onBuyAgain={buyAgain} />;
@@ -188,27 +198,42 @@ function App() {
   else if (screen === 'category') body = <window.LZCategory categoryName={catName} onOpen={open} onHome={() => go('home')} onCategory={openCategory} />;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className={'tr-root' + (screen === 'product' || (screen === 'checkout' && loggedIn) ? ' tr-root--bar' : screen === 'cart' ? ' tr-root--cart' : '') + (['product', 'cart', 'checkout', 'done', 'payfail', 'tracking', 'account'].includes(screen) ? ' tr-root--task' : '')}>
+      <div className="tr-sky" />
       <Header cart={cart} cartCount={cartCount} loggedIn={loggedIn} onNav={go} onOpen={open} onOrders={() => goAccount('orders')} onNotifications={() => goAccount('notifications')} onOpenNotif={(n) => { setPendingNotif(n); goAccount('notifications'); }} query={query} onSearch={(q) => runSearch(q, null)} onCategory={openCategory} onShop={openShop} onRequireLogin={requireLogin} onLogin={toLogin} onLogout={logout} />
-      <main style={{ flex: 1 }}>{body}</main>
-      <Footer onNavPage={(id) => go('page', id)} />
+      <main id="tr-main" tabIndex={-1} className={'tr-main' + (screen === 'home' ? ' tr-main--home' : '')}>{body}</main>
+      <Footer onNavPage={(id) => go('page', id)} onNav={go} />
       <window.LZChatWidget />
-      <window.LZReviewModal open={!!reviewOrder} order={reviewOrder} onClose={() => setReviewOrder(null)} onSubmitted={(bonus) => { setReviewedIds((r) => [...r, reviewOrder.id]); setReviewOrder(null); showToast(bonus ? 'Cảm ơn bạn đã đánh giá! Bạn được tặng ' + bonus + ' Xu' : 'Cảm ơn bạn đã đánh giá sản phẩm!'); }} />
+      <window.LZReviewModal open={!!reviewOrder} order={reviewOrder} onClose={() => setReviewOrder(null)} onSubmitted={(bonus) => { setReviewedIds((r) => [...r, reviewOrder.id]); setReviewOrder(null); showToast(bonus ? 'Cảm ơn bạn đã đánh giá! Bạn được tặng ' + bonus + ' Điểm' : 'Cảm ơn bạn đã đánh giá sản phẩm!'); }} />
       {toast && (
-        <div role="status" style={{ position: 'fixed', top: 32, right: 32, zIndex: 9999, display: 'flex', alignItems: 'center', gap: 12, background: '#fff', color: 'var(--text-strong)', padding: '14px 24px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,.15)', border: '1px solid var(--border-default)', animation: 'lzSlideDown .25s var(--ease-out)' }}>
+        <div role="status" className="tr-toast" style={{ position: 'fixed', top: 32, right: 32, zIndex: 9999, display: 'flex', alignItems: 'center', gap: 12, background: '#fff', color: 'var(--text-strong)', padding: '14px 24px', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,.15)', border: '1px solid var(--border-default)', animation: 'lzSlideDown .25s var(--ease-out)' }}>
           <Icon name={toast.type === 'error' ? 'circle-alert' : 'info'} size={22} style={{ color: toast.type === 'error' ? 'var(--red-500)' : 'var(--color-primary)' }} />
           <span style={{ font: 'var(--weight-medium) 15px var(--font-sans)' }}>{toast.message}</span>
         </div>
       )}
+      <ReceiptConfirm ask={receiptAsk} onClose={() => setReceiptAsk(null)} />
       {loginPrompt && <LoginPrompt onClose={() => setLoginPrompt(false)} onLogin={toLogin} />}
     </div>
+  );
+}
+
+// Confirming receipt releases the money to the shop, so it says so before it happens.
+function ReceiptConfirm({ ask, onClose }) {
+  const { Button, Modal } = window.LazadeeDesignSystem_0477b7;
+  return (
+    <Modal open={!!ask} onClose={onClose} width={480} title="Xác nhận đã nhận hàng?"
+      footer={<><Button variant="ghost" onClick={onClose}>Chưa nhận được</Button><Button iconLeft="check" onClick={() => { ask.onYes(); onClose(); }}>Đã nhận, chuyển tiền cho shop</Button></>}>
+      <p style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55, margin: 0 }}>
+        Khi bạn xác nhận, Genie sẽ chuyển {ask && ask.amount ? <b>{ask.amount.toLocaleString('vi-VN')}₫</b> : 'tiền'} của đơn <span className="code" style={{ whiteSpace: 'nowrap' }}>{ask && ask.id}</span> cho shop. Nếu hàng thiếu, lỗi hoặc sai mô tả, hãy chọn Trả hàng thay vì xác nhận.
+      </p>
+    </Modal>
   );
 }
 
 function LoginPrompt({ onClose, onLogin }) {
   const { Button } = window.LazadeeDesignSystem_0477b7;
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 9999, display: 'grid', placeItems: 'center' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'var(--surface-overlay)', zIndex: 9999, display: 'grid', placeItems: 'center' }}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: 340, background: '#fff', borderRadius: 'var(--radius-lg)', padding: 24, textAlign: 'center', boxShadow: 'var(--shadow-xl)' }}>
         <Icon name="user" size={46} style={{ color: 'var(--text-muted)', marginBottom: 14 }} />
         <div style={{ font: 'var(--weight-bold) 18px var(--font-sans)', color: 'var(--text-strong)', marginBottom: 8 }}>Vui lòng đăng nhập</div>
@@ -225,7 +250,7 @@ function LoginPrompt({ onClose, onLogin }) {
 // Receipt after a successful checkout: one row per shop + totals. Opened directly it shows a sample.
 const SAMPLE_RECEIPT = {
   sessionId: 'CS-8F21A',
-  orders: [{ id: 'LZD-20260608-000044', vendorId: 'techzone', grandTotal: 813000 }, { id: 'LZD-20260608-000041', vendorId: 'beauty', grandTotal: 399000 }],
+  orders: [{ id: 'TR-20260608-000044', vendorId: 'techzone', grandTotal: 813000 }, { id: 'TR-20260608-000041', vendorId: 'beauty', grandTotal: 399000 }],
   price: { subtotal: 1261000, shipping: 41000, platformDisc: 60000, freeshipDisc: 30000, shopDisc: 0, xuDiscount: 0, total: 1212000 },
 };
 function OrderDone({ receipt, onHome, onOrders, onTrack }) {
@@ -243,12 +268,13 @@ function OrderDone({ receipt, onHome, onOrders, onTrack }) {
           <Icon name="circle-check" size={42} strokeWidth={2} />
         </div>
         <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 6 }}>{cod ? 'Đặt hàng thành công!' : 'Thanh toán thành công!'}</h1>
-        <p style={{ color: 'var(--text-muted)' }}>{cod ? 'Bạn thanh toán tiền mặt cho nhân viên giao hàng khi nhận hàng.' : r.orders.length > 1 ? 'Đơn hàng đã được tách theo từng nhà bán hàng.' : 'Cảm ơn bạn đã mua sắm tại Lazadee.'}</p>
+        <p style={{ color: 'var(--text-muted)' }}>{cod ? 'Bạn thanh toán tiền mặt cho nhân viên giao hàng khi nhận hàng.' : r.orders.length > 1 ? 'Đơn hàng đã được tách theo từng nhà bán hàng.' : 'Cảm ơn bạn đã mua sắm tại Genie.'}</p>
       </div>
+      {!cod && <div style={{ marginBottom: 16 }}><window.LZMoneyRail flat amount={p.total} /></div>}
       <div style={{ background: '#fff', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', padding: '24px 28px', boxShadow: 'var(--shadow-sm)', marginBottom: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border-subtle)', paddingBottom: 18, marginBottom: 18 }}>
           <div><div style={kicker}>Mã giao dịch</div><div className="code" style={{ font: '600 15px var(--font-mono)', color: 'var(--text-strong)' }}>{r.sessionId}</div></div>
-          <div style={{ textAlign: 'right' }}><div style={kicker}>Ngày đặt</div><div style={{ font: 'var(--weight-medium) 15px var(--font-sans)', color: 'var(--text-strong)' }}>{new Date().toLocaleDateString('vi-VN')}</div></div>
+          <div style={{ textAlign: 'right' }}><div style={kicker}>Ngày đặt</div><div style={{ font: 'var(--weight-medium) 15px var(--font-sans)', color: 'var(--text-strong)' }}>08/06/2026</div></div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
           {r.orders.map((o) => (
@@ -268,8 +294,8 @@ function OrderDone({ receipt, onHome, onOrders, onTrack }) {
           <div style={row}><span>Tổng tiền hàng (Tạm tính)</span><span>{f(p.subtotal)}</span></div>
           <div style={row}><span>Phí vận chuyển</span><span>{f(p.shipping)}</span></div>
           {disc > 0 && <div style={{ ...row, color: 'var(--mint-600)' }}><span>Giảm giá (Voucher & Khuyến mãi)</span><span>−{f(disc)}</span></div>}
-          {p.xuDiscount > 0 && <div style={{ ...row, color: 'var(--orange-600)' }}><span>Dùng Lazadee Xu</span><span>−{f(p.xuDiscount)}</span></div>}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--border-subtle)', font: '700 18px var(--font-sans)', color: 'var(--orange-600)' }}><span>{cod ? 'Thu khi nhận hàng' : 'Tổng thanh toán'}</span><span>{f(p.total)}</span></div>
+          {p.xuDiscount > 0 && <div style={{ ...row, color: 'var(--brand-600)' }}><span>Dùng Điểm Genie</span><span>−{f(p.xuDiscount)}</span></div>}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--border-subtle)', font: '700 18px var(--font-sans)', color: 'var(--text-price)' }}><span>{cod ? 'Thu khi nhận hàng' : 'Tổng thanh toán'}</span><span>{f(p.total)}</span></div>
         </div>
       </div>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
@@ -284,15 +310,14 @@ function PaymentFailed({ onRetry, onCart, onHome }) {
   const { Button, Icon: I, StatusBadge } = window.LazadeeDesignSystem_0477b7;
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '64px 24px', textAlign: 'center' }}>
-      <div style={{ width: 88, height: 88, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
+      <div style={{ width: 88, height: 88, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px' }}>
         <I name="circle-alert" size={52} strokeWidth={2} />
       </div>
       <h1 style={{ font: 'var(--type-h2)', color: 'var(--text-strong)', marginBottom: 10 }}>Thanh toán thất bại</h1>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><StatusBadge status="ERROR" label="PAYMENT_FAILED" /></div>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 6 }}>Cổng thanh toán không thể xử lý giao dịch (thẻ bị từ chối hoặc hết thời gian chờ). <b>Bạn chưa bị trừ tiền.</b></p>
-      <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Đơn hàng <span className="code">LZD-20260608-000045</span> đang ở trạng thái <b>PENDING_PAYMENT</b>.</p>
+            <p style={{ color: 'var(--text-muted)', marginBottom: 6 }}>Ngân hàng hoặc cổng thanh toán chưa xác nhận giao dịch, có thể do thẻ bị từ chối hoặc quá thời gian chờ. <b>Bạn chưa bị trừ tiền.</b></p>
+      <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Đơn hàng <span className="code">TR-20260608-000045</span> vẫn đang chờ bạn thanh toán.</p>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '10px 16px', font: 'var(--type-body-sm)', marginBottom: 28 }}>
-        <I name="lock" size={16} /> Tồn kho vẫn được giữ thêm <b>13:54</b> — hãy thử lại trước khi hết hạn để không mất hàng.
+        <I name="lock" size={16} style={{ flex: 'none' }} /><span>Tồn kho vẫn được giữ thêm <b>13:54</b>. Hãy thử lại trước khi hết hạn để không mất hàng.</span>
       </div>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
         <Button size="lg" iconLeft="refresh-cw" onClick={onRetry}>Thử thanh toán lại</Button>
@@ -303,28 +328,32 @@ function PaymentFailed({ onRetry, onCart, onHome }) {
   );
 }
 
-function Footer({ onNavPage }) {
+function Footer({ onNavPage, onNav }) {
   const cols = window.LZ_PAGE_GROUPS;
+  const [openGroup, setOpenGroup] = React.useState(null);
+  const head = (title) => <h3><button className="tr-foot__head" aria-expanded={openGroup === title} onClick={() => setOpenGroup((g) => (g === title ? null : title))}>{title}<Icon name="chevron-down" size={18} /></button></h3>;
+  const soon = () => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message: 'Ứng dụng di động sẽ ra mắt ở giai đoạn sau' } }));
   return (
-    <footer style={{ background: '#fff', borderTop: '4px solid var(--color-primary)', marginTop: 20 }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 24px', display: 'grid', gridTemplateColumns: '1.4fr repeat(' + cols.length + ', 1fr)', gap: 28 }}>
+    <footer className="tr-foot">
+      <div className="tr-foot__in" style={{ '--cols': cols.length + 1 }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <img src="../../assets/logomark.svg" width="32" height="32" alt="" />
-            <span style={{ font: '800 22px var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--text-strong)' }}>lazadee</span>
-          </div>
-          <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', maxWidth: 260 }}>Sàn thương mại điện tử đa người bán. Mua sắm an tâm với thanh toán giữ tạm (escrow) và đổi trả trong 7 ngày.</p>
+          <div className="tr-foot__brand"><window.GenieMark size={34} />Genie</div>
+          <p>Sàn đa người bán giữ tiền của bạn đến khi bạn nhận hàng, kèm 7 ngày đổi trả.</p>
         </div>
         {cols.map((g) => (
-          <div key={g.title}>
-            <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 14 }}>{g.title}</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-              {g.pages.map((p) => <a key={p.id} onClick={() => onNavPage(p.id)} style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', textDecoration: 'none', cursor: 'pointer' }} onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-primary)')} onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}>{p.name}</a>)}
-            </div>
+          <div key={g.title} className="tr-foot__group" data-open={openGroup === g.title ? 1 : 0}>
+            {head(g.title)}
+            {g.pages.map((p) => <button key={p.id} className="tr-foot__link" onClick={() => onNavPage(p.id)}>{p.name}</button>)}
           </div>
         ))}
+        <div className="tr-foot__group" data-open={openGroup === 'Bán hàng' ? 1 : 0}>
+          {head('Bán hàng')}
+          <button className="tr-foot__link" onClick={() => onNav('seller')}>Trở thành Người bán</button>
+          <button className="tr-foot__link" onClick={() => { window.location.href = '../vendor/index.html'; }}>Kênh người bán</button>
+          <button className="tr-foot__link" onClick={soon}>Tải ứng dụng</button>
+        </div>
       </div>
-      <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '16px 24px', textAlign: 'center', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>© 2026 Lazadee. Demo design-system recreation. Giá hiển thị bằng VND (₫).</div>
+      <div className="tr-foot__legal">© 2026 Genie (tên tạm). Bản mẫu đồ án, dữ liệu minh họa. Giá hiển thị bằng VND (₫).</div>
     </footer>
   );
 }

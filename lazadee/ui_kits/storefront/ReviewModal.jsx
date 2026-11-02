@@ -1,5 +1,5 @@
-/* Lazadee review form: one review per order line, with a star picker, comment, up to 5
-   photos and 1 video. A review with photos earns 50 Xu. */
+/* Genie review form: one review per order line, with a star picker, comment, up to 5
+   photos and 1 video. A review with photos earns 50 Điểm. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Modal, Radio } = DS;
@@ -50,7 +50,7 @@
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
             {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => setStars(n)} aria-label={n + ' sao'} style={{ border: 0, background: 'transparent', padding: 0, cursor: 'pointer', color: n <= stars ? 'var(--orange-500)' : 'var(--border-strong)' }}>
+              <button key={n} onClick={() => setStars(n)} aria-label={n + ' sao'} style={{ border: 0, background: 'transparent', padding: 0, cursor: 'pointer', color: n <= stars ? 'var(--brand-500)' : 'var(--border-strong)' }}>
                 <Icon name="star" size={38} style={{ fill: n <= stars ? 'currentColor' : 'none' }} />
               </button>
             ))}
@@ -68,13 +68,13 @@
               {imgs.map((src, i) => (
                 <div key={src} style={{ position: 'relative', width: 64, height: 64, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
                   <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <button onClick={() => setImgs((a) => a.filter((_, j) => j !== i))} aria-label="Xoá ảnh" style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, border: 0, borderRadius: '50%', background: 'rgba(0,0,0,.6)', color: '#fff', display: 'grid', placeItems: 'center', cursor: 'pointer' }}><Icon name="x" size={12} /></button>
+                  <button onClick={() => setImgs((a) => a.filter((_, j) => j !== i))} aria-label="Xoá ảnh" style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, border: 0, borderRadius: '50%', background: 'var(--surface-overlay)', color: '#fff', display: 'grid', placeItems: 'center', cursor: 'pointer' }}><Icon name="x" size={12} /></button>
                 </div>
               ))}
               {imgs.length > 0 && imgs.length < 5 && <div style={{ width: 64, height: 64, borderRadius: 8, border: '1px dashed var(--border-strong)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}><Icon name="plus" size={22} /></div>}
             </div>
             <input ref={fileRef} type="file" accept="image/*" multiple onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} style={{ display: 'none' }} />
-            <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 6 }}>Đánh giá có ảnh được tặng 50 Xu.</div>
+            <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 6 }}>Đánh giá có ảnh được tặng 50 Điểm.</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <input ref={videoRef} type="file" accept="video/mp4" onChange={pickVideo} style={{ display: 'none' }} />

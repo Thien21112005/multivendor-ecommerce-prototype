@@ -1,4 +1,4 @@
-/* Lazadee consolidated checkout: cart splits into N sub-orders (one Order ID per
+/* Genie consolidated checkout: cart splits into N sub-orders (one Order ID per
    vendor); stackable Platform + Shop + Freeship vouchers chosen from the voucher
    picker, prorated per line; soft-lock. */
 (function () {
@@ -18,7 +18,7 @@
     <svg viewBox="0 0 100 100" width="30" height="30" aria-hidden="true">
       <rect x="10" y="25" width="80" height="50" rx="6" fill="#fff" stroke="#10b981" strokeWidth="4" />
       <circle cx="50" cy="50" r="14" fill="#d1fae5" stroke="#10b981" strokeWidth="3" />
-      <text x="50" y="55" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="16" fill="#047857" textAnchor="middle">$</text>
+      <text x="50" y="55" fontFamily="var(--font-sans)" fontWeight="bold" fontSize="16" fill="#047857" textAnchor="middle">$</text>
     </svg>
   );
   const PAYMENTS = [
@@ -32,14 +32,16 @@
     const { ADDRESSES } = LZ;
     const [addr, setAddr] = React.useState(ADDRESSES.find((a) => a.default) || ADDRESSES[0]);
     const [addrOpen, setAddrOpen] = React.useState(new URLSearchParams(location.search).get('addr') === '1');
+    const [openShops, setOpenShops] = React.useState({});
     const [simFail, setSimFail] = React.useState(false);
     const [pay, setPay] = React.useState('vnpay');
     const [placing, setPlacing] = React.useState(false);
+    const [gateway, setGateway] = React.useState(null);
     const [qrResult, setQrResult] = React.useState(null);
     const [lazOpen, setLazOpen] = React.useState(false);
     const [shopPicker, setShopPicker] = React.useState(null); // vendorId
     const [notes, setNotes] = React.useState({});
-    const [oos, setOos] = React.useState(new URLSearchParams(location.search).get('oos') === '1'); // simulate LZD-INV-4090
+    const [oos, setOos] = React.useState(new URLSearchParams(location.search).get('oos') === '1'); // simulate TR-INV-4090
 
     const groups = React.useMemo(() => {
       const m = {}; cart.forEach((l) => { (m[l.vendorId] = m[l.vendorId] || []).push(l); });
@@ -67,11 +69,12 @@
           const lines = liveLines(ls);
           const sub = lines.reduce((n, l) => n + l.price * l.qty, 0);
           const grand = Math.max(0, sub + LZ.shipFee(vid, lines) - (price.shopByVendor[vid] || 0) - (price.shipCutByVendor[vid] || 0) - lines.reduce((n, l) => n + (price.perLine[l.key] || 0), 0));
-          return { id: 'LZD-20260608-0000' + (seq++), vendorId: vid, grandTotal: grand };
+          return { id: 'TR-20260608-' + String(200 + seq++).padStart(6, '0'), vendorId: vid, grandTotal: grand };
         });
         const result = { sessionId: 'CS-' + Date.now().toString(36).toUpperCase(), orders, price, keys: live.map((l) => l.key), pay };
         setPlacing(false);
         if (pay === 'vietqr') setQrResult(result);
+        else if (pay === 'vnpay') setGateway(result);
         else onPlaced && onPlaced(result);
       }, 700);
     };
@@ -103,7 +106,7 @@
               const vendor = V[vid];
               const liveV = liveLines(lines);
               const vSub = liveV.reduce((n, l) => n + l.price * l.qty, 0);
-              const oid = 'LZD-20260608-0000' + (orderSeq++);
+              const oid = 'TR-20260608-' + String(200 + orderSeq++).padStart(6, '0');
               const platformCut = liveV.reduce((n, l) => n + (price.perLine[l.key] || 0), 0);
               const shopCut = price.shopByVendor[vid] || 0;
               const shipCut = price.shipCutByVendor[vid] || 0;
@@ -112,23 +115,24 @@
               return (
                 <div key={vid} style={card}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)', marginBottom: 4 }}>
-                    <Icon name="store" size={16} style={{ color: 'var(--color-primary)' }} />
+                    <window.LZSeal id={vid} name={window.LZ.V[vid].name} size={28} />
                     <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>{vendor.name}</span>
-                    {vendor.mall && <Badge variant="solid">MALL</Badge>}
+                    {vendor.mall && <Badge variant="primary">Chính hãng</Badge>}
                     <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Đơn riêng</span>
                       <span className="code" style={{ font: '600 12px var(--font-mono)', color: 'var(--text-body)', background: 'var(--gray-100)', padding: '2px 7px', borderRadius: 'var(--radius-sm)' }}>{oid}</span>
                     </span>
                   </div>
+                  <div className="tr-lines" data-open={openShops[vid] ? 1 : 0}>
                   {lines.map((l) => {
                     const dead = oos && l.key === oosKey;
                     return (
                       <div key={l.key} style={{ display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border-subtle)', opacity: dead ? 0.7 : 1 }}>
-                        <img src={l.img} style={{ width: 56, height: 56, borderRadius: 'var(--radius-md)', objectFit: 'cover', flex: 'none', filter: dead ? 'grayscale(1)' : 'none' }} />
+                        <img src={l.img} alt="" style={{ width: 56, height: 56, borderRadius: 'var(--radius-md)', objectFit: 'cover', flex: 'none', filter: dead ? 'grayscale(1)' : 'none' }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>{l.title}</div>
                           <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>Phân loại: {l.variant}</div>
-                          {dead && <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}><StatusBadge status="ERROR" label="LZD-INV-4090" dot={false} /><span style={{ font: 'var(--type-caption)', color: 'var(--red-600)' }}>Sản phẩm vừa hết hàng — đã gỡ khỏi đơn.</span></div>}
+                          {dead && <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}><StatusBadge status="ERROR" label="Hết hàng" dot={false} /><span style={{ font: 'var(--type-caption)', color: 'var(--red-600)' }}>Sản phẩm vừa hết hàng — đã gỡ khỏi đơn.</span></div>}
                         </div>
                         <div style={{ textAlign: 'right', flex: 'none' }}>
                           <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: dead ? 'var(--text-disabled)' : 'var(--text-body)', textDecoration: dead ? 'line-through' : 'none', fontVariantNumeric: 'tabular-nums' }}>{formatVND(l.price)}</div>
@@ -138,8 +142,10 @@
                       </div>
                     );
                   })}
+                  </div>
+                  {lines.length > 1 && !openShops[vid] && <button className="tr-lines__more" onClick={() => setOpenShops((o) => ({ ...o, [vid]: true }))}>Xem thêm {lines.length - 1} sản phẩm <Icon name="chevron-down" size={15} /></button>}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                    <div style={voucherRow} onClick={() => setShopPicker(vid)}><Icon name="ticket" size={15} style={{ color: 'var(--flash-500)' }} /><span>{shopCut ? 'Voucher Shop −' + formatVND(shopCut) : 'Chọn Voucher của Shop'}</span><Icon name="chevron-right" size={14} style={{ marginLeft: 'auto', color: 'var(--text-subtle)' }} /></div>
+                    <div role="button" tabIndex={0} onKeyDown={window.LZKey} style={voucherRow} onClick={() => setShopPicker(vid)}><Icon name="ticket" size={15} style={{ color: 'var(--flash-500)' }} /><span>{shopCut ? 'Voucher Shop −' + formatVND(shopCut) : 'Chọn Voucher của Shop'}</span><Icon name="chevron-right" size={14} style={{ marginLeft: 'auto', color: 'var(--text-subtle)' }} /></div>
                     <div style={{ ...voucherRow, cursor: 'text' }}><Icon name="message-square" size={15} style={{ color: 'var(--text-muted)' }} /><input value={notes[vid] || ''} maxLength={500} onChange={(e) => setNotes((n) => ({ ...n, [vid]: e.target.value }))} placeholder="Lời nhắn cho Shop…" style={{ border: 0, outline: 'none', font: 'var(--type-body-sm)', flex: 1, minWidth: 0, background: 'transparent' }} /></div>
                   </div>
                   {platformCut > 0 && (
@@ -161,12 +167,12 @@
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <Icon name="ticket" size={18} style={{ color: 'var(--color-primary)' }} />
-                <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Lazadee Voucher</span>
+                <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Voucher Genie</span>
                 <Badge variant="neutral">Tối đa 1 mỗi loại</Badge>
               </div>
-              <div onClick={() => setLazOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', background: 'var(--gray-25)', cursor: 'pointer' }}>
+              <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => setLazOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', background: 'var(--gray-25)', cursor: 'pointer' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: platformVoucher || freeshipVoucher ? 8 : 0 }}>{platformVoucher || freeshipVoucher ? 'Đã chọn Lazadee Voucher' : 'Chọn mã giảm giá'}</div>
+                  <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', marginBottom: platformVoucher || freeshipVoucher ? 8 : 0 }}>{platformVoucher || freeshipVoucher ? 'Đã chọn Voucher Genie' : 'Chọn mã giảm giá'}</div>
                   {(platformVoucher || freeshipVoucher) && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {platformVoucher && <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><Badge variant="primary">Platform</Badge><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span className="code">{platformVoucher.code}</span>: giảm {formatVND(platformDisc)}</span></div>}
@@ -183,25 +189,25 @@
               </div>
             </div>
 
-            {/* Lazadee Xu */}
+            {/* Điểm Genie */}
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'var(--gold-50)', color: 'var(--gold-600, #E09600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="star" size={22} /></div>
+                <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'var(--gold-50)', color: 'var(--gold-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="star" size={22} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Sử dụng Lazadee Xu</span>
-                    <Badge variant="neutral">1 Xu = 1₫</Badge>
+                    <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Sử dụng Điểm Genie</span>
+                    <Badge variant="neutral">1 Điểm = 1₫</Badge>
                   </div>
                   <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 2 }}>
-                    Đang có <b className="code" style={{ color: 'var(--gold-700, #B57A00)' }}>{coins.toLocaleString('vi-VN')}</b> Xu · Dùng tối đa 50% tiền hàng ({formatVND(xuCap)})
+                    Đang có <b className="code" style={{ color: 'var(--gold-700)' }}>{coins.toLocaleString('vi-VN')}</b> Điểm · Dùng tối đa 50% tiền hàng ({formatVND(xuCap)})
                   </div>
                 </div>
-                <Switch checked={useXu} onChange={() => setUseXu(!useXu)} disabled={subtotal <= 0} />
+                <Switch aria-label="Dùng Điểm Genie" checked={useXu} onChange={() => setUseXu(!useXu)} disabled={subtotal <= 0} />
               </div>
               {useXu && xuDiscount > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '9px 12px', background: 'var(--gold-50)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>
-                  <Icon name="circle-check" size={16} style={{ color: 'var(--gold-600, #E09600)' }} />
-                  Đã áp dụng <b>{xuDiscount.toLocaleString('vi-VN')} Xu</b>, giảm <b style={{ color: 'var(--text-price)' }}>{formatVND(xuDiscount)}</b> vào đơn hàng.
+                  <Icon name="circle-check" size={16} style={{ color: 'var(--gold-600)' }} />
+                  Đã áp dụng <b>{xuDiscount.toLocaleString('vi-VN')} Điểm</b>, giảm <b style={{ color: 'var(--text-price)' }}>{formatVND(xuDiscount)}</b> vào đơn hàng.
                 </div>
               )}
             </div>
@@ -209,7 +215,7 @@
             {/* payment */}
             <div style={card}>
               <div style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)', marginBottom: 4 }}>Phương thức thanh toán</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 12 }}><Icon name="shield-check" size={14} style={{ color: 'var(--mint-600)' }} />VNPAY và VietQR được giữ tạm trong Escrow · COD thu tiền khi giao hàng</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 12 }}><Icon name="shield-check" size={14} style={{ color: 'var(--mint-600)' }} />Với VNPAY và VietQR, Genie giữ tiền đến khi bạn nhận hàng rồi mới chuyển cho shop. Với COD, bạn trả tiền cho nhân viên giao hàng.</div>
               {PAYMENTS.map((m) => (
                 <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', border: '1.5px solid ' + (pay === m.id ? 'var(--color-primary)' : 'var(--border-default)'), borderRadius: 'var(--radius-md)', marginBottom: 8, cursor: m.off ? 'not-allowed' : 'pointer', background: pay === m.id ? 'var(--color-primary-tint)' : '#fff', opacity: m.off ? 0.55 : 1 }}>
                   <Radio name="pay" checked={pay === m.id} disabled={!!m.off} onChange={() => !m.off && setPay(m.id)} />
@@ -219,10 +225,20 @@
                 </label>
               ))}
             </div>
+            <window.LZDemoBox title="lỗi thanh toán và hết hàng">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button onClick={() => setOos(!oos)} style={{ width: '100%', border: '1px dashed var(--border-strong)', background: '#fff', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', padding: '10px', font: 'var(--type-caption)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Icon name="refresh-cw" size={13} /> {oos ? 'Khôi phục tồn kho (demo)' : 'Mô phỏng: sản phẩm hết hàng giữa lúc thanh toán'}
+                </button>
+                <button onClick={() => setSimFail(!simFail)} style={{ width: '100%', border: '1px dashed ' + (simFail ? 'var(--red-300, #F3B0A8)' : 'var(--border-strong)'), background: simFail ? 'var(--red-50)' : '#fff', color: simFail ? 'var(--red-600)' : 'var(--text-muted)', borderRadius: 'var(--radius-md)', padding: '10px', font: 'var(--type-caption)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Icon name="triangle-alert" size={13} /> {simFail ? 'Thanh toán sẽ thất bại (demo đang bật)' : 'Mô phỏng: thanh toán thất bại (PAYMENT_FAILED)'}
+                </button>
+              </div>
+            </window.LZDemoBox>
           </div>
 
           {/* summary */}
-          <div style={{ position: 'sticky', top: 180 }}>
+          <div style={{ position: 'sticky', top: 96 }}>
             <div style={{ ...card, marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '9px 12px', font: 'var(--type-body-sm)', marginBottom: 16 }}>
                 <Icon name="lock" size={16} /> <span>Tồn kho được giữ trong <Countdown secs={14 * 60 + 38} /></span>
@@ -234,30 +250,29 @@
               {platformDisc > 0 && <div style={sumRow}><span>Voucher Sàn</span><span style={disc}>−{formatVND(platformDisc)}</span></div>}
               {freeshipDisc > 0 && <div style={sumRow}><span>Giảm phí vận chuyển</span><span style={disc}>−{formatVND(freeshipDisc)}</span></div>}
               {shopDisc > 0 && <div style={sumRow}><span>Voucher Shop</span><span style={disc}>−{formatVND(shopDisc)}</span></div>}
-              {xuDiscount > 0 && <div style={sumRow}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="star" size={13} style={{ color: 'var(--gold-500)' }} />Sử dụng Lazadee Xu</span><span style={disc}>−{formatVND(xuDiscount)}</span></div>}
+              {xuDiscount > 0 && <div style={sumRow}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><Icon name="star" size={13} style={{ color: 'var(--gold-500)' }} />Sử dụng Điểm Genie</span><span style={disc}>−{formatVND(xuDiscount)}</span></div>}
               <div style={{ borderTop: '1px dashed var(--border-default)', margin: '10px 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ font: 'var(--weight-semibold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Tổng thanh toán</span>
                 <span style={{ font: '800 26px var(--font-sans)', color: 'var(--text-price)', fontVariantNumeric: 'tabular-nums' }}>{formatVND(total)}</span>
               </div>
               <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', textAlign: 'right', marginTop: 2 }}>{groups.length} đơn · {cart.length} sản phẩm</div>
-              <Button block size="lg" style={{ marginTop: 16 }} disabled={!canPlace} onClick={place}>{placing ? 'Đang xử lý...' : pay === 'cod' ? 'Đặt hàng' : pay === 'vietqr' ? 'Đặt hàng & lấy mã QR' : 'Đặt hàng & thanh toán VNPAY'}</Button>
-              <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>Nhấn "Đặt hàng" đồng nghĩa bạn đồng ý với <a href="?screen=page&id=terms" target="_blank" rel="noreferrer">Điều khoản Lazadee</a></p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button onClick={() => setOos(!oos)} style={{ width: '100%', border: '1px dashed var(--border-strong)', background: '#fff', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)', padding: '10px', font: 'var(--type-caption)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <Icon name="refresh-cw" size={13} /> {oos ? 'Khôi phục tồn kho (demo)' : 'Mô phỏng: sản phẩm hết hàng giữa lúc thanh toán'}
-              </button>
-              <button onClick={() => setSimFail(!simFail)} style={{ width: '100%', border: '1px dashed ' + (simFail ? 'var(--red-300, #F3B0A8)' : 'var(--border-strong)'), background: simFail ? 'var(--red-50, #FDECEA)' : '#fff', color: simFail ? 'var(--red-600)' : 'var(--text-muted)', borderRadius: 'var(--radius-md)', padding: '10px', font: 'var(--type-caption)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <Icon name="triangle-alert" size={13} /> {simFail ? 'Thanh toán sẽ thất bại (demo đang bật)' : 'Mô phỏng: thanh toán thất bại (PAYMENT_FAILED)'}
-              </button>
+              {pay !== 'cod' && <window.LZHoldNote style={{ marginTop: 14 }}>Genie giữ <b>{formatVND(total)}</b> đến khi bạn nhận hàng.</window.LZHoldNote>}
+              <div className="tr-inline-cta"><Button block size="lg" style={{ marginTop: 14 }} disabled={!canPlace} onClick={place}>{placing ? 'Đang xử lý...' : pay === 'cod' ? 'Đặt hàng' : pay === 'vietqr' ? 'Đặt hàng & lấy mã QR' : 'Đặt hàng & thanh toán VNPAY'}</Button></div>
+              <p style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>Nhấn "Đặt hàng" đồng nghĩa bạn đồng ý với <a href="?screen=page&id=terms" target="_blank" rel="noreferrer">Điều khoản Genie</a></p>
             </div>
           </div>
         </div>
 
-        <window.LZPayModal open={!!qrResult} amount={total} initial="vietqr" code={qrResult ? 'LZD' + qrResult.orders[0].id.replace(/\D/g, '') : ''} onClose={() => setQrResult(null)} onPaid={() => onPlaced && onPlaced(qrResult)} />
+        <div className="tr-paybar">
+          <div><small>Tổng thanh toán</small><b>{formatVND(total)}</b></div>
+          <Button size="lg" disabled={!canPlace} onClick={place}>{placing ? 'Đang xử lý...' : 'Đặt hàng'}</Button>
+        </div>
+
+        {gateway && <window.LZPayGateway amount={total} orders={gateway.orders.length} onCancel={() => setGateway(null)} onPaid={() => { const r = gateway; setGateway(null); onPlaced && onPlaced(r); }} />}
+        <window.LZPayModal open={!!qrResult} amount={total} initial="vietqr" code={qrResult ? 'TR' + qrResult.orders[0].id.replace(/\D/g, '') : ''} onClose={() => setQrResult(null)} onPaid={() => onPlaced && onPlaced(qrResult)} />
         {window.LZAddressModal && <window.LZAddressModal open={addrOpen} onClose={() => setAddrOpen(false)} selectedId={addr.id} onSelect={setAddr} />}
-        <window.LZVoucherPicker open={lazOpen} onClose={() => setLazOpen(false)} title="Chọn Lazadee Voucher" lines={live} selected={voucherSel}
+        <window.LZVoucherPicker open={lazOpen} onClose={() => setLazOpen(false)} title="Chọn Voucher Genie" lines={live} selected={voucherSel}
           onConfirm={(r) => setVoucherSel((s) => ({ ...s, ...r }))} />
         <window.LZVoucherPicker open={!!shopPicker} onClose={() => setShopPicker(null)} title="Chọn Voucher của Shop" mode="shop" vendorId={shopPicker}
           lines={live.filter((l) => l.vendorId === shopPicker)} selected={{ shop: shopPicker && (voucherSel.shop || {})[shopPicker] }}

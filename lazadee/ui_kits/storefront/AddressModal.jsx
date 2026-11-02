@@ -1,4 +1,4 @@
-/* Lazadee address book modal — select / set-default / add / edit a shipping
+/* Genie address book modal — select / set-default / add / edit a shipping
    address. Mirrors the `addresses` table (recipient, phone, province/district/
    ward, street, is_default). The add/edit form uses a GHN-style 3-level region
    picker (Tỉnh/Thành phố → Quận/Huyện → Phường/Xã) plus a "use current location"
@@ -78,18 +78,18 @@
                       <span style={{ width: 1, height: 12, background: 'var(--border-strong)' }} />
                       <span className="code" style={{ font: '13px var(--font-mono)', color: 'var(--text-muted)' }}>{a.phone}</span>
                       {a.label && <span style={{ font: '600 11px var(--font-sans)', color: 'var(--text-muted)', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-pill)', padding: '2px 9px' }}>{a.label}</span>}
-                      {a.default && <span style={{ font: '600 11px var(--font-sans)', color: 'var(--orange-600)', border: '1px solid var(--orange-200)', borderRadius: 4, padding: '1px 7px' }}>Mặc định</span>}
+                      {a.default && <span style={{ font: '600 11px var(--font-sans)', color: 'var(--brand-600)', border: '1px solid var(--brand-200)', borderRadius: 4, padding: '1px 7px' }}>Mặc định</span>}
                     </div>
                     <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>{a.line}, {a.ward}, {a.district}, {a.city}</div>
                     <div style={{ display: 'flex', gap: 16, marginTop: 7 }}>
-                      <span style={link} onClick={(e) => { e.preventDefault(); setEditing(a); setMode('form'); }}>Sửa</span>
-                      {!a.default && <span style={link} onClick={(e) => { e.preventDefault(); makeDefault(a.id); }}>Đặt làm mặc định</span>}
+                      <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={link} onClick={(e) => { e.preventDefault(); setEditing(a); setMode('form'); }}>Sửa</span>
+                      {!a.default && <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={link} onClick={(e) => { e.preventDefault(); makeDefault(a.id); }}>Đặt làm mặc định</span>}
                     </div>
                   </div>
                 </label>
               );
             })}
-            <button onClick={() => { setEditing(null); setMode('form'); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4, height: 46, border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', background: 'var(--surface-sunken)', color: 'var(--orange-600)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', cursor: 'pointer' }}>
+            <button onClick={() => { setEditing(null); setMode('form'); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 4, height: 46, border: '1.5px dashed var(--border-strong)', borderRadius: 'var(--radius-md)', background: 'var(--surface-sunken)', color: 'var(--brand-600)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', cursor: 'pointer' }}>
               <Icon name="plus" size={17} /> Thêm địa chỉ mới
             </button>
           </div>
@@ -144,7 +144,7 @@
         </div>
 
         {/* GPS */}
-        <button onClick={useGPS} disabled={gps === 'locating'} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', border: '1.5px solid ' + (gps === 'done' ? 'var(--mint-500)' : 'var(--blue-300, #B7CEF9)'), background: gps === 'done' ? 'var(--mint-50)' : 'var(--blue-50)', borderRadius: 'var(--radius-md)', padding: '11px 14px', cursor: gps === 'locating' ? 'wait' : 'pointer', textAlign: 'left' }}>
+        <button onClick={useGPS} disabled={gps === 'locating'} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', border: '1.5px solid ' + (gps === 'done' ? 'var(--mint-500)' : 'var(--blue-300)'), background: gps === 'done' ? 'var(--mint-50)' : 'var(--blue-50)', borderRadius: 'var(--radius-md)', padding: '11px 14px', cursor: gps === 'locating' ? 'wait' : 'pointer', textAlign: 'left' }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', flex: 'none', color: gps === 'done' ? 'var(--mint-600)' : 'var(--blue-600)' }}>
             <Icon name={gps === 'locating' ? 'refresh-cw' : (gps === 'done' ? 'circle-check' : 'map-pin')} size={18} className={gps === 'locating' ? 'lz-spin' : ''} />
           </div>
@@ -174,7 +174,7 @@
           <label style={lab}>Loại địa chỉ</label>
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             {['Nhà riêng', 'Văn phòng'].map((l) => (
-              <button key={l} onClick={() => set('label', l)} style={{ height: 38, padding: '0 16px', borderRadius: 'var(--radius-md)', border: '1.5px solid ' + (f.label === l ? 'var(--color-primary)' : 'var(--border-default)'), background: f.label === l ? 'var(--color-primary-tint)' : '#fff', color: f.label === l ? 'var(--orange-700)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>{l}</button>
+              <button key={l} onClick={() => set('label', l)} style={{ height: 38, padding: '0 16px', borderRadius: 'var(--radius-md)', border: '1.5px solid ' + (f.label === l ? 'var(--color-primary)' : 'var(--border-default)'), background: f.label === l ? 'var(--color-primary-tint)' : '#fff', color: f.label === l ? 'var(--brand-700)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>{l}</button>
             ))}
           </div>
         </div>
@@ -241,7 +241,7 @@
             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)' }}>
               {tabs.map((t) => (
                 <button key={t.id} disabled={!t.enabled} onClick={() => t.enabled && (setLevel(t.id), setQ(''))}
-                  style={{ flex: 1, minWidth: 0, height: 40, border: 0, background: 'transparent', borderBottom: '2px solid ' + (level === t.id ? 'var(--color-primary)' : 'transparent'), color: level === t.id ? 'var(--orange-600)' : t.enabled ? 'var(--text-body)' : 'var(--text-disabled)', font: (level === t.id ? '600' : '500') + ' 12.5px var(--font-sans)', cursor: t.enabled ? 'pointer' : 'not-allowed', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 8px' }}>
+                  style={{ flex: 1, minWidth: 0, height: 40, border: 0, background: 'transparent', borderBottom: '2px solid ' + (level === t.id ? 'var(--color-primary)' : 'transparent'), color: level === t.id ? 'var(--brand-600)' : t.enabled ? 'var(--text-body)' : 'var(--text-disabled)', font: (level === t.id ? '600' : '500') + ' 12.5px var(--font-sans)', cursor: t.enabled ? 'pointer' : 'not-allowed', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 8px' }}>
                   {t.label}
                 </button>
               ))}
@@ -260,7 +260,7 @@
               ) : filtered.map((o) => {
                 const sel = (level === 'city' && o === city) || (level === 'district' && o === district) || (level === 'ward' && o === ward);
                 return (
-                  <button key={o} onClick={() => choose(o)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', border: 0, background: 'transparent', padding: '9px 14px', cursor: 'pointer', textAlign: 'left', font: 'var(--type-body-sm)', color: sel ? 'var(--orange-600)' : 'var(--text-body)' }}
+                  <button key={o} onClick={() => choose(o)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', border: 0, background: 'transparent', padding: '9px 14px', cursor: 'pointer', textAlign: 'left', font: 'var(--type-body-sm)', color: sel ? 'var(--brand-600)' : 'var(--text-body)' }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-sunken)')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                     <span style={{ flex: 1 }}>{o}</span>
@@ -275,7 +275,7 @@
     );
   }
 
-  const link = { font: 'var(--type-body-sm)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 };
+  const link = { font: 'var(--type-body-sm)', color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 };
   const lab = { font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' };
 
   window.LZAddressModal = AddressModal;

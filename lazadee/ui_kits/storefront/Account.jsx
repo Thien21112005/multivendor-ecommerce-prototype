@@ -1,6 +1,6 @@
-/* Lazadee customer account hub. The left sidebar switches the main panel:
+/* Genie customer account hub. The left sidebar switches the main panel:
    Hồ sơ · Địa chỉ · Đổi mật khẩu · Đơn mua (orders by status ENUM) · Kho Voucher
-   · Lazadee Xu · Shop đang theo dõi. Mirrors customer_profiles, addresses,
+   · Điểm Genie · Shop đang theo dõi. Mirrors customer_profiles, addresses,
    shop_follows, vouchers, loyalty-coin ledger. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
@@ -42,7 +42,7 @@
       { id: 'orders', name: 'Đơn mua', icon: 'package' },
       { id: 'notifications', name: 'Thông báo', icon: 'bell' },
       { id: 'vouchers', name: 'Kho Voucher', icon: 'ticket' },
-      { id: 'coins', name: 'Lazadee Xu', icon: 'star' },
+      { id: 'coins', name: 'Điểm Genie', icon: 'star' },
       { id: 'wishlist', name: 'Sản phẩm yêu thích', icon: 'heart' },
       { id: 'follow', name: 'Shop đang theo dõi', icon: 'store', badge: FOLLOWS.length },
     ] },
@@ -106,8 +106,8 @@
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '22px 24px 56px', display: 'grid', gridTemplateColumns: '232px minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
 
           {/* ---- Sidebar ---- */}
-          <aside style={{ position: 'sticky', top: 96 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 16, borderBottom: '1px solid var(--border-subtle)', marginBottom: 16 }}>
+          <aside className="tr-acct" style={{ position: 'sticky', top: 96 }}>
+            <div className="tr-acct__who" style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 16, borderBottom: '1px solid var(--border-subtle)', marginBottom: 16 }}>
               <Avatar name={USER.name} src={provider !== 'email' ? USER.avatarUrl : null} size={48} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{USER.name}</div>
@@ -117,43 +117,46 @@
               </div>
             </div>
 
-            {/* demo: switch account type to see how the nav/profile differs */}
-            <div style={{ background: 'var(--surface-sunken)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '9px 11px', marginBottom: 14 }}>
-              <div style={{ font: '600 10px var(--font-sans)', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--text-subtle)', marginBottom: 7 }}>Demo · loại tài khoản</div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {[['email', 'Email'], ['google', 'Google'], ['apple', 'Apple']].map(([id, label]) => {
-                  const on = provider === id;
-                  return (
-                    <button key={id} onClick={() => { setProvider(id); }} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, height: 32, borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--orange-700)' : 'var(--text-body)', font: '600 11.5px var(--font-sans)', cursor: 'pointer' }}>
-                      {id === 'google' ? <GoogleG size={12} /> : id === 'apple' ? <AppleLogo size={12} /> : <Icon name="mail" size={12} />}{label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <div className="tr-acct__menu" ref={(el) => { if (el && window.innerWidth <= 768) { const a = el.querySelector('[aria-current]'); if (a) el.scrollLeft = a.offsetLeft - 12; } }}>
             {MENU.map((sec, i) => (
               <div key={i} style={{ marginBottom: 14 }}>
-                {sec.group && <div style={{ font: '700 11px var(--font-sans)', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--text-subtle)', padding: '0 8px 8px' }}>{sec.group}</div>}
+                {sec.group && <div className="tr-acct__group" style={{ font: '700 11px var(--font-sans)', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--text-subtle)', padding: '0 8px 8px' }}>{sec.group}</div>}
                 {sec.items.map((m) => {
                   const on = m.id === view;
                   const badge = m.id === 'notifications' ? notifUnread : m.id === 'vouchers' ? VOUCHERS.filter((x) => x.saved && x.status === 'active').length : m.badge;
                   const name = m.id === 'password' ? (hasPassword ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu') : m.name;
                   return (
-                    <div key={m.id} onClick={() => setView(m.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, height: 40, padding: '0 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: on ? 'var(--orange-600)' : 'var(--text-body)', background: on ? 'var(--orange-50)' : 'transparent', font: on ? 'var(--weight-semibold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)' }}>
+                    <button key={m.id} aria-current={on ? 'page' : undefined} onClick={() => setView(m.id)} style={{ border: 0, width: '100%', textAlign: 'left', background: 'transparent', display: 'flex', alignItems: 'center', gap: 10, height: 40, padding: '0 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: on ? 'var(--brand-600)' : 'var(--text-body)', background: on ? 'var(--brand-50)' : 'transparent', font: on ? 'var(--weight-semibold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)' }}>
                       <Icon name={m.icon} size={17} />
                       <span style={{ flex: 1 }}>{name}</span>
-                      {badge ? <span style={{ font: '700 11px var(--font-sans)', color: '#fff', background: 'var(--flash-500)', borderRadius: 9, minWidth: 18, height: 18, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{badge}</span> : null}
-                    </div>
+                      {badge ? <span style={{ font: '700 11px var(--font-sans)', color: '#fff', background: 'var(--brand-900)', borderRadius: 9, minWidth: 18, height: 18, display: 'grid', placeItems: 'center', padding: '0 5px' }}>{badge}</span> : null}
+                    </button>
                   );
                 })}
               </div>
             ))}
             <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: 6, paddingTop: 10 }}>
-              <div onClick={() => setLogoutOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 10, height: 40, padding: '0 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: 'var(--red-600)', font: 'var(--type-body-sm)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--red-50, #FDECEA)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+              <button onClick={() => setLogoutOpen(true)} style={{ border: 0, width: '100%', textAlign: 'left', background: 'transparent', display: 'flex', alignItems: 'center', gap: 10, height: 40, padding: '0 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: 'var(--red-600)', font: 'var(--type-body-sm)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--red-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                 <Icon name="log-out" size={17} /><span style={{ flex: 1 }}>Đăng xuất</span>
-              </div>
+              </button>
             </div>
+            </div>
+            <div className="tr-acct__demo">
+              {/* demo: switch account type to see how the nav/profile differs */}
+              <window.LZDemoBox title="loại tài khoản" style={{ marginTop: 16 }}>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[['email', 'Email'], ['google', 'Google'], ['apple', 'Apple']].map(([id, label]) => {
+                    const on = provider === id;
+                    return (
+                      <button key={id} onClick={() => { setProvider(id); }} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, height: 32, borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--brand-700)' : 'var(--text-body)', font: '600 11.5px var(--font-sans)', cursor: 'pointer' }}>
+                        {id === 'google' ? <GoogleG size={12} /> : id === 'apple' ? <AppleLogo size={12} /> : <Icon name="mail" size={12} />}{label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </window.LZDemoBox>
+              </div>
           </aside>
 
           {/* ---- Main panel ---- */}
@@ -185,16 +188,16 @@
 
         <Modal open={!!cancelIds} onClose={() => setCancelIds(null)} title="Xác nhận huỷ đơn hàng"
           footer={<><Button variant="ghost" onClick={() => setCancelIds(null)}>Không</Button><Button variant="danger" onClick={doCancel}>Xác nhận huỷ</Button></>}>
-          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5, marginBottom: 12 }}>Bạn có chắc muốn huỷ {cancelIds && cancelIds.length > 1 ? 'nhóm ' + cancelIds.length + ' đơn hàng' : 'đơn hàng'} này không? Quá trình này không thể hoàn tác, xu và voucher (nếu có) sẽ được hoàn lại.{cancelPaid && ' Số tiền đã thanh toán được hoàn về phương thức gốc.'}</div>
+          <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5, marginBottom: 12 }}>Bạn có chắc muốn huỷ {cancelIds && cancelIds.length > 1 ? 'nhóm ' + cancelIds.length + ' đơn hàng' : 'đơn hàng'} này không? Quá trình này không thể hoàn tác, điểm và voucher (nếu có) sẽ được hoàn lại.{cancelPaid && ' Số tiền đã thanh toán được hoàn về phương thức gốc.'}</div>
           <Select label="Lý do huỷ đơn" value={cancelWhy} onChange={(e) => setCancelWhy(e.target.value)}>{CANCEL_REASONS.map((r) => <option key={r}>{r}</option>)}</Select>
         </Modal>
 
-        <window.LZPayModal open={!!payIds} amount={payTotal} code={payIds ? 'LZD' + payIds[0].replace(/\D/g, '') : ''} onClose={() => setPayIds(null)} onPaid={payOrders} />
+        <window.LZPayModal open={!!payIds} amount={payTotal} code={payIds ? 'TR' + payIds[0].replace(/\D/g, '') : ''} onClose={() => setPayIds(null)} onPaid={payOrders} />
 
         <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="Đăng xuất"
           footer={<><Button variant="ghost" onClick={() => setLogoutOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="log-out" onClick={() => { setLogoutOpen(false); onLogout && onLogout(); }}>Đăng xuất</Button></>}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', width: 'min(420px, 80vw)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="log-out" size={20} /></div>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="log-out" size={20} /></div>
             <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc muốn đăng xuất khỏi tài khoản <b>{USER.name}</b> trên thiết bị này?</div>
           </div>
         </Modal>
@@ -244,12 +247,12 @@
         {orders.map((o, i) => (
           <div key={o.id} style={{ borderBottom: i < orders.length - 1 ? '1px dashed var(--border-subtle)' : 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px' }}>
-              <VendorChip name={V[o.vendorId].name} mall={V[o.vendorId].mall} />
+              <span className="tr-chip"><window.LZSeal id={o.vendorId} name={V[o.vendorId].name} size={30} /><VendorChip name={V[o.vendorId].name} mall={V[o.vendorId].mall} /></span>
               <span className="code" style={{ font: '12px var(--font-mono)', color: 'var(--text-subtle)', marginLeft: 'auto' }}>{o.id}</span>
             </div>
             <div style={{ padding: '0 16px 12px' }}>
               {o.items.map((it, j) => (
-                <div key={j} onClick={() => onTrack && onTrack(o.id)} style={{ display: 'flex', gap: 12, padding: '8px 0', cursor: 'pointer' }}>
+                <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={j} onClick={() => onTrack && onTrack(o.id)} style={{ display: 'flex', gap: 12, padding: '8px 0', cursor: 'pointer' }}>
                   <img src={it.img} alt="" width="50" height="50" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none', border: '1px solid var(--border-subtle)' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{it.title}</div>
@@ -265,10 +268,10 @@
           <div style={{ padding: '8px 16px', background: 'var(--surface-sunken)', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 3, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Tiền hàng</span><span>{fmt(sum('subtotal'))}</span></div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Phí vận chuyển</span><span>+{fmt(sum('shipping'))}</span></div>
-            {sum('discount') > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--mint-600)' }}><span>Giảm giá (Voucher + Xu)</span><span>-{fmt(sum('discount'))}</span></div>}
+            {sum('discount') > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--mint-600)' }}><span>Giảm giá (Voucher + Điểm)</span><span>-{fmt(sum('discount'))}</span></div>}
           </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 12px', padding: '12px 16px', background: 'var(--orange-50)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 12px', padding: '12px 16px', background: 'var(--brand-50)' }}>
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Tổng thanh toán ({orders.length} đơn):</span>
           <span style={{ font: '800 20px var(--font-sans)', color: 'var(--text-price)', marginRight: 'auto' }}>{fmt(sum('total'))}</span>
           {cancelled
@@ -284,9 +287,10 @@
     return (
       <div style={{ background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
-          <VendorChip name={v.name} mall={v.mall} />
+          <span className="tr-chip"><window.LZSeal id={v.id} name={v.name} size={30} /><VendorChip name={v.name} mall={v.mall} /></span>
           <span className="code" style={{ font: '12px var(--font-mono)', color: 'var(--text-subtle)' }}>{o.id}</span>
-          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <window.LZMoneyChip o={o} />
             {o.tracking && o.tracking.shipStatus === 'DELIVERED' && o.status === 'DELIVERED' &&
               <span style={{ font: 'var(--type-caption)', color: 'var(--mint-600)', display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="truck" size={14} />Giao thành công</span>}
             <Badge variant="neutral">{o.pay}</Badge>
@@ -306,7 +310,7 @@
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 12px', padding: '12px 16px', background: 'var(--orange-50)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 12px', padding: '12px 16px', background: 'var(--brand-50)' }}>
           <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Thành tiền:</span>
           <span style={{ font: '800 20px var(--font-sans)', color: 'var(--text-price)', marginRight: 'auto' }}>{fmt(o.total)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -326,7 +330,7 @@
     if (o.status === 'PAID' || o.status === 'CONFIRMED' || o.status === 'PREPARING') return <>{track}{chat}<Button size="sm" variant="ghost" style={{ color: 'var(--red-600)' }} onClick={() => onCancel([o.id])}>Huỷ đơn</Button></>;
     if (o.status === 'RETURN_REQUESTED') return <><Button size="sm" iconLeft="undo-2" onClick={t(onTrack, o.id)}>Xem yêu cầu trả hàng</Button>{chat}</>;
     if (o.status === 'READY_FOR_PICKUP' || o.status === 'DELIVERING') return <><Button size="sm" iconLeft="truck" onClick={t(onTrack, o.id)}>Theo dõi đơn</Button>{chat}</>;
-    if (o.status === 'DELIVERED') return <><Button size="sm" iconLeft="check" onClick={t(onConfirm, o.id)}>Đã nhận hàng</Button><Button size="sm" variant="outline" iconLeft="undo-2" onClick={t(onTrack, o.id)}>Trả hàng</Button>{track}</>;
+    if (o.status === 'DELIVERED') return <><Button size="sm" iconLeft="check" onClick={() => window.dispatchEvent(new CustomEvent('lz_confirm_receipt', { detail: { id: o.id, amount: o.total, onYes: t(onConfirm, o.id) } }))}>Đã nhận hàng</Button><Button size="sm" variant="outline" iconLeft="undo-2" onClick={t(onTrack, o.id)}>Trả hàng</Button>{track}</>;
     if (o.status === 'COMPLETED') return <>{reviewed ? <Button size="sm" iconLeft="star" disabled>Đã đánh giá</Button> : <Button size="sm" iconLeft="star" onClick={t(onReview, o.id)}>Đánh giá</Button>}{again}{chat}</>;
     return <>{again}{chat}</>;
   }
@@ -374,13 +378,13 @@
                 <span style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>{f.email}</span>
                 <Badge variant="mint" icon="badge-check">Đã xác minh</Badge>
                 {isSSO && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: '600 12px var(--font-sans)', color: 'var(--text-body)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-pill)', padding: '3px 10px' }}><ProvIcon size={13} /> Liên kết {provName}</span>}
-                <span style={linkS} onClick={() => setEmailHint((v) => !v)}>Thay đổi</span>
+                <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={linkS} onClick={() => setEmailHint((v) => !v)}>Thay đổi</span>
               </div>
               {isSSO && emailHint && (
                 <div style={{ display: 'flex', gap: 9, marginTop: 8, padding: '11px 13px', background: 'var(--blue-50)', border: '1px solid var(--blue-200)', borderRadius: 'var(--radius-md)' }}>
                   <Icon name="info" size={16} style={{ color: 'var(--blue-600)', flex: 'none', marginTop: 1 }} />
                   <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>
-                    Đổi sang email khác yêu cầu <b style={{ color: 'var(--blue-600)', cursor: 'pointer' }} onClick={onSetPassword}>thiết lập mật khẩu</b> trước. Sau đó bạn có thể đăng nhập bằng <b>{provName}</b> (email cũ) hoặc <b>Email + mật khẩu</b> (email mới).
+                    Đổi sang email khác yêu cầu <b role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ color: 'var(--blue-600)', cursor: 'pointer' }} onClick={onSetPassword}>thiết lập mật khẩu</b> trước. Sau đó bạn có thể đăng nhập bằng <b>{provName}</b> (email cũ) hoặc <b>Email + mật khẩu</b> (email mới).
                   </div>
                 </div>
               )}
@@ -390,7 +394,7 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
                 {f.phone
                   ? <><span className="code" style={{ font: '14px var(--font-mono)', color: 'var(--text-body)' }}>{f.phone}</span><span style={linkS}>Thay đổi</span></>
-                  : <><span style={{ font: 'var(--type-body)', color: 'var(--text-subtle)' }}>Chưa có số điện thoại</span><span style={{ ...linkS, display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => set('phone', '0900 000 000')}><Icon name="plus" size={13} />Thêm</span></>}
+                  : <><span style={{ font: 'var(--type-body)', color: 'var(--text-subtle)' }}>Chưa có số điện thoại</span><span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ ...linkS, display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => set('phone', '0900 000 000')}><Icon name="plus" size={13} />Thêm</span></>}
               </div>
             </div>
             <div>
@@ -417,7 +421,7 @@
                 {[{ id: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' }, { id: 'en', label: 'English', flag: '🇬🇧' }].map((l) => {
                   const on = f.lang === l.id;
                   return (
-                    <button key={l.id} type="button" onClick={() => { set('lang', l.id); window.LZI18n.set(l.id); }} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 16px', borderRadius: 'var(--radius-md)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--orange-700)' : 'var(--text-body)', font: (on ? '600 ' : '500 ') + '14px var(--font-sans)', cursor: 'pointer' }}>
+                    <button key={l.id} type="button" onClick={() => { set('lang', l.id); window.LZI18n.set(l.id); }} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 16px', borderRadius: 'var(--radius-md)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--brand-700)' : 'var(--text-body)', font: (on ? '600 ' : '500 ') + '14px var(--font-sans)', cursor: 'pointer' }}>
                       <span style={{ fontSize: 17 }}>{l.flag}</span>{l.label}
                       {on && <Icon name="check" size={16} style={{ marginLeft: 2 }} />}
                     </button>
@@ -425,7 +429,7 @@
                 })}
               </div>
             </div>
-            {delPending && <div role="status" style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', borderRadius: 'var(--radius-md)', padding: '10px 12px', font: 'var(--type-body-sm)' }}><Icon name="clock" size={16} style={{ flex: 'none' }} />Tài khoản sẽ được ẩn danh sau 30 ngày. Bạn có thể hủy yêu cầu trong thời gian này.</div>}
+            {delPending && <div role="status" style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--red-50)', color: 'var(--red-600)', borderRadius: 'var(--radius-md)', padding: '10px 12px', font: 'var(--type-body-sm)' }}><Icon name="clock" size={16} style={{ flex: 'none' }} />Tài khoản sẽ được ẩn danh sau 30 ngày. Bạn có thể hủy yêu cầu trong thời gian này.</div>}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
               <Button iconLeft="check" onClick={() => { if (!f.name.trim()) { toast('Vui lòng nhập Họ và tên trước khi lưu.', 'error'); return; } setSaved(true); setTimeout(() => setSaved(false), 2000); }}>Lưu thay đổi</Button>
               {delPending
@@ -448,10 +452,10 @@
               ? <><Button variant="ghost" onClick={closeDel}>Huỷ</Button><Button variant="danger" iconLeft="trash-2" disabled={delCode.length < 6} onClick={confirmDelete}>Xác nhận xóa</Button></>
               : <><Button variant="ghost" onClick={closeDel}>Huỷ</Button><Button variant="danger" iconLeft="mail" onClick={() => setDelOtp(true)}>Gửi mã OTP</Button></>}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', width: 'min(420px, 80vw)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="triangle-alert" size={20} /></div>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="triangle-alert" size={20} /></div>
             <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>{activeOrders.length
               ? <>Bạn còn đơn đang xử lý, cần hoàn tất trước khi xóa tài khoản:<ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>{activeOrders.map((id) => <li key={id} className="code">{id}</li>)}</ul></>
-              : <>Hành động này không thể hoàn tác sau 30 ngày. Hồ sơ của <b>{USER.name}</b> sẽ được ẩn danh, voucher và Xu bị hủy. Trong 30 ngày, đăng nhập lại và bấm "Hủy yêu cầu xóa" để giữ tài khoản.</>}</div>
+              : <>Hành động này không thể hoàn tác sau 30 ngày. Hồ sơ của <b>{USER.name}</b> sẽ được ẩn danh, voucher và Điểm bị hủy. Trong 30 ngày, đăng nhập lại và bấm "Hủy yêu cầu xóa" để giữ tài khoản.</>}</div>
           </div>
           {delOtp && !activeOrders.length && <div style={{ marginTop: 14 }}>
             <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 10 }}>Nhập mã OTP gửi tới <b>{maskEmail(USER.email)}</b> (demo: <span className="code">{OTP_DEMO}</span>)</div>
@@ -484,14 +488,14 @@
                   <span style={{ width: 1, height: 12, background: 'var(--border-strong)' }} />
                   <span className="code" style={{ font: '13px var(--font-mono)', color: 'var(--text-muted)' }}>{a.phone}</span>
                   {a.label && <span style={{ font: '600 11px var(--font-sans)', color: 'var(--text-muted)', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-pill)', padding: '2px 9px' }}>{a.label}</span>}
-                  {a.default && <span style={{ font: '600 11px var(--font-sans)', color: 'var(--orange-600)', border: '1px solid var(--orange-200)', borderRadius: 4, padding: '1px 7px' }}>Mặc định</span>}
+                  {a.default && <span style={{ font: '600 11px var(--font-sans)', color: 'var(--brand-600)', border: '1px solid var(--brand-200)', borderRadius: 4, padding: '1px 7px' }}>Mặc định</span>}
                 </div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>{a.line}, {a.ward}, {a.district}, {a.city}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                 <div style={{ display: 'flex', gap: 14 }}>
-                  <span style={linkS} onClick={onAdd}>Sửa</span>
-                  {!a.default && <span style={{ ...linkS, color: 'var(--red-600)' }} onClick={() => setDelAddr(a)}>Xoá</span>}
+                  <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={linkS} onClick={onAdd}>Sửa</span>
+                  {!a.default && <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ ...linkS, color: 'var(--red-600)' }} onClick={() => setDelAddr(a)}>Xoá</span>}
                 </div>
                 <Button size="sm" variant="outline" disabled={a.default} onClick={() => makeDefault(a.id)}>Thiết lập mặc định</Button>
               </div>
@@ -578,7 +582,7 @@
             {stage === 'otp' && (
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16, animation: 'lzSlideDown .25s var(--ease-out)' }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-                  <Icon name="mail" size={16} style={{ color: 'var(--orange-500)' }} />
+                  <Icon name="mail" size={16} style={{ color: 'var(--brand-500)' }} />
                   <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã xác nhận đã gửi đến <b>{maskEmail(USER.email)}</b> (demo: <span className="code">{OTP_DEMO}</span>)</span>
                 </div>
                 <OtpBoxes onChange={setOtp} />
@@ -586,7 +590,7 @@
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
                   <Button iconLeft="check" disabled={otp.length < 6} onClick={confirm}>Xác nhận đổi mật khẩu</Button>
                   <Button variant="ghost" onClick={() => setStage('form')}>Huỷ</Button>
-                  <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{resend > 0 ? `Gửi lại mã sau ${resend}s` : <a style={{ color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setResend(60)}>Gửi lại mã</a>}</span>
+                  <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{resend > 0 ? `Gửi lại mã sau ${resend}s` : <a role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }} onClick={() => setResend(60)}>Gửi lại mã</a>}</span>
                 </div>
               </div>
             )}
@@ -658,7 +662,7 @@
         <div style={{ display: 'flex', alignItems: 'flex-start' }}>
           {mode === 'history' && <button onClick={() => setMode('active')} aria-label="Quay lại" style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: 4, marginRight: 6, color: 'var(--text-muted)', display: 'grid', placeItems: 'center' }}><Icon name="arrow-left" size={20} /></button>}
           <PanelHead icon="ticket" title={mode === 'history' ? 'Lịch sử voucher' : 'Kho Voucher'} sub={mode === 'history' ? 'Voucher đã dùng hoặc đã hết hạn' : `Bạn đang có ${live.filter((v) => v.saved).length} voucher khả dụng`} />
-          {mode === 'active' && <span style={{ ...linkS, marginLeft: 'auto' }} onClick={() => setMode('history')}>Xem lịch sử voucher</span>}
+          {mode === 'active' && <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ ...linkS, marginLeft: 'auto' }} onClick={() => setMode('history')}>Xem lịch sử voucher</span>}
         </div>
         {mode === 'active' && (
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-md)', padding: '10px 14px', margin: '14px 0 4px' }}>
@@ -679,8 +683,8 @@
             const old = mode === 'history';
             const r = rule(v);
             return (
-              <div key={v.id} onClick={() => setDetail(v)} style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#fff', cursor: 'pointer', opacity: old ? 0.72 : 1 }}>
-                <div style={{ position: 'relative', width: 96, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#fff', background: old ? 'var(--gray-400)' : v.kind === 'freeship' ? 'var(--mint-500)' : v.kind === 'shop' ? 'var(--flash-500)' : 'var(--orange-500)' }}>
+              <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={v.id} onClick={() => setDetail(v)} style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#fff', cursor: 'pointer', opacity: old ? 0.72 : 1 }}>
+                <div style={{ position: 'relative', width: 96, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#fff', background: old ? 'var(--gray-400)' : v.kind === 'freeship' ? 'var(--mint-500)' : v.kind === 'shop' ? 'var(--flash-500)' : 'var(--brand-500)' }}>
                   {old && <span style={{ position: 'absolute', top: 4, left: 4, padding: '2px 4px', borderRadius: 4, background: 'rgba(0,0,0,.3)', font: '600 10px var(--font-sans)' }}>{v.status === 'used' ? 'Đã dùng' : 'Hết hạn'}</span>}
                   <Icon name={v.kind === 'freeship' ? 'truck' : v.kind === 'shop' ? 'store' : 'ticket'} size={22} />
                   <span style={{ font: '800 17px var(--font-sans)' }}>{v.amount}</span>
@@ -747,31 +751,31 @@
       const reward = streak + 1 === 7 ? 1000 : 100;
       setChecked(true); setStreak((s) => s + 1); setBalance((b) => b + reward); USER.coins += reward;
       setLog((l) => [{ type: 'earn', label: 'Điểm danh hằng ngày', amount: reward, at: 'Hôm nay' }, ...l]);
-      toast('Điểm danh thành công! +' + reward.toLocaleString('vi-VN') + ' Xu');
+      toast('Điểm danh thành công! +' + reward.toLocaleString('vi-VN') + ' Điểm');
     };
     const redeemXu = (r) => {
       setBalance((b) => b - r.xu); USER.coins -= r.xu;
       const code = 'XU' + r.value / 1000 + 'K' + (VOUCHERS.length + 1);
-      VOUCHERS.push({ id: 'x' + (VOUCHERS.length + 1), code, kind: 'platform', amount: '-' + r.value / 1000 + 'k', label: 'Giảm ' + fmt(r.value), cond: 'Đơn từ 50.000₫', expiry: '31/12/2026', validFrom: 'Hôm nay', scope: 'Toàn sàn', type: 'FIXED', value: r.value, min: 50000, saved: true, status: 'active', used: 0, limit: 1, sponsor: 'Đổi từ Lazadee Xu', content: 'Đổi từ ' + r.xu + ' Xu, dùng 1 lần.' });
+      VOUCHERS.push({ id: 'x' + (VOUCHERS.length + 1), code, kind: 'platform', amount: '-' + r.value / 1000 + 'k', label: 'Giảm ' + fmt(r.value), cond: 'Đơn từ 50.000₫', expiry: '31/12/2026', validFrom: 'Hôm nay', scope: 'Toàn sàn', type: 'FIXED', value: r.value, min: 50000, saved: true, status: 'active', used: 0, limit: 1, sponsor: 'Đổi từ Điểm Genie', content: 'Đổi từ ' + r.xu + ' Điểm, dùng 1 lần.' });
       setLog((l) => [{ type: 'spend', label: 'Đổi voucher ' + code, amount: -r.xu, at: 'Hôm nay' }, ...l]);
       setRedeem(false); toast('Đã đổi voucher ' + code + ', xem trong Kho Voucher');
     };
     return (
       <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ ...card, background: 'linear-gradient(120deg, var(--gold-600, #E09600), var(--gold-500, #FFB100))', color: '#fff', display: 'flex', alignItems: 'center', gap: 18 }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,.2)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="star" size={34} /></div>
+        <div style={{ ...card, background: 'var(--color-accent-tint)', border: '1px solid var(--gold-100)', color: 'var(--text-strong)', display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--color-accent)', color: 'var(--color-on-accent)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="star" size={32} style={{ fill: 'currentColor' }} /></div>
           <div style={{ flex: 1 }}>
-            <div style={{ font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.9)' }}>Số dư Lazadee Xu</div>
-            <div style={{ font: '800 34px var(--font-sans)', lineHeight: 1.1 }}>{balance.toLocaleString('vi-VN')} <span style={{ fontSize: 18, fontWeight: 600 }}>Xu</span></div>
-            <div style={{ font: 'var(--type-caption)', color: 'rgba(255,255,255,.85)', marginTop: 2 }}>1 Xu = 1₫ khi thanh toán · Xu hết hạn sau 12 tháng · <b>150 Xu</b> sắp hết hạn trong 30 ngày tới</div>
+            <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Số dư Điểm Genie</div>
+            <div style={{ font: '800 34px var(--font-sans)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{balance.toLocaleString('vi-VN')} <span style={{ fontSize: 18, fontWeight: 600 }}>Điểm</span></div>
+            <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 2 }}>1 Điểm = 1₫ khi thanh toán · Điểm hết hạn sau 12 tháng · <b>150 Điểm</b> sắp hết hạn trong 30 ngày tới</div>
           </div>
           <Button variant="secondary" iconLeft="gift" onClick={() => setRedeem(true)}>Đổi quà</Button>
         </div>
         <div style={card}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-            <PanelHead icon="calendar" title="Điểm danh nhận Xu" />
+            <PanelHead icon="calendar" title="Điểm danh nhận Điểm" />
             {checked && <span style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Điểm danh lại sau <UntilMidnight /></span>}
-            <Button style={{ marginLeft: checked ? 12 : 'auto' }} variant={checked ? 'outline' : 'primary'} iconLeft={checked ? 'check' : 'calendar'} disabled={checked} onClick={checkin}>{checked ? 'Đã điểm danh' : 'Điểm danh nhận Xu'}</Button>
+            <Button style={{ marginLeft: checked ? 12 : 'auto' }} variant={checked ? 'outline' : 'primary'} iconLeft={checked ? 'check' : 'calendar'} disabled={checked} onClick={checkin}>{checked ? 'Đã điểm danh' : 'Điểm danh nhận Điểm'}</Button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             {[1, 2, 3, 4, 5, 6, 7].map((d) => {
@@ -786,7 +790,7 @@
           </div>
         </div>
         <section style={{ ...card, padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 22px 12px' }}><PanelHead icon="clock" title="Lịch sử Xu" /></div>
+          <div style={{ padding: '16px 22px 12px' }}><PanelHead icon="clock" title="Lịch sử Điểm" /></div>
           <div>
             {log.map((c, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 22px', borderTop: '1px solid var(--border-subtle)' }}>
@@ -795,18 +799,18 @@
                   <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{c.label}</div>
                   <div style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{c.at}</div>
                 </div>
-                <span style={{ font: '800 16px var(--font-sans)', color: c.amount > 0 ? 'var(--mint-600)' : 'var(--text-muted)' }}>{c.amount > 0 ? '+' : ''}{c.amount} Xu</span>
+                <span style={{ font: '800 16px var(--font-sans)', color: c.amount > 0 ? 'var(--mint-600)' : 'var(--text-muted)' }}>{c.amount > 0 ? '+' : ''}{c.amount} Điểm</span>
               </div>
             ))}
           </div>
         </section>
-        <Modal open={redeem} onClose={() => setRedeem(false)} width={440} title="Đổi Xu lấy voucher" footer={<Button variant="ghost" onClick={() => setRedeem(false)}>Đóng</Button>}>
-          <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 10 }}>Số dư: <b style={{ color: 'var(--text-strong)' }}>{balance.toLocaleString('vi-VN')} Xu</b></div>
+        <Modal open={redeem} onClose={() => setRedeem(false)} width={440} title="Đổi Điểm lấy voucher" footer={<Button variant="ghost" onClick={() => setRedeem(false)}>Đóng</Button>}>
+          <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 10 }}>Số dư: <b style={{ color: 'var(--text-strong)' }}>{balance.toLocaleString('vi-VN')} Điểm</b></div>
           {XU_REWARDS.map((r) => (
             <div key={r.xu} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderTop: '1px solid var(--border-subtle)' }}>
               <Icon name="ticket" size={20} style={{ color: 'var(--color-primary)' }} />
-              <div style={{ flex: 1 }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Voucher giảm {fmt(r.value)}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{r.xu.toLocaleString('vi-VN')} Xu · Đơn từ 50.000₫</div></div>
-              <Button size="sm" disabled={balance < r.xu} onClick={() => redeemXu(r)}>{balance < r.xu ? 'Chưa đủ Xu' : 'Đổi'}</Button>
+              <div style={{ flex: 1 }}><div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Voucher giảm {fmt(r.value)}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{r.xu.toLocaleString('vi-VN')} Điểm · Đơn từ 50.000₫</div></div>
+              <Button size="sm" disabled={balance < r.xu} onClick={() => redeemXu(r)}>{balance < r.xu ? 'Chưa đủ Điểm' : 'Đổi'}</Button>
             </div>
           ))}
         </Modal>
@@ -831,7 +835,7 @@
               <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderTop: '1px solid var(--border-subtle)' }}>
                 <img src={p.img} alt="" width="64" height="64" onClick={() => onOpen(id)} style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', cursor: 'pointer', flex: 'none' }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div onClick={() => onOpen(id)} style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
+                  <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => onOpen(id)} style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
                   <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-price)', marginTop: 3 }}>{fmt(p.price)}</div>
                 </div>
                 <Button size="sm" variant="ghost" iconLeft="heart" onClick={() => LZ.wishlist.toggle(id)}>Bỏ thích</Button>
@@ -858,11 +862,11 @@
             return (
               <div key={vid} style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '14px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-md)', background: v.logoBg, color: '#fff', display: 'grid', placeItems: 'center', font: '800 22px var(--font-sans)', flex: 'none', cursor: 'pointer' }} onClick={() => onShop && onShop(vid)}>{v.name[0]}</div>
+                  <div role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ width: 48, height: 48, borderRadius: 'var(--radius-md)', background: v.logoBg, color: '#fff', display: 'grid', placeItems: 'center', font: '800 22px var(--font-sans)', flex: 'none', cursor: 'pointer' }} onClick={() => onShop && onShop(vid)}>{v.name[0]}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', cursor: 'pointer' }} onClick={() => onShop && onShop(vid)}>{v.name}</span>
-                      {v.mall && <Badge variant="solid">MALL</Badge>}
+                      <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', cursor: 'pointer' }} onClick={() => onShop && onShop(vid)}>{v.name}</span>
+                      {v.mall && <Badge variant="primary">Chính hãng</Badge>}
                     </div>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 2 }}><Icon name="star" size={12} style={{ color: 'var(--gold-500)' }} />{v.rating} · {v.followers} theo dõi</div>
                   </div>
@@ -908,16 +912,16 @@
         </div>
         {list.length === 0 ? <Empty icon="bell" text="Không có thông báo nào ở mục này" />
           : list.map((n, i) => (
-            <div key={n.id} onClick={() => onOpen(n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 22px', borderTop: '1px solid var(--border-subtle)', background: n.unread ? 'var(--orange-50)' : '#fff', cursor: 'pointer' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = n.unread ? 'var(--orange-100, #FFE6D9)' : 'var(--gray-50)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = n.unread ? 'var(--orange-50)' : '#fff')}>
+            <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={n.id} onClick={() => onOpen(n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 22px', borderTop: '1px solid var(--border-subtle)', background: n.unread ? 'var(--brand-50)' : '#fff', cursor: 'pointer' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = n.unread ? 'var(--brand-100)' : 'var(--gray-50)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = n.unread ? 'var(--brand-50)' : '#fff')}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: n.bg, color: n.tint }}>{n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" alt="" width="24" height="24" /> : <Icon name={n.icon} size={19} />}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ font: (n.unread ? 'var(--weight-bold)' : 'var(--weight-medium)') + ' var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{n.title}</div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.45 }}>{n.body}</div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: 'var(--type-caption)', color: 'var(--text-subtle)', marginTop: 4 }}><Icon name="clock" size={12} />{n.date}</div>
               </div>
-              {n.unread && <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--orange-500)', flex: 'none' }} />}
+              {n.unread && <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--brand-500)', flex: 'none' }} />}
             </div>
           ))}
         {all.length > limit && <div style={{ padding: 14, textAlign: 'center', borderTop: '1px solid var(--border-subtle)' }}><Button size="sm" variant="ghost" onClick={() => setLimit((l) => l + 5)}>Xem thêm thông báo</Button></div>}
@@ -974,7 +978,7 @@
     return (
       <div style={{ paddingBottom: sub ? 12 : 0, marginBottom: sub ? 4 : 0, borderBottom: sub ? '1px solid var(--border-subtle)' : 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon name={icon} size={20} style={{ color: 'var(--orange-500)' }} />
+          <Icon name={icon} size={20} style={{ color: 'var(--brand-500)' }} />
           <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: 0 }}>{title}</h2>
         </div>
         {sub && <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', margin: '4px 0 0 28px' }}>{sub}</p>}
@@ -1028,7 +1032,7 @@
 
   const card = { background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', padding: 22 };
   const lab = { font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', display: 'block' };
-  const linkS = { font: 'var(--type-body-sm)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 };
+  const linkS = { font: 'var(--type-body-sm)', color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 };
 
   window.LZAccount = Account;
 })();

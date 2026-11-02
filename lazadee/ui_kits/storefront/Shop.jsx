@@ -1,5 +1,5 @@
-/* Lazadee shop page — a seller's storefront inside the marketplace.
-   Cover + identity (Mall, rating, followers, response), follow/chat,
+/* Genie shop page — a seller's storefront inside the marketplace.
+   Cover + identity (Chính hãng, rating, followers, response), follow/chat,
    in-shop search (routes to Search scoped to this vendor), shop vouchers,
    category tabs + the vendor's product grid. */
 (function () {
@@ -7,10 +7,10 @@
   const { Icon, Button, Badge, Tabs, Modal } = DS;
   const { V, productsOfVendor, CATEGORIES, FOLLOWS, VOUCHERS } = window.LZ;
 
-  function Stat({ value, label, gold }) {
+  function Stat({ value, label }) {
     return (
       <div style={{ textAlign: 'center', minWidth: 78 }}>
-        <div style={{ font: '800 17px var(--font-sans)', color: gold ? 'var(--gold-600)' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>{value}</div>
+        <div style={{ font: '800 17px var(--font-sans)', color: '#fff',display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>{value}</div>
         <div style={{ font: 'var(--type-caption)', color: 'rgba(255,255,255,.7)', marginTop: 2 }}>{label}</div>
       </div>
     );
@@ -42,10 +42,10 @@
           {/* cover image */}
           <div style={{ position: 'relative', height: 220, overflow: 'hidden', background: v.logoBg }}>
             <img src={'../../assets/img/' + v.cover + '.jpg'} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${v.logoBg}40 0%, ${v.logoBg}D9 100%)` }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(11, 31, 75, .58) 0%, rgba(11, 31, 75, .14) 48%, rgba(11, 31, 75, .62) 100%)' }} />
             {/* stats float top-right over the banner */}
             <div style={{ position: 'absolute', right: 0, top: 0, maxWidth: 1280, margin: '0 auto', left: 0, padding: '20px 24px', display: 'flex', justifyContent: 'flex-end', gap: 26, flexWrap: 'wrap' }}>
-              <Stat value={<><Icon name="star" size={15} style={{ color: 'var(--gold-500)' }} />{v.rating}</>} label="Đánh giá" gold />
+              <Stat value={<><Icon name="star" size={15} style={{ color: 'var(--gold-400)' }} />{v.rating}</>} label="Đánh giá" />
               <Stat value={v.followers} label="Người theo dõi" />
               <Stat value={products.length} label="Sản phẩm" />
               <Stat value={v.responseRate + '%'} label="Phản hồi chat" />
@@ -54,18 +54,18 @@
           {/* identity card overlapping the banner bottom edge */}
           <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
             <div style={{ position: 'relative', marginTop: -56, background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-              <div style={{ width: 88, height: 88, borderRadius: 'var(--radius-lg)', background: v.logoBg, display: 'grid', placeItems: 'center', flex: 'none', marginTop: -44, border: '4px solid #fff', boxShadow: 'var(--shadow-md)' }}>
-                <span style={{ font: '800 38px var(--font-sans)', color: '#fff' }}>{v.name[0]}</span>
+              <div style={{ width: 88, height: 88, borderRadius: 'var(--radius-lg)', background: '#fff', display: 'grid', placeItems: 'center', flex: 'none', marginTop: -44, border: '4px solid #fff', boxShadow: 'var(--shadow-md)' }}>
+                <window.LZSeal id={v.id} name={v.name} size={76} />
               </div>
               <div style={{ minWidth: 220, flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <h1 style={{ font: '800 24px var(--font-sans)', letterSpacing: '-0.01em', margin: 0, color: 'var(--text-strong)' }}>{v.name}</h1>
-                  {v.mall && <Badge variant="solid">MALL</Badge>}
+                  {v.mall && <Badge variant="primary">Chính hãng</Badge>}
                   {v.favorite && <Badge variant="primary">Shop Yêu Thích</Badge>}
                   {v.vacation && <Badge variant="neutral" icon="clock">Shop đang tạm nghỉ</Badge>}
                 </div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 5 }}>
-                  <span style={{ color: 'var(--mint-500)' }}>●</span> Online · Tham gia từ {v.joined} · Phản hồi {v.responseTime}
+                  Online · Tham gia từ {v.joined} · Phản hồi {v.responseTime}
                 </div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 3 }}>{v.desc}</div>
               </div>
@@ -94,7 +94,7 @@
           </div>
 
           {/* ---- Shop vouchers ---- */}
-          {vouchers.length > 0 && <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+          {vouchers.length > 0 && <div className="tr-vouchers" style={{ marginBottom: 18 }}>
             {vouchers.map((x) => <window.LZSaveVoucher key={x.id} kind={x.kind} amount={x.amount} label={x.cond} code={x.code} />)}
           </div>}
 

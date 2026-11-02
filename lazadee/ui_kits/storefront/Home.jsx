@@ -1,35 +1,22 @@
-/* Lazadee storefront home: hero, categories, flash sale, daily discover grid. */
+/* Genie storefront home: the money promise on a shelf of real products, the Admin banners,
+   then picks, flash sale, vouchers and verified shops. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
-  const { Icon, Badge, Button, VoucherTag, ProductCard } = DS;
-  const { PRODUCTS, CATEGORIES } = window.LZ;
+  const { Icon, Button } = DS;
+  const { PRODUCTS } = window.LZ;
+  const fmt = DS.Money.format;
 
+  // Today's flash sale ends at midnight, so a reload never restarts the clock.
+  const untilMidnight = () => { const d = new Date(); const end = new Date(d); end.setHours(24, 0, 0, 0); return Math.max(0, Math.floor((end - d) / 1000)); };
   function Countdown() {
-    const [t, setT] = React.useState(2 * 3600 + 47 * 60 + 12);
-    React.useEffect(() => { const i = setInterval(() => setT((x) => (x > 0 ? x - 1 : 0)), 1000); return () => clearInterval(i); }, []);
+    const [t, setT] = React.useState(untilMidnight);
+    React.useEffect(() => { const i = setInterval(() => setT(untilMidnight()), 1000); return () => clearInterval(i); }, []);
     const p = (n) => String(n).padStart(2, '0');
-    const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
-    return (
-      <span style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-        {[h, m, s].map((n, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && <span style={{ color: 'var(--ink-900)', fontWeight: 700 }}>:</span>}
-            <span style={cd}>{p(n)}</span>
-          </React.Fragment>
-        ))}
-      </span>
-    );
+    return <span className="tr-clock" role="timer" aria-label="Kết thúc lúc 24:00 hôm nay"><small>Kết thúc sau</small>{p(Math.floor(t / 3600))}:{p(Math.floor((t % 3600) / 60))}:{p(t % 60)}</span>;
   }
 
-  function SectionHead({ title, action }) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)' }}>{title}</h2>
-        {action}
-      </div>
-    );
-  }
-
+  const KIND = { platform: 'Voucher Genie', shop: 'Voucher của shop', freeship: 'Freeship' };
+  // A paper ticket: the amount on a colored stub, the save action inside the ticket.
   function SaveVoucher({ kind, amount, label, code }) {
     const v = window.LZ.VOUCHERS.find((x) => x.code === code);
     const [saved, setSaved] = React.useState(!!(v && v.saved));
@@ -40,113 +27,105 @@
       window.dispatchEvent(new CustomEvent('show_toast', { detail: { message: 'Đã lưu voucher thành công' } }));
     };
     return (
-      <span onClick={save} title={saved ? 'Đã lưu vào Kho Voucher' : 'Bấm để lưu voucher'} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: saved ? 'default' : 'pointer' }}>
-        <VoucherTag kind={kind} amount={amount} label={label} />
-        <span style={{ position: 'absolute', top: -7, right: -6, padding: '1px 7px', borderRadius: 'var(--radius-pill)', font: '700 10px/16px var(--font-sans)', color: saved ? 'var(--mint-600)' : '#fff', background: saved ? 'var(--mint-50)' : 'var(--color-primary)', boxShadow: 'var(--shadow-sm)' }}>{saved ? 'Đã lưu' : 'Lưu'}</span>
-      </span>
-    );
-  }
-
-  // Banners saved in Admin → Banner trang chủ; without any, the seeded hero stays.
-  const adminBanners = (position) => {
-    let rows = [];
-    try { rows = JSON.parse(localStorage.getItem('lz_home_banners')) || []; } catch (e) {}
-    const now = Date.now();
-    return rows.filter((b) => b.on && b.position === position && (!b.startsAt || new Date(b.startsAt).getTime() <= now) && (!b.endsAt || new Date(b.endsAt).getTime() >= now)).sort((a, b) => a.order - b.order);
-  };
-  // Banner links are relative to the site root, which in this kit is the storefront page itself.
-  const followLink = (b, fallback) => {
-    if (!b || !b.link) { fallback(); return; }
-    const u = new URL(b.link, location.origin);
-    window.location.href = location.pathname + u.search + u.hash;
-  };
-
-  function Home({ onOpen, onMore, onCategory }) {
-    React.useEffect(() => { if (location.hash === '#flash-sale') document.getElementById('flash-sale').scrollIntoView(); }, []);
-    const hero = adminBanners('HOME_TOP_CAROUSEL')[0];
-    const middle = adminBanners('HOME_MIDDLE')[0];
-    // Fixed teaser grid (12 = 2 rows of 6). "Xem thêm" → full paginated discover page.
-    const feed = Array.from({ length: 12 }, (_, i) => ({ ...PRODUCTS[i % PRODUCTS.length], _k: i }));
-    const flash = PRODUCTS.filter((p) => p.flash).slice(0, 6);
-
-    return (
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 60px' }}>
-        {/* hero */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 14, marginBottom: 22 }}>
-          <div style={{ position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
-            <img src={hero ? hero.image : '../../assets/img/banner-sale.jpg'} alt="" style={{ width: '100%', height: 320, objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(20,23,31,.82) 0%, rgba(20,23,31,.25) 60%, transparent 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 48px', color: '#fff' }}>
-              <Badge variant="flash" icon="zap" style={{ alignSelf: 'flex-start', fontSize: 13 }}>SIÊU SALE 12.12</Badge>
-              <h1 style={{ font: '800 44px/1.05 var(--font-sans)', letterSpacing: '-0.02em', margin: '14px 0 8px', maxWidth: 460 }}>{hero ? hero.title : 'Giảm đến 60% toàn sàn'}</h1>
-              <p style={{ font: 'var(--text-lg)/1.4 var(--font-sans)', color: 'rgba(255,255,255,.85)', maxWidth: 380, marginBottom: 22 }}>Freeship 0₫ · Voucher tích luỹ · Hoàn xu tới 200k cho đơn đầu tiên.</p>
-              <Button size="lg" iconRight="arrow-right" style={{ alignSelf: 'flex-start' }} onClick={() => followLink(hero, () => onOpen(flash[0].id))}>Săn deal ngay</Button>
-            </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 14 }}>
-            {[{ img: 'banner-tech', t: 'Công nghệ chính hãng', s: 'Bảo hành 12 tháng' }, { img: 'cosmetics', t: 'Làm đẹp cùng Beauty Box', s: 'Mua 1 tặng 1' }].map((b) => (
-              <div key={b.img} style={{ position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
-                <img src={'../../assets/img/' + b.img + '.jpg'} alt="" style={{ width: '100%', height: 153, objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(20,23,31,.7), transparent 70%)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 16, color: '#fff' }}>
-                  <div style={{ font: '700 16px var(--font-sans)' }}>{b.t}</div>
-                  <div style={{ font: '12px var(--font-sans)', color: 'rgba(255,255,255,.85)' }}>{b.s}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* categories */}
-        <div className="lz-card" style={{ padding: '18px 20px', marginBottom: 22 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, minmax(0, 1fr))', gap: 8 }}>
-            {CATEGORIES.map((c) => (
-              <button key={c.name} style={catTile} onClick={() => onCategory && onCategory(c.name)}>
-                <span style={catIcon}><Icon name={c.icon} size={22} /></span>
-                <span style={{ font: 'var(--type-caption)', color: 'var(--text-body)', textAlign: 'center' }}>{c.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* voucher row */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          <SaveVoucher kind="platform" amount="-30k" label="Đơn từ 199.000₫" code="LAZ30K" />
-          <SaveVoucher kind="shop" amount="-15%" label="Tối đa 50.000₫" code="TECH15" />
-          <SaveVoucher kind="freeship" amount="0₫" label="Miễn phí vận chuyển" code="FREESHIP30" />
-          <SaveVoucher kind="platform" amount="-12%" label="Siêu sale 12.12" code="SALE1212" />
-        </div>
-
-        {middle && <img src={middle.image} alt={middle.title} onClick={() => followLink(middle, () => {})} style={{ display: 'block', width: '100%', height: 140, objectFit: 'cover', borderRadius: 'var(--radius-lg)', marginBottom: 24, cursor: middle.link ? 'pointer' : 'default' }} />}
-
-        {/* flash sale */}
-        <div id="flash-sale" className="lz-card" style={{ padding: '18px 20px', marginBottom: 28, borderTop: '3px solid var(--flash-500)', scrollMarginTop: 90 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Icon name="zap" size={26} style={{ color: 'var(--flash-500)' }} strokeWidth={2.4} />
-              <span style={{ font: '800 22px var(--font-sans)', color: 'var(--flash-500)', letterSpacing: '-0.01em' }}>FLASH SALE</span>
-            </div>
-            <Countdown />
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text-link)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', cursor: 'pointer' }} onClick={onMore}>Xem tất cả <Icon name="chevron-right" size={16} /></span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
-            {flash.map((p) => <window.LZCardX key={p.id} p={p} flashBar onClick={() => onOpen(p.id)} />)}
-          </div>
-        </div>
-
-        {/* daily discover */}
-        <SectionHead title="Gợi ý hôm nay" action={<span style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-link)', cursor: 'pointer' }} onClick={onMore}>Xem thêm</span>} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
-          {feed.map((p) => <window.LZCardX key={p._k} p={p} onClick={() => onOpen(p.id)} />)}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0 4px' }}>
-          <Button size="lg" variant="outline" iconRight="chevron-down" onClick={onMore}>Xem thêm sản phẩm</Button>
-        </div>
+      <div className={'tr-ticket tr-ticket--' + kind}>
+        <span className="tr-ticket__amt">{amount}</span>
+        <span className="tr-ticket__body"><small>{KIND[kind]}</small><b>{label}</b></span>
+        <button className="tr-ticket__save" disabled={saved} onClick={save} title={saved ? 'Đã lưu vào Kho Voucher' : undefined} aria-label={saved ? 'Đã lưu ' + label + ' vào Kho Voucher' : 'Lưu voucher ' + label}>
+          {saved ? <Icon name="check" size={16} strokeWidth={2.8} /> : 'Lưu'}
+        </button>
       </div>
     );
   }
 
-  const cd = { background: 'var(--ink-900)', color: '#fff', font: '700 14px/1 var(--font-mono)', padding: '4px 5px', borderRadius: 'var(--radius-xs)', minWidth: 24, textAlign: 'center' };
-  const catTile = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '12px 4px', border: 0, background: 'transparent', borderRadius: 'var(--radius-md)', cursor: 'pointer' };
-  const catIcon = { width: 48, height: 48, borderRadius: '50%', background: 'var(--color-primary-tint)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+
+  function Home({ onOpen, onMore, onShop }) {
+    const stage = React.useRef(null);
+    React.useEffect(() => { if (location.hash === '#flash-sale') document.getElementById('flash-sale').scrollIntoView(); }, []);
+    // The blue field ends partway down the product shelf, wherever the headline wrapped to.
+    React.useLayoutEffect(() => {
+      const root = stage.current.closest('.tr-root');
+      const fit = () => { const r = stage.current.getBoundingClientRect(); root.style.setProperty('--sky-h', Math.round(r.top + window.scrollY + r.height * 0.6) + 'px'); };
+      fit();
+      window.addEventListener('resize', fit);
+      return () => { window.removeEventListener('resize', fit); root.style.removeProperty('--sky-h'); };
+    }, []);
+    // Admin → Banner: every position the storefront home shows.
+    const live = window.LZ.banners.live;
+    const top = live('HOME_TOP_CAROUSEL');
+    const middle = live('HOME_MIDDLE')[0];
+    const flashTop = live('FLASH_SALE_TOP')[0];
+    const shelf = PRODUCTS.slice(0, 6);
+    const picks = Array.from({ length: 10 }, (_, i) => ({ ...PRODUCTS[(i + 6) % PRODUCTS.length], _k: i }));
+    const flash = PRODUCTS.filter((p) => p.flash).slice(0, 5);
+    const shops = window.LZ.vendorList().slice(0, 6);
+
+    return (
+      <div>
+        <section className="tr-hero">
+          <div className="tr-motif" aria-hidden="true"><i /><i /><i /></div>
+          <h1><span className="tr-h1a">Nhận hàng rồi, </span><mark>tiền mới đến shop.</mark></h1>
+          <p>Genie giữ tiền của bạn cho đến khi bạn nhận hàng. Mọi shop đều phải xác minh danh tính mới được bán.</p>
+          <div className="tr-stage" ref={stage}>
+            <div className="tr-shelf">
+              {shelf.map((p, i) => <button key={p.id} style={{ '--i': i }} onClick={() => onOpen(p.id)} aria-label={p.title + ', ' + fmt(p.price)}><img src={p.image} alt="" /><span className="tr-shelf__tag">{fmt(p.price)}</span></button>)}
+            </div>
+            <window.LZMoneyRail interactive amount={389000} shop="TechZone Official" />
+          </div>
+        </section>
+
+        {top.length > 0 && <div className="tr-section tr-section--banner"><window.LZBannerCarousel items={top} /></div>}
+        <window.LZBannerPopup />
+
+        <section className="tr-section">
+          <div className="tr-section__head">
+            <h2>Gợi ý cho bạn</h2>
+            <button className="tr-more" onClick={onMore}>Xem thêm <Icon name="chevron-right" size={16} /></button>
+          </div>
+          <div className="tr-grid">
+            {picks.map((p) => <window.LZCardX key={p._k} p={p} onClick={() => onOpen(p.id)} />)}
+          </div>
+        </section>
+
+        {middle && <div className="tr-section tr-section--banner"><window.LZBanner b={middle} /></div>}
+
+        <section id="flash-sale" className="tr-section tr-flash">
+          <div className="tr-flash__in">
+            <div className="tr-section__head tr-flash__head">
+              <h2>Flash Sale</h2>
+              <Countdown />
+              <button className="tr-more" onClick={onMore}>Xem tất cả <Icon name="chevron-right" size={16} /></button>
+            </div>
+            {flashTop && <div className="tr-flash__banner"><window.LZBanner b={flashTop} /></div>}
+            <div className="tr-grid">
+              {flash.map((p) => <window.LZCardX key={p.id} p={p} flashBar onClick={() => onOpen(p.id)} />)}
+            </div>
+            <h3 className="tr-vouchers__title">Lưu voucher, dùng khi thanh toán</h3>
+            <div className="tr-vouchers">
+              <SaveVoucher kind="platform" amount="-30k" label="Đơn từ 199.000₫" code="GENIE30K" />
+              <SaveVoucher kind="shop" amount="-15%" label="Tối đa 50.000₫" code="TECH15" />
+              <SaveVoucher kind="freeship" amount="0₫" label="Miễn phí vận chuyển" code="FREESHIP30" />
+              <SaveVoucher kind="platform" amount="-12%" label="Siêu sale 12.12" code="SALE1212" />
+            </div>
+          </div>
+        </section>
+
+        <section className="tr-section">
+          <div className="tr-section__head"><h2>Shop đã xác minh</h2></div>
+          <div className="tr-shops">
+            {shops.map((v) => (
+              <button key={v.id} className="tr-shop" onClick={() => onShop && onShop(v.id)}>
+                <window.LZSeal id={v.id} name={v.name} size={52} />
+                <span><b>{v.name}</b><small>{v.rating} sao · {v.followers} người theo dõi · {v.location}</small></span>
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 40 }}>
+            <Button size="lg" variant="outline" iconRight="chevron-down" onClick={onMore}>Xem thêm sản phẩm</Button>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   window.LZHome = Home;
   window.LZSaveVoucher = SaveVoucher;

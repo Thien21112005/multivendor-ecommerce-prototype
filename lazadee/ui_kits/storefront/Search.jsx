@@ -1,7 +1,7 @@
-/* Lazadee search results — TWO SCOPES:
+/* Genie search results — TWO SCOPES:
    • Toàn sàn (whole marketplace)  • Trong Shop <name> (single vendor)
    A segmented control switches scope; filters (category, price, rating,
-   location, Mall, freeship) + sort (relevance / newest / best-selling / price)
+   location, Chính hãng, freeship) + sort (relevance / newest / best-selling / price)
    refine the grid. Reachable from the global header (all) or a shop (in-shop). */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
@@ -29,6 +29,7 @@
     const inShop = scope === 'shop' && shopId && V[shopId];
     const v = inShop ? V[shopId] : null;
     const [sort, setSort] = React.useState('rel');
+    const [filtersOpen, setFiltersOpen] = React.useState(false);
     const [priceAsc, setPriceAsc] = React.useState(true);
     const [cats, setCats] = React.useState([]);
     const [brands, setBrands] = React.useState([]);
@@ -73,9 +74,9 @@
       ...cats.map((c) => ({ k: 'cat:' + c, label: c, clear: () => toggleCat(c) })),
       ...brands.map((b) => ({ k: 'brand:' + b, label: b, clear: () => toggleBrand(b) })),
       ...(activeBand ? [{ k: 'band', label: activeBand.label, clear: () => setBand(null) }] : []),
-      ...(mallOnly ? [{ k: 'mall', label: 'Lazadee Mall', clear: () => setMallOnly(false) }] : []),
+      ...(mallOnly ? [{ k: 'mall', label: 'Shop Chính Hãng', clear: () => setMallOnly(false) }] : []),
       ...(freeOnly ? [{ k: 'free', label: 'Freeship', clear: () => setFreeOnly(false) }] : []),
-      ...(rating ? [{ k: 'rate', label: `${rating}★ trở lên`, clear: () => setRating(0) }] : []),
+      ...(rating ? [{ k: 'rate', label: `${rating} sao trở lên`, clear: () => setRating(0) }] : []),
     ];
 
     return (
@@ -99,8 +100,8 @@
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '12px 16px', marginBottom: 14, boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md)', background: v.logoBg, color: '#fff', display: 'grid', placeItems: 'center', font: '800 19px var(--font-sans)', flex: 'none' }}>{v.name[0]}</div>
             <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{v.name}</span>{v.mall && <Badge variant="solid">MALL</Badge>}</div>
-              <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Đang lọc trong shop này · {v.rating}★ · {v.followers} theo dõi</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{v.name}</span>{v.mall && <Badge variant="primary">Chính hãng</Badge>}</div>
+              <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>Đang lọc trong shop này · {v.rating} sao · {v.followers} theo dõi</div>
             </div>
             <Button size="sm" variant="outline" iconLeft="store" onClick={() => onShop && onShop(shopId)}>Vào shop</Button>
           </div>
@@ -108,7 +109,8 @@
 
         <div style={{ display: 'grid', gridTemplateColumns: '232px minmax(0, 1fr)', gap: 18, alignItems: 'start' }}>
           {/* ---- Filters ---- */}
-          <aside style={{ background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', padding: '16px 16px 20px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 96 }}>
+          <aside className="tr-filters" data-open={filtersOpen ? 1 : 0} style={{ background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', padding: '16px 16px 20px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 96 }}>
+            <button className="tr-filters__close" aria-label="Đóng bộ lọc" onClick={() => setFiltersOpen(false)}><Icon name="x" size={22} /></button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}><Icon name="sliders-horizontal" size={17} style={{ color: 'var(--color-primary)' }} /><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Bộ lọc tìm kiếm</span></div>
 
             {!inShop && <FilterGroup title="Theo danh mục">
@@ -151,19 +153,21 @@
             </FilterGroup>
 
             <FilterGroup title="Dịch vụ & khác">
-              <label style={fRow}><Checkbox checked={mallOnly} onChange={() => setMallOnly(!mallOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Badge variant="solid">MALL</Badge> Chính hãng</span></label>
+              <label style={fRow}><Checkbox checked={mallOnly} onChange={() => setMallOnly(!mallOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Badge variant="primary">Chính hãng</Badge> Chính hãng</span></label>
               <label style={fRow}><Checkbox checked={freeOnly} onChange={() => setFreeOnly(!freeOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="truck" size={14} style={{ color: 'var(--mint-600)' }} /> Miễn phí vận chuyển</span></label>
               <label style={fRow}><Checkbox checked={voucherOnly} onChange={() => setVoucherOnly(!voucherOnly)} /><span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="ticket" size={14} style={{ color: 'var(--color-primary)' }} /> Shop có voucher</span></label>
             </FilterGroup>
 
             <Button block variant="outline" iconLeft="refresh-cw" onClick={clearAll} style={{ marginTop: 6 }}>Xoá tất cả</Button>
+            <div className="tr-filters__done"><Button block size="lg" onClick={() => setFiltersOpen(false)}>Xem {res.length} sản phẩm</Button></div>
           </aside>
 
           {/* ---- Results ---- */}
           <div style={{ minWidth: 0 }}>
             {/* sort bar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface-sunken)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '9px 14px', marginBottom: 14, flexWrap: 'wrap' }}>
-              <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Sắp xếp theo</span>
+            <div className="tr-sortbar" style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface-sunken)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '9px 14px', marginBottom: 14, flexWrap: 'wrap' }}>
+              <button className="tr-filterbtn" onClick={() => setFiltersOpen(true)}><Icon name="sliders-horizontal" size={16} /> Bộ lọc {activeChips.length > 0 && <b>{activeChips.length}</b>}</button>
+              <span className="tr-wide-only" style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Sắp xếp theo</span>
               {SORTS.map((s) => {
                 const on = sort === s.id;
                 return (
@@ -179,8 +183,8 @@
             {activeChips.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
                 {activeChips.map((c) => (
-                  <span key={c.k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 6px 0 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-primary-tint)', color: 'var(--orange-700)', font: '600 12px var(--font-sans)' }}>
-                    {c.label}<button onClick={c.clear} style={{ width: 20, height: 20, border: 0, background: 'transparent', color: 'var(--orange-600)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button>
+                  <span key={c.k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 6px 0 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-primary-tint)', color: 'var(--brand-700)', font: '600 12px var(--font-sans)' }}>
+                    {c.label}<button onClick={c.clear} style={{ width: 20, height: 20, border: 0, background: 'transparent', color: 'var(--brand-600)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button>
                   </span>
                 ))}
                 <button onClick={clearAll} style={{ border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>Xoá lọc</button>
@@ -191,7 +195,7 @@
             {res.length === 0 ? (
               <div style={{ display: 'grid', placeItems: 'center', gap: 12, padding: '70px 0', background: '#fff', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', color: 'var(--text-subtle)' }}>
                 <Icon name="package" size={46} />
-                <div style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>Không tìm thấy sản phẩm nào khớp bộ lọc{inShop ? ' trong shop này' : ''}.</div>
+                <div style={{ font: 'var(--type-body)', color: 'var(--text-muted)' }}>{activeChips.length ? 'Không có sản phẩm nào khớp bộ lọc' : 'Không tìm thấy sản phẩm phù hợp'}{inShop ? ' trong shop này' : ''}.</div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-subtle)' }}>Thử từ khóa ngắn hơn, kiểm tra chính tả hoặc bỏ bớt bộ lọc.</div>
                 {inShop && <Button variant="outline" iconLeft="layout-grid" onClick={() => onScope('all')}>Mở rộng tìm toàn sàn</Button>}
                 <div style={{ width: '100%', padding: '12px 18px 0', boxSizing: 'border-box' }}>

@@ -1,4 +1,4 @@
-/* Lazadee "Gợi ý hôm nay" — full paginated discover page. Reached from the home
+/* Genie "Gợi ý hôm nay" — full paginated discover page. Reached from the home
    "Xem thêm" button; opens on PAGE 2 by default (per request). 30 products/page,
    classic numbered pagination (Prev · 1 2 3 … · Next). Each page scrolls to top. */
 (function () {
@@ -39,7 +39,7 @@
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 56px' }}>
         {/* breadcrumb */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 14 }}>
-          <span style={{ cursor: 'pointer', color: 'var(--text-link)' }} onClick={onHome}>Trang chủ</span>
+          <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer', color: 'var(--text-link)' }} onClick={onHome}>Trang chủ</span>
           <Icon name="chevron-right" size={14} />
           <span style={{ color: 'var(--text-body)' }}>Gợi ý hôm nay</span>
         </div>
@@ -54,7 +54,7 @@
         </div>
 
         {/* grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
           {items.map((p) => <window.LZCardX key={p._k} p={p} onClick={() => onOpen(p.id)} />)}
         </div>
 
@@ -79,5 +79,5 @@
   const pageBtn = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 40, height: 40, padding: 0, border: '1.5px solid var(--border-default)', background: '#fff', borderRadius: 'var(--radius-md)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-body)', cursor: 'pointer' };
   const pageActive = { background: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: '#fff' };
 
-  window.LZDiscover = Discover;
+  window.TRiscover = Discover;
 })();

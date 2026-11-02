@@ -1,9 +1,29 @@
-/* Lazadee storefront header: utility bar, logo + search + cart, category strip. */
+/* Genie storefront header: floating glass bar (logo, search, cart, account) and the category row. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, IconButton, Badge, Modal, Button } = DS;
   const { CATEGORIES, USER, NOTIFICATIONS } = window.LZ;
   const { Avatar } = DS;
+
+  // The Genie lamp, drawn inline so each theme recolours it: the body takes --logo-body,
+  // the smoke and the lid knob take --logo-accent.
+  function GenieMark({ size = 32 }) {
+    return (
+      <svg className="tr-mark" width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <path className="tr-mark__smoke" d="M57.5 20.5c-4.5-2.5-3.5-7 .5-9.5s4-6.5-.5-9" stroke="var(--logo-accent, #E9B23C)" strokeWidth="4" strokeLinecap="round" />
+        <g fill="var(--logo-body, currentColor)">
+          <path d="M5 33h38c0 8.6-8.5 14.5-19 14.5S5 41.6 5 33Z" />
+          <path d="M40 38.5c6.5-.5 11-4.5 14.5-10.5l2.6-4.4c.9-1.5 3-.8 2.6.9L56.5 34C53.6 41 47.5 45 40.5 45.5Z" />
+          <path d="M13 33a11 8 0 0 1 22 0Z" />
+          <path d="M19 47h10v5H19z" />
+          <rect x="12" y="52" width="24" height="6" rx="3" />
+        </g>
+        <circle cx="24" cy="23" r="3.2" fill="var(--logo-accent, #E9B23C)" />
+        <path d="M6.5 36.5c-6 .5-6 9.5 2.5 9.5" stroke="var(--logo-body, currentColor)" strokeWidth="4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  window.GenieMark = GenieMark;
 
   function Header({ cart = [], cartCount = 0, loggedIn = true, onNav, onOpen, onOrders, onNotifications, onOpenNotif, query, onSearch, onCategory, onShop, onRequireLogin, onLogin, onLogout }) {
     const [q, setQ] = React.useState(query || '');
@@ -14,6 +34,8 @@
     const notifCount = loggedIn ? NOTIFICATIONS.filter((n) => n.unread).length : 0;
     const [sug, setSug] = React.useState([]);
     const [sugOpen, setSugOpen] = React.useState(false);
+    const [act, setAct] = React.useState(-1);
+    React.useEffect(() => setAct(-1), [sug]);
     React.useEffect(() => {
       const t = q.trim().toLowerCase();
       if (t.length < 2) { setSug([]); return undefined; }
@@ -29,94 +51,77 @@
     }, [q]);
     const submit = () => { setSugOpen(false); onSearch && onSearch(q); };
     return (
-      <header style={{ position: 'sticky', top: 0, zIndex: 100 }}>
-        {/* utility bar */}
-        <div style={{ background: 'var(--ink-900)', color: 'rgba(255,255,255,.72)' }}>
-          <div style={bar}>
-            <div style={{ display: 'flex', gap: 18, fontSize: 12 }}>
-              <span style={ut} onClick={() => { window.location.href = '../vendor/index.html'; }}>Kênh người bán</span>
-              <span style={ut} onClick={() => onNav && onNav('seller')}>Trở thành Người bán</span>
-              <span style={ut} onClick={() => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message: 'Ứng dụng di động sẽ ra mắt ở giai đoạn sau' } }))}>Tải ứng dụng</span>
-            </div>
-            <div style={{ display: 'flex', gap: 18, fontSize: 12, alignItems: 'center' }}>
-              <span style={ut} onClick={() => (loggedIn ? onOrders() : onRequireLogin())}><Icon name="package" size={14} /> Đơn mua</span>
-              <span style={ut} onClick={() => onNav('page', 'help-center')}><Icon name="circle-help" size={14} /> Hỗ trợ</span>
-              <LangSelect />
-              <span style={{ ...ut, color: '#fff', fontWeight: 600 }} onClick={() => (loggedIn ? onNav('account') : onLogin())}>{loggedIn ? 'Tài khoản của tôi' : 'Đăng nhập'}</span>
-            </div>
-          </div>
-        </div>
-        {/* main bar */}
-        <div style={{ background: 'var(--color-primary)' }}>
-          <div style={{ ...bar, height: 76, gap: 28, alignItems: 'center' }}>
-            <a onClick={() => onNav('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', textDecoration: 'none' }}>
-              <img src="../../assets/logomark.svg" width="40" height="40" alt="" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.18))' }} />
-              <span style={{ font: '800 26px/1 var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>lazadee</span>
-            </a>
-            <div style={{ flex: 1, maxWidth: 720 }}>
-              <div style={{ position: 'relative', display: 'flex', background: '#fff', borderRadius: 'var(--radius-sm)', padding: 3, alignItems: 'center' }}>
-                {sugOpen && sug.length > 0 && (
-                  <div role="listbox" style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', padding: 4, zIndex: 120 }}>
-                    {sug.map((s) => (
-                      <div key={s.key} role="option" aria-selected="false" onMouseDown={(e) => { e.preventDefault(); setSugOpen(false); s.go(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--text-body)' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-                        {s.img ? <img src={s.img} alt="" width="32" height="32" style={{ borderRadius: 4, objectFit: 'cover', flex: 'none' }} /> : <Icon name={s.icon} size={18} style={{ color: 'var(--text-muted)', flex: 'none' }} />}
-                        <span style={{ flex: 1, minWidth: 0, font: 'var(--type-body-sm)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
-                        {s.hint && <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{s.hint}</span>}
-                      </div>
-                    ))}
+      <>
+      <header className="tr-pillwrap">
+        <div className="tr-pill tr-glass">
+          <button className="tr-logo" onClick={() => onNav('home')} aria-label="Genie, về trang chủ">
+            <GenieMark size={34} />
+            <span>Genie</span>
+          </button>
+          <div className="tr-search">
+            {sugOpen && sug.length > 0 && (
+              <div role="listbox" id="tr-sug" aria-label="Gợi ý tìm kiếm" className="tr-sug">
+                {sug.map((s, i) => (
+                  <div key={s.key} id={'tr-sug-' + i} role="option" aria-selected={i === act} onMouseDown={(e) => { e.preventDefault(); setSugOpen(false); s.go(); }} style={{ background: i === act ? 'var(--brand-50)' : undefined, display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: 'var(--text-body)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+                    {s.img ? <img src={s.img} alt="" width="32" height="32" style={{ borderRadius: 6, objectFit: 'cover', flex: 'none' }} /> : <Icon name={s.icon} size={18} style={{ color: 'var(--text-muted)', flex: 'none' }} />}
+                    <span style={{ flex: 1, minWidth: 0, font: 'var(--type-body-sm)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.label}</span>
+                    {s.hint && <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{s.hint}</span>}
                   </div>
-                )}
-                <input value={q} aria-label="Tìm kiếm" onChange={(e) => { setQ(e.target.value); setSugOpen(true); }} onFocus={() => setSugOpen(true)} onBlur={() => setSugOpen(false)} onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') setSugOpen(false); }}
-                  placeholder="Tìm kiếm sản phẩm, thương hiệu, shop…"
-                  style={{ flex: 1, border: 0, outline: 'none', height: 38, padding: '0 12px', font: 'var(--type-body)', background: 'transparent' }} />
-                <button onClick={submit} style={searchBtn}><Icon name="search" size={18} strokeWidth={2.4} /></button>
-              </div>
-              <div style={{ display: 'flex', gap: 14, marginTop: 5, fontSize: 11, color: 'rgba(255,255,255,.82)' }}>
-                {['Smartphone', 'Áo thun', 'Serum', 'Tai nghe', 'Giày sneaker'].map((t) => (
-                  <span key={t} style={{ cursor: 'pointer' }} onClick={() => { setQ(t); onSearch && onSearch(t); }}>{t}</span>
                 ))}
               </div>
+            )}
+            <input value={q} aria-label="Tìm kiếm" role="combobox" aria-autocomplete="list" aria-controls="tr-sug" aria-expanded={sugOpen && sug.length > 0} aria-activedescendant={act >= 0 ? 'tr-sug-' + act : undefined} onChange={(e) => { setQ(e.target.value); setSugOpen(true); }} onFocus={() => setSugOpen(true)} onBlur={() => setSugOpen(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                  e.preventDefault(); setSugOpen(true);
+                  const step = e.key === 'ArrowDown' ? 1 : -1;
+                  setAct((a) => { if (!sug.length) return -1; const n = a + step; return n < 0 ? sug.length - 1 : n >= sug.length ? 0 : n; });
+                }
+                if (e.key === 'Enter') { if (sugOpen && act >= 0 && sug[act]) { e.preventDefault(); setSugOpen(false); sug[act].go(); } else submit(); }
+                if (e.key === 'Escape') setSugOpen(false);
+              }}
+              placeholder="Tìm sản phẩm, thương hiệu, shop đã xác minh…" />
+            <button className="tr-search__go" onClick={submit} aria-label="Tìm"><Icon name="search" size={18} strokeWidth={2.4} /></button>
+          </div>
+          <div className="tr-actions">
+            <button className="tr-textbtn tr-textbtn--wide" onClick={() => onNav('seller')}>Bán hàng</button>
+            <span className="tr-textbtn--wide" style={{ display: 'inline-flex' }}><LangSelect /></span>
+            <button className="tr-iconbtn tr-textbtn--wide" onClick={() => onNav('page', 'help-center')} aria-label="Hỗ trợ"><Icon name="circle-help" size={22} /></button>
+            <div style={{ position: 'relative' }} onMouseEnter={() => loggedIn && setNotifOpen(true)} onMouseLeave={() => setNotifOpen(false)}>
+              <button className="tr-iconbtn" onClick={() => (loggedIn ? onNotifications() : onRequireLogin())} aria-label={notifCount > 0 ? 'Thông báo, ' + notifCount + ' chưa đọc' : 'Thông báo'}><Icon name="bell" size={22} />{notifCount > 0 && <span className="tr-badge">{notifCount > 99 ? '99+' : notifCount}</span>}</button>
+              {notifOpen && <NotifPanel onItem={(n) => { setNotifOpen(false); onOpenNotif(n); }} onSeeAll={() => { setNotifOpen(false); onNotifications(); }} />}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fff' }}>
-              <div style={{ position: 'relative' }} onMouseEnter={() => loggedIn && setNotifOpen(true)} onMouseLeave={() => setNotifOpen(false)}>
-                <button onClick={() => (loggedIn ? onNotifications() : onRequireLogin())} style={cartBtn} aria-label="Thông báo"><Icon name="bell" size={24} /></button>
-                {notifCount > 0 && <span style={cartBadge}>{notifCount > 99 ? '99+' : notifCount}</span>}
-                {notifOpen && <NotifPanel onItem={(n) => { setNotifOpen(false); onOpenNotif(n); }} onSeeAll={() => { setNotifOpen(false); onNotifications(); }} />}
-              </div>
-              <div style={{ position: 'relative' }} onMouseEnter={() => loggedIn && setCartOpen(true)} onMouseLeave={() => setCartOpen(false)}>
-                <button onClick={() => (loggedIn ? onNav('cart') : onRequireLogin())} style={cartBtn} aria-label="Giỏ hàng"><Icon name="shopping-cart" size={26} /></button>
-                {loggedIn && cartCount > 0 && <span style={cartBadge}>{cartCount}</span>}
-                {cartOpen && <MiniCart cart={cart} onOpen={(id) => { setCartOpen(false); onOpen(id); }} onGoCart={() => { setCartOpen(false); onNav('cart'); }} />}
-              </div>
-              <div style={{ position: 'relative', marginLeft: 8 }}>
-                {loggedIn
-                  ? <button onClick={() => setUserOpen((o) => !o)} aria-label="Tài khoản" style={{ display: 'flex', alignItems: 'center', gap: 10, height: 42, padding: '4px 16px 4px 6px', background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.25)', borderRadius: 10, color: '#fff', font: '600 14px var(--font-sans)', cursor: 'pointer' }}><Avatar name={USER.name} src={USER.avatarUrl} size={30} /><span style={{ whiteSpace: 'nowrap' }}>{USER.name}</span></button>
-                  : <Button variant="secondary" onClick={onLogin} style={{ background: '#fff', color: 'var(--color-primary)', border: 0, height: 36, padding: '0 16px' }}>Đăng nhập</Button>}
-                {loggedIn && userOpen && <UserMenu onClose={() => setUserOpen(false)} onNav={onNav} onOrders={onOrders} onLogout={() => setLogoutOpen(true)} />}
-              </div>
+            <div style={{ position: 'relative' }} onMouseEnter={() => loggedIn && setCartOpen(true)} onMouseLeave={() => setCartOpen(false)}>
+              <button className="tr-iconbtn" onClick={() => (loggedIn ? onNav('cart') : onRequireLogin())} aria-label={loggedIn && cartCount > 0 ? 'Giỏ hàng, ' + cartCount + ' sản phẩm' : 'Giỏ hàng'}><Icon name="shopping-cart" size={22} />{loggedIn && cartCount > 0 && <span className="tr-badge">{cartCount}</span>}</button>
+              {cartOpen && <MiniCart cart={cart} onOpen={(id) => { setCartOpen(false); onOpen(id); }} onGoCart={() => { setCartOpen(false); onNav('cart'); }} />}
+            </div>
+            <div style={{ position: 'relative', marginLeft: 4 }}>
+              {loggedIn
+                ? <button className="tr-user" onClick={() => setUserOpen((o) => !o)} aria-haspopup="menu" aria-expanded={userOpen}><Avatar name={USER.name} src={USER.avatarUrl} size={34} /><span style={{ whiteSpace: 'nowrap' }}>{USER.name}</span></button>
+                : <Button onClick={onLogin}>Đăng nhập</Button>}
+              {loggedIn && userOpen && <UserMenu onClose={() => setUserOpen(false)} onNav={onNav} onOrders={onOrders} onLogout={() => setLogoutOpen(true)} />}
             </div>
           </div>
         </div>
-        {/* category strip */}
-        <div style={{ background: '#fff', borderBottom: '1px solid var(--border-default)' }}>
-          <div style={{ ...bar, height: 48, gap: 4, overflowX: 'auto' }}>
-            {CATEGORIES.map((c) => (
-              <button key={c.name} onClick={() => (onCategory ? onCategory(c.name) : onSearch(c.name))} style={catBtn}>
-                <Icon name={c.icon} size={16} /> {c.name}
-              </button>
-            ))}
-          </div>
-        </div>
+      </header>
+      <nav className="tr-cats" aria-label="Danh mục">
+        {CATEGORIES.map((c, i) => (
+          <button key={c.name} className="tr-cat" style={{ '--i': i }} onClick={() => (onCategory ? onCategory(c.name) : onSearch(c.name))}>
+            <Icon name={c.icon} size={15} /> {c.name}
+          </button>
+        ))}
+      </nav>
+
 
         <Modal open={logoutOpen} onClose={() => setLogoutOpen(false)} title="Đăng xuất"
           footer={<><Button variant="ghost" onClick={() => setLogoutOpen(false)}>Huỷ</Button><Button variant="danger" iconLeft="log-out" onClick={() => { setLogoutOpen(false); onLogout && onLogout(); }}>Đăng xuất</Button></>}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', width: 'min(420px, 80vw)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50, #FDECEA)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="log-out" size={20} /></div>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--red-50)', color: 'var(--red-600)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name="log-out" size={20} /></div>
             <div style={{ font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>Bạn có chắc muốn đăng xuất khỏi tài khoản <b>{USER ? USER.name : ''}</b>?</div>
           </div>
         </Modal>
-      </header>
+      </>
     );
   }
 
@@ -136,7 +141,7 @@
               <div style={{ padding: '12px 16px', font: 'var(--type-body-sm)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>Sản phẩm mới thêm</div>
               <div style={{ maxHeight: 360, overflowY: 'auto' }}>
                 {recent.map((l) => (
-                  <div key={l.key} onClick={() => onOpen(l.productId)} style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer' }}
+                  <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={l.key} onClick={() => onOpen(l.productId)} style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer' }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                     <img src={l.img} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', flex: 'none' }} />
                     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -162,8 +167,8 @@
 
   function UserMenu({ onClose, onNav, onOrders, onLogout }) {
     const item = (icon, label, onClick, danger) => (
-      <div onClick={() => { onClose(); onClick(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: danger ? 'var(--red-600)' : 'var(--text-body)', font: 'var(--type-body-sm)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = danger ? 'var(--red-50, #FDECEA)' : 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+      <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => { onClose(); onClick(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: danger ? 'var(--red-600)' : 'var(--text-body)', font: 'var(--type-body-sm)' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = danger ? 'var(--red-50)' : 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
         <Icon name={icon} size={17} /><span style={{ flex: 1 }}>{label}</span>
       </div>
     );
@@ -172,16 +177,16 @@
         <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 90 }} />
         <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 208, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', zIndex: 95, padding: 4, color: 'var(--text-body)', cursor: 'default' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px 10px', borderBottom: '1px solid var(--border-subtle)', marginBottom: 4 }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--orange-100, #FFE6D9)', color: 'var(--orange-600)', display: 'grid', placeItems: 'center', font: '700 15px var(--font-sans)', flex: 'none' }}>{USER ? USER.name.trim().split(' ').pop()[0] : 'K'}</div>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--brand-100)', color: 'var(--brand-600)', display: 'grid', placeItems: 'center', font: '700 15px var(--font-sans)', flex: 'none' }}>{USER ? USER.name.trim().split(' ').pop()[0] : 'K'}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{USER ? USER.name : 'Khách'}</div>
-              <div onClick={() => { onClose(); onNav('account'); }} style={{ font: 'var(--type-caption)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }}>Xem hồ sơ</div>
+              <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => { onClose(); onNav('account'); }} style={{ font: 'var(--type-caption)', color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }}>Xem hồ sơ</div>
             </div>
           </div>
           {item('user', 'Tài khoản của tôi', () => onNav('account'))}
           {item('package', 'Đơn mua', () => onOrders())}
           <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '4px 0' }} />
-          <div onClick={() => { onClose(); window.location.href = '../vendor/index.html'; }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
+          <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => { onClose(); window.location.href = '../vendor/index.html'; }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--gray-50)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
             <Avatar name="TechZone Official" size={32} />
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -198,7 +203,7 @@
   }
 
   function LangSelect() {
-    const LANGS = [{ id: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' }, { id: 'en', label: 'English', flag: '🇬🇧' }];
+    const LANGS = [{ id: 'vi', label: 'Tiếng Việt' }, { id: 'en', label: 'English' }];
     const [open, setOpen] = React.useState(false);
     const [lang, setLangState] = React.useState(window.LZI18n.lang);
     const setLang = (next) => { setLangState(next); window.LZI18n.set(next); };
@@ -206,17 +211,17 @@
     const cur = LANGS.find((l) => l.id === lang);
     return (
       <span style={{ position: 'relative' }}>
-        <span style={{ ...ut, gap: 5 }} onClick={() => setOpen((o) => !o)}>
-          <span style={{ fontSize: 13 }}>{cur.flag}</span>{cur.label}
+        <button className="tr-textbtn" aria-expanded={open} aria-label={'Ngôn ngữ: ' + cur.label} onClick={() => setOpen((o) => !o)}>
+          <span className="tr-lang-full">{cur.label}</span><span className="tr-lang-code">{cur.id.toUpperCase()}</span>
           <Icon name="chevron-down" size={12} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
-        </span>
+        </button>
         {open && (
           <>
             <span onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 110 }} />
             <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 168, background: '#fff', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-xl)', zIndex: 115, overflow: 'hidden', padding: 4 }}>
               {LANGS.map((l) => (
-                <div key={l.id} onClick={() => { setLang(l.id); setOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: l.id === lang ? 'var(--orange-50)' : 'transparent', color: l.id === lang ? 'var(--orange-600)' : 'var(--text-body)', font: (l.id === lang ? '600 ' : '500 ') + '13px var(--font-sans)' }}>
-                  <span style={{ fontSize: 16 }}>{l.flag}</span><span style={{ flex: 1 }}>{l.label}</span>{l.id === lang && <Icon name="check" size={15} />}
+                <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={l.id} onClick={() => { setLang(l.id); setOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: l.id === lang ? 'var(--brand-50)' : 'transparent', color: l.id === lang ? 'var(--brand-600)' : 'var(--text-body)', font: (l.id === lang ? '600 ' : '500 ') + '13px var(--font-sans)' }}>
+                  <span style={{ flex: 1 }}>{l.label}</span>{l.id === lang && <Icon name="check" size={15} />}
                 </div>
               ))}
             </div>
@@ -235,11 +240,11 @@
         <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xl)', overflow: 'hidden', color: 'var(--text-body)', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', padding: '13px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
             <span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Thông báo</span>
-            <span onClick={markAll} style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--orange-600)', cursor: 'pointer', fontWeight: 600 }}>Đánh dấu đã đọc</span>
+            <span role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={markAll} style={{ marginLeft: 'auto', font: 'var(--type-caption)', color: 'var(--brand-600)', cursor: 'pointer', fontWeight: 600 }}>Đánh dấu đã đọc</span>
           </div>
           <div style={{ maxHeight: 360, overflowY: 'auto' }}>
             {items.map((n) => (
-              <div key={n.id} onClick={() => onItem(n)} style={{ display: 'flex', gap: 11, padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', background: n.unread ? 'var(--orange-50)' : '#fff', cursor: 'pointer' }}>
+              <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={n.id} onClick={() => onItem(n)} style={{ display: 'flex', gap: 11, padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', background: n.unread ? 'var(--brand-50)' : '#fff', cursor: 'pointer' }}>
                 <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: n.icon === 'lazadee' ? 'transparent' : n.bg, color: n.tint, display: 'grid', placeItems: 'center', flex: 'none' }}>{n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" alt="" width="26" height="26" /> : <Icon name={n.icon} size={19} />}</div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{n.title}</div>
@@ -250,18 +255,13 @@
             ))}
             {items.length === 0 && <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Chưa có thông báo nào</div>}
           </div>
-          <div onClick={onSeeAll} style={{ padding: '11px 16px', textAlign: 'center', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--orange-600)', cursor: 'pointer' }}>Xem tất cả thông báo</div>
+          <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={onSeeAll} style={{ padding: '11px 16px', textAlign: 'center', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--brand-600)', cursor: 'pointer' }}>Xem tất cả thông báo</div>
         </div>
       </div>
     );
   }
 
-  const bar = { maxWidth: 1280, margin: '0 auto', padding: '0 24px', height: 36, display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
   const ut = { display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' };
-  const searchBtn = { width: 60, height: 38, border: 0, borderRadius: 'var(--radius-xs)', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-  const cartBtn = { width: 44, height: 44, borderRadius: 'var(--radius-md)', border: 0, background: 'transparent', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-  const cartBadge = { position: 'absolute', top: 2, right: 0, background: '#fff', color: 'var(--color-primary)', font: '700 11px/1 var(--font-sans)', minWidth: 18, height: 18, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px', border: '1.5px solid var(--color-primary)' };
-  const catBtn = { display: 'inline-flex', alignItems: 'center', gap: 6, height: 36, padding: '0 14px', border: 0, background: 'transparent', whiteSpace: 'nowrap', font: 'var(--weight-medium) var(--text-sm) var(--font-sans)', color: 'var(--text-body)', cursor: 'pointer', borderRadius: 'var(--radius-md)' };
 
   window.LZHeader = Header;
 })();

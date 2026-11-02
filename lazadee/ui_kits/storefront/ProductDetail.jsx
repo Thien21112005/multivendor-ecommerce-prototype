@@ -1,4 +1,4 @@
-/* Lazadee product detail: gallery, SKU variants, vendor, reviews. */
+/* Genie product detail: gallery, SKU variants, vendor, reviews. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, IconButton, Badge, PriceVND, Rating, VendorChip, QuantityStepper, StatusBadge, Money, Modal, Select } = DS;
@@ -52,9 +52,9 @@
     const shown = anon ? name[0] + '***' + name[name.length - 1] : name;
     const report = () => { if (!window.LZ.loggedIn) { window.dispatchEvent(new CustomEvent('lz_require_login')); return; } setReportOpen(true); };
     return (
-      <div style={{ display: 'flex', gap: 12, padding: '18px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+      <div className="tr-review" style={{ display: 'flex', gap: 12, padding: '18px 0', borderBottom: '1px solid var(--border-subtle)' }}>
         <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--gray-200)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)', fontWeight: 700, flex: 'none' }}>{shown[0]}</div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{shown}{anon && <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)', marginLeft: 6 }}>Đánh giá ẩn tên</span>}</div>
           <div style={{ margin: '3px 0 6px' }}><Rating value={rating} size={13} showNumber={false} /></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
@@ -62,7 +62,7 @@
             <span style={{ font: 'var(--type-caption)', color: 'var(--text-subtle)' }}>{when} · Phân loại: {variant}</span>
           </div>
           <p style={{ font: 'var(--type-body)', color: 'var(--text-body)', marginBottom: imgs ? 10 : 0 }}>{text}</p>
-          {imgs && <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>{imgs.map((m) => <img key={m} src={'../../assets/img/' + m + '.jpg'} style={{ width: 64, height: 64, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />)}</div>}
+          {imgs && <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>{imgs.map((m, i) => <img key={m} alt={'Ảnh khách hàng chụp ' + (i + 1)} src={'../../assets/img/' + m + '.jpg'} style={{ width: 64, height: 64, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />)}</div>}
           {reply && (
             <div style={{ marginTop: 10, background: 'var(--gray-50)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -74,7 +74,7 @@
           )}
         </div>
         <div style={{ alignSelf: 'flex-start', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flex: 'none' }}>
-          <button onClick={() => setHelpful((h) => !h)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: helpful ? 'var(--color-primary)' : 'var(--text-muted)', font: 'var(--type-caption)', cursor: 'pointer' }}><Icon name="thumbs-up" size={14} /> Hữu ích ({24 + (helpful ? 1 : 0)})</button>
+          <button onClick={() => setHelpful((h) => !h)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: helpful ? 'var(--color-primary)' : 'var(--text-muted)', font: 'var(--type-caption)', cursor: 'pointer' }}><Icon name="thumbs-up" size={14} /> Hữu ích ({12 + (name.length * 7) % 31 + (helpful ? 1 : 0)})</button>
           <button disabled={reported} onClick={report} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 0, background: 'transparent', color: 'var(--text-subtle)', font: 'var(--type-caption)', cursor: reported ? 'default' : 'pointer' }}><Icon name="triangle-alert" size={13} />{reported ? 'Đã báo cáo' : 'Báo cáo'}</button>
         </div>
         <Modal open={reportOpen} onClose={() => setReportOpen(false)} width={440} title="Báo cáo đánh giá"
@@ -96,7 +96,7 @@
           <Button variant="outline" iconLeft="house" onClick={onHome}>Về trang chủ</Button>
         </div>
         <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 14 }}>Sản phẩm tương tự</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>{picks.map((x) => <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />)}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>{picks.map((x) => <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />)}</div>
       </div>
     );
   }
@@ -149,31 +149,32 @@
 
     // returns the cart line, or null after warning when a variant group is still open
     const line = () => {
-      if (!c && !s) { toast('Vui lòng chọn Phân loại hàng', 'error'); return null; }
-      if (!c || !s) { toast('Vui lòng chọn đầy đủ Phân loại hàng', 'error'); return null; }
+      const showVariants = () => { if (window.innerWidth <= 768) document.getElementById('tr-variants').scrollIntoView({ block: 'start' }); };
+      if (!c && !s) { toast('Vui lòng chọn Phân loại hàng', 'error'); showVariants(); return null; }
+      if (!c || !s) { toast('Vui lòng chọn đầy đủ Phân loại hàng', 'error'); showVariants(); return null; }
       return { key: p.id + '|' + c.label + '/' + s.label, productId: p.id, vendorId: p.v, title: p.title, img: p.img, price, original: p.original, variant: c.label + ' / ' + s.label, qty, stock };
     };
     const add = () => {
-      if (flashOut) { toast('LZD-INV-4091: Đã hết suất Flash Sale', 'error'); return null; }
+      if (flashOut) { toast('Sản phẩm này đã hết suất Flash Sale', 'error'); return null; }
       const l = line(); if (l) onAdd(l); return l;
     };
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 24px 60px' }}>
         <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 14, display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ cursor: 'pointer' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={13} /><span style={{ cursor: 'pointer' }} onClick={() => onCategory && onCategory(p.cat)}>{p.cat}</span><Icon name="chevron-right" size={13} /><span style={{ color: 'var(--text-body)' }}>{p.title.slice(0, 30)}…</span>
+          <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={13} /><span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer' }} onClick={() => onCategory && onCategory(p.cat)}>{p.cat}</span><span className="tr-wide-only" style={{ display: 'contents' }}><Icon name="chevron-right" size={13} /><span style={{ color: 'var(--text-body)' }}>{p.title.slice(0, 30)}…</span></span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '440px 1fr', gap: 24, background: '#fff', borderRadius: 'var(--radius-lg)', padding: 20, boxShadow: 'var(--shadow-sm)' }}>
           {/* gallery */}
           <div>
-            <div onClick={() => setLightbox(true)} style={{ aspectRatio: '1', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--gray-100)', cursor: 'zoom-in' }}>
+            <div role="button" tabIndex={0} onKeyDown={window.LZKey} className="tr-gallery" onClick={() => setLightbox(true)} style={{ aspectRatio: '1', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--gray-100)', cursor: 'zoom-in' }}>
               <img src={gallery[active]} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
               {gallery.map((g, i) => (
-                <button key={i} onClick={() => setActive(i)} style={{ width: 64, height: 64, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '2px solid ' + (i === active ? 'var(--color-primary)' : 'transparent'), padding: 0, cursor: 'pointer', background: 'none' }}>
-                  <img src={g} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button key={i} aria-label={'Ảnh ' + (i + 1)} aria-pressed={i === active} onClick={() => setActive(i)} style={{ width: 64, height: 64, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '2px solid ' + (i === active ? 'var(--color-primary)' : 'transparent'), padding: 0, cursor: 'pointer', background: 'none' }}>
+                  <img src={g} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </button>
               ))}
             </div>
@@ -186,10 +187,10 @@
           {/* info */}
           <div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              {p.mall && <Badge variant="solid">MALL</Badge>}
+              {p.mall && <Badge variant="primary">Chính hãng</Badge>}
               {p.flash && <Badge variant="flash" icon="zap">FLASH SALE</Badge>}
               {p.preOrderDays && <Badge variant="primary" icon="clock">Đặt trước</Badge>}
-              <Badge variant="outline">Chính hãng 100%</Badge>
+              {!p.mall && <Badge variant="outline">Chính hãng 100%</Badge>}
             </div>
             <h1 style={{ font: 'var(--weight-semibold) 22px/1.3 var(--font-sans)', color: 'var(--text-strong)', marginBottom: 10 }}>{p.title}</h1>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border-subtle)' }}>
@@ -199,7 +200,7 @@
             </div>
 
             {/* price block */}
-            <div style={{ background: 'var(--color-primary-tint)', borderRadius: 'var(--radius-md)', padding: '16px 18px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14 }}>
               <PriceVND amount={price} original={p.original} size="lg" />
               <Badge variant="flash">-{p.discountPct}%</Badge>
             </div>
@@ -207,14 +208,14 @@
             {p.flash && p.flashTotal && (
               <div style={{ marginBottom: 18 }}>
                 <window.LZFlashBar p={p} />
-                <div style={{ font: 'var(--type-caption)', color: flashOut ? 'var(--red-600)' : 'var(--text-muted)', marginTop: 5 }}>{flashOut ? 'Đã hết suất Flash Sale (LZD-INV-4091)' : 'Giá Flash Sale áp dụng tối đa 1 suất cho mỗi tài khoản'}</div>
+                <div style={{ font: 'var(--type-caption)', color: flashOut ? 'var(--red-600)' : 'var(--text-muted)', marginTop: 5 }}>{flashOut ? 'Đã hết suất Flash Sale' : 'Giá Flash Sale áp dụng tối đa 1 suất cho mỗi tài khoản'}</div>
               </div>
             )}
             {p.preOrderDays && <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--blue-50)', borderRadius: 'var(--radius-md)', padding: '8px 12px', font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 18 }}><Icon name="clock" size={15} style={{ color: 'var(--blue-600)' }} />Hàng đặt trước, shop chuẩn bị trong {p.preOrderDays} ngày trước khi giao.</div>}
             {vacation && <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--gray-100)', borderRadius: 'var(--radius-md)', padding: '10px 12px', font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 18 }}><Icon name="clock" size={15} />Shop đang tạm nghỉ đến {vacation.until}. Bạn chưa thể đặt mua sản phẩm này.</div>}
 
             {/* variants */}
-            <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr', gap: '14px 16px', alignItems: 'center', marginBottom: 18 }}>
+            <div id="tr-variants" style={{ display: 'grid', gridTemplateColumns: '90px 1fr', gap: '14px 16px', alignItems: 'center', marginBottom: 18, scrollMarginTop: 130 }}>
               <span style={vLabel}>Màu sắc</span>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {COLORS.map((o, i) => (
@@ -241,30 +242,31 @@
 
             {/* soft-lock note */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--amber-50)', color: 'var(--amber-600)', borderRadius: 'var(--radius-md)', padding: '8px 12px', font: 'var(--type-body-sm)', marginBottom: 18 }}>
-              <Icon name="lock" size={15} /> Đặt hàng sẽ giữ chỗ tồn kho trong <b style={{ margin: '0 3px' }}>15:00</b> phút để bạn hoàn tất thanh toán.
+              <Icon name="lock" size={15} /> Khi đặt hàng, Genie giữ chỗ sản phẩm trong <b style={{ margin: '0 3px' }}>15 phút</b> để bạn thanh toán.
             </div>
 
             {/* actions */}
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div className="tr-buybar">
               <Button variant="secondary" size="lg" iconLeft="shopping-cart" disabled={soldOut || !!vacation} onClick={add}>Thêm vào giỏ</Button>
               <Button size="lg" disabled={soldOut || !!vacation} onClick={() => { const l = add(); if (l) onGoCart(l.key); }}>{p.preOrderDays ? 'Đặt trước' : 'Mua ngay'}</Button>
             </div>
+            <window.LZHoldNote style={{ marginTop: 16 }}>Khi trả trước qua VNPay hoặc VietQR, Genie giữ tiền của bạn và chỉ chuyển cho <b>{vendor.name}</b> sau khi bạn nhận hàng.</window.LZHoldNote>
           </div>
         </div>
 
         {/* vendor strip */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 20px', margin: '16px 0', boxShadow: 'var(--shadow-sm)' }}>
-          <div style={{ width: 56, height: 56, borderRadius: 'var(--radius-md)', background: vendor.logoBg, color: '#fff', display: 'grid', placeItems: 'center', font: '800 22px var(--font-sans)', flex: 'none', cursor: 'pointer' }} onClick={() => onShop && onShop(p.v)}>{vendor.name[0]}</div>
+        <div className="tr-vstrip" style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 20px', margin: '16px 0', boxShadow: 'var(--shadow-sm)' }}>
+          <button onClick={() => onShop && onShop(p.v)} aria-label={'Xem shop ' + vendor.name} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%', flex: 'none' }}><window.LZSeal id={p.v} name={vendor.name} size={56} /></button>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ font: 'var(--weight-bold) var(--text-lg) var(--font-sans)', color: 'var(--text-strong)', cursor: 'pointer' }} onClick={() => onShop && onShop(p.v)}>{vendor.name}</span>
-              {vendor.mall && <Badge variant="solid">MALL</Badge>}
+              <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ font: 'var(--weight-bold) var(--text-lg) var(--font-sans)', color: 'var(--text-strong)', cursor: 'pointer' }} onClick={() => onShop && onShop(p.v)}>{vendor.name}</span>
+              {vendor.mall && <Badge variant="primary">Chính hãng</Badge>}
               {vendor.favorite && <Badge variant="primary">Shop Yêu Thích</Badge>}
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: vacation ? 'var(--text-muted)' : 'var(--mint-600)', font: 'var(--type-caption)' }}>{vacation ? 'Đang tạm nghỉ' : '● Online'}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: vacation ? 'var(--text-muted)' : 'var(--mint-600)', font: 'var(--type-caption)' }}>{vacation ? 'Đang tạm nghỉ' : 'Online'}</span>
             </div>
-            <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>{vendor.followers} người theo dõi · {vendor.location} · Đánh giá shop {vendor.rating}★</div>
+            <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 3 }}>{vendor.followers} người theo dõi · {vendor.location} · Đánh giá shop {vendor.rating} sao</div>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div className="tr-vstrip__act">
             <Button variant={follow ? 'subtle' : 'secondary'} iconLeft={follow ? 'check' : 'plus'} onClick={requireThen(() => (follow ? setUnfollowOpen(true) : setFollow(true)))}>{follow ? 'Đang theo dõi' : 'Theo dõi'}</Button>
             <Button variant="ghost" iconLeft="message-circle" onClick={() => onChat && onChat(p.v, p)}>Chat ngay</Button>
             <Button variant="ghost" iconLeft="store" onClick={() => onShop && onShop(p.v)}>Xem shop</Button>
@@ -272,6 +274,11 @@
         </div>
 
         {/* Chi tiết sản phẩm + Mô tả */}
+        <section className="tr-promise" aria-label="Khi mua ở Genie">
+          <div><Icon name="shield-check" size={22} /><span><b>Genie giữ tiền đến khi bạn nhận hàng</b>Trả trước qua VNPay hoặc VietQR, tiền chưa đến shop cho tới khi bạn xác nhận.</span></div>
+          <div><Icon name="undo-2" size={22} /><span><b>7 ngày để yêu cầu trả hàng</b>Hàng lỗi hoặc sai mô tả, gửi ảnh và video bằng chứng ngay trong đơn.</span></div>
+          <div><Icon name="badge-check" size={22} /><span><b>{vendor.name} đã xác minh danh tính</b>Bán trên Genie từ {vendor.joined}, đánh giá shop {vendor.rating} sao.</span></div>
+        </section>
         <SpecsTable p={p} vendor={vendor} onShop={onShop} onCategory={onCategory} />
         <ProductDescription vendor={vendor} />
 
@@ -287,7 +294,7 @@
           <div style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
             {R_FILTERS.map((f) => {
               const on = f.id === rFilter;
-              return <button key={f.id} onClick={() => setRFilter(f.id)} style={{ height: 32, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--orange-700)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>{f.label} ({REVIEWS.filter(f.test).length})</button>;
+              return <button key={f.id} onClick={() => setRFilter(f.id)} style={{ height: 32, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--brand-700)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>{f.label} ({REVIEWS.filter(f.test).length})</button>;
             })}
           </div>
           {rShown.map((r) => <Review key={r.id} {...r} />)}
@@ -296,7 +303,7 @@
 
         {/* related */}
         <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', margin: '24px 0 14px' }}>Sản phẩm tương tự</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
           {similar.map((x) => (
             <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />
           ))}
@@ -331,7 +338,7 @@
     const link = { color: 'var(--blue-600)', textDecoration: 'none', cursor: 'pointer' };
     return (
       <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '20px 24px', marginBottom: 16, boxShadow: 'var(--shadow-sm)' }}>
-        <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', textTransform: 'uppercase', letterSpacing: '.03em', marginBottom: 16 }}>Chi tiết sản phẩm</h2>
+        <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 16 }}>Chi tiết sản phẩm</h2>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>
             {SPECS.map((sp, i) => (
@@ -339,9 +346,9 @@
                 <td style={{ width: 180, padding: '12px 16px 12px 0', font: 'var(--type-body-sm)', color: 'var(--text-muted)', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{sp.key}</td>
                 <td style={{ padding: '12px 0', font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.5 }}>
                   {sp.type === 'breadcrumb'
-                    ? <span>{sp.crumbs.map((c, j) => <React.Fragment key={j}>{j > 0 && <span style={{ color: 'var(--text-subtle)' }}> › </span>}<a style={link} onClick={() => onCategory && onCategory(c)}>{c}</a></React.Fragment>)}</span>
+                    ? <span>{sp.crumbs.map((c, j) => <React.Fragment key={j}>{j > 0 && <span style={{ color: 'var(--text-subtle)' }}> › </span>}<a role="button" tabIndex={0} onKeyDown={window.LZKey} style={link} onClick={() => onCategory && onCategory(c)}>{c}</a></React.Fragment>)}</span>
                     : sp.type === 'link'
-                      ? <a style={link} onClick={sp.onClick}>{sp.value}</a>
+                      ? <a role="button" tabIndex={0} onKeyDown={window.LZKey} style={link} onClick={sp.onClick}>{sp.value}</a>
                       : sp.value}
                 </td>
               </tr>
@@ -358,9 +365,9 @@
     const hd = { font: 'var(--weight-semibold) 14px var(--font-sans)', color: 'var(--text-strong)', margin: '16px 0 8px' };
     return (
       <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '20px 24px', marginBottom: 16, boxShadow: 'var(--shadow-sm)', position: 'relative', overflow: 'hidden' }}>
-        <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', textTransform: 'uppercase', letterSpacing: '.03em', marginBottom: 16 }}>Mô tả sản phẩm</h2>
+        <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 16 }}>Mô tả sản phẩm</h2>
         <div style={{ maxHeight: expanded ? 'none' : MAX_H, overflow: 'hidden', lineHeight: 1.8, font: 'var(--type-body)', color: 'var(--text-body)' }}>
-          <p style={{ font: 'var(--weight-bold) 15px var(--font-sans)', color: 'var(--text-strong)', marginBottom: 6, textTransform: 'uppercase' }}>{vendor.name} — Tai nghe Bluetooth chính hãng</p>
+          <p style={{ font: 'var(--weight-bold) 15px var(--font-sans)', color: 'var(--text-strong)', marginBottom: 6 }}>{vendor.name} — Tai nghe Bluetooth chính hãng</p>
           <p style={{ marginBottom: 16 }}>Tai Nghe Bluetooth ANC Pro 5 — Chống Ồn Chủ Động, Pin 40 Giờ, Bluetooth 5.3, Driver 40mm Titanium.</p>
           <p style={hd}>Thông tin sản phẩm:</p>
           <ul style={{ paddingLeft: 20, marginBottom: 16 }}>

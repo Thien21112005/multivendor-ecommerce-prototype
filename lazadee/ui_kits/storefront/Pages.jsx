@@ -1,8 +1,8 @@
-/* Lazadee static policy pages (help, legal, payment, seller policy): sidebar of
+/* Genie static policy pages (help, legal, payment, seller policy): sidebar of
    groups + rich-text body. Content lives in pages-data.jsx. */
 (function () {
   const CSS = `
-    .static-content-html h3 { font: var(--type-h3); color: var(--text-strong); margin: 40px 0 16px; border-left: 4px solid var(--color-primary); padding-left: 14px; border-radius: 2px; }
+    .static-content-html h3 { font: var(--type-h3); color: var(--text-strong); margin: 40px 0 16px;  border-radius: var(--radius-xs); }
     .static-content-html h4 { font: var(--type-h4); color: var(--text-strong); margin: 24px 0 12px; }
     .static-content-html p { margin: 0 0 20px; color: var(--text-muted); }
     .static-content-html ul { margin: 0 0 24px; padding-left: 28px; color: var(--text-muted); list-style-type: disc; }
@@ -12,13 +12,13 @@
     .static-content-html strong { font-weight: var(--weight-bold); color: var(--text-strong); }
     .static-content-html a { color: var(--color-primary); text-decoration: none; font-weight: var(--weight-semibold); }
     .static-content-html a:hover { text-decoration: underline; }
-    .static-content-html .alert-box { background: var(--amber-50); border: 1px solid var(--gold-400); padding: 20px 24px; border-radius: 12px; margin: 32px 0; }
-    .static-content-html .alert-box h4 { color: var(--amber-600); margin: 0 0 8px; font-size: 16px; }
+    .static-content-html .alert-box { background: var(--amber-50); border: 1px solid var(--gold-400); padding: 20px 24px; border-radius: var(--radius-lg); margin: 32px 0; }
+    .static-content-html .alert-box h4 { color: var(--amber-600); margin: 0 0 8px; font-size: var(--text-lg); }
     .static-content-html .alert-box p { color: var(--text-body); margin: 0; }
-    .static-content-html .info-box { background: var(--blue-50); border: 1px solid var(--blue-200); padding: 24px; border-radius: 12px; margin: 32px 0; }
+    .static-content-html .info-box { background: var(--blue-50); border: 1px solid var(--blue-200); padding: 24px; border-radius: var(--radius-lg); margin: 32px 0; }
     .static-content-html .info-box h4 { color: var(--blue-600); margin: 0 0 12px; }
     .static-content-html .info-box p { color: var(--text-body); margin: 0; }
-    .static-content-html table { width: 100%; border-collapse: collapse; margin: 32px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px var(--border-subtle); }
+    .static-content-html table { width: 100%; border-collapse: collapse; margin: 32px 0; border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 0 0 1px var(--border-subtle); }
     .static-content-html th, .static-content-html td { border-bottom: 1px solid var(--border-subtle); padding: 16px 20px; text-align: left; font-size: 14px; }
     .static-content-html th { background: var(--gray-50); font-weight: var(--weight-bold); color: var(--text-strong); text-transform: uppercase; font-size: 12px; letter-spacing: .05em; }
     .static-content-html tr:last-child td { border-bottom: none; }
@@ -30,7 +30,7 @@
     React.useEffect(() => { window.scrollTo(0, 0); }, [pageId]);
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 24px 72px', display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-        <aside style={{ width: 280, flex: 'none', position: 'sticky', top: 180, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '24px 18px', boxShadow: 'var(--shadow-sm)' }}>
+        <aside style={{ width: 280, flex: 'none', position: 'sticky', top: 96, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', background: '#fff', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '24px 18px', boxShadow: 'var(--shadow-sm)' }}>
           <h2 style={{ font: 'var(--type-h4)', color: 'var(--text-strong)', margin: '0 0 18px 10px' }}>Thông tin hỗ trợ</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {groups.map((g) => (

@@ -1,6 +1,6 @@
-/* Lazadee voucher picker: scrollable list of every saved voucher, grouped by type.
+/* Genie voucher picker: scrollable list of every saved voucher, grouped by type.
    Enter a code or pick from the list; vouchers that do not apply stay visible, greyed,
-   with the reason. Used by Cart (Lazadee + per-shop) and Checkout. */
+   with the reason. Used by Cart (Genie + per-shop) and Checkout. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Modal, Money } = DS;
@@ -10,9 +10,9 @@
   const toast = (message, type) => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message, type } }));
 
   function Ticket({ v, on, ok, reason, onPick }) {
-    const color = v.kind === 'freeship' ? 'var(--mint-500)' : v.kind === 'shop' ? 'var(--flash-500)' : 'var(--orange-500)';
+    const color = v.kind === 'freeship' ? 'var(--mint-500)' : v.kind === 'shop' ? 'var(--flash-500)' : 'var(--brand-500)';
     return (
-      <div onClick={() => ok && onPick(v)} style={{ display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-subtle)'), boxShadow: on ? '0 0 0 3px var(--color-primary-tint)' : 'none', cursor: ok ? 'pointer' : 'not-allowed', opacity: ok ? 1 : 0.72 }}>
+      <div role="button" tabIndex={0} onKeyDown={window.LZKey} onClick={() => ok && onPick(v)} style={{ display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-subtle)'), boxShadow: on ? '0 0 0 3px var(--color-primary-tint)' : 'none', cursor: ok ? 'pointer' : 'not-allowed', opacity: ok ? 1 : 0.72 }}>
         <div style={{ display: 'flex', minHeight: 92 }}>
           <div style={{ width: 96, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#fff', background: ok ? color : 'var(--gray-400)' }}>
             <Icon name={v.kind === 'freeship' ? 'truck' : v.kind === 'shop' ? 'store' : 'ticket'} size={22} />
@@ -22,7 +22,7 @@
             <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{v.label}</div>
             <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 2 }}>{v.cond} · {v.scope}</div>
             {v.categories && <div style={{ display: 'inline-block', marginTop: 5, padding: '1px 7px', borderRadius: 'var(--radius-sm)', background: 'var(--mint-50)', color: 'var(--mint-600)', font: '600 11px var(--font-sans)' }}>Chỉ áp dụng: {v.categories.join(', ')}</div>}
-            {v.excluded && <div style={{ display: 'inline-block', marginTop: 5, padding: '1px 7px', borderRadius: 'var(--radius-sm)', background: 'var(--orange-50)', color: 'var(--orange-600)', font: '600 11px var(--font-sans)' }}>Ngoại trừ: {v.excluded.join(', ')}</div>}
+            {v.excluded && <div style={{ display: 'inline-block', marginTop: 5, padding: '1px 7px', borderRadius: 'var(--radius-sm)', background: 'var(--brand-50)', color: 'var(--brand-600)', font: '600 11px var(--font-sans)' }}>Ngoại trừ: {v.excluded.join(', ')}</div>}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
               <span className="code" style={{ font: '600 11px var(--font-mono)', color: 'var(--text-body)', background: 'var(--gray-100)', padding: '1px 6px', borderRadius: 'var(--radius-sm)' }}>{v.code}</span>
               <span style={{ font: 'var(--type-caption)', color: 'var(--flash-600)' }}>HSD: {v.expiry}</span>

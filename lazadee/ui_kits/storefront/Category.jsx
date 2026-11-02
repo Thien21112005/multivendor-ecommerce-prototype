@@ -1,5 +1,5 @@
-/* Lazadee category landing page: colored header, sub-category chips, filter sidebar
-   (price band, Mall, Freeship, rating), sort bar and paginated product grid. */
+/* Genie category landing page: colored header, sub-category chips, filter sidebar
+   (price band, Chính hãng, Freeship, rating), sort bar and paginated product grid. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, ProductCard, Checkbox } = DS;
@@ -24,6 +24,7 @@
     const [band, setBand] = React.useState(null);
     const [range, setRange] = React.useState({ min: '', max: '' });
     const [mall, setMall] = React.useState(false);
+    const [filtersOpen, setFiltersOpen] = React.useState(false);
     const [free, setFree] = React.useState(false);
     const [rate, setRate] = React.useState(0);
     const [brand, setBrand] = React.useState(null);
@@ -53,22 +54,27 @@
     const chips = [
       ...(sub ? [{ k: 'sub', label: sub, clear: () => setSub(null) }] : []),
       ...(b ? [{ k: 'band', label: b.label, clear: () => setBand(null) }] : []),
-      ...(mall ? [{ k: 'mall', label: 'Lazadee Mall', clear: () => setMall(false) }] : []),
+      ...(mall ? [{ k: 'mall', label: 'Shop Chính Hãng', clear: () => setMall(false) }] : []),
       ...(free ? [{ k: 'free', label: 'Freeship', clear: () => setFree(false) }] : []),
-      ...(rate ? [{ k: 'rate', label: `${rate}★ trở lên`, clear: () => setRate(0) }] : []),
+      ...(rate ? [{ k: 'rate', label: `${rate} sao trở lên`, clear: () => setRate(0) }] : []),
     ];
+
+    // Admin → Banner, position "Đầu trang danh mục" for this category.
+    const catBanners = LZ.banners.live('CATEGORY_TOP', categoryName);
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 24px 56px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 14 }}>
-          <span style={{ cursor: 'pointer', color: 'var(--text-link)' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={14} /><span style={{ color: 'var(--text-body)', fontWeight: 600 }}>{categoryName}</span>
+          <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer', color: 'var(--text-link)' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={14} /><span style={{ color: 'var(--text-body)', fontWeight: 600 }}>{categoryName}</span>
         </div>
 
-        <div style={{ background: 'var(--orange-50)', borderRadius: 'var(--radius-lg)', padding: '24px 28px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 22, boxShadow: 'var(--shadow-sm)' }}>
+        {catBanners.length > 0 && <div style={{ marginBottom: 18 }}><window.LZBannerCarousel key={categoryName} items={catBanners} /></div>}
+
+        <div className="tr-cathead" style={{ background: 'var(--brand-50)', borderRadius: 'var(--radius-lg)', padding: '24px 28px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 22, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ width: 68, height: 68, borderRadius: 'var(--radius-lg)', background: '#fff', boxShadow: 'var(--shadow-sm)', display: 'grid', placeItems: 'center', flex: 'none' }}><Icon name={meta.icon} size={32} style={{ color: 'var(--color-primary)' }} /></div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ font: '800 26px/1.15 var(--font-sans)', color: 'var(--text-strong)', margin: 0 }}>{categoryName}</h1>
-            <p style={{ font: 'var(--type-body)', color: 'var(--text-muted)', margin: '6px 0 0' }}>{meta.desc}</p>
+            <p className="tr-wide-only" style={{ font: 'var(--type-body)', color: 'var(--text-muted)', margin: '6px 0 0' }}>{meta.desc}</p>
           </div>
           <div style={{ textAlign: 'right', flex: 'none' }}>
             <div style={{ font: '800 26px var(--font-sans)', color: 'var(--color-primary)' }}>{LZ.productsOfCategory(categoryName).length}</div>
@@ -77,7 +83,7 @@
         </div>
 
         {subs.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+          <div className="tr-scrollrow" style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
             {[null, ...subs].map((s) => {
               const on = s === sub;
               return <button key={s || 'all'} onClick={() => setSub(s)} style={{ height: 36, padding: '0 18px', borderRadius: 'var(--radius-pill)', cursor: 'pointer', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary)' : '#fff', color: on ? '#fff' : 'var(--text-body)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', whiteSpace: 'nowrap' }}>{s || 'Tất cả'}</button>;
@@ -86,10 +92,11 @@
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '232px minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
-          <aside style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 18px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 180 }}>
+          <aside className="tr-filters" data-open={filtersOpen ? 1 : 0} style={{ background: '#fff', borderRadius: 'var(--radius-lg)', padding: '16px 18px', boxShadow: 'var(--shadow-sm)', position: 'sticky', top: 96 }}>
+            <button className="tr-filters__close" aria-label="Đóng bộ lọc" onClick={() => setFiltersOpen(false)}><Icon name="x" size={22} /></button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}><Icon name="list" size={16} /> Bộ lọc tìm kiếm</div>
             <Group title="Nơi bán & dịch vụ">
-              <Checkbox checked={mall} onChange={() => setMall(!mall)}>Lazadee Mall</Checkbox>
+              <Checkbox checked={mall} onChange={() => setMall(!mall)}>Shop Chính Hãng</Checkbox>
               <Checkbox checked={free} onChange={() => setFree(!free)}>Freeship</Checkbox>
             </Group>
             <Group title="Thương hiệu">
@@ -111,11 +118,13 @@
               ))}
             </Group>
             <Button block variant="outline" iconLeft="refresh-cw" onClick={clearAll} style={{ marginTop: 14 }}>Xoá tất cả</Button>
+            <div className="tr-filters__done"><Button block size="lg" onClick={() => setFiltersOpen(false)}>Xem {list.length} sản phẩm</Button></div>
           </aside>
 
           <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface-sunken)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '9px 14px', marginBottom: 14, flexWrap: 'wrap' }}>
-              <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Sắp xếp theo</span>
+            <div className="tr-sortbar" style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface-sunken)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '9px 14px', marginBottom: 14, flexWrap: 'wrap' }}>
+              <button className="tr-filterbtn" onClick={() => setFiltersOpen(true)}><Icon name="sliders-horizontal" size={16} /> Bộ lọc {chips.length > 0 && <b>{chips.length}</b>}</button>
+              <span className="tr-wide-only" style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Sắp xếp theo</span>
               {SORTS.map((s) => {
                 const on = sort === s.id;
                 return <button key={s.id} onClick={() => { if (s.id === 'price' && on) setAsc(!asc); setSort(s.id); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: 0, cursor: 'pointer', font: on ? 'var(--weight-semibold) var(--text-sm) var(--font-sans)' : 'var(--type-body-sm)', background: on ? 'var(--color-primary)' : '#fff', color: on ? '#fff' : 'var(--text-body)', boxShadow: on ? 'none' : 'inset 0 0 0 1px var(--border-default)' }}>{s.label}{s.id === 'price' && <Icon name={asc ? 'chevron-up' : 'chevron-down'} size={14} />}</button>;
@@ -124,7 +133,7 @@
             </div>
             {chips.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                {chips.map((c) => <span key={c.k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 6px 0 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-50)', color: 'var(--color-primary)', font: '600 12px var(--font-sans)' }}>{c.label}<button onClick={c.clear} aria-label="Bỏ lọc" style={{ width: 20, height: 20, border: 0, background: 'transparent', color: 'inherit', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button></span>)}
+                {chips.map((c) => <span key={c.k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 6px 0 12px', borderRadius: 'var(--radius-pill)', background: 'var(--brand-50)', color: 'var(--color-primary)', font: '600 12px var(--font-sans)' }}>{c.label}<button onClick={c.clear} aria-label="Bỏ lọc" style={{ width: 20, height: 20, border: 0, background: 'transparent', color: 'inherit', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Icon name="x" size={13} /></button></span>)}
                 <button onClick={clearAll} style={{ border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer' }}>Xoá lọc</button>
               </div>
             )}
