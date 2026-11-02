@@ -5,3 +5,11 @@ Thumbs.db
 .vscode/
 .idea/
 .env
+TLCN/
+
+# Impeccable runtime state (kept: briefs, critiques, design sidecar)
+.impeccable/hook.cache.json
+.impeccable/questions/
+.impeccable/live/
+.impeccable/review/
+.impeccable/config.local.json

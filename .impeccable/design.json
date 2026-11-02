@@ -1,0 +1,1045 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T03:17:06.658Z",
+  "title": "Design System: Trao",
+  "extensions": {
+    "colorMeta": {
+      "action-blue": {
+        "role": "primary",
+        "displayName": "Action Blue",
+        "canonical": "#1D4ED8",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "action-blue-hover": {
+        "role": "primary",
+        "displayName": "Action Blue Hover",
+        "canonical": "#1A43BD",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "action-blue-pressed": {
+        "role": "primary",
+        "displayName": "Action Blue Pressed",
+        "canonical": "#16379B",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "midnight-blue": {
+        "role": "primary",
+        "displayName": "Midnight Blue",
+        "canonical": "#0B1F4B",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "voucher-navy": {
+        "role": "primary",
+        "displayName": "Voucher Navy",
+        "canonical": "#122C7A",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "action-tint": {
+        "role": "primary",
+        "displayName": "Action Tint",
+        "canonical": "#EEF3FF",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "action-tint-strong": {
+        "role": "primary",
+        "displayName": "Action Tint Strong",
+        "canonical": "#DCE6FE",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "secondary-border": {
+        "role": "primary",
+        "displayName": "Secondary Border",
+        "canonical": "#B9CDFB",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "field-deep": {
+        "role": "secondary",
+        "displayName": "Field Deep",
+        "canonical": "#0E2C86",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "field-mid": {
+        "role": "secondary",
+        "displayName": "Field Mid",
+        "canonical": "#16399F",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "sky-glow": {
+        "role": "secondary",
+        "displayName": "Sky Glow",
+        "canonical": "#38B1EC",
+        "tonalRamp": [
+          "#38B1EC",
+          "#74C8F3",
+          "#A6DDF8",
+          "#D2EEFC",
+          "#EAF7FE"
+        ]
+      },
+      "sky-wash": {
+        "role": "secondary",
+        "displayName": "Sky Wash",
+        "canonical": "#EAF7FE",
+        "tonalRamp": [
+          "#38B1EC",
+          "#74C8F3",
+          "#A6DDF8",
+          "#D2EEFC",
+          "#EAF7FE"
+        ]
+      },
+      "field-text-soft": {
+        "role": "secondary",
+        "displayName": "Field Text Soft",
+        "canonical": "#E4EEFC",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "footer-text": {
+        "role": "secondary",
+        "displayName": "Footer Text",
+        "canonical": "#C9D6EE",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "footer-legal": {
+        "role": "secondary",
+        "displayName": "Footer Legal",
+        "canonical": "#AFC0E0",
+        "tonalRamp": [
+          "#0B1F4B",
+          "#122C7A",
+          "#16379B",
+          "#1A43BD",
+          "#1D4ED8",
+          "#5A85EE",
+          "#8CACF6",
+          "#B9CDFB",
+          "#DCE6FE",
+          "#EEF3FF"
+        ]
+      },
+      "glass-white": {
+        "role": "secondary",
+        "displayName": "Glass White",
+        "canonical": "rgba(255, 255, 255, 0.74)",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "sheet-white": {
+        "role": "neutral",
+        "displayName": "Sheet White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "page-mist": {
+        "role": "neutral",
+        "displayName": "Page Mist",
+        "canonical": "#F3F6FA",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "sunken-gray": {
+        "role": "neutral",
+        "displayName": "Sunken Gray",
+        "canonical": "#E9EDF3",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "border-default": {
+        "role": "neutral",
+        "displayName": "Border Default",
+        "canonical": "#DCE2EB",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Border Strong",
+        "canonical": "#C4CDD9",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "ink-text": {
+        "role": "neutral",
+        "displayName": "Ink Text",
+        "canonical": "#121824",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "body-text": {
+        "role": "neutral",
+        "displayName": "Body Text",
+        "canonical": "#242C39",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "rail-text": {
+        "role": "neutral",
+        "displayName": "Rail Text",
+        "canonical": "#36404F",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "muted-text": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "#4A5568",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "subtle-text": {
+        "role": "neutral",
+        "displayName": "Subtle Text",
+        "canonical": "#647084",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "disabled-text": {
+        "role": "neutral",
+        "displayName": "Disabled Text",
+        "canonical": "#98A3B3",
+        "tonalRamp": [
+          "#121824",
+          "#242C39",
+          "#36404F",
+          "#4A5568",
+          "#647084",
+          "#98A3B3",
+          "#C4CDD9",
+          "#DCE2EB",
+          "#E9EDF3",
+          "#F3F6FA",
+          "#FAFBFD",
+          "#FFFFFF"
+        ]
+      },
+      "discount-red": {
+        "role": "tertiary",
+        "displayName": "Discount Red",
+        "canonical": "#C8103F",
+        "tonalRamp": [
+          "#A50D34",
+          "#C8103F",
+          "#FFD3DD",
+          "#FFEDF1"
+        ]
+      },
+      "discount-red-deep": {
+        "role": "tertiary",
+        "displayName": "Discount Red Deep",
+        "canonical": "#A50D34",
+        "tonalRamp": [
+          "#A50D34",
+          "#C8103F",
+          "#FFD3DD",
+          "#FFEDF1"
+        ]
+      },
+      "discount-wash": {
+        "role": "tertiary",
+        "displayName": "Discount Wash",
+        "canonical": "#FFEDF1",
+        "tonalRamp": [
+          "#A50D34",
+          "#C8103F",
+          "#FFD3DD",
+          "#FFEDF1"
+        ]
+      },
+      "sold-bar": {
+        "role": "tertiary",
+        "displayName": "Sold Bar",
+        "canonical": "#FFD3DD",
+        "tonalRamp": [
+          "#A50D34",
+          "#C8103F",
+          "#FFD3DD",
+          "#FFEDF1"
+        ]
+      },
+      "error-red": {
+        "role": "tertiary",
+        "displayName": "Error Red",
+        "canonical": "#D3122A",
+        "tonalRamp": [
+          "#B00E22",
+          "#D3122A",
+          "#FDECEC"
+        ]
+      },
+      "error-red-deep": {
+        "role": "tertiary",
+        "displayName": "Error Red Deep",
+        "canonical": "#B00E22",
+        "tonalRamp": [
+          "#B00E22",
+          "#D3122A",
+          "#FDECEC"
+        ]
+      },
+      "error-wash": {
+        "role": "tertiary",
+        "displayName": "Error Wash",
+        "canonical": "#FDECEC",
+        "tonalRamp": [
+          "#B00E22",
+          "#D3122A",
+          "#FDECEC"
+        ]
+      },
+      "info-cyan": {
+        "role": "tertiary",
+        "displayName": "Info Cyan",
+        "canonical": "#0B7FAB",
+        "tonalRamp": [
+          "#08688D",
+          "#0B7FAB",
+          "#6DC5E5",
+          "#9FDAEF",
+          "#CBEBF7",
+          "#E5F5FB"
+        ]
+      },
+      "info-cyan-deep": {
+        "role": "tertiary",
+        "displayName": "Info Cyan Deep",
+        "canonical": "#08688D",
+        "tonalRamp": [
+          "#08688D",
+          "#0B7FAB",
+          "#6DC5E5",
+          "#9FDAEF",
+          "#CBEBF7",
+          "#E5F5FB"
+        ]
+      },
+      "info-wash": {
+        "role": "tertiary",
+        "displayName": "Info Wash",
+        "canonical": "#E5F5FB",
+        "tonalRamp": [
+          "#08688D",
+          "#0B7FAB",
+          "#6DC5E5",
+          "#9FDAEF",
+          "#CBEBF7",
+          "#E5F5FB"
+        ]
+      },
+      "freeship-mint": {
+        "role": "tertiary",
+        "displayName": "Freeship Mint",
+        "canonical": "#0B7F4C",
+        "tonalRamp": [
+          "#09693F",
+          "#0B7F4C",
+          "#BCEDD8",
+          "#E6F8F0"
+        ]
+      },
+      "freeship-mint-deep": {
+        "role": "tertiary",
+        "displayName": "Freeship Mint Deep",
+        "canonical": "#09693F",
+        "tonalRamp": [
+          "#09693F",
+          "#0B7F4C",
+          "#BCEDD8",
+          "#E6F8F0"
+        ]
+      },
+      "mint-wash": {
+        "role": "tertiary",
+        "displayName": "Mint Wash",
+        "canonical": "#E6F8F0",
+        "tonalRamp": [
+          "#09693F",
+          "#0B7F4C",
+          "#BCEDD8",
+          "#E6F8F0"
+        ]
+      },
+      "success-green-deep": {
+        "role": "tertiary",
+        "displayName": "Success Green Deep",
+        "canonical": "#0A7039",
+        "tonalRamp": [
+          "#0A7039",
+          "#0E8A4B",
+          "#E7F7EE"
+        ]
+      },
+      "success-wash": {
+        "role": "tertiary",
+        "displayName": "Success Wash",
+        "canonical": "#E7F7EE",
+        "tonalRamp": [
+          "#0A7039",
+          "#0E8A4B",
+          "#E7F7EE"
+        ]
+      },
+      "pending-amber-deep": {
+        "role": "tertiary",
+        "displayName": "Pending Amber Deep",
+        "canonical": "#9A5B00",
+        "tonalRamp": [
+          "#9A5B00",
+          "#F5A524",
+          "#FFF6E5"
+        ]
+      },
+      "pending-amber-wash": {
+        "role": "tertiary",
+        "displayName": "Pending Amber Wash",
+        "canonical": "#FFF6E5",
+        "tonalRamp": [
+          "#9A5B00",
+          "#F5A524",
+          "#FFF6E5"
+        ]
+      },
+      "rating-gold": {
+        "role": "tertiary",
+        "displayName": "Rating Gold",
+        "canonical": "#F2A900",
+        "tonalRamp": [
+          "#8A6100",
+          "#F2A900",
+          "#FFC02E",
+          "#FFE9AE",
+          "#FFF7E0"
+        ]
+      },
+      "rating-gold-deep": {
+        "role": "tertiary",
+        "displayName": "Rating Gold Deep",
+        "canonical": "#8A6100",
+        "tonalRamp": [
+          "#8A6100",
+          "#F2A900",
+          "#FFC02E",
+          "#FFE9AE",
+          "#FFF7E0"
+        ]
+      },
+      "rating-gold-wash": {
+        "role": "tertiary",
+        "displayName": "Rating Gold Wash",
+        "canonical": "#FFF7E0",
+        "tonalRamp": [
+          "#8A6100",
+          "#F2A900",
+          "#FFC02E",
+          "#FFE9AE",
+          "#FFF7E0"
+        ]
+      },
+      "shipped-violet": {
+        "role": "tertiary",
+        "displayName": "Shipped Violet",
+        "canonical": "#6C2BD9",
+        "tonalRamp": [
+          "#6C2BD9",
+          "#F1ECFE"
+        ]
+      },
+      "shipped-wash": {
+        "role": "tertiary",
+        "displayName": "Shipped Wash",
+        "canonical": "#F1ECFE",
+        "tonalRamp": [
+          "#6C2BD9",
+          "#F1ECFE"
+        ]
+      },
+      "ink-chrome": {
+        "role": "neutral",
+        "displayName": "Ink Chrome",
+        "canonical": "#111827",
+        "tonalRamp": [
+          "#0A0F1C",
+          "#111827",
+          "#1B2438",
+          "#2A3550"
+        ]
+      },
+      "ink-chrome-deep": {
+        "role": "neutral",
+        "displayName": "Ink Chrome Deep",
+        "canonical": "#0A0F1C",
+        "tonalRamp": [
+          "#0A0F1C",
+          "#111827",
+          "#1B2438",
+          "#2A3550"
+        ]
+      },
+      "ink-chrome-raised": {
+        "role": "neutral",
+        "displayName": "Ink Chrome Raised",
+        "canonical": "#1B2438",
+        "tonalRamp": [
+          "#0A0F1C",
+          "#111827",
+          "#1B2438",
+          "#2A3550"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The hero promise on home only; scales clamp(40px, 6.3vw, 92px)."
+      },
+      "headline-band": {
+        "displayName": "Headline Band",
+        "purpose": "Heading of a full-width blue band; scales clamp(28px, 3vw, 40px)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings; scales clamp(24px, 2.6vw, 34px)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Product names on the detail page and panel headings."
+      },
+      "title-sm": {
+        "displayName": "Title Sm",
+        "purpose": "Smaller panel headings."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "The sentence under the hero, held to 62ch; scales clamp(16px, 1.4vw, 19px)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default copy."
+      },
+      "body-sm": {
+        "displayName": "Body Sm",
+        "purpose": "Card titles, rail notes, hold notes."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels and nav text."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Shop, rating and hint metadata."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Button labels."
+      },
+      "price-card": {
+        "displayName": "Price Card",
+        "purpose": "Product card price, tabular, in ink."
+      },
+      "price-detail": {
+        "displayName": "Price Detail",
+        "purpose": "Product page price, tabular, in ink."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "The provisional wordmark, 22px on phones."
+      },
+      "count": {
+        "displayName": "Count",
+        "purpose": "Count badge figures."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Order codes, account numbers, transfer references."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glass",
+        "value": "inset 0 1px 0 rgba(255,255,255,.95), inset 0 -8px 16px -12px rgba(255,255,255,.7), 0 14px 34px -10px rgba(11,31,75,.32)",
+        "purpose": "Glass only, with backdrop-filter: blur(22px) saturate(130%), 14px blur on phones, and a 1px rim of white at 72 percent."
+      },
+      {
+        "name": "popover",
+        "value": "0 24px 48px rgba(11, 31, 75, 0.2)",
+        "purpose": "Search suggestions, mini cart, notifications, account menu, modals."
+      },
+      {
+        "name": "small",
+        "value": "0 1px 3px rgba(11, 31, 75, 0.08), 0 1px 2px rgba(11, 31, 75, 0.04)",
+        "purpose": "Working panels on inner screens and small floating controls."
+      },
+      {
+        "name": "drop",
+        "value": "drop-shadow(0 5px 8px rgba(11,31,75,.38))",
+        "purpose": "CSS filter under the water drop on the money rail."
+      }
+    ],
+    "motion": [
+      {
+        "name": "dur-fast",
+        "value": "120ms",
+        "purpose": "Button and field state changes."
+      },
+      {
+        "name": "dur-base",
+        "value": "180ms",
+        "purpose": "Switches and small state changes."
+      },
+      {
+        "name": "dur-slow",
+        "value": "280ms",
+        "purpose": "Image scale on hover and rail stop rings."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Default easing, including the rail."
+      },
+      {
+        "name": "ease-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Switch thumb only."
+      },
+      {
+        "name": "rail-move",
+        "value": "700ms",
+        "purpose": "Drop travel, rail fill and the landing squash; removed under prefers-reduced-motion."
+      },
+      {
+        "name": "rail-step",
+        "value": "3600ms",
+        "purpose": "Automatic step interval until the first click; off under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "768px"
+      },
+      {
+        "name": "tablet",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action on a storefront screen: an action-blue pill.",
+      "html": "<button class=\"ds-btn-primary\">Mua ngay</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 999px; font: var(--weight-semibold, 600) var(--text-base, 14px)/1 var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); letter-spacing: -.01em; cursor: pointer; transition: background var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), transform var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)); border: 1.5px solid transparent; background: var(--color-primary, #1D4ED8); color: #fff; } .ds-btn-primary:hover { background: var(--color-primary-hover, #1A43BD); } .ds-btn-primary:active { background: var(--color-primary-active, #16379B); transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring, 0 0 0 3px rgba(29, 78, 216, 0.4)); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The partner action, such as add to cart: white pill, blue label, quiet blue outline.",
+      "html": "<button class=\"ds-btn-secondary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"21\" r=\"1\"/><circle cx=\"19\" cy=\"21\" r=\"1\"/><path d=\"M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12\"/></svg>Thêm vào giỏ</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 999px; font: var(--weight-semibold, 600) var(--text-base, 14px)/1 var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); letter-spacing: -.01em; cursor: pointer; transition: background var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), transform var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)); border: 1.5px solid var(--brand-200, #B9CDFB); background: var(--surface-card, #FFFFFF); color: var(--color-primary, #1D4ED8); } .ds-btn-secondary:hover { background: var(--color-primary-tint, #EEF3FF); } .ds-btn-secondary:active { background: var(--brand-100, #DCE6FE); transform: translateY(1px); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: var(--focus-ring, 0 0 0 3px rgba(29, 78, 216, 0.4)); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A solid white form field with a label above and a blue focus ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field__label\">Số điện thoại</span><input class=\"ds-input\" placeholder=\"0901 234 567\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; max-width: 320px; } .ds-field__label { font: var(--type-label, 600 13px/1.3 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--text-strong, #121824); } .ds-input { width: 100%; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--border-default, #DCE2EB); border-radius: var(--radius-md, 10px); background: var(--surface-card, #FFFFFF); color: var(--text-strong, #121824); font: var(--type-body, 400 14px/1.5 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); transition: border-color var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--dur-fast, 120ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)); } .ds-input::placeholder { color: var(--text-subtle, #647084); } .ds-input:hover { border-color: var(--border-strong, #C4CDD9); } .ds-input:focus { outline: none; border-color: var(--border-focus, #1D4ED8); box-shadow: var(--focus-ring, 0 0 0 3px rgba(29, 78, 216, 0.4)); }"
+    },
+    {
+      "name": "Glass Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "The floating glass bar on the blue field, with a solid search well and a midnight count badge.",
+      "html": "<div class=\"ds-sky\"><div class=\"ds-nav\"><span class=\"ds-nav__logo\">Trao</span><div class=\"ds-nav__search\"><input aria-label=\"Tìm kiếm\" placeholder=\"Tìm sản phẩm, thương hiệu, shop đã xác minh…\"><button aria-label=\"Tìm\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg></button></div><button class=\"ds-nav__icon\" aria-label=\"Giỏ hàng\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"21\" r=\"1\"/><circle cx=\"19\" cy=\"21\" r=\"1\"/><path d=\"M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12\"/></svg><span>3</span></button></div></div>",
+      "css": ".ds-sky { background: radial-gradient(52% 70% at 88% 0%, rgba(56,177,236,.62), transparent 72%), linear-gradient(160deg, #0E2C86 0%, #16399F 55%, #1A43BD 100%); padding: 16px; border-radius: 12px; } .ds-nav { background: rgba(255,255,255,.74); -webkit-backdrop-filter: blur(22px) saturate(130%); backdrop-filter: blur(22px) saturate(130%); border: 1px solid rgba(255,255,255,.72); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -8px 16px -12px rgba(255,255,255,.7), 0 14px 34px -10px rgba(11,31,75,.32); min-height: 64px; display: flex; align-items: center; gap: 18px; padding: 8px 10px 8px 18px; border-radius: 26px; color: var(--brand-900, #0B1F4B); } .ds-nav__logo { font: 800 26px/1 var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); letter-spacing: -.03em; } .ds-nav__search { flex: 1; min-width: 0; display: flex; align-items: center; height: 48px; padding: 4px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px rgba(11,31,75,.08); } .ds-nav__search:focus-within { box-shadow: inset 0 0 0 2px var(--brand-500, #1D4ED8); } .ds-nav__search input { flex: 1; min-width: 0; height: 100%; padding: 0 12px; border: 0; outline: 0; background: transparent; font: var(--type-body, 400 14px/1.5 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--text-strong, #121824); } .ds-nav__search button { flex: none; width: 56px; height: 40px; border: 0; border-radius: 12px; background: var(--brand-500, #1D4ED8); color: #fff; display: grid; place-items: center; cursor: pointer; } .ds-nav__search button:hover { background: var(--brand-600, #1A43BD); } .ds-nav__icon { position: relative; flex: none; width: 44px; height: 44px; border: 0; border-radius: 14px; background: transparent; color: inherit; display: grid; place-items: center; cursor: pointer; } .ds-nav__icon:hover { background: rgba(11,31,75,.08); } .ds-nav__icon:focus-visible { outline: none; box-shadow: var(--focus-ring, 0 0 0 3px rgba(29, 78, 216, 0.4)); } .ds-nav__icon span { position: absolute; top: 3px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--brand-900, #0B1F4B); color: #fff; font: 700 11px/18px var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); text-align: center; }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "refersTo": "category-chip",
+      "description": "A translucent pill on the blue field. It has no blur, so it is not glass.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z\"/></svg>Điện tử</button><button class=\"ds-chip\">Thời trang</button></div>",
+      "css": ".ds-chips { background: radial-gradient(52% 70% at 88% 0%, rgba(56,177,236,.62), transparent 72%), linear-gradient(160deg, #0E2C86 0%, #16399F 55%, #1A43BD 100%); padding: 16px; border-radius: 12px; } .ds-chips { display: flex; gap: 6px; } .ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(255,255,255,.12); color: #fff; font: var(--weight-medium, 500) var(--text-sm, 13px) var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); cursor: pointer; white-space: nowrap; } .ds-chip:hover { background: rgba(255,255,255,.26); } .ds-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--brand-500, #1D4ED8); }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "product-card",
+      "description": "A flat white sheet: image, title, ink price, red percent badge, shop line and rating.",
+      "html": "<article class=\"ds-card\"><button class=\"ds-card__main\"><span class=\"ds-card__media\"><span class=\"ds-card__off\">-51%</span></span><span class=\"ds-card__body\"><span class=\"ds-card__title\">Tai nghe Bluetooth chống ồn ANC Pro 5, pin 40 giờ</span><span class=\"ds-card__price\"><b>389.000₫</b><s>799.000₫</s></span><span class=\"ds-card__meta\"><span>TechZone Official</span><span>4,8</span></span><span class=\"ds-card__ship\">Miễn phí vận chuyển</span></span></button><button class=\"ds-card__heart\" aria-label=\"Yêu thích\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></button></article>",
+      "css": ".ds-card { position: relative; width: 220px; } .ds-card__main { display: flex; flex-direction: column; width: 100%; padding: 0; border: 0; border-radius: var(--radius-xl, 20px); background: #fff; text-align: left; cursor: pointer; color: inherit; overflow: hidden; } .ds-card__main:focus-visible { outline: none; box-shadow: var(--focus-ring, 0 0 0 3px rgba(29, 78, 216, 0.4)); } .ds-card__media { position: relative; display: block; aspect-ratio: 1; background: var(--gray-100, #E9EDF3); transition: transform var(--dur-slow, 280ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)); } .ds-card__main:hover .ds-card__media { transform: scale(1.04); } .ds-card__off { position: absolute; right: 8px; bottom: 8px; padding: 3px 8px; border-radius: 999px; background: var(--flash-500, #C8103F); color: #fff; font: 700 12px/16px var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); } .ds-card__body { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px 12px; } .ds-card__title { font: var(--type-body-sm, 400 13px/1.5 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--text-body, #242C39); } .ds-card__price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 7px; font-variant-numeric: tabular-nums; } .ds-card__price b { font: 800 17px/1.2 var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); letter-spacing: -.01em; color: var(--text-price, #121824); } .ds-card__price s { font: var(--type-caption, 400 12px/1.3 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--text-subtle, #647084); } .ds-card__meta { display: flex; justify-content: space-between; gap: 6px; font: var(--type-caption, 400 12px/1.3 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--text-muted, #4A5568); } .ds-card__ship { font: var(--type-caption, 400 12px/1.3 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); font-weight: 600; color: var(--mint-600, #09693F); } .ds-card__heart { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm, 0 1px 3px rgba(11, 31, 75, 0.08), 0 1px 2px rgba(11, 31, 75, 0.04)); display: grid; place-items: center; cursor: pointer; color: var(--gray-700, #36404F); }"
+    },
+    {
+      "name": "Money Rail",
+      "kind": "custom",
+      "refersTo": "money-rail",
+      "description": "The signature component: a glass four-stop line with a water drop showing where the money is now.",
+      "html": "<div class=\"ds-rail-stage\"><div class=\"ds-rail\"><div class=\"ds-rail__head\">Ví dụ: <b>1.290.000₫</b> tại TechZone Official</div><div class=\"ds-rail__track\"><div class=\"ds-rail__line\"><div></div></div><span class=\"ds-rail__drop\"><svg viewBox=\"0 0 42 50\" width=\"42\" height=\"50\" aria-hidden=\"true\"><defs><linearGradient id=\"ds-drop\" x1=\".2\" y1=\"0\" x2=\".8\" y2=\"1\"><stop offset=\"0\" stop-color=\"#5CC3F2\"/><stop offset=\"1\" stop-color=\"#16379B\"/></linearGradient></defs><path d=\"M21 1C21 1 40 19 40 31a19 19 0 0 1-38 0C2 19 21 1 21 1Z\" fill=\"url(#ds-drop)\" stroke=\"#fff\" stroke-width=\"2\"/></svg><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg></span><button class=\"ds-rail__stop\" data-done=\"1\"><i></i>Bạn thanh toán</button><button class=\"ds-rail__stop\" aria-current=\"step\" data-done=\"1\"><i></i>Trao giữ tiền</button><button class=\"ds-rail__stop\"><i></i>Bạn nhận hàng</button><button class=\"ds-rail__stop\"><i></i>Shop nhận tiền</button></div><p class=\"ds-rail__note\">Tiền nằm ở sàn, shop chưa nhận được đồng nào.</p></div></div>",
+      "css": ".ds-rail-stage { padding: 28px; border-radius: 12px; background: linear-gradient(160deg, #0E2C86, #1A43BD); } .ds-rail { background: rgba(255,255,255,.74); -webkit-backdrop-filter: blur(22px) saturate(130%); backdrop-filter: blur(22px) saturate(130%); border: 1px solid rgba(255,255,255,.72); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -8px 16px -12px rgba(255,255,255,.7), 0 14px 34px -10px rgba(11,31,75,.32); padding: 16px 22px 18px; border-radius: 28px; color: var(--brand-900, #0B1F4B); } .ds-rail__head { font: var(--type-body-sm, 400 13px/1.5 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--gray-700, #36404F); } .ds-rail__head b { color: var(--brand-900, #0B1F4B); font-variant-numeric: tabular-nums; } .ds-rail__track { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 10px; } .ds-rail__line { position: absolute; top: 22px; left: 12.5%; right: 12.5%; height: 4px; border-radius: 2px; background: rgba(11,31,75,.16); } .ds-rail__line div { width: 33.33%; height: 100%; border-radius: 2px; background: var(--brand-500, #1D4ED8); } .ds-rail__stop { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 4px; border: 0; background: none; color: var(--gray-700, #36404F); cursor: pointer; border-radius: 12px; font: var(--weight-medium, 500) var(--text-sm, 13px)/1.25 var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); } .ds-rail__stop:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--brand-500, #1D4ED8); } .ds-rail__stop i { width: 14px; height: 14px; margin: 16px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 3px var(--gray-400, #98A3B3); } .ds-rail__stop[data-done=\"1\"] i { box-shadow: inset 0 0 0 3px var(--brand-500, #1D4ED8); } .ds-rail__stop[aria-current=\"step\"] { color: var(--brand-900, #0B1F4B); font-weight: 700; } .ds-rail__stop[aria-current=\"step\"] i { visibility: hidden; } .ds-rail__drop { position: absolute; z-index: 2; top: -3px; left: 37.5%; width: 42px; height: 50px; margin-left: -21px; color: #fff; pointer-events: none; filter: drop-shadow(0 5px 8px rgba(11,31,75,.38)); } .ds-rail__drop svg:first-child { position: absolute; inset: 0; } .ds-rail__drop svg:last-child { position: absolute; left: 13px; top: 22px; } .ds-rail__note { margin: 8px 0 0; text-align: center; font: var(--type-body-sm, 400 13px/1.5 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); color: var(--gray-800, #242C39); }"
+    },
+    {
+      "name": "Hold Note",
+      "kind": "custom",
+      "refersTo": "hold-note",
+      "description": "The money promise beside a buy decision: midnight text on Sky Wash.",
+      "html": "<div class=\"ds-hold\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/></svg><span>Khi trả trước qua VNPay hoặc VietQR, Trao giữ tiền của bạn và chỉ chuyển cho <b>TechZone Official</b> sau khi bạn nhận hàng.</span></div>",
+      "css": ".ds-hold { display: flex; align-items: flex-start; gap: 10px; max-width: 520px; padding: 12px 14px; border-radius: var(--radius-md, 10px); background: var(--sky-50, #EAF7FE); color: var(--brand-900, #0B1F4B); font: var(--type-body-sm, 400 13px/1.5 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); line-height: 1.45; } .ds-hold svg { flex: none; color: var(--brand-500, #1D4ED8); margin-top: 1px; }"
+    },
+    {
+      "name": "Shop Seal",
+      "kind": "custom",
+      "description": "A fine-line rosette generated from the shop id. This sample shows one seed at 52px.",
+      "html": "<svg class=\"ds-seal\" width=\"52\" height=\"52\" viewBox=\"0 0 100 100\" role=\"img\" aria-label=\"Con dấu xác minh của TechZone Official\"><circle cx=\"50\" cy=\"50\" r=\"49\" fill=\"#fff\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M94.0 50.0L93.1 52.3L90.6 54.3L86.8 55.8L82.2 56.9L77.5 57.4L73.2 57.6L69.9 57.7L67.9 58.0L67.4 58.9L68.2 60.5L70.1 63.0L72.5 66.4L75.1 70.3L77.3 74.6L78.6 78.6L78.7 81.9L77.7 84.2L75.5 85.1L72.5 84.6L68.9 82.8L65.3 79.9L61.8 76.6L58.9 73.3L56.7 70.7L55.1 69.1L54.0 69.0L53.2 70.4L52.4 73.3L51.4 77.2L50.0 81.7L48.1 86.0L45.8 89.7L43.3 92.1L40.9 93.0L38.7 92.1L37.1 89.6L36.2 85.8L36.1 81.3L36.5 76.5L37.2 72.1L38.0 68.5L38.3 66.2L37.8 65.1L36.3 65.2L33.8 66.2L30.2 67.8L25.9 69.5L21.3 70.9L16.9 71.5L13.3 71.2L10.9 69.9L10.0 67.8L10.8 65.1L13.0 62.0L16.3 59.0L20.3 56.3L24.2 54.1L27.6 52.4L29.8 51.1L30.6 50.0L29.8 48.9L27.6 47.6L24.2 45.9L20.3 43.7L16.3 41.0L13.0 38.0L10.8 34.9L10.0 32.2L10.9 30.1L13.3 28.8L16.9 28.5L21.3 29.1L25.9 30.5L30.2 32.2L33.8 33.8L36.3 34.8L37.8 34.9L38.3 33.8L38.0 31.5L37.2 27.9L36.5 23.5L36.1 18.7L36.2 14.2L37.1 10.4L38.7 7.9L40.9 7.0L43.3 7.9L45.8 10.3L48.1 14.0L50.0 18.3L51.4 22.8L52.4 26.7L53.2 29.6L54.0 31.0L55.1 30.9L56.7 29.3L58.9 26.7L61.8 23.4L65.3 20.1L68.9 17.2L72.5 15.4L75.5 14.9L77.7 15.8L78.7 18.1L78.6 21.4L77.3 25.4L75.1 29.7L72.5 33.6L70.1 37.0L68.2 39.5L67.4 41.1L67.9 42.0L69.9 42.3L73.2 42.4L77.5 42.6L82.2 43.1L86.8 44.2L90.6 45.7L93.1 47.7L94.0 50.0Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\"/><path d=\"M85.2 50.0L84.5 51.8L82.5 53.4L79.5 54.7L75.8 55.5L72.0 55.9L68.6 56.0L65.9 56.1L64.3 56.4L63.9 57.1L64.6 58.4L66.1 60.4L68.0 63.1L70.1 66.3L71.8 69.6L72.8 72.8L73.0 75.5L72.1 77.3L70.4 78.1L68.0 77.7L65.1 76.2L62.2 74.0L59.5 71.3L57.2 68.6L55.4 66.5L54.1 65.3L53.2 65.2L52.6 66.4L52.0 68.6L51.1 71.8L50.0 75.3L48.5 78.8L46.7 81.8L44.7 83.7L42.7 84.4L41.0 83.7L39.7 81.7L39.0 78.7L38.9 75.0L39.2 71.2L39.8 67.7L40.4 64.8L40.6 62.9L40.2 62.0L39.1 62.1L37.0 63.0L34.1 64.3L30.7 65.6L27.0 66.7L23.5 67.2L20.7 66.9L18.7 65.9L18.0 64.2L18.6 62.0L20.4 59.6L23.1 57.2L26.2 55.1L29.4 53.3L32.1 51.9L33.9 50.8L34.5 50.0L33.9 49.2L32.1 48.1L29.4 46.7L26.2 44.9L23.1 42.8L20.4 40.4L18.6 38.0L18.0 35.8L18.7 34.1L20.7 33.1L23.5 32.8L27.0 33.3L30.7 34.4L34.1 35.7L37.0 37.0L39.1 37.9L40.2 38.0L40.6 37.1L40.4 35.2L39.8 32.3L39.2 28.8L38.9 25.0L39.0 21.3L39.7 18.3L41.0 16.3L42.7 15.6L44.7 16.3L46.7 18.2L48.5 21.2L50.0 24.7L51.1 28.2L52.0 31.4L52.6 33.6L53.2 34.8L54.1 34.7L55.4 33.5L57.2 31.4L59.5 28.7L62.2 26.0L65.1 23.8L68.0 22.3L70.4 21.9L72.1 22.7L73.0 24.5L72.8 27.2L71.8 30.4L70.1 33.7L68.0 36.9L66.1 39.6L64.6 41.6L63.9 42.9L64.3 43.6L65.9 43.9L68.6 44.0L72.0 44.1L75.8 44.5L79.5 45.3L82.5 46.6L84.5 48.2L85.2 50.0Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\"/><path d=\"M77.3 50.0L76.7 51.4L75.2 52.6L72.8 53.6L70.0 54.2L67.1 54.6L64.4 54.7L62.4 54.7L61.1 55.0L60.8 55.5L61.3 56.5L62.4 58.1L64.0 60.2L65.6 62.6L66.9 65.2L67.7 67.7L67.8 69.8L67.2 71.2L65.8 71.8L63.9 71.5L61.7 70.3L59.5 68.6L57.3 66.5L55.5 64.5L54.2 62.8L53.2 61.8L52.5 61.8L52.0 62.7L51.5 64.5L50.9 66.9L50.0 69.6L48.8 72.3L47.4 74.6L45.9 76.1L44.3 76.6L43.0 76.1L42.0 74.6L41.5 72.2L41.4 69.4L41.6 66.4L42.1 63.7L42.5 61.5L42.7 60.0L42.4 59.3L41.5 59.4L39.9 60.1L37.7 61.1L35.0 62.1L32.2 62.9L29.5 63.3L27.3 63.1L25.8 62.3L25.2 61.0L25.7 59.3L27.0 57.5L29.1 55.6L31.6 53.9L34.0 52.5L36.1 51.5L37.5 50.7L38.0 50.0L37.5 49.3L36.1 48.5L34.0 47.5L31.6 46.1L29.1 44.4L27.0 42.5L25.7 40.7L25.2 39.0L25.8 37.7L27.3 36.9L29.5 36.7L32.2 37.1L35.0 37.9L37.7 38.9L39.9 39.9L41.5 40.6L42.4 40.7L42.7 40.0L42.5 38.5L42.1 36.3L41.6 33.6L41.4 30.6L41.5 27.8L42.0 25.4L43.0 23.9L44.3 23.4L45.9 23.9L47.4 25.4L48.8 27.7L50.0 30.4L50.9 33.1L51.5 35.5L52.0 37.3L52.5 38.2L53.2 38.2L54.2 37.2L55.5 35.5L57.3 33.5L59.5 31.4L61.7 29.7L63.9 28.5L65.8 28.2L67.2 28.8L67.8 30.2L67.7 32.3L66.9 34.8L65.6 37.4L64.0 39.8L62.4 41.9L61.3 43.5L60.8 44.5L61.1 45.0L62.4 45.3L64.4 45.3L67.1 45.4L70.0 45.8L72.8 46.4L75.2 47.4L76.7 48.6L77.3 50.0Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"50\" cy=\"50\" r=\"19\" fill=\"currentColor\"/><text x=\"50\" y=\"58\" text-anchor=\"middle\" font-size=\"23\" font-weight=\"800\" fill=\"#fff\">T</text></svg>",
+      "css": ".ds-seal { color: var(--brand-500, #1D4ED8); font-family: var(--font-sans, 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Glass Ledger",
+    "overview": "A deep blue field with a sky glow carries the page. Frosted white glass floats on it for the two things that orient the buyer: the navigation bar, and the money rail that shows where their money is right now. Products and prices never sit on glass; they sit on solid white sheets, so the eye moves from a luminous, moving layer to a calm, legible one.\n\nThe structure comes from a ledger: a status line for the money, a seal for each verified shop, the next step shown first. The material of that ledger is translated into glass. On the home page, the promise is a large headline, proved at once by a working rail laid over a shelf of real product photographs. On buying screens the same promise returns as a small hold note, and the density stays that of a working marketplace, with 14px body text.\n\nThe name \"Trao\" and the droplet logo are provisional. The owner has not chosen a final name, so nothing here depends on the word or on the logo's exact drawing. The rename tool does not touch Markdown files, so a rename means updating this file by hand.",
+    "keyCharacteristics": [
+      "Deep blue field with translucent sky glow behind the header, the hero and the flash band.",
+      "Blurred glass on exactly two components: the navigation bar and the money rail.",
+      "Solid white sheets for everything that is read, compared or bought.",
+      "Ink prices, midnight count badges, and red kept for discounts, errors and destructive actions.",
+      "One signature motion: a water drop moving along the money rail, which stops on the first click and is absent under reduced motion.",
+      "Fine-line seals generated from each shop's id, so no two shops share a mark."
+    ],
+    "rules": [
+      {
+        "name": "The Ink Price Rule",
+        "body": "Every price is Ink Text with tabular figures. A price in blue reads as a link; a price in red reads as a shouting sale.",
+        "section": "colors"
+      },
+      {
+        "name": "The Rationed Red Rule",
+        "body": "Red means a discount, an error or a destructive action, and nothing else. It does not mark urgency, favourites, required fields or decoration. The flash band itself is blue; only its percent badges and sold bars are red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Midnight Count Rule",
+        "body": "Count badges on the cart, notifications and chat are Midnight Blue with white figures. A count is information, not an alarm.",
+        "section": "colors"
+      },
+      {
+        "name": "The Sky Is Light Rule",
+        "body": "Sky is never a solid fill behind white text. It may glow translucently into the deep blue field, where sampled chip fills in the review captures stay near or above 4.8:1 against white, and it may tint a surface carrying midnight text. The logo and water drop start in sky and deepen to blue; those are marks, not text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cyan Is Not Brand Rule",
+        "body": "The `--blue-*` tokens are the information role. Brand work uses `--brand-*`; a button, general link or selected state is never drawn from `--blue-*`. An inline link inside an information note may stay in the information colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Stacked Diacritic Rule",
+        "body": "Headlines that can wrap keep a line height of at least 1.14, so stacked Vietnamese marks such as those in \"Nhận\" and \"đến\" never touch the line above. Check every new heading against real Vietnamese copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Money Rule",
+        "body": "Money, counts and countdowns use tabular figures so that columns and ticking clocks do not jitter.",
+        "section": "typography"
+      },
+      {
+        "name": "The Glass Is For Finding Your Way Rule",
+        "body": "Blurred glass belongs to the navigation bar and the money rail, nothing else. Products, prices, forms, popovers and modals are solid. Plain translucent white without blur, such as category chips and the countdown on the blue field, is not glass and is allowed there.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Quiet Sheet Rule",
+        "body": "A reading sheet never goes beyond the Small shadow and never gets a blur or a tint. Product cards take no shadow at all.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Opaque Fallback Rule",
+        "body": "Under `prefers-reduced-transparency`, glass becomes solid white with no blur. Everything on glass must already be legible on white.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep every reading surface solid white, with glass reserved for the navigation bar and the money rail.",
+      "Do set every price in Ink Text with tabular figures, at every scale including small popovers.",
+      "Do use Midnight Blue for count badges.",
+      "Do repeat the money promise beside each buying decision with the Hold Note, and show the solid rail with real values once money has moved.",
+      "Do show a Shop Seal beside the shop name in buying contexts.",
+      "Do stop automatic motion on first interaction and remove it entirely under `prefers-reduced-motion`.",
+      "Do give every new control a 44px minimum hit target, including icon buttons and rail stops on phones.",
+      "Do treat \"Trao\" and the logo as replaceable, keeping them out of any rule that would break on a rename."
+    ],
+    "donts": [
+      "Don't put product, price or form content on blurred glass.",
+      "Don't use red for urgency, favourites, required markers or decoration, or as a background for a whole flash-sale section.",
+      "Don't set white text on a solid sky fill.",
+      "Don't use `--blue-*` as a brand colour, or `--brand-*` to mean information.",
+      "Don't use orange as a brand colour, or anything that makes the page read as Shopee, Lazada or Tiki.",
+      "Don't bring glass, pills or the blue field into Vendor or Admin, and don't bring their dark ink chrome into the storefront."
+    ]
+  }
+}
