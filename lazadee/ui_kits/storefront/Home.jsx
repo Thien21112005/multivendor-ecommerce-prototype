@@ -52,9 +52,10 @@
     // Admin → Banner: every position the storefront home shows.
     const live = window.LZ.banners.live;
     const top = live('HOME_TOP_CAROUSEL');
-    const side = live('HOME_TOP_SIDE').slice(0, 2);
-    const middle = live('HOME_MIDDLE').slice(0, 2);
-    const flashTop = live('FLASH_SALE_TOP')[0];
+    // Every live banner of each position shows; two-slot positions deal them alternately.
+    const side = live('HOME_TOP_SIDE');
+    const middle = live('HOME_MIDDLE');
+    const flashTop = live('FLASH_SALE_TOP');
     const shelf = PRODUCTS.slice(0, 6);
     const picks = Array.from({ length: 12 }, (_, i) => ({ ...PRODUCTS[(i + 6) % PRODUCTS.length], _k: i }));
     const flash = PRODUCTS.filter((p) => p.flash).slice(0, 6);
@@ -78,7 +79,7 @@
           <div className="tr-section tr-section--banner">
             <div className={'tr-heroban' + (side.length && top.length ? '' : ' tr-heroban--solo')}>
               {top.length > 0 && <window.LZBannerCarousel items={top} />}
-              {side.length > 0 && <div className="tr-heroban__side">{side.map((b) => <window.LZBanner key={b.id} b={b} />)}</div>}
+              {side.length > 0 && <window.LZBannerPair items={side} className="tr-heroban__side" />}
             </div>
           </div>
         )}
@@ -94,7 +95,7 @@
           </div>
         </section>
 
-        {middle.length > 0 && <div className="tr-section tr-section--banner"><div className={'tr-duo' + (middle.length === 1 ? ' tr-duo--solo' : '')}>{middle.map((b) => <window.LZBanner key={b.id} b={b} />)}</div></div>}
+        {middle.length > 0 && <div className="tr-section tr-section--banner"><window.LZBannerPair items={middle} className="tr-duo" /></div>}
 
         <section id="flash-sale" className="tr-section tr-flash">
           <div className="tr-flash__in">
@@ -103,7 +104,7 @@
               <Countdown />
               <button className="tr-more" onClick={onMore}>Xem tất cả <Icon name="chevron-right" size={16} /></button>
             </div>
-            {flashTop && <div className="tr-flash__banner"><window.LZBanner b={flashTop} /></div>}
+            {flashTop.length > 0 && <div className="tr-flash__banner">{flashTop.length === 1 ? <window.LZBanner b={flashTop[0]} /> : <window.LZBannerCarousel items={flashTop} compact />}</div>}
             <div className="tr-grid">
               {flash.map((p) => <window.LZCardX key={p.id} p={p} flashBar onClick={() => onOpen(p.id)} />)}
             </div>

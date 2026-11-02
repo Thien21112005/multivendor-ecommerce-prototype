@@ -123,12 +123,12 @@
   ];
 
   const BANNER_POSITIONS = [
-    { id: 'HOME_TOP_CAROUSEL', label: 'Đầu trang chủ', where: 'Băng chuyền ngay dưới đường ray tiền, tự chuyển 6 giây một banner', preview: '?screen=home' },
-    { id: 'HOME_TOP_SIDE', label: 'Cạnh băng chuyền', where: 'Hai ô nhỏ bên phải băng chuyền đầu trang', preview: '?screen=home' },
-    { id: 'HOME_MIDDLE', label: 'Giữa trang chủ', where: 'Hai ô cạnh nhau giữa "Gợi ý cho bạn" và Flash Sale', preview: '?screen=home#flash-sale' },
+    { id: 'HOME_TOP_CAROUSEL', label: 'Đầu trang chủ', where: 'Băng chuyền dưới đường ray tiền, 6 giây một banner; chiếm hết chiều ngang khi không có banner cạnh băng chuyền', preview: '?screen=home' },
+    { id: 'HOME_TOP_SIDE', label: 'Cạnh băng chuyền', where: 'Hai ô bên phải băng chuyền: banner lẻ vào ô trên, chẵn vào ô dưới, mỗi ô tự lướt', preview: '?screen=home' },
+    { id: 'HOME_MIDDLE', label: 'Giữa trang chủ', where: 'Giữa "Gợi ý cho bạn" và Flash Sale: 1 banner chiếm hết, 2 chia đôi, từ 3 thì hai bên thay nhau lướt', preview: '?screen=home#flash-sale' },
     { id: 'CATEGORY_TOP', label: 'Đầu trang danh mục', where: 'Trên đầu trang của danh mục đã chọn', preview: '?screen=category&cat=' },
-    { id: 'FLASH_SALE_TOP', label: 'Khu Flash Sale', where: 'Trong khối Flash Sale, trên danh sách sản phẩm', preview: '?screen=home#flash-sale' },
-    { id: 'POPUP', label: 'Popup', where: 'Hộp nổi khi mở trang chủ, mỗi phiên một lần', preview: '?screen=home' },
+    { id: 'FLASH_SALE_TOP', label: 'Khu Flash Sale', where: 'Trong khối Flash Sale, trên danh sách sản phẩm; từ 2 banner thì lướt', preview: '?screen=home#flash-sale' },
+    { id: 'POPUP', label: 'Popup', where: 'Hộp nổi khi mở trang chủ, mỗi phiên một lần; chỉ banner có thứ tự nhỏ nhất được hiện', preview: '?screen=home' },
   ];
   // The seed lives with the storefront data so both kits read one banner store.
   const BANNERS = window.LZ.banners.all();

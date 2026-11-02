@@ -180,13 +180,35 @@
 .tr-heroban--solo { grid-template-columns: minmax(0, 1fr); }
 .tr-heroban .tr-banner img, .tr-duo .tr-banner img { aspect-ratio: 3 / 1; }
 .tr-heroban__side { display: grid; grid-template-rows: 1fr 1fr; gap: 10px; min-height: 0; }
-.tr-heroban__side .tr-banner { height: 100%; }
+.tr-heroban__side--solo { grid-template-rows: 1fr; }
+.tr-heroban__side > *, .tr-heroban__side .tr-carousel__track, .tr-heroban__side .tr-banner { height: 100%; min-height: 0; }
 .tr-heroban__side .tr-banner img { height: 100%; aspect-ratio: auto; }
+/* With no side banners the carousel takes the full width and grows, capped so it never towers. */
+.tr-heroban--solo .tr-carousel .tr-banner img { max-height: 380px; }
+.tr-duo--solo .tr-banner img { max-height: 320px; }
+/* Small slots keep their dots and drop the arrows. */
+.tr-carousel--compact .tr-carousel__dots { bottom: 6px; }
+.tr-carousel--compact .tr-carousel__dots button { width: 18px; height: 18px; }
+.tr-carousel--compact .tr-carousel__dots button i { top: 5px; }
 .tr-heroban__side .tr-banner img, .tr-duo .tr-banner img { transition: transform var(--dur-slow) var(--ease-out); }
 .tr-heroban__side .tr-banner:hover img, .tr-duo .tr-banner:hover img { transform: scale(1.03); }
 .tr-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .tr-duo--solo { grid-template-columns: minmax(0, 1fr); }
-.tr-catban .tr-banner img { aspect-ratio: 6 / 1; }
+.tr-catban .tr-banner img, .tr-flash__banner .tr-banner img { aspect-ratio: 6 / 1; }
+.tr-popup__card .tr-banner img { aspect-ratio: 3 / 1; }
+/* Campaign page */
+.tr-camp__crumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; font: var(--type-body-sm); color: var(--text-muted); }
+.tr-camp__crumb button { border: 0; background: none; padding: 0; color: var(--text-link); cursor: pointer; font: inherit; }
+.tr-camp__crumb span { color: var(--text-strong); font-weight: 600; }
+.tr-camp__head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; margin: 0 0 28px; padding: 32px 36px; border-radius: var(--radius-2xl); color: #FFF6EC; overflow: hidden; }
+.tr-camp__head h1 { margin: 0 0 8px; font: 800 clamp(30px, 3.4vw, 48px)/1.1 var(--font-display, var(--font-sans)); letter-spacing: -.02em; }
+.tr-camp__head p { margin: 0 0 18px; max-width: 58ch; font: var(--type-body); line-height: 1.55; color: #FFE9D6; }
+.tr-camp__head .tr-ticket { max-width: 340px; }
+.tr-camp__pics { display: flex; }
+.tr-camp__pics img { width: 150px; height: 150px; object-fit: cover; border: 5px solid #fff; border-radius: var(--radius-xl); box-shadow: 0 16px 30px -16px rgba(0, 0, 0, .5); }
+.tr-camp__pics img + img { margin-left: -36px; }
+.tr-camp__pics img:nth-child(1) { transform: rotate(-6deg); } .tr-camp__pics img:nth-child(2) { transform: translateY(14px) rotate(4deg); } .tr-camp__pics img:nth-child(3) { transform: rotate(-2deg); }
+@media (max-width: 768px) { .tr-camp__head { grid-template-columns: minmax(0, 1fr); padding: 22px 18px; } .tr-camp__pics { display: none; } }
 @media (prefers-reduced-motion: reduce) { .tr-carousel .tr-banner img { animation: none !important; } }
 @media (max-width: 768px) {
   .tr-heroban { grid-template-columns: minmax(0, 1fr); }

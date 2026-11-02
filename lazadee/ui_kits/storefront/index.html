@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="storefront.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Bai+Jamjuree:wght@500;600;700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Lexend:wght@400..800&family=Phudu:wght@500..900&family=Saira+Condensed:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Alegreya:wght@700;800&family=Baloo+2:wght@600;700;800&family=Bai+Jamjuree:wght@500;600;700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Lexend:wght@400..800&family=Phudu:wght@500..900&family=Saira+Condensed:wght@600;700;800&display=swap">
 <link rel="stylesheet" href="themes.css">
 <script src="themes.js"></script>
 <style>
@@ -52,6 +52,7 @@
 <script type="text/babel" src="ChatWidget.jsx"></script>
 <script type="text/babel" src="Category.jsx"></script>
 <script type="text/babel" src="Pages.jsx"></script>
+<script type="text/babel" src="Campaign.jsx"></script>
 <script type="text/babel" src="ReviewModal.jsx"></script>
 <script src="pages-data.js"></script>
 <script type="text/babel">
@@ -77,6 +78,7 @@ function App() {
   const [acctView, setAcctView] = React.useState(qp('view') || null);
   const [pageId, setPageId] = React.useState(qp('id') || 'help-center');
   const [catName, setCatName] = React.useState(qp('cat') || 'Điện tử');
+  const campSlug = qp('slug') || 'sieu-sale-12-12';
   const [loggedIn, setLoggedIn] = React.useState(qp('guest') !== '1');
   const [loginPrompt, setLoginPrompt] = React.useState(false);
   const [toast, setToast] = React.useState(null);
@@ -195,6 +197,7 @@ function App() {
   else if (screen === 'search') body = <window.LZSearch query={query} scope={searchScope} shopId={searchShopId} onOpen={open} onScope={setSearchScope} onShop={openShop} />;
   else if (screen === 'seller') body = <window.LZBecomeSeller onLogin={toLogin} onRegistered={() => { window.location.href = '../vendor/index.html?screen=kyc&kyc=NOT_SUBMITTED'; }} />;
   else if (screen === 'page') body = <window.LZPolicyPage pageId={pageId} onNav={(id) => go('page', id)} />;
+  else if (screen === 'campaign') body = <window.LZCampaign slug={campSlug} onOpen={open} onHome={() => go('home')} />;
   else if (screen === 'category') body = <window.LZCategory categoryName={catName} onOpen={open} onHome={() => go('home')} onCategory={openCategory} />;
 
   return (

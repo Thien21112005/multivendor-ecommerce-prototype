@@ -29,11 +29,16 @@ const BANNERS = [
   { id: 'side-seller', size: 'wide', field: '#1F4E5F', ink: '#F4F8F9', acc: '#F2C14E', head: 'Mở shop 0₫<br>trên Genie', sub: 'Xác minh danh tính rồi bán ngay', cta: 'Đăng ký bán', pics: ['mug'], big: true },
   { id: 'mid-home', size: 'wide', field: '#E3EAEE', ink: '#22303A', acc: '#C8702A', head: 'Nhà cửa<br>và đời sống', sub: 'Đèn, ghế, cốc sứ cho góc nhà', cta: 'Xem nhà cửa', pics: ['lamp', 'chair', 'mug'], big: true },
   { id: 'mid-acc', size: 'wide', field: '#2E2A27', ink: '#F4EFE8', acc: '#E9B23C', head: 'Phụ kiện<br>công nghệ', sub: 'Bàn phím, đồng hồ, balo', cta: 'Xem phụ kiện', pics: ['keyboard', 'watch2', 'backpack'], big: true },
-  { id: 'cat-beauty', size: 'strip', field: '#F3D9CF', ink: '#4A1F2A', acc: '#B8455F', head: 'Làm đẹp từ shop đã xác minh', sub: 'Mỹ phẩm, chăm sóc da, nước hoa', pics: ['cosmetics', 'skincare', 'perfume'] },
-  { id: 'cat-tech', size: 'strip', field: '#1E2A44', ink: '#F3F6FB', acc: '#7FD1C7', head: 'Điện tử chính hãng', sub: 'Mã TECH10 giảm 10% cho đơn từ 500.000₫', pics: ['laptop', 'phone', 'headphones'] },
-  { id: 'cat-fashion', size: 'strip', field: '#D8E4D0', ink: '#1F2E1C', acc: '#2F5D3A', head: 'Thời trang cho mỗi ngày', sub: 'Áo, giày và phụ kiện từ shop đã xác minh', pics: ['tshirt', 'sneakers', 'jacket'] },
-  { id: 'cat-home', size: 'strip', field: '#E3EAEE', ink: '#22303A', acc: '#C8702A', head: 'Nhà cửa và đời sống', sub: 'Đèn, ghế, cốc sứ cho góc nhà', pics: ['lamp', 'chair', 'mug'] },
-  { id: 'cat-acc', size: 'strip', field: '#2E2A27', ink: '#F4EFE8', acc: '#E9B23C', head: 'Phụ kiện công nghệ', sub: 'Bàn phím, đồng hồ, balo', pics: ['keyboard', 'watch2', 'backpack'] },
+  // Category strips spotlight one verified shop; the banner links to that shop.
+  { id: 'cat-beauty', size: 'strip', field: '#F3D9CF', ink: '#4A1F2A', acc: '#B8455F', head: 'Beauty Box', sub: 'Shop làm đẹp đã xác minh · 4.9 sao · 203k người theo dõi', pics: ['cosmetics', 'skincare', 'perfume'] },
+  { id: 'cat-tech', size: 'strip', field: '#1E2A44', ink: '#F3F6FB', acc: '#7FD1C7', head: 'TechZone Official', sub: 'Shop điện tử đã xác minh · 4.9 sao · 128k người theo dõi', pics: ['headphones', 'laptop', 'camera'] },
+  { id: 'cat-fashion', size: 'strip', field: '#D8E4D0', ink: '#1F2E1C', acc: '#2F5D3A', head: 'Boutique Sài Gòn', sub: 'Shop thời trang đã xác minh · 4.8 sao · 67k người theo dõi', pics: ['jacket', 'tshirt', 'sunglasses'] },
+  { id: 'cat-home', size: 'strip', field: '#E3EAEE', ink: '#22303A', acc: '#C8702A', head: 'Home & Living', sub: 'Shop nhà cửa đã xác minh · 4.6 sao · 19,8k người theo dõi', pics: ['lamp', 'chair', 'mug'] },
+  { id: 'cat-acc', size: 'strip', field: '#2E2A27', ink: '#F4EFE8', acc: '#E9B23C', head: 'TravelGear', sub: 'Shop balo và phụ kiện du lịch đã xác minh · 4.5 sao · 8,4k người theo dõi', pics: ['backpack'] },
+  // Flash Sale slot: links to one product.
+  { id: 'flash-anc', size: 'strip', field: '#14171F', ink: '#F6F3EC', acc: '#F2C14E', head: 'Tai nghe ANC Pro 5 chỉ 389.000₫', sub: 'Giảm 51% trong Flash Sale hôm nay, còn 5 suất', pics: ['headphones'] },
+  // Campaign: the carousel slide and the popup link to /sieu-sale-12-12.
+  { id: 'camp-1212', size: 'wide', field: '#B3202E', ink: '#FFF6EC', acc: '#F2C14E', head: 'Siêu sale 12.12', sub: 'Mã SALE1212 giảm 12% cho đơn từ 300.000₫, dùng từ 12/12', cta: 'Xem chiến dịch', pics: ['sneakers', 'perfume', 'speaker'], big: true },
 ];
 
 const page = (b) => {

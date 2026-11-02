@@ -356,23 +356,26 @@
 
   // Banners: one store shared by Admin → Banner and the storefront slots. The seed counts as
   // saved until Admin edits it, so a fresh browser already shows the live banners.
-  // v2: designed banners and the side slots; older saved sets are left behind.
-  const BANNER_KEY = 'lz_home_banners_v2';
+  // v3: every position seeded (flash, popup, campaign, shop spotlights); older sets are left behind.
+  const BANNER_KEY = 'lz_home_banners_v3';
   const BANNER_SEED = [
     { id: 'BN-101', title: 'Nhận hàng rồi, tiền mới đến shop', image: '../../assets/img/banners/home-trust.jpg', imageMobile: '', link: '/?screen=discover', position: 'HOME_TOP_CAROUSEL', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 182400, clicks: 9860 },
     { id: 'BN-105', title: 'Công nghệ chính hãng', image: '../../assets/img/banners/home-tech.jpg', imageMobile: '', link: '/?screen=category&cat=Điện tử', position: 'HOME_TOP_CAROUSEL', category: '', order: 2, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 64100, clicks: 2870 },
     { id: 'BN-106', title: 'Làm đẹp mỗi ngày', image: '../../assets/img/banners/home-beauty.jpg', imageMobile: '', link: '/?screen=category&cat=Làm đẹp', position: 'HOME_TOP_CAROUSEL', category: '', order: 3, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 51800, clicks: 2240 },
     { id: 'BN-107', title: 'Thời trang mới về', image: '../../assets/img/banners/home-fashion.jpg', imageMobile: '', link: '/?screen=category&cat=Thời trang', position: 'HOME_TOP_CAROUSEL', category: '', order: 4, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 47300, clicks: 1910 },
+    { id: 'BN-115', title: 'Siêu sale 12.12', image: '../../assets/img/banners/camp-1212.jpg', imageMobile: '', link: '/sieu-sale-12-12', position: 'HOME_TOP_CAROUSEL', category: '', order: 5, startsAt: '2026-11-01', endsAt: '2026-12-12', on: true, views: 12800, clicks: 940 },
     { id: 'BN-108', title: 'Freeship đơn từ 99.000₫', image: '../../assets/img/banners/side-freeship.jpg', imageMobile: '', link: '/?screen=home#flash-sale', position: 'HOME_TOP_SIDE', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 88200, clicks: 4410 },
     { id: 'BN-109', title: 'Mở shop 0₫ trên Genie', image: '../../assets/img/banners/side-seller.jpg', imageMobile: '', link: '/?screen=seller', position: 'HOME_TOP_SIDE', category: '', order: 2, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 39700, clicks: 1260 },
     { id: 'BN-102', title: 'Nhà cửa và đời sống', image: '../../assets/img/banners/mid-home.jpg', imageMobile: '', link: '/?screen=category&cat=Nhà cửa', position: 'HOME_MIDDLE', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 96300, clicks: 3120 },
     { id: 'BN-110', title: 'Phụ kiện công nghệ', image: '../../assets/img/banners/mid-acc.jpg', imageMobile: '', link: '/?screen=category&cat=Phụ kiện', position: 'HOME_MIDDLE', category: '', order: 2, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 42600, clicks: 1530 },
-    { id: 'BN-103', title: 'Làm đẹp từ shop đã xác minh', image: '../../assets/img/banners/cat-beauty.jpg', imageMobile: '', link: '/?screen=shop&shop=beauty', position: 'CATEGORY_TOP', category: 'Làm đẹp', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 41200, clicks: 1980 },
-    { id: 'BN-111', title: 'Điện tử chính hãng', image: '../../assets/img/banners/cat-tech.jpg', imageMobile: '', link: '/?screen=shop&shop=techzone', position: 'CATEGORY_TOP', category: 'Điện tử', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 30500, clicks: 1220 },
-    { id: 'BN-112', title: 'Thời trang cho mỗi ngày', image: '../../assets/img/banners/cat-fashion.jpg', imageMobile: '', link: '/?screen=shop&shop=boutique', position: 'CATEGORY_TOP', category: 'Thời trang', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 27800, clicks: 990 },
-    { id: 'BN-113', title: 'Nhà cửa và đời sống', image: '../../assets/img/banners/cat-home.jpg', imageMobile: '', link: '/?screen=shop&shop=home', position: 'CATEGORY_TOP', category: 'Nhà cửa', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 19400, clicks: 610 },
-    { id: 'BN-114', title: 'Phụ kiện công nghệ', image: '../../assets/img/banners/cat-acc.jpg', imageMobile: '', link: '/?screen=category&cat=Phụ kiện', position: 'CATEGORY_TOP', category: 'Phụ kiện', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 15100, clicks: 470 },
-    { id: 'BN-104', title: 'Tết 2026 giảm sâu', image: '../../assets/img/banner-sale.jpg', imageMobile: '', link: '/?screen=discover', position: 'POPUP', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2026-02-15', on: true, views: 310000, clicks: 12400 },
+    { id: 'BN-103', title: 'Shop nổi bật: Beauty Box', image: '../../assets/img/banners/cat-beauty.jpg', imageMobile: '', link: '/?screen=shop&shop=beauty', position: 'CATEGORY_TOP', category: 'Làm đẹp', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 41200, clicks: 1980 },
+    { id: 'BN-111', title: 'Shop nổi bật: TechZone Official', image: '../../assets/img/banners/cat-tech.jpg', imageMobile: '', link: '/?screen=shop&shop=techzone', position: 'CATEGORY_TOP', category: 'Điện tử', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 30500, clicks: 1220 },
+    { id: 'BN-112', title: 'Shop nổi bật: Boutique Sài Gòn', image: '../../assets/img/banners/cat-fashion.jpg', imageMobile: '', link: '/?screen=shop&shop=boutique', position: 'CATEGORY_TOP', category: 'Thời trang', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 27800, clicks: 990 },
+    { id: 'BN-113', title: 'Shop nổi bật: Home & Living', image: '../../assets/img/banners/cat-home.jpg', imageMobile: '', link: '/?screen=shop&shop=home', position: 'CATEGORY_TOP', category: 'Nhà cửa', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 19400, clicks: 610 },
+    { id: 'BN-114', title: 'Shop nổi bật: TravelGear', image: '../../assets/img/banners/cat-acc.jpg', imageMobile: '', link: '/?screen=shop&shop=travel', position: 'CATEGORY_TOP', category: 'Phụ kiện', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 15100, clicks: 470 },
+    { id: 'BN-116', title: 'Tai nghe ANC Pro 5 chỉ 389.000₫', image: '../../assets/img/banners/flash-anc.jpg', imageMobile: '', link: '/?screen=product&product=p1', position: 'FLASH_SALE_TOP', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 23600, clicks: 2050 },
+    { id: 'BN-104', title: 'Siêu sale 12.12', image: '../../assets/img/banners/camp-1212.jpg', imageMobile: '', link: '/sieu-sale-12-12', position: 'POPUP', category: '', order: 1, startsAt: '2026-11-01', endsAt: '2026-12-12', on: true, views: 31000, clicks: 2480 },
+    { id: 'BN-117', title: 'Tết 2026 giảm sâu', image: '../../assets/img/banner-sale.jpg', imageMobile: '', link: '/?screen=discover', position: 'POPUP', category: '', order: 2, startsAt: '2026-01-01', endsAt: '2026-02-15', on: true, views: 310000, clicks: 12400 },
   ];
   // Dates are compared as local YYYY-MM-DD strings, the same way on both sides.
   const localDay = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
@@ -384,6 +387,19 @@
     live: (position, category) => banners.all().filter((b) => b.position === position && banners.stateOf(b) === 'LIVE' && (!category || b.category === category)).sort((a, b) => a.order - b.order),
     count: (id, field) => banners.save(banners.all().map((b) => (b.id === id ? { ...b, [field]: (b[field] || 0) + 1 } : b))),
     today: localDay,
+  };
+
+  // Campaign pages, reached from a banner whose link is a path such as /sieu-sale-12-12.
+  const CAMPAIGNS = {
+    'sieu-sale-12-12': {
+      title: 'Siêu sale 12.12',
+      colour: '#B3202E',
+      pics: ['sneakers', 'perfume', 'speaker'],
+      intro: 'Từ 00:00 ngày 12/12 các shop đã xác minh giảm sâu. Lưu mã SALE1212 hôm nay để dùng khi chiến dịch mở; Genie vẫn giữ tiền đến khi bạn nhận hàng.',
+      voucher: { kind: 'platform', amount: '-12%', label: 'Đơn từ 300.000₫, dùng từ 12/12', code: 'SALE1212' },
+      pick: (p) => p.discountPct >= 45,
+      endsAt: '2026-12-12',
+    },
   };
 
   // Wishlist survives reloads and notifies every card that shows the heart.
@@ -403,7 +419,7 @@
   };
 
   window.LZ = {
-    wishlist, banners, loggedIn: true, ATTR_FILTERS,
+    wishlist, banners, CAMPAIGNS, loggedIn: true, ATTR_FILTERS,
     V, PRODUCTS, CATEGORIES, USER, ADDRESSES, FOLLOWS, ORDERS, PROVINCES, DISTRICTS, VOUCHERS, COIN_LOG, NOTIFICATIONS, DEVICES, CATEGORY_META,
     byId, voucherCheck, voucherDiscount, priceCart, bestVouchers, shipFee, badgeStatus,
     variantOptions: (p) => (p && VARIANT_GROUPS[p.cat]) || [{ key: 'Phân loại', values: ['Tiêu chuẩn'] }],

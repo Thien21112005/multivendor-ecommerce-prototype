@@ -236,7 +236,10 @@
     if (!b || !b.link) return;
     window.LZ.banners.count(b.id, 'clicks');
     const u = new URL(b.link, location.origin);
-    window.location.href = location.pathname + u.search + u.hash;
+    // A bare path (Admin's "Trang chiến dịch") opens the campaign page of that slug.
+    const slug = u.pathname.replace(/^\/+|\/+$/g, '');
+    const search = !u.search && slug ? '?screen=campaign&slug=' + encodeURIComponent(slug) : u.search;
+    window.location.href = location.pathname + search + u.hash;
   };
   const useCountView = (b) => React.useEffect(() => { if (b) window.LZ.banners.count(b.id, 'views'); }, [b && b.id]);
   // Phones get the mobile image when Admin uploaded one; both crop from the center.
@@ -255,17 +258,21 @@
   // fills as the time runs), pauses while hovered or focused, follows a swipe or drag, and
   // stays still under reduced motion.
   const SLIDE_MS = 6000;
-  function BannerCarousel({ items }) {
+  // compact: a small slot (no arrows). delay: the first slide waits this much longer, so
+  // neighbouring slots change at different moments.
+  function BannerCarousel({ items, compact, delay = 0 }) {
     const [i, setI] = React.useState(0);
     const [hold, setHold] = React.useState(false);
     const drag = React.useRef(null);
+    const first = React.useRef(true);
     const n = items.length;
     const b = items[i % Math.max(n, 1)];
     useCountView(b);
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wait = SLIDE_MS + (first.current ? delay : 0);
     React.useEffect(() => {
       if (n < 2 || hold || still) return undefined;
-      const t = setTimeout(() => setI((x) => (x + 1) % n), SLIDE_MS);
+      const t = setTimeout(() => { first.current = false; setI((x) => (x + 1) % n); }, wait);
       return () => clearTimeout(t);
     }, [n, hold, i]);
     const step = (d) => setI((x) => (x + d + n) % n);
@@ -279,7 +286,7 @@
     const swallow = (e) => { if (drag.current && drag.current.moved) { e.preventDefault(); e.stopPropagation(); } drag.current = null; };
     if (!n) return null;
     return (
-      <div className="tr-carousel" role="region" aria-roledescription="băng chuyền" aria-label="Banner trang chủ" data-hold={hold ? 1 : 0}
+      <div className={'tr-carousel' + (compact ? ' tr-carousel--compact' : '')} role="region" aria-roledescription="băng chuyền" aria-label="Banner" data-hold={hold ? 1 : 0}
         onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}
         onPointerDown={down} onPointerUp={up} onClickCapture={swallow}>
         <div className="tr-carousel__track" style={{ transform: 'translateX(' + (-100 * (i % n)) + '%)' }}>
@@ -289,12 +296,14 @@
           ))}
         </div>
         {n > 1 && <>
+          {!compact && <>
           <button className="tr-carousel__nav tr-carousel__nav--prev" aria-label="Banner trước" onClick={() => step(-1)}><Icon name="chevron-left" size={20} /></button>
           <button className="tr-carousel__nav tr-carousel__nav--next" aria-label="Banner sau" onClick={() => step(1)}><Icon name="chevron-right" size={20} /></button>
+          </>}
           <div className="tr-carousel__dots">
             {items.map((x, k) => (
               <button key={x.id} aria-label={'Banner ' + (k + 1)} aria-current={k === i % n ? 'true' : undefined} onClick={() => setI(k)}>
-                {k === i % n && !still && <i key={i} style={{ animationDuration: SLIDE_MS + 'ms' }} />}
+                {k === i % n && !still && <i key={i} style={{ animationDuration: wait + 'ms' }} />}
               </button>
             ))}
           </div>
@@ -302,6 +311,16 @@
       </div>
     );
   }
+  // One slot: a single banner stands still, two or more take turns.
+  const BannerSlot = ({ items, delay }) => (items.length === 1 ? <Banner b={items[0]} /> : <BannerCarousel items={items} compact delay={delay} />);
+  // Banners of a two-slot position, dealt alternately: 1st, 3rd, 5th... to the first slot and
+  // 2nd, 4th... to the second, so each slot rotates on its own.
+  const dealTwo = (items) => [items.filter((_, k) => k % 2 === 0), items.filter((_, k) => k % 2 === 1)].filter((s) => s.length);
+  function BannerPair({ items, className }) {
+    const slots = dealTwo(items);
+    return <div className={className + (slots.length === 1 ? ' ' + className + '--solo' : '')}>{slots.map((s, k) => <BannerSlot key={k} items={s} delay={k * SLIDE_MS / 2} />)}</div>;
+  }
+
   // Popup position: once per browser session, closes on Esc, the backdrop or the close button.
   function BannerPopup() {
     const b = React.useMemo(() => {
@@ -358,5 +377,6 @@
   window.LZPayModal = PayModal;
   window.LZBanner = Banner;
   window.LZBannerCarousel = BannerCarousel;
+  window.LZBannerPair = BannerPair;
   window.LZBannerPopup = BannerPopup;
 })();
