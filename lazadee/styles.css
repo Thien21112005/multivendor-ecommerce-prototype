@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Lazadee Design System — global entry point.
+   Genie Design System — global entry point.
    Consumers link THIS file only. Imports-only; no rules live here.
    =========================================================================== */
 @import url('./tokens/fonts.css');

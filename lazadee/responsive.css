@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Lazadee — responsive layer for 360–1440 px.
+   Genie — responsive layer for 360–1440 px.
    Screens lay out with inline styles, so these rules match them by style value.
    =========================================================================== */
 @media (max-width: 1100px) {
@@ -13,7 +13,7 @@
 }
 
 @media (max-width: 768px) {
-  html, body { overflow-x: hidden; }
+  html, body { overflow-x: clip; }
   img, video, svg { max-width: 100%; }
 
   /* every grid stacks, card grids keep two columns */
@@ -38,10 +38,6 @@
   /* wide tables scroll inside their card */
   table { display: block; overflow-x: auto; }
   [style*="min-width: 5"], [style*="min-width: 6"], [style*="min-width: 7"], [style*="min-width: 8"], [style*="min-width: 9"], [style*="min-width: 10"] { min-width: 0 !important; }
-
-  /* storefront header */
-  [style*="height: 76px"] { height: auto !important; padding-top: 8px !important; padding-bottom: 8px !important; }
-  header [style*="max-width: 1280px"] { height: auto !important; gap: 8px !important; }
 
   /* seller and admin shells: sidebar becomes a scrolling top bar */
   aside { position: static !important; height: auto !important; top: auto !important; }

@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Lazadee — Base layer. Light reset + element defaults wired to tokens.
+   Genie — Base layer. Light reset + element defaults wired to tokens.
    =========================================================================== */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -23,9 +23,15 @@ img, svg { display: block; max-width: 100%; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
-:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; box-shadow: none; }
+p a, li a { text-decoration: underline; text-underline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .lz-pcard:hover, .tr-card__main:hover img, .tr-shelf button:hover img { transform: none !important; }
+  .lz-spin, .lz-typing-dot { animation-duration: 2s !important; }
+}
 
-::selection { background: var(--orange-100); color: var(--orange-900); }
+::selection { background: var(--brand-100); color: var(--brand-900); }
 
 /* Money: always tabular figures. ₫ comes from the Be Vietnam Pro vietnamese subset. */
 .money { font-variant-numeric: var(--numeric-tabular); }

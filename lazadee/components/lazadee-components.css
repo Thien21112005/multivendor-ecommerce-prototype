@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Lazadee component styles. Token-driven classes consumed by the React
+   Genie component styles. Token-driven classes consumed by the React
    primitives. Imported from styles.css so cards & UI kits get them too.
    All primary controls honor a 44px minimum hit target.
    =========================================================================== */
@@ -19,7 +19,7 @@
 .lz-btn[disabled],.lz-btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
 .lz-btn--secondary{background:var(--surface-card);color:var(--color-primary);border-color:var(--color-primary)}
 .lz-btn--secondary:hover{background:var(--color-primary-tint)}
-.lz-btn--secondary:active{background:var(--orange-100)}
+.lz-btn--secondary:active{background:var(--brand-100)}
 .lz-btn--outline{background:var(--surface-card);color:var(--text-body);border-color:var(--border-strong)}
 .lz-btn--outline:hover{background:var(--gray-50);border-color:var(--color-primary);color:var(--color-primary)}
 .lz-btn--outline:active{background:var(--gray-100)}
@@ -99,7 +99,7 @@
 .lz-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;min-height:44px;font:var(--type-body);color:var(--text-body)}
 .lz-switch input{position:absolute;opacity:0;width:0;height:0}
 .lz-switch__track{width:42px;height:24px;border-radius:var(--radius-pill);background:var(--gray-300);position:relative;transition:background var(--dur-base) var(--ease-out);flex:none}
-.lz-switch__thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:transform var(--dur-base) var(--ease-spring)}
+.lz-switch__thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:transform var(--dur-base) var(--ease-out)}
 .lz-switch input:checked+.lz-switch__track{background:var(--color-primary)}
 .lz-switch input:checked+.lz-switch__track .lz-switch__thumb{transform:translateX(18px)}
 .lz-switch input:focus-visible+.lz-switch__track{box-shadow:var(--focus-ring)}
@@ -108,7 +108,7 @@
 .lz-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--radius-sm);
   font:var(--weight-semibold) var(--text-xs)/1.1 var(--font-sans);letter-spacing:.01em;white-space:nowrap}
 .lz-badge--neutral{background:var(--gray-100);color:var(--text-body)}
-.lz-badge--primary{background:var(--color-primary-tint);color:var(--orange-700)}
+.lz-badge--primary{background:var(--color-primary-tint);color:var(--brand-700)}
 .lz-badge--solid{background:var(--color-primary);color:#fff}
 .lz-badge--flash{background:var(--flash-500);color:#fff}
 .lz-badge--success{background:var(--green-50);color:var(--green-600)}
@@ -121,7 +121,7 @@
 /* ---- Tag (removable filter chip) ----------------------------------------- */
 .lz-tag{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 11px;border-radius:var(--radius-pill);
   background:var(--gray-100);color:var(--text-body);font:var(--weight-medium) var(--text-sm)/1 var(--font-sans)}
-.lz-tag--brand{background:var(--color-primary-tint);color:var(--orange-700)}
+.lz-tag--brand{background:var(--color-primary-tint);color:var(--brand-700)}
 .lz-tag__x{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;cursor:pointer;color:inherit;opacity:.6}
 .lz-tag__x:hover{opacity:1;background:rgba(0,0,0,.08)}
 
@@ -178,11 +178,11 @@
 .lz-pcard{display:flex;flex-direction:column;background:var(--surface-card);border:1px solid var(--border-subtle);
   border-radius:var(--radius-md);overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;
   transition:box-shadow var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out),border-color var(--dur-base) var(--ease-out)}
-.lz-pcard:hover{box-shadow:var(--shadow-lift);transform:translateY(-2px);border-color:var(--orange-200);text-decoration:none}
+.lz-pcard:hover{box-shadow:var(--shadow-lift);transform:translateY(-2px);border-color:var(--brand-200);text-decoration:none}
 .lz-pcard__media{position:relative;width:100%;aspect-ratio:1/1;background:var(--gray-100)}
 .lz-pcard__media img{width:100%;height:100%;object-fit:cover}
 .lz-pcard__flags{position:absolute;top:0;left:0;display:flex;flex-direction:column;gap:0}
-.lz-pcard__disc{position:absolute;top:0;right:0;background:var(--gold-400);color:var(--orange-800);
+.lz-pcard__disc{position:absolute;top:0;right:0;background:var(--gold-400);color:var(--brand-800);
   font:var(--weight-bold) var(--text-xs)/1 var(--font-sans);padding:5px 5px 6px;border-bottom-left-radius:var(--radius-sm);text-align:center}
 .lz-pcard__disc b{display:block;font-size:var(--text-sm);font-weight:800}
 .lz-pcard__body{padding:9px 10px 11px;display:flex;flex-direction:column;gap:7px}

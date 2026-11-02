@@ -12,7 +12,7 @@ const __ds_scope = {};
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 const KIND_LABEL = {
-  platform: 'Lazadee',
+  platform: 'Genie',
   shop: 'Shop',
   freeship: 'Freeship'
 };
@@ -110,7 +110,7 @@ function Avatar({
   square
 }) {
   const initials = name.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
-  const palette = ['#F5511E', '#2563EB', '#6C2BD9', '#14B86E', '#E0142B', '#D98A0B'];
+  const palette = ['#1D4ED8', '#0369A1', '#6C2BD9', '#0E8A52', '#C8102E', '#B45309'];
   const bg = palette[(name.charCodeAt(0) || 0) % palette.length];
   return /*#__PURE__*/React.createElement("span", {
     style: {
@@ -157,7 +157,7 @@ Object.assign(__ds_scope, { Avatar });
 // components/core/Icon.jsx
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-/* Lazadee icon set — Lucide geometry (ISC), vendored inline so the component
+/* Genie icon set — Lucide geometry (ISC), vendored inline so the component
    is self-contained and recolors via currentColor. 24x24 grid, 2px stroke.
    Source SVGs also live in assets/icons/. */
 const ICONS = {
@@ -280,7 +280,7 @@ function Icon({
 }) {
   const inner = ICONS[name];
   if (!inner) {
-    if (typeof console !== 'undefined') console.warn('Lazadee Icon: unknown name', name);
+    if (typeof console !== 'undefined') console.warn('Genie Icon: unknown name', name);
     return null;
   }
   return /*#__PURE__*/React.createElement("svg", _extends({
@@ -451,7 +451,7 @@ function ProductCard({
       borderRadius: 0,
       padding: '3px 7px'
     }
-  }, "MALL")), discountPct != null && /*#__PURE__*/React.createElement("div", {
+  }, "CHÍNH HÃNG")), discountPct != null && /*#__PURE__*/React.createElement("div", {
     className: "lz-pcard__disc"
   }, /*#__PURE__*/React.createElement("b", null, "-", discountPct, "%"))), /*#__PURE__*/React.createElement("div", {
     className: "lz-pcard__body"
@@ -491,7 +491,7 @@ Object.assign(__ds_scope, { ProductCard });
 
 // components/commerce/VendorChip.jsx
 try { (() => {
-/** Vendor identity: logo (or initial), name with optional Mall/verified badge, meta line. */
+/** Vendor identity: logo (or initial), name with optional Chính hãng/verified badge, meta line. */
 function VendorChip({
   name,
   logo,
@@ -546,15 +546,53 @@ Object.assign(__ds_scope, { VendorChip });
 // components/core/Modal.jsx
 try { (() => {
 /** Centered modal dialog with scrim. Render conditionally on `open`. */
-function Modal({
-  open,
+// Dialog: labelled, focus moves in and stays in, Escape closes, focus returns to the trigger.
+let __lzModalSeq = 0;
+function Modal(props) {
+  return props.open ? /*#__PURE__*/React.createElement(ModalDialog, props) : null;
+}
+function ModalDialog({
   onClose,
   title,
   children,
   footer,
   width = 460
 }) {
-  if (!open) return null;
+  const box = React.useRef(null);
+  const close = React.useRef(onClose);
+  close.current = onClose;
+  const [labelId] = React.useState(() => 'lz-modal-' + ++__lzModalSeq);
+  React.useEffect(() => {
+    const prev = document.activeElement;
+    const el = box.current;
+    const tabbables = () => Array.from(el.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')).filter(x => x.offsetParent !== null);
+    const all = tabbables();
+    (all.find(x => x.getAttribute('aria-label') !== '\u0110\xF3ng') || all[0] || el).focus();
+    const onKey = e => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        close.current && close.current();
+      }
+      if (e.key !== 'Tab') return;
+      const f = tabbables();
+      if (!f.length) {
+        e.preventDefault();
+        return;
+      }
+      if (e.shiftKey && document.activeElement === f[0]) {
+        e.preventDefault();
+        f[f.length - 1].focus();
+      } else if (!e.shiftKey && document.activeElement === f[f.length - 1]) {
+        e.preventDefault();
+        f[0].focus();
+      }
+    };
+    el.addEventListener('keydown', onKey);
+    return () => {
+      el.removeEventListener('keydown', onKey);
+      if (prev && prev.focus && document.contains(prev)) prev.focus();
+    };
+  }, []);
   return /*#__PURE__*/React.createElement("div", {
     onClick: onClose,
     style: {
@@ -567,6 +605,11 @@ function Modal({
       padding: 24
     }
   }, /*#__PURE__*/React.createElement("div", {
+    ref: box,
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-labelledby": title ? labelId : undefined,
+    tabIndex: -1,
     onClick: e => e.stopPropagation(),
     style: {
       width,
@@ -577,28 +620,31 @@ function Modal({
       borderRadius: 'var(--radius-xl)',
       boxShadow: 'var(--shadow-xl)',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      outline: 'none'
     }
   }, title && /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
       gap: 12,
-      padding: '16px 20px',
+      padding: '12px 12px 12px 20px',
       borderBottom: '1px solid var(--border-subtle)'
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("h2", {
+    id: labelId,
     style: {
       font: 'var(--weight-bold) var(--text-lg) var(--font-sans)',
       color: 'var(--text-strong)',
-      flex: 1
+      flex: 1,
+      margin: 0
     }
   }, title), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     "aria-label": "\u0110\xF3ng",
     style: {
-      width: 36,
-      height: 36,
+      width: 44,
+      height: 44,
       borderRadius: 'var(--radius-md)',
       border: 0,
       background: 'transparent',
@@ -619,6 +665,7 @@ function Modal({
     style: {
       display: 'flex',
       justifyContent: 'flex-end',
+      flexWrap: 'wrap',
       gap: 10,
       padding: '14px 20px',
       borderTop: '1px solid var(--border-subtle)'
@@ -669,6 +716,8 @@ const MAP = {
 };
 
 /** Pill that reflects an order / KYC / escrow status with the right semantics. */
+// Status codes are for the system; people read these words.
+const STATUS_WORDS = { PENDING: "Chờ xử lý", PAID: "Đã thanh toán", SHIPPED: "Đang giao", DELIVERED: "Đã giao", COMPLETED: "Hoàn tất", CANCELLED: "Đã hủy", ERROR: "Lỗi", VERIFIED: "Đã xác minh", REJECTED: "Từ chối", HELD: "Đang giữ", AVAILABLE: "Khả dụng" };
 function StatusBadge({
   status = 'PENDING',
   label,
@@ -685,7 +734,7 @@ function StatusBadge({
     }
   }, rest), dot && /*#__PURE__*/React.createElement("span", {
     className: "lz-status__dot"
-  }), label || key);
+  }), label || STATUS_WORDS[key] || key);
 }
 Object.assign(__ds_scope, { StatusBadge });
 })(); } catch (e) { __ds_ns.__errors.push({ path: "components/feedback/StatusBadge.jsx", error: String((e && e.message) || e) }); }
@@ -720,7 +769,7 @@ Object.assign(__ds_scope, { Tag });
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /**
- * Lazadee primary action button. Variants map to brand intent; all sizes keep a
+ * Genie primary action button. Variants map to brand intent; all sizes keep a
  * 44px minimum hit target.
  */
 function Button({
@@ -762,7 +811,7 @@ function Checkbox({
   children,
   ...rest
 }) {
-  return /*#__PURE__*/React.createElement("label", {
+  return /*#__PURE__*/React.createElement(children ? "label" : "span", {
     className: "lz-check"
   }, /*#__PURE__*/React.createElement("input", _extends({
     type: "checkbox",
@@ -874,7 +923,7 @@ function Radio({
   children,
   ...rest
 }) {
-  return /*#__PURE__*/React.createElement("label", {
+  return /*#__PURE__*/React.createElement(children ? "label" : "span", {
     className: "lz-radio"
   }, /*#__PURE__*/React.createElement("input", _extends({
     type: "radio",
@@ -943,7 +992,7 @@ function Select({
     style: { position: 'relative' }
   }, /*#__PURE__*/React.createElement("div", {
     className: "lz-input",
-    style: { cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderColor: open ? 'var(--orange-500)' : undefined, background: '#fff', userSelect: 'none' },
+    style: { cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderColor: open ? 'var(--brand-500)' : undefined, background: '#fff', userSelect: 'none' },
     onClick: () => setOpen(!open)
   }, /*#__PURE__*/React.createElement("span", { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, selectedOption.label), /*#__PURE__*/React.createElement(__ds_scope.Icon, {
     name: "chevron-down",
@@ -962,11 +1011,11 @@ function Select({
       key: i,
       style: {
         padding: '8px 12px', cursor: 'pointer', borderRadius: 'var(--radius-sm)',
-        background: isSelected ? 'var(--orange-50)' : 'transparent',
-        color: isSelected ? 'var(--orange-600)' : 'var(--text-body)',
+        background: isSelected ? 'var(--brand-50)' : 'transparent',
+        color: isSelected ? 'var(--brand-600)' : 'var(--text-body)',
         fontWeight: isSelected ? 500 : 400
       },
-      onMouseEnter: e => { if (!isSelected) { e.target.style.background = 'var(--orange-50)'; e.target.style.color = 'var(--orange-600)'; } },
+      onMouseEnter: e => { if (!isSelected) { e.target.style.background = 'var(--brand-50)'; e.target.style.color = 'var(--brand-600)'; } },
       onMouseLeave: e => { if (!isSelected) { e.target.style.background = 'transparent'; e.target.style.color = 'var(--text-body)'; } },
       onClick: () => { setInnerValue(opt.value); if (onChange) onChange({ target: { value: opt.value } }); setOpen(false); }
     }, opt.label);
@@ -989,7 +1038,7 @@ function Switch({
   children,
   ...rest
 }) {
-  return /*#__PURE__*/React.createElement("label", {
+  return /*#__PURE__*/React.createElement(children ? "label" : "span", {
     className: "lz-switch"
   }, /*#__PURE__*/React.createElement("input", _extends({
     type: "checkbox",
@@ -1017,6 +1066,7 @@ function Tabs({
   size = 'md'
 }) {
   return /*#__PURE__*/React.createElement("div", {
+    className: "lz-tabs",
     style: {
       display: 'flex',
       gap: size === 'sm' ? 18 : 26,
@@ -2606,7 +2656,7 @@ try { (() => {
 
 // ui_kits/admin/data.jsx
 try { (() => {
-/* Mock data for the Lazadee Staff/Admin panel. */
+/* Mock data for the Genie Staff/Admin panel. */
 (function () {
   const NAV = [{
     id: 'kyc',
@@ -2852,25 +2902,25 @@ try { (() => {
   }];
   const STAFF = [{
     name: 'Đặng Hải Yến',
-    email: 'yen.dh@lazadee.vn',
+    email: 'yen.dh@genie.example',
     role: 'Super Admin',
     perms: ['all'],
     active: true
   }, {
     name: 'Ngô Tấn Phát',
-    email: 'phat.nt@lazadee.vn',
+    email: 'phat.nt@genie.example',
     role: 'KYC Reviewer',
     perms: ['kyc.review', 'catalog.read'],
     active: true
   }, {
     name: 'Trịnh Mỹ Linh',
-    email: 'linh.tm@lazadee.vn',
+    email: 'linh.tm@genie.example',
     role: 'Finance',
     perms: ['payout.process', 'ledger.read', 'commission.config'],
     active: true
   }, {
     name: 'Vương Đại Nghĩa',
-    email: 'nghia.vd@lazadee.vn',
+    email: 'nghia.vd@genie.example',
     role: 'Moderator',
     perms: ['review.moderate', 'refund.arbitrate'],
     active: false
@@ -2891,7 +2941,7 @@ try { (() => {
 
 // ui_kits/storefront/Cart.jsx
 try { (() => {
-/* Lazadee multi-vendor cart: grouped by vendor, per-vendor subtotals & shipping. */
+/* Genie multi-vendor cart: grouped by vendor, per-vendor subtotals & shipping. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const {
@@ -3035,7 +3085,7 @@ try { (() => {
         }
       }, vendor.name), vendor.mall && /*#__PURE__*/React.createElement(Badge, {
         variant: "solid"
-      }, "MALL"), /*#__PURE__*/React.createElement("button", {
+      }, "CHÍNH HÃNG"), /*#__PURE__*/React.createElement("button", {
         style: chatBtn
       }, /*#__PURE__*/React.createElement(Icon, {
         name: "message-circle",
@@ -3200,7 +3250,7 @@ try { (() => {
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "ticket",
       size: 15
-    }), " Lazadee Voucher"), /*#__PURE__*/React.createElement("div", {
+    }), " Voucher Genie"), /*#__PURE__*/React.createElement("div", {
       style: {
         marginLeft: 'auto',
         textAlign: 'right'
@@ -3248,7 +3298,7 @@ try { (() => {
 
 // ui_kits/storefront/Checkout.jsx
 try { (() => {
-/* Lazadee consolidated checkout: cart splits into N sub-orders (one Order ID per
+/* Genie consolidated checkout: cart splits into N sub-orders (one Order ID per
    vendor); stackable Platform + Shop + Freeship vouchers, prorated; soft-lock. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
@@ -3415,7 +3465,7 @@ try { (() => {
         }
       }, vendor.name), vendor.mall && /*#__PURE__*/React.createElement(Badge, {
         variant: "solid"
-      }, "MALL"), /*#__PURE__*/React.createElement("span", {
+      }, "CHÍNH HÃNG"), /*#__PURE__*/React.createElement("span", {
         style: {
           marginLeft: 'auto',
           display: 'inline-flex',
@@ -3607,7 +3657,7 @@ try { (() => {
         font: 'var(--weight-bold) var(--text-base) var(--font-sans)',
         color: 'var(--text-strong)'
       }
-    }, "Lazadee Voucher"), /*#__PURE__*/React.createElement(Badge, {
+    }, "Voucher Genie"), /*#__PURE__*/React.createElement(Badge, {
       variant: "neutral"
     }, "T\u1ED1i \u0111a 1 m\u1ED7i lo\u1EA1i")), /*#__PURE__*/React.createElement("label", {
       style: vchk
@@ -3653,7 +3703,7 @@ try { (() => {
         color: 'var(--text-strong)',
         marginBottom: 12
       }
-    }, "Ph\u01B0\u01A1ng th\u1EE9c thanh to\xE1n"), [['wallet', 'Ví Lazadee', 'wallet', 'Số dư 2.450.000₫'], ['cod', 'Thanh toán khi nhận hàng (COD)', 'banknote', ''], ['card', 'Thẻ tín dụng / Ghi nợ', 'credit-card', 'Visa •••• 4242']].map(([id, name, icon, meta]) => /*#__PURE__*/React.createElement("label", {
+    }, "Ph\u01B0\u01A1ng th\u1EE9c thanh to\xE1n"), [['wallet', 'Ví Genie', 'wallet', 'Số dư 2.450.000₫'], ['cod', 'Thanh toán khi nhận hàng (COD)', 'banknote', ''], ['card', 'Thẻ tín dụng / Ghi nợ', 'credit-card', 'Visa •••• 4242']].map(([id, name, icon, meta]) => /*#__PURE__*/React.createElement("label", {
       key: id,
       style: {
         display: 'flex',
@@ -3783,7 +3833,7 @@ try { (() => {
         textAlign: 'center',
         marginTop: 10
       }
-    }, "Nh\u1EA5n \"\u0110\u1EB7t h\xE0ng\" \u0111\u1ED3ng ngh\u0129a b\u1EA1n \u0111\u1ED3ng \xFD v\u1EDBi ", /*#__PURE__*/React.createElement("a", null, "\u0110i\u1EC1u kho\u1EA3n Lazadee"))), /*#__PURE__*/React.createElement("button", {
+    }, "Nh\u1EA5n \"\u0110\u1EB7t h\xE0ng\" \u0111\u1ED3ng ngh\u0129a b\u1EA1n \u0111\u1ED3ng \xFD v\u1EDBi ", /*#__PURE__*/React.createElement("a", null, "\u0110i\u1EC1u kho\u1EA3n Genie"))), /*#__PURE__*/React.createElement("button", {
       onClick: () => setOos(!oos),
       style: {
         width: '100%',
@@ -3849,7 +3899,7 @@ try { (() => {
 
 // ui_kits/storefront/Header.jsx
 try { (() => {
-/* Lazadee storefront header: utility bar, logo + search + cart, category strip. */
+/* Genie storefront header: utility bar, logo + search + cart, category strip. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const {
@@ -4127,7 +4177,7 @@ try { (() => {
 // ui_kits/storefront/Home.jsx
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-/* Lazadee storefront home: hero, categories, flash sale, daily discover grid. */
+/* Genie storefront home: hero, categories, flash sale, daily discover grid. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const {
@@ -4270,7 +4320,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         maxWidth: 380,
         marginBottom: 22
       }
-    }, "Freeship 0\u20AB \xB7 Voucher t\xEDch lu\u1EF9 \xB7 Ho\xE0n xu t\u1EDBi 200k cho \u0111\u01A1n \u0111\u1EA7u ti\xEAn."), /*#__PURE__*/React.createElement(Button, {
+    }, "Freeship 0\u20AB \xB7 Voucher t\xEDch lu\u1EF9 \xB7 Ho\xE0n điểm t\u1EDBi 200k cho \u0111\u01A1n \u0111\u1EA7u ti\xEAn."), /*#__PURE__*/React.createElement(Button, {
       size: "lg",
       iconRight: "arrow-right",
       style: {
@@ -4503,7 +4553,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 // ui_kits/storefront/ProductDetail.jsx
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-/* Lazadee product detail: gallery, SKU variants, vendor, reviews. */
+/* Genie product detail: gallery, SKU variants, vendor, reviews. */
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const {
@@ -4822,7 +4872,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }
     }, p.mall && /*#__PURE__*/React.createElement(Badge, {
       variant: "solid"
-    }, "MALL"), p.flash && /*#__PURE__*/React.createElement(Badge, {
+    }, "CHÍNH HÃNG"), p.flash && /*#__PURE__*/React.createElement(Badge, {
       variant: "flash",
       icon: "zap"
     }, "FLASH SALE"), /*#__PURE__*/React.createElement(Badge, {
@@ -5022,7 +5072,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }
     }, vendor.name), vendor.mall && /*#__PURE__*/React.createElement(Badge, {
       variant: "solid"
-    }, "MALL"), /*#__PURE__*/React.createElement("span", {
+    }, "CHÍNH HÃNG"), /*#__PURE__*/React.createElement("span", {
       style: {
         display: 'inline-flex',
         alignItems: 'center',
@@ -5101,7 +5151,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         borderRadius: 'var(--radius-sm)',
         border: '1px solid ' + (i === 0 ? 'var(--color-primary)' : 'var(--border-default)'),
         background: i === 0 ? 'var(--color-primary-tint)' : '#fff',
-        color: i === 0 ? 'var(--orange-700)' : 'var(--text-body)',
+        color: i === 0 ? 'var(--brand-700)' : 'var(--text-body)',
         font: 'var(--type-body-sm)',
         cursor: 'pointer'
       }
@@ -5183,7 +5233,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 
 // ui_kits/storefront/data.jsx
 try { (() => {
-/* Shared mock data for the Lazadee storefront kit. Exposed on window. */
+/* Shared mock data for the Genie storefront kit. Exposed on window. */
 (function () {
   const V = {
     techzone: {
@@ -5204,7 +5254,7 @@ try { (() => {
       followers: '42,1k',
       location: 'Bình Dương',
       ship: 18000,
-      logoBg: '#B53109'
+      logoBg: '#0F766E'
     },
     boutique: {
       id: 'boutique',
@@ -5937,7 +5987,7 @@ try { (() => {
     total: 459000,
     status: 'SHIPPED',
     waybill: 'VN931042771',
-    carrier: 'Lazadee Express'
+    carrier: 'Genie Express'
   }];
   function Fulfillment() {
     const [tab, setTab] = React.useState('PAID');
@@ -6062,7 +6112,7 @@ try { (() => {
       }, isShipped ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Badge, {
         variant: "mint",
         icon: "truck"
-      }, o.carrier || 'Lazadee Express'), /*#__PURE__*/React.createElement("span", {
+      }, o.carrier || 'Genie Express'), /*#__PURE__*/React.createElement("span", {
         className: "code",
         style: {
           font: '13px var(--font-mono)',
@@ -6137,7 +6187,7 @@ try { (() => {
           font: '800 16px var(--font-sans)',
           color: 'var(--text-strong)'
         }
-      }, "Lazadee Express"), /*#__PURE__*/React.createElement(Badge, {
+      }, "Genie Express"), /*#__PURE__*/React.createElement(Badge, {
         variant: "primary",
         style: {
           marginLeft: 'auto'
@@ -6253,7 +6303,7 @@ try { (() => {
         v: 'warning',
         icon: 'clock',
         t: 'Hồ sơ đang chờ duyệt',
-        s: 'Đội ngũ Lazadee sẽ xét duyệt trong vòng 24 giờ. Bạn chưa thể đăng bán cho đến khi được duyệt.'
+        s: 'Đội ngũ Genie sẽ xét duyệt trong vòng 24 giờ. Bạn chưa thể đăng bán cho đến khi được duyệt.'
       },
       VERIFIED: {
         v: 'success',
@@ -6293,7 +6343,7 @@ try { (() => {
         borderRadius: 'var(--radius-pill)',
         border: '1px solid ' + (state === s ? 'var(--color-primary)' : 'var(--border-default)'),
         background: state === s ? 'var(--color-primary-tint)' : '#fff',
-        color: state === s ? 'var(--orange-700)' : 'var(--text-muted)',
+        color: state === s ? 'var(--brand-700)' : 'var(--text-muted)',
         font: '600 12px var(--font-sans)',
         cursor: 'pointer'
       }
@@ -6699,7 +6749,7 @@ try { (() => {
         width: '100%',
         height: d.v / max * 140,
         borderRadius: '6px 6px 0 0',
-        background: i === SALES_7D.length - 2 ? 'var(--color-primary)' : 'var(--orange-200)'
+        background: i === SALES_7D.length - 2 ? 'var(--color-primary)' : 'var(--brand-200)'
       }
     }), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -7445,7 +7495,7 @@ try { (() => {
       style: {
         font: '600 9px var(--font-sans)',
         letterSpacing: '.14em',
-        color: 'var(--orange-400)',
+        color: 'var(--brand-400)',
         textTransform: 'uppercase'
       }
     }, "Seller Center"))), /*#__PURE__*/React.createElement("div", {
@@ -8096,7 +8146,7 @@ try { (() => {
 
 // ui_kits/vendor/data.jsx
 try { (() => {
-/* Mock data for the Lazadee vendor dashboard (escrow wallet focus). */
+/* Mock data for the Genie vendor dashboard (escrow wallet focus). */
 (function () {
   const SHOP = {
     name: 'TechZone Official',

@@ -1,4 +1,4 @@
-/* Lazadee — Figma-style screen board.
+/* Genie — Figma-style screen board.
    Lays every kit screen out as a live artboard on a pan/zoom canvas.
    A global load-queue boots only a couple of iframes at a time (behind
    skeletons) so 17 React apps don't all compile Babel on the same frame. */
@@ -21,7 +21,7 @@ function Skeleton({ surface }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: tint, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, opacity: .6 }}>
-        <div className="lz-spin" style={{ width: 30, height: 30, border: '3px solid rgba(245,81,30,.25)', borderTopColor: 'var(--orange-500)', borderRadius: '50%' }} />
+        <div className="lz-spin" style={{ width: 30, height: 30, border: '3px solid rgba(29, 78, 216,.25)', borderTopColor: 'var(--brand-500)', borderRadius: '50%' }} />
         <div style={{ font: '500 14px var(--font-sans)', color: surface === 'storefront' ? 'var(--text-subtle)' : 'rgba(255,255,255,.6)' }}>Đang tải…</div>
       </div>
     </div>
@@ -67,7 +67,7 @@ const BOARD = [
       { screen: 'cart', label: 'Giỏ hàng (tách theo shop)', h: 2480 },
       { screen: 'checkout', label: 'Thanh toán · voucher chồng', h: 2060 },
       { screen: 'checkout', id: 'checkout-address', label: 'Đổi địa chỉ nhận hàng (chọn / thêm mới)', h: 2060, query: 'addr=1' },
-      { screen: 'checkout', id: 'checkout-oos', label: 'Hết hàng giữa lúc thanh toán · LZD-INV-4090', h: 2060, query: 'oos=1' },
+      { screen: 'checkout', id: 'checkout-oos', label: 'Hết hàng giữa lúc thanh toán · TR-INV-4090', h: 2060, query: 'oos=1' },
       { screen: 'payfail', label: 'Thanh toán thất bại · PAYMENT_FAILED', h: 1098 },
       { screen: 'done', label: 'Đặt hàng thành công', h: 913 },
       { screen: 'account', label: 'Tài khoản · Đơn mua', h: 2010 },
@@ -77,12 +77,12 @@ const BOARD = [
       { screen: 'account', id: 'account-password', label: 'Tài khoản · Đổi mật khẩu', h: 998, query: 'view=password' },
       { screen: 'account', id: 'account-devices', label: 'Tài khoản · Thiết bị đăng nhập', h: 1020, query: 'view=devices' },
       { screen: 'account', id: 'account-vouchers', label: 'Tài khoản · Kho Voucher', h: 1024, query: 'view=vouchers' },
-      { screen: 'account', id: 'account-coins', label: 'Tài khoản · Lazadee Xu', h: 1076, query: 'view=coins' },
+      { screen: 'account', id: 'account-coins', label: 'Tài khoản · Điểm Genie', h: 1076, query: 'view=coins' },
       { screen: 'account', id: 'account-follow', label: 'Tài khoản · Shop theo dõi', h: 1024, query: 'view=follow' },
       { screen: 'account', id: 'account-wishlist', label: 'Tài khoản · Sản phẩm yêu thích', h: 1024, query: 'view=wishlist' },
       { screen: 'tracking', label: 'Theo dõi đơn hàng · đang giao', h: 1342 },
-      { screen: 'tracking', id: 'tracking-delivered', label: 'Theo dõi · đã giao (xác nhận / trả hàng)', h: 1402, query: 'order=LZD-20260608-000041' },
-      { screen: 'tracking', id: 'tracking-return', label: 'Theo dõi · đang trả hàng / hoàn tiền', h: 1200, query: 'order=LZD-20260608-000028' },
+      { screen: 'tracking', id: 'tracking-delivered', label: 'Theo dõi · đã giao (xác nhận / trả hàng)', h: 1402, query: 'order=TR-20260608-000041' },
+      { screen: 'tracking', id: 'tracking-return', label: 'Theo dõi · đang trả hàng / hoàn tiền', h: 1200, query: 'order=TR-20260608-000028' },
       { screen: 'shop', label: 'Thông tin Shop · sản phẩm của shop', h: 1752, query: 'shop=techzone' },
       { screen: 'search', id: 'search-all', label: 'Tìm kiếm · Toàn sàn', h: 2142, query: 'q=' },
       { screen: 'search', id: 'search-shop', label: 'Tìm kiếm · Trong Shop', h: 1486, query: 'scope=shop&shop=techzone&q=' },

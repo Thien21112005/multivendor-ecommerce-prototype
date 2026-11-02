@@ -1,77 +1,99 @@
 /* ===========================================================================
-   Lazadee — Color tokens
-   Energetic multivendor marketplace. Tangerine primary, warm neutrals,
-   navy dashboard chrome, plus marketplace-specific status/escrow colors.
+   Genie — Color tokens
+   Multivendor marketplace. Warm paper ground, white content sheets, navy ink,
+   royal blue for actions, marigold for money and the one thing to look at.
    Base ramps first, semantic aliases below. Use the aliases in product code.
    =========================================================================== */
 :root {
-  /* --- Brand: Tangerine (primary) ------------------------------------------ */
-  --orange-50:  #FFF3EE;
-  --orange-100: #FFE2D4;
-  --orange-200: #FFC1A6;
-  --orange-300: #FF9C72;
-  --orange-400: #FB7440;
-  --orange-500: #F5511E;   /* primary */
-  --orange-600: #DB3F0E;   /* hover */
-  --orange-700: #B53109;   /* pressed / active */
-  --orange-800: #8C2708;
-  --orange-900: #5E1B06;
+  /* --- Brand: deep blue (fills, actions) ----------------------------------- */
+  --brand-50:  #EEF3FF;
+  --brand-100: #DCE6FE;
+  --brand-200: #B9CDFB;
+  --brand-300: #8CACF6;
+  --brand-400: #5A85EE;
+  --brand-500: #1D4ED8;   /* primary, white text 6.7:1 */
+  --brand-600: #1A43BD;   /* hover */
+  --brand-700: #16379B;   /* pressed / active */
+  --brand-800: #122C7A;
+  --brand-900: #0B1F4B;
 
-  /* --- Flash sale (hot pink-red, used sparingly for urgency) --------------- */
-  --flash-50:  #FFEDF2;
-  --flash-100: #FFD0DE;
-  --flash-500: #FF2E63;
-  --flash-600: #E01551;
+  /* --- Sky (tints and accents only, never behind white text) --------------- */
+  --sky-50:  #EAF7FE;
+  --sky-100: #D2EEFC;
+  --sky-200: #A6DDF8;
+  --sky-300: #74C8F3;
+  --sky-400: #38B1EC;
 
-  /* --- Gold (vouchers, coins, ratings) ------------------------------------- */
+  /* --- Flash sale (red, used sparingly for urgency) ------------------------ */
+  --flash-50:  #FFEDF1;
+  --flash-100: #FFD3DD;
+  --flash-500: #C8103F;
+  --flash-600: #A50D34;
+
+  /* --- Gold / marigold (money accent, ratings, points) ----------------------
+     400 is a fill under navy text (10:1). Never gold text on white: use 700. */
   --gold-50:  #FFF7E0;
   --gold-100: #FFE9AE;
   --gold-400: #FFC02E;
-  --gold-500: #FFB100;
-  --gold-600: #E09400;
+  --gold-500: #F2A900;
+  --gold-600: #8A6100;
+  --gold-700: #6E4E00;
 
-  /* --- Freeship / fresh green (freeship vouchers, eco) ---------------------- */
+  /* --- Freeship green ------------------------------------------------------ */
   --mint-50:  #E6F8F0;
   --mint-100: #BCEDD8;
-  --mint-500: #14B86E;
-  --mint-600: #0E9A5A;
+  --mint-500: #0B7F4C;
+  --mint-600: #09693F;
 
-  /* --- Ink / Navy (vendor & admin dashboard chrome) ------------------------ */
-  --ink-700: #2A3040;
-  --ink-800: #1E232E;
-  --ink-900: #14171F;
-  --ink-950: #0C0E14;
+  /* --- Ink (vendor & admin dashboard chrome) ------------------------------- */
+  --ink-700: #2A3550;
+  --ink-800: #1B2438;
+  --ink-900: #111827;
+  --ink-950: #0A0F1C;
 
-  /* --- Neutrals (warm-tinted gray) ----------------------------------------- */
+  /* --- Paper (warm page ground; white sheets sit on it) -------------------- */
+  --paper-50:  #F7F5F0;
+  --paper-100: #EFEBE2;
+
+  /* --- Neutrals (cool gray) ------------------------------------------------ */
   --gray-0:   #FFFFFF;
-  --gray-25:  #FBFAF9;
-  --gray-50:  #F6F5F3;
-  --gray-100: #EFEDEA;
-  --gray-200: #E3E0DB;
-  --gray-300: #CFCAC2;
-  --gray-400: #A8A299;
-  --gray-500: #7E786E;
-  --gray-600: #5B564E;
-  --gray-700: #423E38;
-  --gray-800: #2A2723;
-  --gray-900: #1A1815;
+  --gray-25:  #FAFBFD;
+  --gray-50:  #F3F6FA;
+  --gray-100: #E9EDF3;
+  --gray-200: #DCE2EB;
+  --gray-300: #C4CDD9;
+  --gray-400: #98A3B3;
+  --gray-500: #5D697D;
+  --gray-600: #4A5568;
+  --gray-700: #36404F;
+  --gray-800: #242C39;
+  --gray-900: #121824;
 
   /* --- Semantic status palette --------------------------------------------- */
-  --green-50:  #E7F7EE;  --green-500: #11A65A;  --green-600: #0C8B49;
-  --amber-50:  #FFF6E5;  --amber-500: #F5A524;  --amber-600: #D98A0B;
-  --red-50:    #FDECEC;  --red-500:   #E0142B;  --red-600:   #BC0E22;
-  --blue-50:   #EAF1FE;  --blue-500:  #2563EB;  --blue-600:  #1A4FD0;
+  --green-50:  #E7F7EE;  --green-500: #0E8A4B;  --green-600: #0A7039;
+  --amber-50:  #FFF6E5;  --amber-500: #F5A524;  --amber-600: #9A5B00;
+  --red-50:    #FDECEC;  --red-200:   #F3B0A8;  --red-500:   #D3122A;  --red-600:   #B00E22;
+  /* Information. Cyan-leaning so it never reads as the brand. */
+  --blue-50:   #E5F5FB;  --blue-100:  #CBEBF7;  --blue-200:  #9FDAEF;  --blue-300:  #6DC5E5;
+  --blue-500:  #0B7FAB;  --blue-600:  #08688D;
   --purple-50: #F1ECFE;  --purple-500:#6C2BD9;
 
   /* =========================================================================
      SEMANTIC ALIASES — prefer these in product code
      ========================================================================= */
   /* Primary action */
-  --color-primary:        var(--orange-500);
-  --color-primary-hover:  var(--orange-600);
-  --color-primary-active: var(--orange-700);
-  --color-primary-tint:   var(--orange-50);
+  --color-primary:        var(--brand-500);
+  --color-primary-hover:  var(--brand-600);
+  --color-primary-active: var(--brand-700);
+  --color-primary-tint:   var(--brand-50);
   --color-on-primary:     #FFFFFF;
+
+  /* Accent: marigold, the money highlight. Navy on it, never white. */
+  --color-accent:       var(--gold-400);
+  --color-accent-hover: var(--gold-500);
+  --color-on-accent:    var(--brand-900);
+  --color-accent-ink:   var(--gold-700);   /* accent as text on white, 7.6:1 */
+  --color-accent-tint:  var(--gold-50);
 
   /* Accents */
   --color-flash:    var(--flash-500);
@@ -81,31 +103,31 @@
   /* Text */
   --text-strong:   var(--gray-900);
   --text-body:     var(--gray-800);
-  --text-muted:    var(--gray-500);
-  --text-subtle:   var(--gray-400);
-  --text-disabled: var(--gray-300);
+  --text-muted:    var(--gray-600);
+  --text-subtle:   var(--gray-500);
+  --text-disabled: var(--gray-400);
   --text-inverse:  #FFFFFF;
-  --text-link:     var(--orange-600);
-  --text-price:    var(--orange-500);   /* prices render in brand orange */
+  --text-link:     var(--brand-600);
+  --text-price:    var(--gray-900);   /* prices stay ink so they never read as links */
 
   /* Surfaces */
-  --surface-page:    var(--gray-50);
+  --surface-page:    var(--paper-50);
   --surface-card:    var(--gray-0);
   --surface-sunken:  var(--gray-100);
   --surface-raised:  var(--gray-0);
-  --surface-tint:    var(--orange-50);
+  --surface-tint:    var(--brand-50);
   --surface-ink:     var(--ink-900);   /* dark dashboard chrome */
   --surface-ink-2:   var(--ink-800);
-  --surface-overlay: rgba(20, 23, 31, 0.55);
+  --surface-overlay: rgba(11, 31, 75, 0.55);
 
   /* Borders */
   --border-subtle:  var(--gray-100);
   --border-default: var(--gray-200);
   --border-strong:  var(--gray-300);
-  --border-focus:   var(--orange-500);
+  --border-focus:   var(--brand-500);
 
   /* Focus ring */
-  --focus-ring: 0 0 0 3px rgba(245, 81, 30, 0.35);
+  --focus-ring: 0 0 0 3px rgba(29, 78, 216, 0.4);
 
   /* --- Order lifecycle status ---------------------------------------------- */
   --status-pending-fg:   var(--amber-600);  --status-pending-bg:   var(--amber-50);
@@ -113,7 +135,7 @@
   --status-shipped-fg:   var(--purple-500); --status-shipped-bg:   var(--purple-50);
   --status-delivered-fg: var(--mint-600);   --status-delivered-bg: var(--mint-50);
   --status-completed-fg: var(--green-600);  --status-completed-bg: var(--green-50);
-  --status-cancelled-fg: var(--gray-500);   --status-cancelled-bg: var(--gray-100);
+  --status-cancelled-fg: var(--gray-600);   --status-cancelled-bg: var(--gray-100);
   --status-error-fg:     var(--red-600);    --status-error-bg:     var(--red-50);
 
   /* --- KYC verification ----------------------------------------------------- */
@@ -124,5 +146,5 @@
   /* --- Escrow wallet -------------------------------------------------------- */
   --escrow-held-fg:      var(--amber-600);  --escrow-held-bg:      var(--amber-50);
   --escrow-available-fg: var(--green-600);  --escrow-available-bg: var(--green-50);
-  --escrow-commission:   var(--gray-500);
+  --escrow-commission:   var(--gray-600);
 }

@@ -1,16 +1,16 @@
 /* ===========================================================================
-   Lazadee — Radii, shadows, borders, motion.
-   Soft 8px default radius. Shadows are subtle and warm-neutral; the brand
-   "lift" shadow uses a faint tangerine cast on hover for product cards.
+   Genie — Radii, shadows, borders, motion.
+   Soft 10px default radius. Shadows are subtle and cool-neutral; the brand
+   "lift" shadow uses a faint blue cast on hover for product cards.
    =========================================================================== */
 :root {
   /* Radii */
-  --radius-xs:   3px;
-  --radius-sm:   5px;
-  --radius-md:   8px;    /* default — buttons, inputs, cards */
-  --radius-lg:   12px;
-  --radius-xl:   16px;
-  --radius-2xl:  22px;
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;   /* default — buttons, inputs, cards */
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-2xl:  28px;
   --radius-pill: 999px;
 
   /* Borders */
@@ -18,15 +18,15 @@
   --border-2: 2px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(26, 24, 21, 0.06);
-  --shadow-sm: 0 1px 3px rgba(26, 24, 21, 0.08), 0 1px 2px rgba(26, 24, 21, 0.04);
-  --shadow-md: 0 4px 12px rgba(26, 24, 21, 0.08), 0 1px 3px rgba(26, 24, 21, 0.05);
-  --shadow-lg: 0 12px 28px rgba(26, 24, 21, 0.12), 0 4px 8px rgba(26, 24, 21, 0.06);
-  --shadow-xl: 0 24px 48px rgba(26, 24, 21, 0.18);
-  /* Product-card hover lift with a faint tangerine cast */
-  --shadow-lift: 0 10px 24px rgba(245, 81, 30, 0.16), 0 2px 6px rgba(26, 24, 21, 0.08);
+  --shadow-xs: 0 1px 2px rgba(11, 31, 75, 0.06);
+  --shadow-sm: 0 1px 3px rgba(11, 31, 75, 0.08), 0 1px 2px rgba(11, 31, 75, 0.04);
+  --shadow-md: 0 4px 12px rgba(11, 31, 75, 0.08), 0 1px 3px rgba(11, 31, 75, 0.05);
+  --shadow-lg: 0 12px 28px rgba(11, 31, 75, 0.12), 0 4px 8px rgba(11, 31, 75, 0.06);
+  --shadow-xl: 0 24px 48px rgba(11, 31, 75, 0.2);
+  /* Product-card hover lift */
+  --shadow-lift: 0 10px 24px rgba(11, 31, 75, 0.14), 0 2px 6px rgba(11, 31, 75, 0.08);
   /* Inset for sunken fields / wells */
-  --shadow-inset: inset 0 1px 2px rgba(26, 24, 21, 0.06);
+  --shadow-inset: inset 0 1px 2px rgba(11, 31, 75, 0.06);
 
   /* Motion */
   --dur-fast:  120ms; /* @kind other */
