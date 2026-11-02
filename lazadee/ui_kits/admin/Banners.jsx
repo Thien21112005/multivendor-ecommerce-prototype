@@ -11,7 +11,107 @@
   const today = () => new Date().toISOString().slice(0, 10);
   const stateOf = (b) => (!b.on ? 'OFF' : b.endsAt < today() ? 'ENDED' : b.startsAt > today() ? 'SCHEDULED' : 'LIVE');
   const ST = { LIVE: ['success', 'Đang hiển thị'], SCHEDULED: ['primary', 'Đã lên lịch'], ENDED: ['neutral', 'Đã kết thúc'], OFF: ['danger', 'Đã tắt'] };
-  const EMPTY = { title: '', image: '', imageMobile: '', link: '/?screen=category&cat=Điện tử', position: 'HOME_TOP_CAROUSEL', category: 'Điện tử', order: 1, startsAt: '', endsAt: '', on: true };
+  const EMPTY = { title: '', image: '', imageMobile: '', link: '', position: 'HOME_TOP_CAROUSEL', category: 'Điện tử', order: 1, startsAt: '', endsAt: '', on: true };
+
+  // The target is picked from platform data and stored as a link inside the platform domain.
+  const { CATEGORIES, PRODUCTS, V, productsOfCategory } = window.LZ;
+  const LINK_CATEGORIES = CATEGORIES.map((x) => x.name).filter((name) => productsOfCategory(name).length);
+  const SHOPS = Object.values(V);
+  const LINK_TYPES = [
+    { id: 'category', label: 'Danh mục' },
+    { id: 'product', label: 'Sản phẩm' },
+    { id: 'shop', label: 'Cửa hàng' },
+    { id: 'flash', label: 'Flash Sale' },
+    { id: 'discover', label: 'Gợi ý hôm nay' },
+    { id: 'campaign', label: 'Trang chiến dịch' },
+  ];
+  const FLASH_LINK = '/?screen=home#flash-sale';
+  const DISCOVER_LINK = '/?screen=discover';
+  const SITE = 'https://lazadee.vn';
+  const parseLink = (link) => {
+    const u = new URL(link || '/', SITE);
+    const q = u.searchParams;
+    if (!link) return { type: 'category', value: '' };
+    if (link === FLASH_LINK) return { type: 'flash', value: '' };
+    if (link === DISCOVER_LINK) return { type: 'discover', value: '' };
+    if (q.get('screen') === 'category' && q.get('cat')) return { type: 'category', value: q.get('cat') };
+    if (q.get('screen') === 'product' && q.get('product')) return { type: 'product', value: q.get('product') };
+    if (q.get('screen') === 'shop' && q.get('shop')) return { type: 'shop', value: q.get('shop') };
+    return { type: 'campaign', value: link };
+  };
+  const linkTo = {
+    category: (name) => (name ? '/?screen=category&cat=' + encodeURIComponent(name) : ''),
+    product: (id) => (id ? '/?screen=product&product=' + id : ''),
+    shop: (id) => (id ? '/?screen=shop&shop=' + id : ''),
+    flash: () => FLASH_LINK,
+    discover: () => DISCOVER_LINK,
+    campaign: () => '',
+  };
+  // Parsing against the site blocks //other.com, /\other.com and javascript: links.
+  const sitePath = (link) => {
+    try {
+      const u = new URL(link.trim(), SITE);
+      return u.origin === SITE ? u.pathname + u.search + u.hash : null;
+    } catch (e) { return null; }
+  };
+  const plain = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+  const linkParts = (link) => {
+    const { type, value } = parseLink(link);
+    const name = type === 'product' ? (PRODUCTS.find((p) => p.id === value) || {}).title : type === 'shop' ? (V[value] || {}).name : value;
+    return { type, label: LINK_TYPES.find((t) => t.id === type).label, name: name || value };
+  };
+
+  function ProductPicker({ value, onChange }) {
+    const [query, setQuery] = React.useState('');
+    const chosen = PRODUCTS.find((p) => p.id === value);
+    if (chosen) {
+      return (
+        <div>
+          <label style={lab}>Sản phẩm</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, padding: '4px 4px 4px 8px', border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+            <img src={chosen.image} alt="" width="32" height="32" style={{ objectFit: 'cover', borderRadius: 'var(--radius-sm)', flex: 'none' }} />
+            <span style={{ flex: 1, minWidth: 0, font: 'var(--type-body-sm)', color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{chosen.title}</span>
+            <Button size="sm" variant="ghost" onClick={() => { setQuery(''); onChange(''); }}>Đổi</Button>
+          </div>
+        </div>
+      );
+    }
+    const q = plain(query.trim());
+    const found = q ? PRODUCTS.filter((p) => plain(p.title).includes(q)).slice(0, 5) : [];
+    return (
+      <div>
+        <Input label="Sản phẩm" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm theo tên sản phẩm" />
+        {q && <div style={{ marginTop: 6, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+          {found.length === 0 && <div style={{ padding: '10px 12px', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Không tìm thấy sản phẩm</div>}
+          {found.map((p) => (
+            <button key={p.id} type="button" onClick={() => onChange(p.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '6px 10px', border: 0, background: '#fff', cursor: 'pointer', textAlign: 'left' }}>
+              <img src={p.image} alt="" width="32" height="32" style={{ objectFit: 'cover', borderRadius: 'var(--radius-sm)', flex: 'none' }} />
+              <span style={{ minWidth: 0, font: 'var(--type-body-sm)', color: 'var(--text-body)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+            </button>
+          ))}
+        </div>}
+      </div>
+    );
+  }
+
+  function LinkPicker({ link, error, onChange }) {
+    const parsed = parseLink(link);
+    const [type, setType] = React.useState(parsed.type);
+    const value = type === parsed.type ? parsed.value : '';
+    return (
+      <div>
+        <div style={{ display: 'grid', gridTemplateColumns: '170px minmax(0, 1fr)', gap: 12, alignItems: 'start' }}>
+          <Select label="Liên kết đích" value={type} onChange={(e) => { setType(e.target.value); onChange(linkTo[e.target.value]('')); }}>{LINK_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}</Select>
+          {type === 'category' && <Select label="Danh mục" value={value} onChange={(e) => onChange(linkTo.category(e.target.value))}>{[<option key="" value="">Chọn danh mục</option>, ...LINK_CATEGORIES.map((x) => <option key={x} value={x}>{x}</option>)]}</Select>}
+          {type === 'product' && <ProductPicker value={value} onChange={(id) => onChange(linkTo.product(id))} />}
+          {type === 'shop' && <Select label="Cửa hàng" value={value} onChange={(e) => onChange(linkTo.shop(e.target.value))}>{[<option key="" value="">Chọn cửa hàng</option>, ...SHOPS.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)]}</Select>}
+          {(type === 'flash' || type === 'discover') && <div style={{ alignSelf: 'end', minHeight: 42, display: 'flex', alignItems: 'center', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>{type === 'flash' ? 'Mở khu Flash Sale trên trang chủ' : 'Mở trang Gợi ý hôm nay'}</div>}
+          {type === 'campaign' && <Input label="Đường dẫn trang" value={value} onChange={(e) => onChange(e.target.value)} placeholder="/sieu-sale-12-12" />}
+        </div>
+        {error && <Err text={error} />}
+      </div>
+    );
+  }
 
   function Banners() {
     const [rows, setRows] = React.useState(load);
@@ -36,14 +136,17 @@
       const e = {};
       if (!form.title.trim()) e.title = 'Nhập tiêu đề';
       if (!form.image) e.image = 'Chọn ảnh desktop';
-      if (!form.link.startsWith('/')) e.link = 'Liên kết đích phải thuộc miền của sàn';
+      const link = form.link.trim() && sitePath(form.link);
+      if (!form.link.trim()) e.link = 'Chọn liên kết đích cho banner';
+      else if (!link) e.link = 'Liên kết đích phải thuộc miền lazadee.vn';
       if (!form.startsAt || !form.endsAt) e.date = 'Chọn thời gian hiển thị';
       else if (form.endsAt <= form.startsAt) e.date = 'Ngày kết thúc phải sau ngày bắt đầu';
       if (form.position === 'CATEGORY_TOP' && !form.category) e.position = 'Chọn danh mục cho banner này';
       if (liveAt(form.position, form.id) >= 8) e.position = 'Vị trí này đã đủ 8 banner đang hiển thị';
       setErr(e);
       if (Object.keys(e).length) return;
-      update(form.id ? rows.map((b) => (b.id === form.id ? form : b)) : [{ ...form, id: 'BN-' + Date.now().toString(36), views: 0, clicks: 0 }, ...rows]);
+      const saved = { ...form, link };
+      update(form.id ? rows.map((b) => (b.id === form.id ? saved : b)) : [{ ...saved, id: 'BN-' + Date.now().toString(36), views: 0, clicks: 0 }, ...rows]);
       setForm(null);
     };
 
@@ -62,9 +165,10 @@
               {list.length === 0 && <tr><td colSpan="7" style={{ padding: 40, textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Chưa có banner ở vị trí này.</td></tr>}
               {list.map((b) => {
                 const s = stateOf(b);
+                const target = linkParts(b.link);
                 return (
                   <tr key={b.id} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
-                    <td style={c}><div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><img src={b.image} alt="" width="84" height="44" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><div style={{ maxWidth: 240 }}><div style={{ fontWeight: 600, color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div><div className="code" style={{ font: '11px var(--font-mono)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.link}</div></div></div></td>
+                    <td style={c}><div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><img src={b.image} alt="" width="84" height="44" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><div style={{ maxWidth: 240 }}><div style={{ fontWeight: 600, color: 'var(--text-strong)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div><div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{target.label}{target.name && ': '}{target.name && <span style={target.type === 'campaign' ? { fontFamily: 'var(--font-mono)' } : undefined}>{target.name}</span>}</div></div></div></td>
                     <td style={c}>{(BANNER_POSITIONS.find((p) => p.id === b.position) || {}).label}{b.position === 'CATEGORY_TOP' && <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{b.category}</div>}</td>
                     <td style={{ ...c, color: 'var(--text-muted)', fontSize: 12 }}>{b.startsAt}<br />→ {b.endsAt}</td>
                     <td style={{ ...c, textAlign: 'right' }}>{b.views.toLocaleString('vi-VN')} / {b.clicks.toLocaleString('vi-VN')}</td>
@@ -100,7 +204,7 @@
                 {form.imageMobile && <img src={form.imageMobile} alt="" width="48" height="48" style={{ objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />}
               </div>
             </div>
-            <Input label="Liên kết đích" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} error={err.link} placeholder="/?screen=category&cat=..." />
+            <LinkPicker link={form.link} error={err.link} onChange={(link) => { setForm({ ...form, link }); setErr({ ...err, link: null }); }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <Select label="Vị trí" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>{BANNER_POSITIONS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</Select>
