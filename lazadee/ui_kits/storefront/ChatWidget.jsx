@@ -261,7 +261,7 @@
 
         {/* launcher */}
         <button onClick={() => { if (!window.LZ.loggedIn) { window.dispatchEvent(new CustomEvent('lz_require_login')); return; } setOpen((o) => !o); }} aria-label={!open && totalUnread > 0 ? 'Chat với shop, ' + totalUnread + ' tin chưa đọc' : 'Chat với shop'}
-          style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', border: 'none', background: 'var(--brand-900)', color: '#fff', cursor: 'pointer', boxShadow: '0 0 0 3px #fff, var(--shadow-lg)', display: 'grid', placeItems: 'center', transition: 'transform var(--dur-fast) var(--ease-out), background var(--dur-fast)' }}
+          style={{ position: 'relative', width: 50, height: 50, borderRadius: '50%', border: 'none', background: 'var(--brand-900)', color: '#fff', cursor: 'pointer', boxShadow: '0 0 0 3px #fff, var(--shadow-lg)', display: 'grid', placeItems: 'center', transition: 'transform var(--dur-fast) var(--ease-out), background var(--dur-fast)' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--brand-800)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--brand-900)'; e.currentTarget.style.transform = 'none'; }}>
           <Icon name={open ? 'chevron-down' : 'message-circle'} size={26} />

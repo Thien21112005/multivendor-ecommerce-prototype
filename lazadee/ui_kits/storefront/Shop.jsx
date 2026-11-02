@@ -105,7 +105,7 @@
 
           {/* ---- Product grid ---- */}
           <div style={{ background: '#fff', borderRadius: '0 0 var(--radius-lg) var(--radius-lg)', padding: '18px 16px', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '12px 10px' }}>
               {shown.map((p) => <window.LZCardX key={p.id} p={p} onClick={() => onOpen(p.id)} />)}
             </div>
             {shown.length === 0 && <div style={{ padding: '48px 0', textAlign: 'center', font: 'var(--type-body)', color: 'var(--text-muted)' }}>Shop chưa có sản phẩm nào ở mục này.</div>}

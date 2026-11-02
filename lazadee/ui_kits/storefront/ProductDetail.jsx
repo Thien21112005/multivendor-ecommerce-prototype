@@ -96,7 +96,7 @@
           <Button variant="outline" iconLeft="house" onClick={onHome}>Về trang chủ</Button>
         </div>
         <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', marginBottom: 14 }}>Sản phẩm tương tự</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>{picks.map((x) => <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />)}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '12px 10px' }}>{picks.map((x) => <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />)}</div>
       </div>
     );
   }
@@ -303,7 +303,7 @@
 
         {/* related */}
         <h2 style={{ font: 'var(--type-h3)', color: 'var(--text-strong)', margin: '24px 0 14px' }}>Sản phẩm tương tự</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '12px 10px' }}>
           {similar.map((x) => (
             <window.LZCardX key={x.id} p={x} onClick={() => onOpen(x.id)} />
           ))}

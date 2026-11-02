@@ -56,7 +56,11 @@
 }
 
 /* ---- Header ------------------------------------------------------------- */
-.tr-pillwrap { position: sticky; top: 0; z-index: 100; padding: 12px 24px 0; }
+/* The bar and the category row stick as one block. At rest it is transparent over the
+   field; once the page scrolls it takes the theme's band (--top-bg) edge to edge. */
+.tr-top { position: sticky; top: 0; z-index: 100; padding-bottom: 10px; transition: background-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+.tr-top[data-stuck="1"] { background: var(--top-bg, rgba(247, 245, 240, .94)); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--top-line, rgba(0, 0, 0, .08)), 0 8px 20px -14px rgba(0, 0, 0, .3); }
+.tr-pillwrap { position: relative; z-index: 2; padding: 12px 24px 0; }
 .tr-pill { max-width: 1232px; margin: 0 auto; min-height: 64px; display: flex; align-items: center; gap: 18px; padding: 8px 10px 8px 18px; border-radius: var(--radius-2xl); }
 .tr-logo { display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; flex: none; color: var(--brand-900); border-radius: var(--radius-md); }
 .tr-logo span { font: 800 26px/1 var(--font-sans); letter-spacing: -.03em; }
@@ -81,7 +85,7 @@
 .tr-cat:hover { background: #fff; border-color: rgba(11, 31, 75, .18); }
 .tr-cat:focus-visible, .tr-rail__stop:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--brand-500); }
 .tr-main { position: relative; flex: 1; }
-.tr-main:not(.tr-main--home) { padding-top: 24px; }
+.tr-main:not(.tr-main--home) { padding-top: 4px; }
 
 /* ---- Home hero ---------------------------------------------------------- */
 .tr-hero { max-width: 1280px; margin: 0 auto; padding: 34px 24px 0; color: var(--brand-900); }
@@ -149,7 +153,46 @@
 .tr-carousel__dots { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); display: flex; padding: 0 6px; border-radius: var(--radius-pill); background: rgba(11, 31, 75, .32); }
 .tr-carousel__dots button { width: 24px; height: 24px; min-height: 0 !important; padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
 .tr-carousel__dots button::after { content: ""; width: 8px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .7); transition: width var(--dur-base) var(--ease-out); }
-.tr-carousel__dots button[aria-current="true"]::after { width: 20px; background: var(--color-accent); }
+.tr-carousel__dots button { position: relative; }
+.tr-carousel__dots button[aria-current="true"]::after { width: 22px; background: rgba(255, 255, 255, .45); }
+/* The active dot fills while its slide is on screen. */
+.tr-carousel__dots button i { position: absolute; left: 1px; top: 8px; height: 8px; width: 22px; border-radius: 4px; background: var(--color-accent); transform-origin: left; animation: tr-dotfill linear forwards; }
+.tr-carousel[data-hold="1"] .tr-carousel__dots button i { animation-play-state: paused; }
+@keyframes tr-dotfill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* The slide on screen beats like a heart: a strong pulse, a softer echo, then a rest. */
+@keyframes tr-heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.045); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.03); }
+  70%, 100% { transform: scale(1); }
+}
+.tr-carousel .tr-banner[aria-hidden="false"] img { animation: tr-heartbeat 1.4s cubic-bezier(.3, 0, .3, 1) infinite; }
+.tr-carousel { touch-action: pan-y; }
+/* Arrows sit in the bottom-right corner, clear of the banner's copy, and come forward on hover. */
+.tr-carousel .tr-carousel__nav { top: auto; bottom: 12px; margin-top: 0; width: 34px; height: 34px; opacity: .78; transition: opacity var(--dur-fast), background var(--dur-fast); }
+.tr-carousel:hover .tr-carousel__nav, .tr-carousel .tr-carousel__nav:focus-visible { opacity: 1; }
+.tr-carousel .tr-carousel__nav--prev { left: auto; right: 54px; }
+.tr-carousel .tr-carousel__nav--next { right: 12px; }
+.tr-carousel__track { transition-duration: .7s; transition-timing-function: cubic-bezier(.65, 0, .25, 1); }
+/* Home: the carousel takes two thirds, two side banners stack beside it; mid-page banners pair up. */
+.tr-heroban { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; }
+.tr-heroban--solo { grid-template-columns: minmax(0, 1fr); }
+.tr-heroban .tr-banner img, .tr-duo .tr-banner img { aspect-ratio: 3 / 1; }
+.tr-heroban__side { display: grid; grid-template-rows: 1fr 1fr; gap: 10px; min-height: 0; }
+.tr-heroban__side .tr-banner { height: 100%; }
+.tr-heroban__side .tr-banner img { height: 100%; aspect-ratio: auto; }
+.tr-heroban__side .tr-banner img, .tr-duo .tr-banner img { transition: transform var(--dur-slow) var(--ease-out); }
+.tr-heroban__side .tr-banner:hover img, .tr-duo .tr-banner:hover img { transform: scale(1.03); }
+.tr-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tr-duo--solo { grid-template-columns: minmax(0, 1fr); }
+.tr-catban .tr-banner img { aspect-ratio: 6 / 1; }
+@media (prefers-reduced-motion: reduce) { .tr-carousel .tr-banner img { animation: none !important; } }
+@media (max-width: 768px) {
+  .tr-heroban { grid-template-columns: minmax(0, 1fr); }
+  .tr-heroban__side { display: none; }
+  .tr-duo { grid-template-columns: minmax(0, 1fr); }
+}
 @media (prefers-reduced-motion: reduce) { .tr-carousel__track { transition: none; } }
 .tr-popup { position: fixed; inset: 0; z-index: 4500; display: grid; place-items: center; padding: 16px; background: var(--surface-overlay); }
 .tr-popup__card { position: relative; width: min(720px, 100%); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-xl); }
@@ -157,7 +200,7 @@
 .tr-popup__close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #fff; color: var(--brand-900); cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-md); }
 
 /* ---- Flash sale: a warm marigold sheet on the paper, not a blue slab ------- */
-.tr-flash { scroll-margin-top: 90px; }
+.tr-flash { scroll-margin-top: calc(var(--top-h, 140px) + 12px); }
 .tr-flash__in { padding: 28px 28px 30px; border-radius: var(--radius-2xl); background: var(--color-accent-tint); border: 1px solid var(--gold-100); }
 .tr-flash__head { align-items: center; flex-wrap: wrap; gap: 12px 18px; }
 .tr-flash .tr-more { margin-left: auto; }
@@ -360,7 +403,7 @@
   .tr-lang-code { display: inline; }
   .tr-root--task .tr-cats { display: none; }
   .tr-root--task .tr-sky { height: 132px; }
-  main.tr-main:not(.tr-main--home) { padding-top: 22px !important; }
+  main.tr-main:not(.tr-main--home) { padding-top: 6px !important; }
   .tr-gallery { aspect-ratio: 3 / 2 !important; }
   .tr-gallery + div { margin-top: 8px !important; }
   .tr-gallery + div button { width: 48px !important; height: 48px !important; }
@@ -445,4 +488,85 @@
   .tr-cart-pay__total { font-size: 18px !important; }
   .tr-cart-pay__cta .lz-btn, .tr-paybar .lz-btn { padding: 0 14px; font-size: var(--text-base); }
   .tr-paybar b { font-size: 18px; }
+}
+
+/* ===========================================================================
+   Marketplace density. Buyers compare many products at once, so on desktop
+   the chrome steps down: a 52px bar, 30px category chips, a short hero, six
+   products across, compact tickets and footer. Phones keep their 44px hit
+   targets and only tighten spacing.
+   =========================================================================== */
+.tr-grid { gap: 12px 10px; }
+.tr-card { gap: 6px; }
+.tr-card__body { gap: 3px; padding: 8px 10px 10px; }
+.tr-card__title { font-size: 13px; line-height: 1.4; min-height: 2.8em; }
+.tr-card__now { font-size: 15px; }
+.tr-card__heart { width: 32px; height: 32px; top: 6px; right: 6px; }
+.tr-card__off { right: 6px; bottom: 6px; padding: 2px 6px; font-size: 11px; line-height: 15px; }
+.tr-section { padding-top: 32px; }
+.tr-section__head { margin-bottom: 12px; }
+.tr-section__head h2 { font-size: clamp(20px, 1.8vw, 24px); }
+.tr-section--banner { padding-top: 24px; }
+.tr-flash__in { padding: 18px 20px 20px; }
+.tr-clock { padding: 5px 10px; font-size: 16px; }
+.tr-vouchers__title { margin: 18px 0 10px; font-size: 14px; }
+.tr-vouchers { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
+.tr-ticket { min-height: 56px; }
+.tr-ticket__amt { width: 64px; font-size: 16px; }
+.tr-ticket__body { padding: 6px 10px; }
+.tr-ticket__body small { font-size: 12px; }
+.tr-ticket__body b { font-size: 13px; }
+.tr-ticket__save { height: 30px; min-width: 52px; margin-right: 10px; padding: 0 12px; font-size: 12px; }
+.tr-shops { gap: 0 20px; padding: 6px 14px; }
+.tr-shop { gap: 10px; padding: 10px 6px; }
+.tr-shop b { font-size: 14px; }
+.tr-foot { margin-top: 40px; }
+.tr-foot__in { padding: 32px 24px 24px; gap: 20px; }
+.tr-foot__brand { font-size: 22px; margin-bottom: 10px; }
+.tr-foot h3 { margin-bottom: 8px; font-size: 13px; }
+.tr-foot__link { padding: 3px 0; font-size: 13px; }
+.tr-foot__legal { padding: 12px 24px; }
+
+@media (min-width: 769px) {
+  .tr-pillwrap { padding: 8px 24px 0; }
+  .tr-pill { min-height: 52px; gap: 14px; padding: 6px 8px 6px 14px; border-radius: var(--radius-xl); }
+  .tr-logo span { font-size: 22px; }
+  .tr-logo .tr-mark { width: 28px; height: 28px; }
+  .tr-search { height: 40px; padding: 3px; }
+  .tr-search input { font-size: 14px; }
+  .tr-search__go { width: 48px; height: 34px; }
+  .tr-iconbtn { width: 38px; height: 38px; }
+  .tr-iconbtn svg { width: 20px; height: 20px; }
+  .tr-textbtn { height: 38px; padding: 0 10px; font-size: 13px; }
+  .tr-user { height: 38px; font-size: 13px; }
+  .tr-badge { top: 1px; right: 0; min-width: 16px; height: 16px; font-size: 10px; line-height: 16px; padding: 0 4px; }
+  .tr-cats { padding: 8px 24px 0; gap: 4px; }
+  .tr-cat { height: 30px; padding: 0 11px; gap: 5px; font-size: 13px; }
+  .tr-top { padding-bottom: 8px; }
+  .tr-hero { padding-top: 20px; }
+  .tr-hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
+  .tr-hero > p { margin-top: 8px; font-size: 15px; }
+  .tr-stage { margin-top: 18px; }
+  .tr-shelf { gap: 10px; height: clamp(150px, 12.5vw, 184px); margin-bottom: -40px; }
+  .tr-shelf__tag { left: 8px; top: 8px; padding: 2px 8px; font-size: 12px; }
+  .tr-rail { margin: 0 40px; padding: 10px 18px 12px; }
+  .tr-rail__head { font-size: 13px; }
+  .tr-rail__track { margin-top: 4px; }
+  .tr-rail__line { top: 17px; }
+  .tr-rail__dot { width: 36px; height: 36px; }
+  .tr-rail__drop { top: 0; width: 34px; height: 34px; margin-left: -17px; }
+  .tr-rail__drop > svg:last-child { left: 9px; top: 9px; width: 16px; height: 16px; }
+  .tr-rail__stop { font-size: 13px; gap: 2px; }
+  .tr-rail__note { margin-top: 4px; font-size: 13px; }
+  .tr-banner img { aspect-ratio: 5 / 1; }
+  .tr-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (min-width: 769px) and (max-width: 1199px) { .tr-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 769px) and (max-width: 999px) { .tr-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .tr-shops { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 768px) {
+  .tr-section { padding: 24px 16px 0; }
+  .tr-hero, .tr-cats { padding-left: 16px; padding-right: 16px; }
+  .tr-flash__in { padding: 14px 12px 16px; }
+  .tr-shops { grid-template-columns: minmax(0, 1fr); }
+  .tr-grid { gap: 10px 8px; }
 }

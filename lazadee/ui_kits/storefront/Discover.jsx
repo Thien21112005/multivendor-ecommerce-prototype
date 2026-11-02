@@ -54,7 +54,7 @@
         </div>
 
         {/* grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '12px 10px' }}>
           {items.map((p) => <window.LZCardX key={p._k} p={p} onClick={() => onOpen(p.id)} />)}
         </div>
 
