@@ -107,13 +107,13 @@
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: '11px var(--font-sans)', color: kyc === 'VERIFIED' ? 'var(--mint-500)' : kyc === 'REJECTED' ? 'var(--flash-500)' : 'var(--gold-500)' }}><Icon name={kyc === 'VERIFIED' ? 'badge-check' : kyc === 'REJECTED' ? 'triangle-alert' : 'clock'} size={12} /> {kyc === 'VERIFIED' ? 'Đã xác minh' : kyc === 'REJECTED' ? 'KYC bị từ chối' : kyc === 'NOT_SUBMITTED' ? 'Chưa nộp KYC' : 'KYC đang chờ'}</div>
             </div>
           </div>
-          <nav style={{ flex: 1, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+          <nav style={{ flex: 1, minHeight: 0, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,.2) transparent' }}>
             {NAV.map((n) => {
               const on = n.id === active;
               const ok = allow(n.id);
               return (
                 <button key={n.id} onClick={() => (ok ? onNav(n.id) : showToast('Hoàn tất xác minh KYC để sử dụng tính năng này'))} style={{
-                  display: 'flex', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, borderRadius: 'var(--radius-md)', border: 0, cursor: ok ? 'pointer' : 'not-allowed', textAlign: 'left',
+                  display: 'flex', flex: 'none', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, borderRadius: 'var(--radius-md)', border: 0, cursor: ok ? 'pointer' : 'not-allowed', textAlign: 'left',
                   background: on ? 'var(--color-primary)' : 'transparent',
                   color: on ? '#fff' : ok ? 'rgba(255,255,255,.66)' : 'rgba(255,255,255,.3)',
                   font: (on ? '600' : '500') + ' 14px var(--font-sans)',

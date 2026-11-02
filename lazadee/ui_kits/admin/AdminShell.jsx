@@ -58,12 +58,12 @@
             <Icon name="shield-check" size={15} style={{ color: 'var(--blue-500)' }} />
             <span style={{ font: '600 11px var(--font-sans)', color: 'rgba(255,255,255,.82)' }}>Quyền: {role}</span>
           </div>
-          <nav style={{ flex: 1, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+          <nav style={{ flex: 1, minHeight: 0, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,.2) transparent' }}>
             {visibleNav.map((n) => {
               const on = n.id === active;
               return (
                 <button key={n.id} onClick={() => onNav(n.id)} style={{
-                  display: 'flex', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, borderRadius: 'var(--radius-md)', border: 0, cursor: 'pointer', textAlign: 'left',
+                  display: 'flex', flex: 'none', alignItems: 'center', gap: 11, padding: '0 12px', height: 44, borderRadius: 'var(--radius-md)', border: 0, cursor: 'pointer', textAlign: 'left',
                   background: on ? 'var(--blue-500)' : 'transparent', color: on ? '#fff' : 'rgba(255,255,255,.62)',
                   font: (on ? '600' : '500') + ' 13.5px var(--font-sans)',
                 }}>
