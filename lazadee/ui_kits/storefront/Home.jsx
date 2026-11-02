@@ -54,9 +54,15 @@
     const now = Date.now();
     return rows.filter((b) => b.on && b.position === position && (!b.startsAt || new Date(b.startsAt).getTime() <= now) && (!b.endsAt || new Date(b.endsAt).getTime() >= now)).sort((a, b) => a.order - b.order);
   };
-  const followLink = (b, fallback) => { if (b && b.link) window.location.href = b.link; else fallback(); };
+  // Banner links are relative to the site root, which in this kit is the storefront page itself.
+  const followLink = (b, fallback) => {
+    if (!b || !b.link) { fallback(); return; }
+    const u = new URL(b.link, location.origin);
+    window.location.href = location.pathname + u.search + u.hash;
+  };
 
   function Home({ onOpen, onMore, onCategory }) {
+    React.useEffect(() => { if (location.hash === '#flash-sale') document.getElementById('flash-sale').scrollIntoView(); }, []);
     const hero = adminBanners('HOME_TOP_CAROUSEL')[0];
     const middle = adminBanners('HOME_MIDDLE')[0];
     // Fixed teaser grid (12 = 2 rows of 6). "Xem thêm" → full paginated discover page.
@@ -112,7 +118,7 @@
         {middle && <img src={middle.image} alt={middle.title} onClick={() => followLink(middle, () => {})} style={{ display: 'block', width: '100%', height: 140, objectFit: 'cover', borderRadius: 'var(--radius-lg)', marginBottom: 24, cursor: middle.link ? 'pointer' : 'default' }} />}
 
         {/* flash sale */}
-        <div className="lz-card" style={{ padding: '18px 20px', marginBottom: 28, borderTop: '3px solid var(--flash-500)' }}>
+        <div id="flash-sale" className="lz-card" style={{ padding: '18px 20px', marginBottom: 28, borderTop: '3px solid var(--flash-500)', scrollMarginTop: 90 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon name="zap" size={26} style={{ color: 'var(--flash-500)' }} strokeWidth={2.4} />
