@@ -240,13 +240,14 @@
 @keyframes tr-paint { from { opacity: 1; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 -10% 0 0); } }
 @keyframes tr-unroll { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 [data-theme="saigon"] .tr-sky { background: #0F6E45; }
-[data-theme="saigon"] .tr-sky::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 46px; transform-origin: top;
+/* The awning hangs over the field at rest and over the stuck band once the page scrolls,
+   so it never scrolls away. */
+[data-theme="saigon"] .tr-sky::before, [data-theme="saigon"] .tr-top[data-stuck="1"]::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 46px; transform-origin: top; pointer-events: none;
   background: repeating-linear-gradient(90deg, #D52B1E 0 40px, #FAF6E8 40px 80px);
   -webkit-mask: radial-gradient(circle 20px at 20px 26px, #000 98%, transparent) 0 0 / 40px 46px repeat-x, linear-gradient(#000, #000) 0 0 / 100% 26px no-repeat;
   mask: radial-gradient(circle 20px at 20px 26px, #000 98%, transparent) 0 0 / 40px 46px repeat-x, linear-gradient(#000, #000) 0 0 / 100% 26px no-repeat; }
 @media (prefers-reduced-motion: no-preference) { [data-theme="saigon"].tr-play .tr-sky::before { animation: tr-unroll .6s var(--ease-out) both; } }
-[data-theme="saigon"] .tr-pillwrap { padding-top: 26px; transition: padding-top var(--dur-base) var(--ease-out); }
-[data-theme="saigon"] .tr-top[data-stuck="1"] .tr-pillwrap { padding-top: 12px; }
+[data-theme="saigon"] .tr-pillwrap { padding-top: 26px; }
 [data-theme="saigon"] .tr-pill { background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; border: 0; box-shadow: 0 0 0 2px #062C1C, 0 12px 26px -12px rgba(6, 44, 28, .55); }
 [data-theme="saigon"] .tr-logo span { font-weight: 800; letter-spacing: 0; font-size: 26px; }
 [data-theme="saigon"] .tr-cat { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .32); color: #fff; }
