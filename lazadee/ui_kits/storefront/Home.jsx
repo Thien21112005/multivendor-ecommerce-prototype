@@ -57,7 +57,7 @@
     const middle = live('HOME_MIDDLE');
     const flashTop = live('FLASH_SALE_TOP');
     const shelf = PRODUCTS.slice(0, 6);
-    const picks = Array.from({ length: 12 }, (_, i) => ({ ...PRODUCTS[(i + 6) % PRODUCTS.length], _k: i }));
+    const picks = Array.from({ length: 36 }, (_, i) => ({ ...PRODUCTS[(i + 6) % PRODUCTS.length], _k: i }));
     const flash = PRODUCTS.filter((p) => p.flash).slice(0, 6);
     const shops = window.LZ.vendorList().slice(0, 6);
 
