@@ -224,5 +224,22 @@
     );
   }
 
-  window.TRDash = { vnd, short, change, Delta, StatTile, WorkQueue, Segmented, BarList, StackBar, Pipeline, TimeChart };
+  // One whole split into a few parts, read at a glance: a tall bar whose blocks print their
+  // share, and a legend that names each part with its count. parts: [{ label, value, tone }]
+  function SegBar({ parts, label, format = (v) => v.toLocaleString('vi-VN') }) {
+    const total = parts.reduce((n, p) => n + p.value, 0) || 1;
+    const share = (v) => (v / total * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%';
+    return (
+      <div className="dash-seg-bar">
+        <div className="dash-seg-bar__bar" role="img" aria-label={label + ': ' + parts.map((p) => p.label + ' ' + format(p.value) + ' (' + share(p.value) + ')').join(', ')}>
+          {parts.map((p) => p.value > 0 && <i key={p.label} data-tone={p.tone} style={{ flexGrow: p.value }} title={p.label + ': ' + format(p.value) + ' · ' + share(p.value)}>{p.value / total >= 0.09 && share(p.value)}</i>)}
+        </div>
+        <ul className="dash-seg-bar__legend">
+          {parts.map((p) => <li key={p.label} data-tone={p.tone}><i aria-hidden="true" />{p.label}<b>{format(p.value)}</b><small>{share(p.value)}</small></li>)}
+        </ul>
+      </div>
+    );
+  }
+
+  window.TRDash = { vnd, short, change, Delta, StatTile, WorkQueue, Segmented, BarList, StackBar, Pipeline, TimeChart, SegBar };
 })();

@@ -3,8 +3,8 @@
 (function () {
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, StatusBadge } = DS;
-  const { vnd, Delta, StatTile, WorkQueue, Segmented, BarList, StackBar, TimeChart } = window.TRDash;
-  const { WALLET, REVENUE, PERF, ORDERS, ORDER_COUNTS, CHAT_UNREAD, orderBadge, AS_OF } = window.LZV;
+  const { vnd, Delta, StatTile, WorkQueue, Segmented, BarList, StackBar, TimeChart, SegBar } = window.TRDash;
+  const { WALLET, REVENUE, PERF, ORDERS, ORDER_COUNTS, CHAT_UNREAD, orderBadge, AS_OF, OUTCOMES } = window.LZV;
 
   const RANGES = [['week', '7 ngày'], ['month', '30 ngày'], ['year', '12 tháng']];
 
@@ -115,12 +115,17 @@
         </section>
 
         <div className="dash-cols">
-          <section>
-            <div className="dash-head"><h2 className="dash-title">Hiệu suất 30 ngày qua</h2><span className="dash-sub">Đến {AS_OF}</span></div>
-            <div className="dash-tiles" style={{ '--n': 3 }}>
-              <StatTile label="Đơn hàng" value={P.orders.toLocaleString('vi-VN')} note={<Delta cur={P.orders} prev={P.prevOrders} against={P.against} />} onClick={() => onNav('stats')} />
-              <StatTile label="Lượt truy cập" value={P.visits.toLocaleString('vi-VN')} note={<Delta cur={P.visits} prev={P.prevVisits} against={P.against} />} onClick={() => onNav('stats')} />
-              <StatTile label="Tỉ lệ chuyển đổi" value={((P.orders / P.visits) * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%'} note="Đơn hàng trên lượt truy cập" onClick={() => onNav('stats')} />
+          <section className="dash-sheet">
+            <div className="dash-head">
+              <h2 className="dash-title">Đơn 30 ngày qua</h2><span className="dash-sub">Đến {AS_OF}</span>
+              <div className="dash-end"><Button variant="ghost" size="sm" iconRight="chevron-right" onClick={() => onNav('stats')}>Phân tích</Button></div>
+            </div>
+            <div className="dash-figure">{P.orders.toLocaleString('vi-VN')} đơn</div>
+            <div className="dash-sub" style={{ marginBottom: 14 }}><Delta cur={P.orders} prev={P.prevOrders} against={P.against} /></div>
+            <SegBar label="Kết quả đơn 30 ngày qua" parts={OUTCOMES.map(([k, tone], i) => ({ label: k, tone, value: P.out[i] }))} />
+            <div className="dash-rows" style={{ marginTop: 14 }}>
+              <div className="dash-row"><span>Lượt truy cập</span><b>{P.visits.toLocaleString('vi-VN')} <Delta cur={P.visits} prev={P.prevVisits} /></b></div>
+              <div className="dash-row"><span>Tỉ lệ chuyển đổi (đơn trên lượt truy cập)</span><b>{((P.orders / P.visits) * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}%</b></div>
             </div>
           </section>
           <section className="dash-sheet">

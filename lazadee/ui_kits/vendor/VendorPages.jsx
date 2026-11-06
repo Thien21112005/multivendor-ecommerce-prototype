@@ -312,70 +312,120 @@
     { name: 'Loa bluetooth mini', img: 'speaker', sold: 12, rev: 3840000, conv: 4.8 },
     { name: 'Webcam Full HD', img: 'camera', sold: 5, rev: 2700000, conv: 2.1 },
   ];
-  const SOURCES = [{ name: 'Tìm kiếm trong sàn', pct: 46, c: 'var(--brand-500)' }, { name: 'Trang chủ / Gợi ý', pct: 28, c: 'var(--blue-500)' }, { name: 'Khuyến mãi / Flash Sale', pct: 16, c: 'var(--flash-500)' }, { name: 'Link ngoài / Chia sẻ', pct: 10, c: 'var(--mint-500)' }];
+  // Share of visits by source over 30 days and how often each source turns into an order
+  // (UC-VND-08 step 6, from product_view_stats).
+  const SOURCES = [
+    { name: 'Tìm kiếm trong sàn', pct: 46, conv: 3.9 },
+    { name: 'Trang chủ / Gợi ý', pct: 28, conv: 2.6 },
+    { name: 'Khuyến mãi / Flash Sale', pct: 16, conv: 4.4 },
+    { name: 'Link ngoài / Chia sẻ', pct: 10, conv: 1.2 },
+  ];
 
   function Stats() {
     const [range, setRange] = React.useState('7 ngày qua');
     const [from, setFrom] = React.useState('');
     const [to, setTo] = React.useState('');
-    const { Delta, StatTile, TimeChart } = window.TRDash;
-    const cur = window.LZV.PERF[range] || window.LZV.PERF['30 ngày qua'];
+    const { short, Delta, StatTile, TimeChart, SegBar } = window.TRDash;
+    const { PERF, OUTCOMES, COMMISSION_RATE, HEALTH } = window.LZV;
+    const cur = PERF[range] || PERF['30 ngày qua'];
     const cr = (o, v) => (o / v) * 100;
+    const pct1 = (n) => n.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%';
+    const commission = Math.round(cur.rev * COMMISSION_RATE);
+    const net = cur.rev - commission - cur.shopVoucher;
+    const out = OUTCOMES.map(([k, tone], i) => ({ label: k, tone, value: cur.out[i] }));
+    const shopCancel = cur.orders ? cur.out[2] / cur.orders * 100 : 0;
+    const month = PERF['30 ngày qua'];
+    const sourceMax = Math.max(...SOURCES.map((s) => s.pct));
     return (
-      <div style={{ maxWidth: 1180 }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+      <div className="dash" style={{ maxWidth: 1180 }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <SectionTitle icon="chart-column" title="Phân tích bán hàng" sub={'Hiệu suất Shop ' + (range === 'Tùy chọn ngày' ? 'theo khoảng ngày đã chọn' : cur.sub)} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {range === 'Tùy chọn ngày' && <><input type="date" aria-label="Từ ngày" value={from} onChange={(e) => setFrom(e.target.value)} style={{ ...dateInput, flex: 'none' }} /><input type="date" aria-label="Đến ngày" value={to} min={from} onChange={(e) => setTo(e.target.value)} style={{ ...dateInput, flex: 'none' }} /></>}
             <div style={{ width: 180 }}><Select value={range} onChange={(e) => setRange(e.target.value)}><option>Hôm nay</option><option>7 ngày qua</option><option>30 ngày qua</option><option>Tùy chọn ngày</option></Select></div>
           </div>
         </div>
-        <div className="dash-tiles" style={{ marginBottom: 16 }}>
-          <StatTile label="Doanh thu" value={fmt(cur.rev)} note={<Delta cur={cur.rev} prev={cur.prevRev} against={cur.against} />} />
+        <div className="dash-tiles">
+          <StatTile label="Doanh thu gộp" value={fmt(cur.rev)} note={<Delta cur={cur.rev} prev={cur.prevRev} against={cur.against} />} />
           <StatTile label="Đơn hàng" value={cur.orders.toLocaleString('vi-VN')} note={<Delta cur={cur.orders} prev={cur.prevOrders} against={cur.against} />} />
           <StatTile label="Lượt truy cập" value={cur.visits.toLocaleString('vi-VN')} note={<Delta cur={cur.visits} prev={cur.prevVisits} against={cur.against} />} />
-          <StatTile label="Tỉ lệ chuyển đổi" value={cr(cur.orders, cur.visits).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '%'} note={<Delta cur={cr(cur.orders, cur.visits)} prev={cr(cur.prevOrders, cur.prevVisits)} against={cur.against} />} />
+          <StatTile label="Tỉ lệ chuyển đổi" value={pct1(cr(cur.orders, cur.visits))} note={<Delta cur={cr(cur.orders, cur.visits)} prev={cr(cur.prevOrders, cur.prevVisits)} against={cur.against} />} />
         </div>
-        <div className="dash-tiles" style={{ '--n': 3, marginBottom: 16 }}>
-          <StatTile label="Tỉ lệ hủy của shop (30 ngày)" value="1,8%" />
-          <StatTile label="Khiếu nại thua (30 ngày)" value="1" />
-          <StatTile label="Đơn chậm xác nhận (30 ngày)" value="2" />
-        </div>
-        <div className="dash-cols" style={{ marginBottom: 16 }}>
-          <div className="dash-sheet">
+        <div className="dash-cols">
+          <section className="dash-sheet">
             <div className="dash-head"><h3 className="dash-title">{cur.title}</h3><span className="dash-sub">{cur.sub}</span></div>
             <TimeChart data={cur.points} kind="bar" name="Doanh thu" />
-          </div>
-          <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', padding: '18px 20px' }}>
-            <span style={{ font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Nguồn truy cập</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 13, marginTop: 16 }}>
-              {SOURCES.map((s) => (
-                <div key={s.name}>
-                  <div style={{ display: 'flex', font: 'var(--type-body-sm)', color: 'var(--text-body)', marginBottom: 5 }}><span style={{ flex: 1 }}>{s.name}</span><b>{s.pct}%</b></div>
-                  <div style={{ height: 8, borderRadius: 4, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: s.pct + '%', height: '100%', background: 'var(--brand-500)' }} /></div>
-                </div>
-              ))}
+          </section>
+          <section className="dash-sheet">
+            <div className="dash-head">
+              <div>
+                <h3 className="dash-title">Tiền thực về shop</h3>
+                <div className="dash-sub">Voucher sàn và Xu do sàn chịu, không trừ vào tiền của shop</div>
+              </div>
             </div>
-          </div>
+            <div className="dash-sub">Doanh thu thuần</div>
+            <div className="dash-figure" style={{ marginBottom: 14 }}>{fmt(net)}</div>
+            <SegBar label={'Doanh thu gộp ' + cur.sub} format={fmt} parts={[
+              { label: 'Về shop', value: net, tone: 'ok' },
+              { label: 'Hoa hồng ' + pct1(COMMISSION_RATE * 100), value: commission, tone: 'wait' },
+              { label: 'Voucher shop', value: cur.shopVoucher, tone: 'held' },
+            ]} />
+            <div className="dash-rows" style={{ marginTop: 14 }}>
+              <div className="dash-row"><span>Doanh thu gộp</span><b>{fmt(cur.rev)}</b></div>
+            </div>
+          </section>
         </div>
-        <div style={{ background: '#fff', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
-          <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--border-subtle)', font: 'var(--weight-bold) var(--text-base) var(--font-sans)', color: 'var(--text-strong)' }}>Sản phẩm bán chạy trong 30 ngày qua</div>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', fontVariantNumeric: 'tabular-nums' }}>
-              <thead><tr style={hrow}><th style={th}>Sản phẩm</th><th style={{ ...th, textAlign: 'right' }}>Đã bán</th><th style={{ ...th, textAlign: 'right' }}>Doanh thu</th><th style={{ ...th, textAlign: 'right' }}>Chuyển đổi</th></tr></thead>
+        <div className="dash-cols dash-cols--even">
+          <section className="dash-sheet">
+            <div className="dash-head">
+              <h3 className="dash-title">Đơn kết thúc thế nào</h3>
+              <span className="dash-sub">{cur.orders.toLocaleString('vi-VN')} đơn {cur.sub}</span>
+            </div>
+            <SegBar label={'Kết quả đơn ' + cur.sub} parts={out} />
+            <div className="dash-rows" style={{ marginTop: 14 }}>
+              <div className="dash-row"><span>Tỉ lệ shop tự hủy hoặc từ chối đơn</span><b>{pct1(shopCancel)}</b></div>
+              <div className="dash-row"><span>Khiếu nại shop thua (30 ngày)</span><b>{HEALTH.lostDisputes}</b></div>
+              <div className="dash-row"><span>Đơn quá 24 giờ, sàn tự xác nhận (30 ngày)</span><b>{HEALTH.lateConfirms}</b></div>
+            </div>
+          </section>
+          <section className="dash-sheet">
+            <div className="dash-head">
+              <h3 className="dash-title">Nguồn truy cập</h3>
+              <span className="dash-sub">30 ngày qua</span>
+            </div>
+            <ol className="dash-bars">
+              {SOURCES.map((s, i) => {
+                const visits = Math.round(month.visits * s.pct / 100);
+                return (
+                  <li key={s.name} data-lead={i === 0 ? 1 : 0}>
+                    <div className="dash-bar__top"><span>{s.name}</span><b>{visits.toLocaleString('vi-VN')} lượt · {s.pct}%</b></div>
+                    <div className="dash-bar__track"><div className="dash-bar__fill" style={{ width: (s.pct / sourceMax) * 100 + '%' }} /></div>
+                    <div className="dash-sub" style={{ marginTop: 3 }}>Tỉ lệ ra đơn {pct1(s.conv)}</div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        </div>
+        <section className="dash-sheet dash-sheet--flush">
+          <div className="dash-head"><h3 className="dash-title">Sản phẩm bán chạy trong 30 ngày qua</h3><span className="dash-sub">Đóng góp tính trên {short(month.rev)} doanh thu gộp</span></div>
+          <div className="dash-tablewrap">
+            <table className="dash-table">
+              <thead><tr><th>Sản phẩm</th><th className="num">Đã bán</th><th className="num">Doanh thu</th><th className="num">Đóng góp doanh thu</th><th className="num">Chuyển đổi</th></tr></thead>
               <tbody>
-                {TOP.map((p, i) => (
-                  <tr key={i} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
-                    <td style={td}><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><img src={'../../assets/img/' + p.img + '.jpg'} alt="" width="36" height="36" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><span>{p.name}</span></div></td>
-                    <td style={{ ...td, textAlign: 'right' }}>{p.sold}</td>
-                    <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{fmt(p.rev)}</td>
-                    <td style={{ ...td, textAlign: 'right', color: 'var(--mint-600)' }}>{p.conv.toLocaleString('vi-VN')}%</td>
+                {TOP.map((p) => (
+                  <tr key={p.name}>
+                    <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><img src={'../../assets/img/' + p.img + '.jpg'} alt="" width="36" height="36" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><span>{p.name}</span></div></td>
+                    <td className="num">{p.sold}</td>
+                    <td className="num" style={{ fontWeight: 600 }}>{fmt(p.rev)}</td>
+                    <td className="num"><span className="dash-share"><span><i style={{ width: (p.rev / month.rev) * 100 + '%' }} /></span><b>{pct1(p.rev / month.rev * 100)}</b></span></td>
+                    <td className="num">{pct1(p.conv)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       </div>
     );
   }

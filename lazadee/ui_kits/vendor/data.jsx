@@ -33,10 +33,17 @@
     year: { title: '12 tháng đã chốt', points: MONTHS, prev: null, against: 'Từ 06/2025 đến 05/2026' },
   };
   const PERF = {
-    'Hôm nay': { sub: 'hôm nay', against: 'so với hôm qua', rev: DAILY[29], prevRev: DAILY[28], orders: 5, prevOrders: 4, visits: 140, prevVisits: 120, points: HOURS_TODAY, title: 'Doanh thu theo khung giờ' },
-    '7 ngày qua': { sub: 'trong 7 ngày qua', against: 'so với 7 ngày trước', rev: sum(DAILY.slice(-7)), prevRev: REVENUE.week.prev, orders: 29, prevOrders: 24, visits: 860, prevVisits: 760, points: dayPoints(7), title: 'Doanh thu theo ngày' },
-    '30 ngày qua': { sub: 'trong 30 ngày qua', against: 'so với 30 ngày trước', rev: sum(DAILY), prevRev: PREV_30_DAYS, orders: 100, prevOrders: 92, visits: 3120, prevVisits: 2786, points: dayPoints(30), title: 'Doanh thu theo ngày' },
+    'Hôm nay': { sub: 'hôm nay', against: 'so với hôm qua', rev: DAILY[29], prevRev: DAILY[28], orders: 5, prevOrders: 4, visits: 140, prevVisits: 120, points: HOURS_TODAY, title: 'Doanh thu theo khung giờ', shopVoucher: 52000, out: [0, 0, 0, 0, 5] },
+    '7 ngày qua': { sub: 'trong 7 ngày qua', against: 'so với 7 ngày trước', rev: sum(DAILY.slice(-7)), prevRev: REVENUE.week.prev, orders: 29, prevOrders: 24, visits: 860, prevVisits: 760, points: dayPoints(7), title: 'Doanh thu theo ngày', shopVoucher: 296000, out: [17, 1, 1, 0, 10] },
+    '30 ngày qua': { sub: 'trong 30 ngày qua', against: 'so với 30 ngày trước', rev: sum(DAILY), prevRev: PREV_30_DAYS, orders: 100, prevOrders: 92, visits: 3120, prevVisits: 2786, points: dayPoints(30), title: 'Doanh thu theo ngày', shopVoucher: 1284000, out: [81, 4, 2, 2, 11] },
   };
+  // How each period's orders ended, in the order of PERF[x].out (UC-VND-08: hoàn tất, hủy, trả hàng).
+  const OUTCOMES = [['Hoàn tất', 'ok'], ['Khách hủy', 'wait'], ['Shop từ chối', 'bad'], ['Trả hàng, hoàn tiền', 'held'], ['Đang xử lý', 'info']];
+  // Commission falls back shop → category → 5% (FR-PAY-03); this shop pays the 5% default.
+  const COMMISSION_RATE = 0.05;
+  // Shop health over 30 days: complaints the shop lost (UC-SUP-03) and orders the cron had
+  // to confirm after 24 hours (FR-LOG-01).
+  const HEALTH = { lostDisputes: 1, lateConfirms: 2 };
   const WALLET = {
     available: 12450000,
     held: sum(LEDGER.filter((r) => r.bucket === 'HELD').map((r) => r.net)), // in escrow, not yet released
@@ -107,5 +114,5 @@
     { id: 'settings', name: 'Cài đặt', icon: 'settings' },
   ];
 
-  window.LZV = { SHOP, WALLET, LEDGER, REVENUE, PERF, AS_OF, CHAT_UNREAD, ORDERS, NAV, NOTIFICATIONS, ORDER_COUNTS, orderBadge, ghnStatus, BANK, KYC_NAME, downloadCsv };
+  window.LZV = { OUTCOMES, COMMISSION_RATE, HEALTH, SHOP, WALLET, LEDGER, REVENUE, PERF, AS_OF, CHAT_UNREAD, ORDERS, NAV, NOTIFICATIONS, ORDER_COUNTS, orderBadge, ghnStatus, BANK, KYC_NAME, downloadCsv };
 })();

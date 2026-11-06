@@ -110,6 +110,22 @@ button.dash-stack__item:hover { background: var(--gray-25); }
 .dash-pipe__chip small { color: var(--text-muted); }
 .dash-money { margin: 2px 0 12px; }
 
+/* ---- Segmented bar: one whole, a few parts, shares printed on the blocks ---- */
+.dash-seg-bar__bar { display: flex; gap: 2px; height: 34px; border-radius: 6px; overflow: hidden; background: var(--gray-100); }
+.dash-seg-bar__bar i { display: grid; place-items: center; min-width: 6px; background: var(--tone); color: #fff; font: 700 12px/1 var(--font-sans); font-style: normal; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; }
+.dash-seg-bar__bar i[data-tone="held"], .dash-seg-bar__bar i[data-tone="info"], .dash-seg-bar__bar i[data-tone="wait"] { color: var(--ink-900, #111827); }
+.dash-seg-bar__legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 12px 0 0; padding: 0; list-style: none; }
+.dash-seg-bar__legend li { display: inline-flex; align-items: center; gap: 6px; font: var(--type-body-sm); color: var(--text-body); }
+.dash-seg-bar__legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--tone); }
+.dash-seg-bar__legend b { color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.dash-seg-bar__legend small { font: var(--type-caption); color: var(--text-muted); }
+
+/* ---- Inline share bar inside a table cell ---- */
+.dash-share { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; width: 100%; }
+.dash-share > span { flex: none; width: 96px; height: 6px; border-radius: 3px; background: var(--gray-100); overflow: hidden; }
+.dash-share > span > i { display: block; height: 100%; border-radius: 3px; background: var(--brand-700); }
+.dash-share > b { min-width: 46px; text-align: right; font-weight: 600; color: var(--text-strong); }
+
 /* ---- Tables ---- */
 .dash-tablewrap { overflow-x: auto; }
 .dash-table { width: 100%; min-width: 640px; border-collapse: collapse; font-variant-numeric: tabular-nums; }

@@ -5,7 +5,7 @@
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Avatar, Button, Select } = DS;
   const { DASHBOARD, CURRENT_USER, downloadCsv } = window.LZA;
-  const { vnd, short, Delta, StatTile, WorkQueue, Segmented, BarList, StackBar, Pipeline, TimeChart } = window.TRDash;
+  const { vnd, short, Delta, StatTile, WorkQueue, Segmented, BarList, StackBar, Pipeline, TimeChart, SegBar } = window.TRDash;
 
   // Order statuses split into orders still moving and how finished orders ended.
   const MOVING = { 'Chờ thanh toán': 'held', 'Đã thanh toán': 'info', 'Đang chuẩn bị': 'info', 'Đang giao': 'ship', 'Đã giao': 'ok' };
@@ -68,6 +68,24 @@
             <StatTile label="Chi phí voucher và freeship" value={vnd(D.voucherCost[month])} note={<Delta cur={D.voucherCost[month]} prev={prev && D.voucherCost[prev]} against={against} downIsGood />} onClick={go('vouchers')} />
             <StatTile label="Lợi nhuận ròng" value={vnd(net(month))} note="Hoa hồng trừ voucher, điểm thưởng, phí cổng" onClick={go('ledger')} />
           </div>
+
+          {/* UC-ADM-06: lợi nhuận ròng = hoa hồng − chi phí sàn tài trợ − Xu − phí cổng. */}
+          <section className="dash-sheet">
+            <div className="dash-head">
+              <div>
+                <h2 className="dash-title">Hoa hồng {month} đi về đâu</h2>
+                <div className="dash-sub">Sàn chỉ thu hoa hồng; voucher sàn, điểm thưởng và phí cổng thanh toán do sàn tự chịu, phần còn lại là lợi nhuận ròng.</div>
+              </div>
+            </div>
+            <div className="dash-sub">Tổng hoa hồng sàn thu trong kỳ (5% trên GMV)</div>
+            <div className="dash-figure" style={{ marginBottom: 14 }}>{vnd(D.commission[month])}</div>
+            <SegBar label={'Hoa hồng ' + month} format={vnd} parts={[
+              { label: 'Lợi nhuận ròng', value: net(month), tone: 'ok' },
+              { label: 'Voucher sàn và freeship', value: D.voucherCost[month], tone: 'held' },
+              { label: 'Điểm thưởng (Xu)', value: D.xuCost[month], tone: 'info' },
+              { label: 'Phí cổng thanh toán', value: D.gatewayFee[month], tone: 'wait' },
+            ]} />
+          </section>
 
           <section className="dash-sheet">
             <div className="dash-head">
