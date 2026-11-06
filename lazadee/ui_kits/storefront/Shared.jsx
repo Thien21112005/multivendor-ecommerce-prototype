@@ -222,9 +222,9 @@
   }
 
   // Simulation controls for the thesis demo. Kept apart from real actions and closed by default.
-  function DemoBox({ title, children, style }) {
+  function DemoBox({ title, children, style, open }) {
     return (
-      <details className="tr-demo" style={style}>
+      <details className="tr-demo" style={style} open={open || undefined}>
         <summary>Mô phỏng cho buổi demo: {title}</summary>
         <div className="tr-demo__body">{children}</div>
       </details>

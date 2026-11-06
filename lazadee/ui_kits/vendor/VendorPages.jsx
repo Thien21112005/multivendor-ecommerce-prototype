@@ -659,7 +659,22 @@
   const VPW_COLORS = ['var(--red-500)', 'var(--red-500)', 'var(--gold-500)', 'var(--mint-500)', 'var(--mint-600)'];
   const VPW_LABELS = ['Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
   const vStrength = (p) => { let s = 0; if (p.length >= 8) s++; if (/[A-Z]/.test(p)) s++; if (/[0-9]/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++; return s; };
+  // The shop runs on the owner's buyer account (same email), so it shares the buyer's login
+  // methods: one account, at most one password (account-linking-google-login.md). The demo
+  // state lives in localStorage under the key the storefront and sign-in page use.
+  const ACCT_KEY = 'genie_acct_demo';
+  const readAcct = () => {
+    try { const a = JSON.parse(localStorage.getItem(ACCT_KEY)); if (a && typeof a.password === 'boolean') return a; } catch (e) {}
+    return { origin: 'google', password: false, google: true };
+  };
   function SecuritySection() {
+    const [acct, setAcct] = React.useState(readAcct);
+    React.useEffect(() => {
+      const on = (e) => { if (e.key === ACCT_KEY) setAcct(readAcct()); };
+      window.addEventListener('storage', on);
+      return () => window.removeEventListener('storage', on);
+    }, []);
+    const hasPw = acct.password;
     const [f, setF] = React.useState({ cur: '', nw: '', cf: '' });
     const [err, setErr] = React.useState({});
     const [stage, setStage] = React.useState('form');
@@ -670,23 +685,39 @@
     React.useEffect(() => { if (stage !== 'otp' || resend <= 0) return; const t = setInterval(() => setResend((s) => (s > 0 ? s - 1 : 0)), 1000); return () => clearInterval(t); }, [stage, resend]);
     const submit = () => {
       const e = {};
-      if (!f.cur) e.cur = 'Nhập mật khẩu hiện tại';
-      if (f.nw.length < 8) e.nw = 'Tối thiểu 8 ký tự'; else if (!/[A-Z]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ hoa'; else if (!/[a-z]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ thường'; else if (f.nw === f.cur) e.nw = 'Mật khẩu mới phải khác mật khẩu hiện tại'; else if (!/[0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ số'; else if (!/[^A-Za-z0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 ký tự đặc biệt';
+      if (hasPw && !f.cur) e.cur = 'Nhập mật khẩu hiện tại';
+      if (f.nw.length < 8) e.nw = 'Tối thiểu 8 ký tự'; else if (!/[A-Z]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ hoa'; else if (!/[a-z]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ thường'; else if (hasPw && f.nw === f.cur) e.nw = 'Mật khẩu mới phải khác mật khẩu hiện tại'; else if (!/[0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 chữ số'; else if (!/[^A-Za-z0-9]/.test(f.nw)) e.nw = 'Cần ít nhất 1 ký tự đặc biệt';
       if (f.cf !== f.nw) e.cf = 'Mật khẩu nhập lại không khớp';
       setErr(e); if (Object.keys(e).length === 0) { setStage('otp'); setResend(60); setOtp(''); }
     };
-    const confirm = () => { if (otp !== '123456') { setErr({ otp: 'Mã OTP không đúng' }); return; } setErr({}); setStage('done'); setF({ cur: '', nw: '', cf: '' }); setTimeout(() => setStage('form'), 2800); };
+    // A first password flips the section to "Đổi mật khẩu" once the success note has been read.
+    const confirm = () => {
+      if (otp !== '123456') { setErr({ otp: 'Mã OTP không đúng' }); return; }
+      setErr({}); setStage('done'); setF({ cur: '', nw: '', cf: '' });
+      setTimeout(() => {
+        if (!hasPw) { const next = { ...acct, password: true }; try { localStorage.setItem(ACCT_KEY, JSON.stringify(next)); } catch (e) {} setAcct(next); }
+        setStage('form');
+      }, 2800);
+    };
+    const chip = (on, icon, label) => <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-default)', font: '600 12px var(--font-sans)', color: on ? 'var(--text-strong)' : 'var(--text-subtle)', background: on ? '#fff' : 'transparent' }}>{icon}{label}<Icon name={on ? 'circle-check' : 'minus-circle'} size={13} style={{ color: on ? 'var(--mint-600)' : 'var(--text-subtle)' }} /></span>;
+    const gIcon = <svg width="13" height="13" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>;
     return (
-      <Section title="Bảo mật tài khoản" icon="shield-check">
+      <Section title={hasPw ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'} icon="shield-check">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+          <span style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Đăng nhập bằng:</span>
+          {chip(hasPw, <Icon name="mail" size={13} />, 'Email và mật khẩu')}
+          {chip(acct.google, gIcon, 'Google')}
+          <a href="../storefront/index.html?screen=account&view=logins" style={{ marginLeft: 'auto', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--brand-600)' }}>Quản lý liên kết đăng nhập</a>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 260px', gap: 24, alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <VPwField label="Mật khẩu hiện tại" value={f.cur} onChange={(v) => set('cur', v)} err={err.cur} />
+            {hasPw && <VPwField label="Mật khẩu hiện tại" value={f.cur} onChange={(v) => set('cur', v)} err={err.cur} />}
             <div>
               <VPwField label="Mật khẩu mới" value={f.nw} onChange={(v) => set('nw', v)} err={err.nw} hint="Tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt" />
               {f.nw && <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}><div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--gray-200)', overflow: 'hidden' }}><div style={{ width: (strength / 4 * 100) + '%', height: '100%', borderRadius: 3, background: VPW_COLORS[strength], transition: 'all .3s' }} /></div><span style={{ font: '600 12px var(--font-sans)', color: VPW_COLORS[strength], minWidth: 64 }}>{VPW_LABELS[strength]}</span></div>}
             </div>
             <VPwField label="Nhập lại mật khẩu mới" value={f.cf} onChange={(v) => set('cf', v)} err={err.cf} />
-            {stage === 'form' && <div><Button iconLeft="check" onClick={submit}>Cập nhật mật khẩu</Button></div>}
+            {stage === 'form' && <div><Button iconLeft="check" onClick={submit}>{hasPw ? 'Cập nhật mật khẩu' : 'Thiết lập mật khẩu'}</Button></div>}
             {stage === 'otp' && (
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}><Icon name="mail" size={16} style={{ color: 'var(--brand-500)' }} /><span style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>Mã OTP đã gửi đến email <b>tr****@gmail.com</b> (demo: 123456)</span></div>
@@ -699,11 +730,15 @@
                 </div>
               </div>
             )}
-            {stage === 'done' && <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'var(--mint-600)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', background: 'var(--mint-50)', borderRadius: 'var(--radius-md)', padding: '10px 14px' }}><Icon name="circle-check" size={18} />Đổi mật khẩu thành công</div>}
+            {stage === 'done' && <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'var(--mint-600)', font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', background: 'var(--mint-50)', borderRadius: 'var(--radius-md)', padding: '10px 14px' }}><Icon name="circle-check" size={18} />{hasPw ? 'Đổi mật khẩu thành công' : 'Thiết lập mật khẩu thành công'}</div>}
           </div>
           <div style={{ background: 'var(--surface-sunken)', borderRadius: 'var(--radius-md)', padding: '14px 16px' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}><Icon name="info" size={16} style={{ color: 'var(--blue-600)' }} /><span style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Lưu ý</span></div>
-            <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', lineHeight: 1.55, margin: 0 }}>Đổi mật khẩu yêu cầu xác thực OTP gửi tới email đăng ký của Shop để đảm bảo an toàn cho ví Escrow.</p>
+            <p style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', lineHeight: 1.55, margin: 0 }}>
+              {hasPw
+                ? 'Shop dùng chung tài khoản và mật khẩu với tài khoản mua hàng cùng email. Đổi mật khẩu yêu cầu OTP gửi tới email đăng ký để bảo vệ ví Escrow.'
+                : 'Tài khoản đang chỉ đăng nhập bằng Google nên chưa có mật khẩu. Không cần mật khẩu cũ; sau khi đặt, bạn đăng nhập được bằng cả email lẫn Google. Vẫn cần OTP gửi tới email đăng ký.'}
+            </p>
           </div>
         </div>
       </Section>

@@ -36,6 +36,7 @@
       { id: 'profile', name: 'Hồ sơ', icon: 'user' },
       { id: 'address', name: 'Địa chỉ', icon: 'map-pin' },
       { id: 'password', name: USER.hasPassword === false ? 'Thiết lập mật khẩu' : 'Đổi mật khẩu', icon: 'shield-check' },
+      { id: 'logins', name: 'Liên kết đăng nhập', icon: 'user-check' },
       { id: 'devices', name: 'Thiết bị đăng nhập', icon: 'lock' },
     ] },
     { group: '', items: [
@@ -50,6 +51,106 @@
 
   const toast = (message, type) => window.dispatchEvent(new CustomEvent('show_toast', { detail: { message, type } }));
 
+  /* ---- Account linking demo (account-linking-google-login.md) --------------------------
+     One person, one account, at most one password; Google is just another way in.
+     acct = { origin: 'email' | 'google', password: bool, google: bool }. Kept in localStorage
+     so the sign-in page's Google simulation and this page tell the same story. */
+  const ACCT_KEY = 'genie_acct_demo';
+  const SCENARIOS = [
+    { id: 'A1', name: 'Đăng ký email', acct: { origin: 'email', password: true, google: false },
+      story: ['Đăng ký bằng email và mật khẩu.', 'Chưa từng đăng nhập Google.'] },
+    { id: 'A2', name: 'Email trước, Google sau', acct: { origin: 'email', password: true, google: true },
+      story: ['Đăng ký bằng email và mật khẩu.', 'Hôm sau bấm "Đăng nhập Google" với cùng email đã xác minh, hệ thống gắn Google vào tài khoản này thay vì tạo tài khoản mới.'] },
+    { id: 'B1', name: 'Google trước', acct: { origin: 'google', password: false, google: true },
+      story: ['Bấm "Đăng nhập Google" lần đầu, email chưa có tài khoản nên hệ thống tạo tài khoản mới.', 'Tài khoản chưa có mật khẩu.'] },
+    { id: 'B2', name: 'Google trước, đã đặt mật khẩu', acct: { origin: 'google', password: true, google: true },
+      story: ['Tạo tài khoản bằng Google.', 'Vào "Thiết lập mật khẩu", từ giờ đăng nhập được cả hai cách.'] },
+  ];
+  const loadAcct = () => {
+    try { const a = JSON.parse(localStorage.getItem(ACCT_KEY)); if (a && typeof a.password === 'boolean') return a; } catch (e) {}
+    return { origin: USER.authProvider === 'google' ? 'google' : 'email', password: USER.hasPassword !== false, google: USER.authProvider === 'google' };
+  };
+  const saveAcct = (a) => { try { localStorage.setItem(ACCT_KEY, JSON.stringify(a)); } catch (e) {} };
+  const scenarioOf = (a) => SCENARIOS.find((s) => s.acct.origin === a.origin && s.acct.password === a.password && s.acct.google === a.google);
+  const GOOGLE_ID = '109823447156';
+
+  // Scenario switcher plus the users row the scenario leaves behind.
+  function AcctDemo({ acct, onPick }) {
+    const cur = scenarioOf(acct);
+    return (
+      <window.LZDemoBox title="kịch bản tài khoản" open style={{ marginTop: 0 }}>
+        <div role="radiogroup" aria-label="Kịch bản tài khoản" style={{ display: 'grid', gap: 6 }}>
+          {SCENARIOS.map((s) => {
+            const on = cur && cur.id === s.id;
+            return (
+              <button key={s.id} role="radio" aria-checked={on} onClick={() => onPick(s.acct)} style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 34, padding: '6px 9px', borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--brand-700)' : 'var(--text-body)', font: '600 12px/1.3 var(--font-sans)', cursor: 'pointer', textAlign: 'left' }}>
+                <span style={{ display: 'inline-flex', gap: 3, flex: 'none' }}>{s.acct.origin === 'google' ? <><GoogleG size={12} /><Icon name="mail" size={12} style={{ opacity: s.acct.password ? 1 : .25 }} /></> : <><Icon name="mail" size={12} /><span style={{ opacity: s.acct.google ? 1 : .25, display: 'inline-flex' }}><GoogleG size={12} /></span></>}</span>
+                {s.name}
+              </button>
+            );
+          })}
+        </div>
+        {cur && (
+          <ol style={{ margin: '10px 0 0', paddingLeft: 18, font: 'var(--type-caption)', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+            {cur.story.map((t) => <li key={t} style={{ marginBottom: 3 }}>{t}</li>)}
+          </ol>
+        )}
+        <div className="code" style={{ marginTop: 8, padding: '7px 9px', borderRadius: 'var(--radius-sm)', background: 'var(--gray-50)', font: '11px/1.55 var(--font-mono)', color: 'var(--text-body)' }}>
+          users.id = 1<br />
+          password_hash = {acct.password ? <b>$2a$10$…</b> : <b style={{ color: 'var(--red-600)' }}>NULL</b>}<br />
+          google_id = {acct.google ? <b>{GOOGLE_ID}</b> : <b style={{ color: 'var(--red-600)' }}>NULL</b>}
+        </div>
+      </window.LZDemoBox>
+    );
+  }
+
+  // Both ways in, side by side: email + password and Google, each pointing at the same account.
+  function LoginsPanel({ acct, setAcct, onPassword }) {
+    const [ask, setAsk] = React.useState(null); // 'link' | 'unlink'
+    const methods = (acct.password ? 1 : 0) + (acct.google ? 1 : 0);
+    const row = { display: 'flex', alignItems: 'center', gap: 14, padding: '16px 0', borderTop: '1px solid var(--border-subtle)' };
+    const ico = { width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'var(--gray-50)', display: 'grid', placeItems: 'center', flex: 'none', color: 'var(--text-body)' };
+    const state = (ok, text) => <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, font: '600 12px var(--font-sans)', color: ok ? 'var(--mint-600)' : 'var(--text-subtle)' }}><Icon name={ok ? 'circle-check' : 'minus-circle'} size={14} />{text}</span>;
+    return (
+      <section style={card}>
+        <PanelHead icon="user-check" title="Liên kết đăng nhập" sub="Các cách đăng nhập vào cùng một tài khoản" />
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '16px 0 6px', padding: '11px 13px', background: 'var(--blue-50)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>
+          <Icon name="info" size={16} style={{ color: 'var(--blue-600)', flex: 'none', marginTop: 2 }} />
+          <span>Một tài khoản chỉ có <b>một mật khẩu</b>. Google chỉ là thêm một cách đăng nhập: dù vào bằng cách nào, bạn vẫn vào đúng tài khoản <b>{USER.email}</b> với cùng đơn hàng, ví và điểm.</span>
+        </div>
+        <div style={row}>
+          <span style={ico}><Icon name="mail" size={19} /></span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Email và mật khẩu</div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 3, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{USER.email}{state(acct.password, acct.password ? 'Đã có mật khẩu' : 'Chưa có mật khẩu')}</div>
+          </div>
+          <Button size="sm" variant={acct.password ? 'ghost' : 'primary'} onClick={onPassword}>{acct.password ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'}</Button>
+        </div>
+        <div style={row}>
+          <span style={ico}><GoogleG size={19} /></span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>Google</div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 3, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{acct.google ? USER.email : 'Chưa liên kết'}{state(acct.google, acct.google ? 'Đã liên kết' : 'Chưa liên kết')}</div>
+            {acct.google && !acct.password && <div style={{ marginTop: 6, font: 'var(--type-caption)', color: 'var(--amber-600)' }}>Đây là cách đăng nhập duy nhất. Thiết lập mật khẩu trước nếu muốn gỡ liên kết.</div>}
+          </div>
+          {acct.google
+            ? <Button size="sm" variant="ghost" disabled={!acct.password} onClick={() => setAsk('unlink')}>Gỡ liên kết</Button>
+            : <Button size="sm" variant="ghost" onClick={() => setAsk('link')}>Liên kết Google</Button>}
+        </div>
+        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12, font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{methods} cách đăng nhập đang bật</div>
+
+        <Modal open={ask === 'link'} onClose={() => setAsk(null)} width={420} title="Liên kết Google (mô phỏng)"
+          footer={<><Button variant="ghost" onClick={() => setAsk(null)}>Huỷ</Button><Button onClick={() => { setAcct({ ...acct, google: true }); setAsk(null); toast('Đã liên kết Google. Lần sau bấm "Đăng nhập Google" là vào tài khoản này'); }}>Liên kết</Button></>}>
+          <p style={{ margin: 0, font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55 }}>Google trả về tài khoản <b>{USER.email}</b>, email đã được Google xác minh. Genie gắn mã Google <span className="code">{GOOGLE_ID}</span> vào tài khoản hiện tại, không tạo tài khoản mới.</p>
+        </Modal>
+        <Modal open={ask === 'unlink'} onClose={() => setAsk(null)} width={420} title="Gỡ liên kết Google?"
+          footer={<><Button variant="ghost" onClick={() => setAsk(null)}>Giữ liên kết</Button><Button variant="danger" onClick={() => { setAcct({ ...acct, google: false }); setAsk(null); toast('Đã gỡ liên kết Google. Bạn đăng nhập bằng email và mật khẩu'); }}>Gỡ liên kết</Button></>}>
+          <p style={{ margin: 0, font: 'var(--type-body)', color: 'var(--text-body)', lineHeight: 1.55 }}>Sau khi gỡ, bấm "Đăng nhập Google" sẽ không vào tài khoản này nữa cho đến khi bạn liên kết lại. Bạn vẫn đăng nhập được bằng email và mật khẩu.</p>
+        </Modal>
+      </section>
+    );
+  }
+
   function Account({ initialView, pendingNotif, onClearPendingNotif, onTrack, onOpen, onChat, onReview, onBuyAgain, onShop, onGo, onViewChange, onLogout, reviewedIds = [] }) {
     const [view, setView] = React.useState(initialView || new URLSearchParams(location.search).get('view') || 'orders');
     const [orders, setOrders] = React.useState(ORDERS);
@@ -60,8 +161,10 @@
     const [cancelWhy, setCancelWhy] = React.useState(CANCEL_REASONS[0]);
     const [payIds, setPayIds] = React.useState(null);
     const [logoutOpen, setLogoutOpen] = React.useState(false);
-    const [provider, setProvider] = React.useState(USER.authProvider || 'email'); // demo: 'email' | 'google'
-    const hasPassword = provider === 'email';
+    const [acct, setAcctRaw] = React.useState(loadAcct);
+    const setAcct = (a) => { saveAcct(a); setAcctRaw(a); };
+    const provider = acct.origin; // how the account was first created
+    const hasPassword = acct.password;
     const notifUnread = notifs.filter((n) => n.unread).length;
     React.useEffect(() => { if (initialView) setView(initialView); }, [initialView]);
     React.useEffect(() => { if (onViewChange) onViewChange(view); }, [view]);
@@ -112,11 +215,14 @@
               <div style={{ minWidth: 0 }}>
                 <div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{USER.name}</div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 1 }}>
-                  {provider === 'google' ? <><GoogleG size={11} /> Tài khoản Google</> : provider === 'apple' ? <><AppleLogo size={11} /> Tài khoản Apple</> : <><Icon name="mail" size={12} /> Tài khoản Email</>}
+                  {acct.password && <Icon name="mail" size={12} />}{acct.google && <GoogleG size={11} />}
+                  {acct.password && acct.google ? ' Email và Google' : acct.google ? ' Tài khoản Google' : ' Tài khoản Email'}
                 </div>
               </div>
             </div>
 
+            {/* demo: pick how the account came to be, and every login screen follows */}
+            <div className="tr-acct__demo" style={{ marginBottom: 14 }}><AcctDemo acct={acct} onPick={setAcct} /></div>
             <div className="tr-acct__menu" ref={(el) => { if (el && window.innerWidth <= 768) { const a = el.querySelector('[aria-current]'); if (a) el.scrollLeft = a.offsetLeft - 12; } }}>
             {MENU.map((sec, i) => (
               <div key={i} style={{ marginBottom: 14 }}>
@@ -142,30 +248,16 @@
               </button>
             </div>
             </div>
-            <div className="tr-acct__demo">
-              {/* demo: switch account type to see how the nav/profile differs */}
-              <window.LZDemoBox title="loại tài khoản" style={{ marginTop: 16 }}>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[['email', 'Email'], ['google', 'Google'], ['apple', 'Apple']].map(([id, label]) => {
-                    const on = provider === id;
-                    return (
-                      <button key={id} onClick={() => { setProvider(id); }} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, height: 32, borderRadius: 'var(--radius-sm)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--border-default)'), background: on ? 'var(--color-primary-tint)' : '#fff', color: on ? 'var(--brand-700)' : 'var(--text-body)', font: '600 11.5px var(--font-sans)', cursor: 'pointer' }}>
-                        {id === 'google' ? <GoogleG size={12} /> : id === 'apple' ? <AppleLogo size={12} /> : <Icon name="mail" size={12} />}{label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </window.LZDemoBox>
-              </div>
           </aside>
 
           {/* ---- Main panel ---- */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
             {view === 'orders' && <OrdersPanel orders={orders} reviewedIds={reviewedIds} onTrack={onTrack} onChat={onChat} onReview={onReview} onConfirm={confirmReceipt} onBuyAgain={onBuyAgain} onPay={setPayIds} onCancel={(ids) => { setCancelWhy(CANCEL_REASONS[0]); setCancelIds(ids); }} />}
             {view === 'notifications' && <NotificationsPanel notifs={notifs} unread={notifUnread} onOpen={openNotif} onMarkAll={markAllRead} />}
-            {view === 'profile' && <ProfilePanel key={provider} provider={provider} onSetPassword={() => setView('password')} onDeleted={onLogout} />}
+            {view === 'profile' && <ProfilePanel key={provider + acct.password} provider={provider} linked={acct.google} hasPw={acct.password} onSetPassword={() => setView('password')} onDeleted={onLogout} />}
             {view === 'address' && <AddressPanel onAdd={() => setAddrOpen(true)} />}
-            {view === 'password' && <PasswordPanel key={provider} provider={provider} />}
+            {view === 'password' && <PasswordPanel key={String(acct.password)} hasPw={acct.password} onDone={() => { if (!acct.password) setAcct({ ...acct, password: true }); }} />}
+            {view === 'logins' && <LoginsPanel acct={acct} setAcct={setAcct} onPassword={() => setView('password')} />}
             {view === 'devices' && <DevicesPanel />}
             {view === 'vouchers' && <VouchersPanel onUse={() => onGo && onGo('cart')} />}
             {view === 'coins' && <CoinsPanel />}
@@ -336,7 +428,7 @@
   }
 
   /* ============================== PROFILE ============================== */
-  function ProfilePanel({ provider, onSetPassword, onDeleted }) {
+  function ProfilePanel({ provider, linked, hasPw, onSetPassword, onDeleted }) {
     const [delOpen, setDelOpen] = React.useState(false);
     const [delOtp, setDelOtp] = React.useState(false);
     const [delCode, setDelCode] = React.useState('');
@@ -377,10 +469,10 @@
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
                 <span style={{ font: 'var(--type-body)', color: 'var(--text-body)' }}>{f.email}</span>
                 <Badge variant="mint" icon="badge-check">Đã xác minh</Badge>
-                {isSSO && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: '600 12px var(--font-sans)', color: 'var(--text-body)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-pill)', padding: '3px 10px' }}><ProvIcon size={13} /> Liên kết {provName}</span>}
+                {linked && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: '600 12px var(--font-sans)', color: 'var(--text-body)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-pill)', padding: '3px 10px' }}><ProvIcon size={13} /> Liên kết {provName}</span>}
                 <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={linkS} onClick={() => setEmailHint((v) => !v)}>Thay đổi</span>
               </div>
-              {isSSO && emailHint && (
+              {linked && !hasPw && emailHint && (
                 <div style={{ display: 'flex', gap: 9, marginTop: 8, padding: '11px 13px', background: 'var(--blue-50)', border: '1px solid var(--blue-200)', borderRadius: 'var(--radius-md)' }}>
                   <Icon name="info" size={16} style={{ color: 'var(--blue-600)', flex: 'none', marginTop: 1 }} />
                   <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>
@@ -511,8 +603,9 @@
   }
 
   /* ============================== PASSWORD ============================== */
-  function PasswordPanel({ provider }) {
-    const hasPw = (provider || USER.authProvider) === 'email';
+  // No password yet (Google-only account): set one with no old password, since signing in
+  // with Google already proved who you are. With a password: the old one is required.
+  function PasswordPanel({ hasPw, onDone }) {
     const [f, setF] = React.useState({ cur: '', nw: '', cf: '' });
     const [err, setErr] = React.useState({});
     const [stage, setStage] = React.useState('form'); // form | otp | done
@@ -551,12 +644,14 @@
     const [otpErr, setOtpErr] = React.useState('');
     const confirm = () => {
       if (otp !== OTP_DEMO) { setOtpErr('Mã OTP không đúng'); return; }
-      setOtpErr(''); setStage('done'); setF({ cur: '', nw: '', cf: '' }); setTimeout(() => setStage('form'), 2800);
+      setOtpErr(''); setStage('done'); setF({ cur: '', nw: '', cf: '' });
+      // A first password flips the page to "Đổi mật khẩu" once the success note has been read.
+      setTimeout(() => { if (onDone) onDone(); setStage('form'); }, 2800);
     };
 
     return (
       <section style={card}>
-        <PanelHead icon="shield-check" title={hasPw ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'} sub={hasPw ? 'Bảo mật tài khoản bằng mật khẩu mạnh' : 'Tạo mật khẩu để đăng nhập bằng email bên cạnh Google SSO'} />
+        <PanelHead icon="shield-check" title={hasPw ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'} sub={hasPw ? 'Bảo mật tài khoản bằng mật khẩu mạnh' : 'Tài khoản đang chỉ có Google. Không cần mật khẩu cũ vì bạn đã đăng nhập bằng Google; sau khi đặt, bạn đăng nhập được bằng cả email lẫn Google'} />
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: 28, marginTop: 18, alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {hasPw && <div>

@@ -124,8 +124,99 @@ function useCountdown(start, running) {
 }
 const mmss = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 
+/* Google sign-in, simulated step by step (account-linking-google-login.md, section 3):
+   [1] find by google_id → [2] email_verified? → [3] find by email → link or create.
+   Each case is one thing Google could hand back; the result writes the account-page demo. */
+const ACCT_KEY = 'genie_acct_demo';
+const G_CASES = [
+  { id: 'linked', email: 'mai.tran@gmail.com', title: 'Đã liên kết từ trước', desc: 'Tài khoản Google này đã gắn với Genie',
+    steps: [true], result: 'login', acct: { origin: 'email', password: true, google: true },
+    before: ['$2a$10$…', '109823447156'], after: ['$2a$10$…', '109823447156'] },
+  { id: 'link', email: 'mai.tran@gmail.com', title: 'Email đã có tài khoản Genie', desc: 'Đăng ký bằng email trước, giờ mới dùng Google',
+    steps: [false, true, true], result: 'link', acct: { origin: 'email', password: true, google: true },
+    before: ['$2a$10$…', null], after: ['$2a$10$…', '109823447156'] },
+  { id: 'new', email: 'khach.moi@gmail.com', title: 'Email chưa có tài khoản', desc: 'Lần đầu đến Genie',
+    steps: [false, true, false], result: 'create', acct: { origin: 'google', password: false, google: true },
+    before: null, after: [null, '220176533901'] },
+  { id: 'unverified', email: 'mai.tran@gmail.com', title: 'Email chưa được xác minh', desc: 'Nhà cung cấp trả về email_verified = false',
+    steps: [false, false], result: 'deny', reason: 'Email chưa được xác minh nên Genie không gắn vào tài khoản có sẵn, tránh bị chiếm tài khoản.' },
+  { id: 'banned', email: 'bi.khoa@gmail.com', title: 'Tài khoản bị khóa', desc: 'Email trùng một tài khoản đang bị khóa',
+    steps: [false, true, true], result: 'deny', reason: 'Tài khoản này đang bị khóa. Genie không liên kết và không cấp phiên đăng nhập.' },
+];
+const G_STEPS = ['Tìm theo mã Google (google_id)', 'Google đã xác minh email?', 'Tìm tài khoản theo email'];
+const G_RESULT = {
+  login: { tone: 'var(--mint-600)', bg: 'var(--mint-50)', icon: 'circle-check', title: 'Đăng nhập luôn', text: 'Đã thấy tài khoản gắn với mã Google này.' },
+  link: { tone: 'var(--mint-600)', bg: 'var(--mint-50)', icon: 'circle-check', title: 'Liên kết vào tài khoản có sẵn', text: 'Gắn mã Google vào tài khoản cùng email, không tạo tài khoản mới. Từ giờ đăng nhập được bằng cả mật khẩu lẫn Google.' },
+  create: { tone: 'var(--mint-600)', bg: 'var(--mint-50)', icon: 'circle-check', title: 'Tạo tài khoản mới', text: 'Tài khoản chưa có mật khẩu. Có thể thiết lập mật khẩu sau trong Tài khoản.' },
+  deny: { tone: 'var(--red-600)', bg: 'var(--red-50)', icon: 'ban', title: 'Từ chối đăng nhập', text: '' },
+};
+
+function GoogleFlow({ open, onClose }) {
+  const { Modal } = window.LazadeeDesignSystem_0477b7;
+  const [pick, setPick] = React.useState('link');
+  const [stage, setStage] = React.useState('choose'); // choose | result
+  React.useEffect(() => { if (open) setStage('choose'); }, [open]);
+  const c = G_CASES.find((x) => x.id === pick);
+  const r = G_RESULT[c.result];
+  const enter = () => {
+    try { localStorage.setItem(ACCT_KEY, JSON.stringify(c.acct)); } catch (e) {}
+    window.location.href = '../storefront/index.html?screen=account&view=logins';
+  };
+  const cell = (v) => v ? <b>{v}</b> : <b style={{ color: 'var(--red-600)' }}>NULL</b>;
+  const row = (r2) => r2 ? <>password_hash = {cell(r2[0])} · google_id = {cell(r2[1])}</> : <i>chưa có dòng nào</i>;
+  return (
+    <Modal open={open} onClose={onClose} width={520} title="Đăng nhập bằng Google (mô phỏng)"
+      footer={stage === 'choose'
+        ? <><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={() => setStage('result')}>Tiếp tục với Google</Button></>
+        : <><Button variant="ghost" onClick={() => setStage('choose')}>Thử tình huống khác</Button>{c.result !== 'deny' && <Button iconRight="arrow-right" onClick={enter}>Vào Genie</Button>}</>}>
+      {stage === 'choose' ? (
+        <div>
+          <p style={{ margin: '0 0 12px', font: 'var(--type-body-sm)', color: 'var(--text-muted)' }}>Chọn điều Google trả về cho Genie:</p>
+          <div role="radiogroup" aria-label="Tình huống Google trả về" style={{ display: 'grid', gap: 8 }}>
+            {G_CASES.map((x) => (
+              <label key={x.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', borderRadius: 'var(--radius-md)', cursor: 'pointer', border: '1.5px solid ' + (pick === x.id ? 'var(--color-primary)' : 'var(--border-default)'), background: pick === x.id ? 'var(--color-primary-tint)' : '#fff' }}>
+                <input type="radio" name="gcase" checked={pick === x.id} onChange={() => setPick(x.id)} style={{ marginTop: 3, accentColor: 'var(--color-primary)' }} />
+                <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <b style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{x.title}</b>
+                  <span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>{x.email} · {x.desc}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div>
+          <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 8 }}>
+            {G_STEPS.map((s, i) => {
+              const ran = i < c.steps.length, ok = c.steps[i];
+              const note = !ran ? 'Bỏ qua' : i === 0 ? (ok ? 'Có' : 'Không thấy') : i === 1 ? (ok ? 'Đã xác minh' : 'Chưa xác minh') : (ok ? 'Có tài khoản ' + c.email : 'Chưa có');
+              return (
+                <li key={s} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 'var(--radius-md)', background: ran ? 'var(--gray-50)' : 'transparent', opacity: ran ? 1 : .45 }}>
+                  <span style={{ width: 22, height: 22, borderRadius: '50%', display: 'grid', placeItems: 'center', flex: 'none', font: '700 12px var(--font-sans)', background: ran ? 'var(--brand-900)' : 'var(--gray-200)', color: '#fff' }}>{i + 1}</span>
+                  <span style={{ flex: 1, font: 'var(--type-body-sm)', color: 'var(--text-body)' }}>{s}</span>
+                  <b style={{ font: '600 12px var(--font-sans)', color: !ran ? 'var(--text-subtle)' : 'var(--text-strong)' }}>{note}</b>
+                </li>
+              );
+            })}
+          </ol>
+          <div role="status" style={{ display: 'flex', gap: 10, marginTop: 14, padding: '12px 14px', borderRadius: 'var(--radius-md)', background: r.bg }}>
+            <Icon name={r.icon} size={20} style={{ color: r.tone, flex: 'none', marginTop: 1 }} />
+            <div><div style={{ font: 'var(--weight-bold) var(--text-sm) var(--font-sans)', color: r.tone }}>{r.title}</div><div style={{ marginTop: 2, font: 'var(--type-body-sm)', color: 'var(--text-body)', lineHeight: 1.5 }}>{c.reason || r.text}</div></div>
+          </div>
+          {c.result !== 'deny' && (
+            <div className="code" style={{ marginTop: 12, padding: '9px 12px', borderRadius: 'var(--radius-md)', background: 'var(--gray-50)', font: '12px/1.7 var(--font-mono)', color: 'var(--text-body)' }}>
+              Trước: {row(c.before)}<br />Sau:&nbsp;&nbsp;{row(c.after)}
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 function SsoDialog({ provider, onClose }) {
   const { Modal } = window.LazadeeDesignSystem_0477b7;
+  if (provider === 'Google' || provider === null) return <GoogleFlow open={provider === 'Google'} onClose={onClose} />;
   return (
     <Modal open={!!provider} onClose={onClose} width={400} title={'Tiếp tục với ' + provider}
       footer={<><Button variant="ghost" onClick={onClose}>Huỷ</Button><Button onClick={() => { window.location.href = '../storefront/index.html'; }}>Tiếp tục</Button></>}>
