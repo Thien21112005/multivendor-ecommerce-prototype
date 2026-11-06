@@ -4,7 +4,7 @@
   const DS = window.LazadeeDesignSystem_0477b7;
   const { Icon, Button, Badge, Modal, Input, Select } = DS;
   const { PLATFORM_NOTIFS } = window.LZA;
-  const TARGET = { ALL: 'Tất cả người dùng', SELLER: 'Chỉ Vendor', BUYER: 'Chỉ Customer', SPECIFIC: 'Người dùng cụ thể' };
+  const TARGET = { ALL: 'Tất cả người dùng', VENDOR: 'Chỉ Vendor', CUSTOMER: 'Chỉ Customer', SPECIFIC_USERS: 'Người dùng cụ thể' };
   const plain = (html) => String(html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
   // Minimal rich-text box: bold, italic, link. Mock only, content stays in this browser.
@@ -25,10 +25,10 @@
       </div>
     );
   }
-  const T_VARIANT = { ALL: 'primary', SELLER: 'warning', BUYER: 'mint', SPECIFIC: 'neutral' };
-  const FILTER = { 'Tất cả đối tượng': null, 'Chỉ Vendor': 'SELLER', 'Chỉ Customer': 'BUYER', 'Người dùng cụ thể': 'SPECIFIC' };
+  const T_VARIANT = { ALL: 'primary', VENDOR: 'warning', CUSTOMER: 'mint', SPECIFIC_USERS: 'neutral' };
+  const FILTER = { 'Tất cả đối tượng': null, 'Chỉ Vendor': 'VENDOR', 'Chỉ Customer': 'CUSTOMER', 'Người dùng cụ thể': 'SPECIFIC_USERS' };
   const PAGE = 5;
-  const REACH = { ALL: 248300, BUYER: 120400, SELLER: 3120 };
+  const REACH = { ALL: 248300, CUSTOMER: 120400, VENDOR: 3120 };
   const short = (n) => (n < 1000 ? String(n) : n < 1e6 ? '~' + (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : '~' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M');
 
   function Stat({ icon, tone, label, value }) {
@@ -66,7 +66,7 @@
     const send = () => {
       if (form.id) setRows((rs) => rs.map((n) => (n.id === form.id ? { ...n, ...form } : n)));
       else {
-        const reach = form.target === 'SPECIFIC' ? (form.emails || '').split(',').filter((x) => x.trim()).length : REACH[form.target];
+        const reach = form.target === 'SPECIFIC_USERS' ? (form.emails || '').split(',').filter((x) => x.trim()).length : REACH[form.target];
         setRows((rs) => [{ ...form, id: 'PN-' + (1049 + rs.length), by: 'Admin (1)', at: form.sendAt ? form.sendAt.replace('T', ' ') : 'Vừa xong', scheduled: !!form.sendAt, reads: 0, reach }, ...rs]);
       }
       setConfirm(false); setForm(null); setPage(1);
@@ -136,13 +136,13 @@
         </Modal>
 
         <Modal open={!!form} onClose={() => setForm(null)} width={560} title={form && form.id ? 'Sửa thông báo toàn sàn' : 'Tạo thông báo toàn sàn (Broadcast)'}
-          footer={form && <><Button variant="ghost" onClick={() => setForm(null)}>Hủy</Button><Button iconLeft="send" disabled={!form.title.trim() || !plain(form.content) || (form.target === 'SPECIFIC' && !(form.emails || '').trim())} onClick={() => setConfirm(true)}>{form.id ? 'Cập nhật' : form.sendAt ? 'Lưu & hẹn giờ' : 'Phát thông báo'}</Button></>}>
+          footer={form && <><Button variant="ghost" onClick={() => setForm(null)}>Hủy</Button><Button iconLeft="send" disabled={!form.title.trim() || !plain(form.content) || (form.target === 'SPECIFIC_USERS' && !(form.emails || '').trim())} onClick={() => setConfirm(true)}>{form.id ? 'Cập nhật' : form.sendAt ? 'Lưu & hẹn giờ' : 'Phát thông báo'}</Button></>}>
           {form && <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={lab}>Đối tượng nhận (Target Audience)</label>
               <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>{Object.entries(TARGET).map(([k, v]) => <label key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', font: 'var(--type-body-sm)', color: 'var(--text-body)' }}><input type="radio" name="target" checked={form.target === k} onChange={() => setForm({ ...form, target: k })} style={{ accentColor: 'var(--blue-500)' }} />{v}</label>)}</div>
             </div>
-            {form.target === 'SPECIFIC' && <Input label="Email người nhận (cách nhau bằng dấu phẩy)" value={form.emails || ''} onChange={(e) => setForm({ ...form, emails: e.target.value })} placeholder="mai.tran@gmail.com, an.nguyen@gmail.com" />}
+            {form.target === 'SPECIFIC_USERS' && <Input label="Email người nhận (cách nhau bằng dấu phẩy)" value={form.emails || ''} onChange={(e) => setForm({ ...form, emails: e.target.value })} placeholder="mai.tran@gmail.com, an.nguyen@gmail.com" />}
             <Input label="Tiêu đề (Title)" value={form.title} maxLength={100} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Nhập tiêu đề thông báo (Tối đa 100 ký tự)" />
             <div>
               <label style={lab}>Hình ảnh đính kèm (không bắt buộc)</label>

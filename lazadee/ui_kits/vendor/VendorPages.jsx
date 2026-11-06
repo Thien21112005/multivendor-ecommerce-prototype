@@ -360,7 +360,7 @@
             <div className="dash-head">
               <div>
                 <h3 className="dash-title">Tiền thực về shop</h3>
-                <div className="dash-sub">Voucher sàn và Xu do sàn chịu, không trừ vào tiền của shop</div>
+                <div className="dash-sub">Voucher sàn và Điểm Genie do sàn chịu, không trừ vào tiền của shop</div>
               </div>
             </div>
             <div className="dash-sub">Doanh thu thuần</div>

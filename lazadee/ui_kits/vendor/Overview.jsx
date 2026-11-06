@@ -48,7 +48,7 @@
 
   function KycBanner({ kyc, onNav }) {
     const B = {
-      PENDING: { bg: 'var(--amber-50)', icon: 'clock', c: 'var(--amber-600)', t: 'Hồ sơ KYC đang chờ duyệt', s: 'Đội ngũ sẽ xét duyệt trong 1-3 ngày làm việc.', btn: 'Xem tiến độ' },
+      PENDING: { bg: 'var(--amber-50)', icon: 'clock', c: 'var(--amber-600)', t: 'Hồ sơ KYC đang chờ duyệt', s: 'Hồ sơ nghi ngờ được nhân viên xử lý trong 24 giờ làm việc.', btn: 'Xem tiến độ' },
       REJECTED: { bg: 'var(--red-50)', icon: 'triangle-alert', c: 'var(--red-600)', t: 'KYC bị từ chối', s: 'Vui lòng cập nhật hồ sơ và nộp lại.', btn: 'Nộp lại' },
     }[kyc];
     if (!B) return null;

@@ -69,7 +69,7 @@
             <StatTile label="Lợi nhuận ròng" value={vnd(net(month))} note="Hoa hồng trừ voucher, điểm thưởng, phí cổng" onClick={go('ledger')} />
           </div>
 
-          {/* UC-ADM-06: lợi nhuận ròng = hoa hồng − chi phí sàn tài trợ − Xu − phí cổng. */}
+          {/* UC-ADM-06: lợi nhuận ròng = hoa hồng − chi phí sàn tài trợ − Điểm − phí cổng. */}
           <section className="dash-sheet">
             <div className="dash-head">
               <div>
@@ -82,7 +82,7 @@
             <SegBar label={'Hoa hồng ' + month} format={vnd} parts={[
               { label: 'Lợi nhuận ròng', value: net(month), tone: 'ok' },
               { label: 'Voucher sàn và freeship', value: D.voucherCost[month], tone: 'held' },
-              { label: 'Điểm thưởng (Xu)', value: D.xuCost[month], tone: 'info' },
+              { label: 'Điểm Genie', value: D.xuCost[month], tone: 'info' },
               { label: 'Phí cổng thanh toán', value: D.gatewayFee[month], tone: 'wait' },
             ]} />
           </section>

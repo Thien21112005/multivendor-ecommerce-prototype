@@ -14,7 +14,7 @@
   ];
   const STEPS = [
     { n: 1, title: 'Đăng ký thông tin Shop', desc: 'Điền tên shop, ngành hàng và thông tin liên hệ.' },
-    { n: 2, title: 'Xác minh KYC', desc: 'Tải CCCD / ĐKKD. Genie duyệt trong 1–2 ngày làm việc.' },
+    { n: 2, title: 'Xác minh KYC', desc: 'Tải CCCD / ĐKKD. AI thẩm định ngay, hồ sơ nghi ngờ được duyệt trong 24 giờ làm việc.' },
     { n: 3, title: 'Đăng bán & nhận đơn', desc: 'Sau khi VERIFIED, đăng sản phẩm và bắt đầu bán ngay.' },
   ];
   const CATS = ['Điện tử', 'Thời trang', 'Làm đẹp', 'Nhà cửa & Đời sống', 'Mẹ & Bé', 'Thể thao', 'Bách hoá', 'Khác'];

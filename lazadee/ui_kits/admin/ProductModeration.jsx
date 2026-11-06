@@ -11,12 +11,14 @@
   const STATE = {
     PENDING_APPROVAL: ['warning', 'clock', 'Chờ duyệt'],
     FLAGGED: ['warning', 'triangle-alert', 'AI nghi ngờ'],
+    // Nhãn của sản phẩm đưa lại hàng chờ: trạng thái vẫn là PENDING_APPROVAL (ProductStatus), cờ requeued chỉ đổi nhãn.
     REQUEUED: ['warning', 'refresh-cw', 'Chờ duyệt lại'],
     PUBLISHED: ['success', 'circle-check', 'Đã duyệt'],
     REJECTED: ['danger', 'ban', 'Từ chối'],
   };
   const REJECT_REASONS = ['Thiếu chứng nhận an toàn', 'Vi phạm chính sách', 'Ảnh sản phẩm không đạt', 'Mô tả sai / gây hiểu lầm', 'Giá bất hợp lý', 'Hàng cấm / hạn chế'];
-  const TABS = { PENDING: ['PENDING_APPROVAL', 'FLAGGED', 'REQUEUED'], PUBLISHED: ['PUBLISHED'], REJECTED: ['REJECTED'] };
+  const labelOf = (p) => STATE[p.state === 'PENDING_APPROVAL' && p.requeued ? 'REQUEUED' : p.state];
+  const TABS = { PENDING: ['PENDING_APPROVAL', 'FLAGGED'], PUBLISHED: ['PUBLISHED'], REJECTED: ['REJECTED'] };
 
   function Toast({ text }) {
     return text ? <div role="status" style={{ position: 'fixed', top: 24, right: 24, zIndex: 1000, display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid var(--border-default)', padding: '12px 18px', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)', font: 'var(--weight-medium) 14px var(--font-sans)', color: 'var(--text-strong)' }}><Icon name="info" size={18} style={{ color: 'var(--blue-500)' }} />{text}</div> : null;
@@ -30,7 +32,7 @@
     const [zoom, setZoom] = React.useState(null);
     const rejectText = reason + (note.trim() ? ': ' + note.trim() : '');
     const askReject = () => setConfirm('REJECTED');
-    const st = STATE[p.state];
+    const st = labelOf(p);
     const aiRejected = p.state === 'REJECTED' && !p.moderator;
     return (
       <div style={{ maxWidth: 1180, paddingBottom: 96 }}>
@@ -109,7 +111,7 @@
           </div>
           {p.state !== 'REJECTED' && <Button variant="danger" iconLeft="ban" onClick={askReject}>Từ chối</Button>}
           {p.state !== 'PUBLISHED' && <Button iconLeft="circle-check" onClick={() => setConfirm('PUBLISHED')}>Duyệt lên sàn</Button>}
-          {!TABS.PENDING.includes(p.state) && <Button variant="outline" iconLeft="refresh-cw" onClick={() => onDecide(p, 'REQUEUED', '')}>Chờ duyệt lại</Button>}
+          {!TABS.PENDING.includes(p.state) && <Button variant="outline" iconLeft="refresh-cw" onClick={() => onDecide(p, 'PENDING_APPROVAL', '', true)}>Chờ duyệt lại</Button>}
         </div>
 
         <Modal open={!!confirm} onClose={() => setConfirm(null)} width={420} title={confirm === 'PUBLISHED' ? 'Xác nhận duyệt sản phẩm' : 'Xác nhận từ chối sản phẩm'}
@@ -146,8 +148,8 @@
 
     const inTab = (p, t) => TABS[t].includes(p.state);
     const open = rows.find((p) => p.id === openId);
-    const decide = (p, state, note) => {
-      setRows((rs) => rs.map((x) => (x.id === p.id ? { ...x, state, aiReason: state === 'REJECTED' ? note : x.aiReason, moderator: x.moderator || staff[0].name } : x)));
+    const decide = (p, state, note, requeued = false) => {
+      setRows((rs) => rs.map((x) => (x.id === p.id ? { ...x, state, requeued, aiReason: state === 'REJECTED' ? note : x.aiReason, moderator: x.moderator || staff[0].name } : x)));
       setOpenId(null);
       say(state === 'PUBLISHED' ? 'Đã duyệt sản phẩm thành công!' : state === 'REJECTED' ? 'Đã từ chối sản phẩm!' : 'Đã đưa sản phẩm về hàng chờ duyệt lại');
     };
@@ -206,7 +208,7 @@
               <thead><tr style={{ font: '600 12px var(--font-sans)', color: 'var(--text-muted)', textAlign: 'left', background: 'var(--gray-25)' }}><th style={c}>Sản phẩm</th><th style={c}>Nhà bán (Vendor)</th><th style={c}>Trạng thái</th><th style={c}>Người duyệt</th><th style={{ ...c, textAlign: 'right' }}>Thao tác</th></tr></thead>
               <tbody>
                 {shown.map((p) => {
-                  const st = STATE[p.state];
+                  const st = labelOf(p);
                   return (
                     <tr key={p.id} style={{ borderTop: '1px solid var(--border-subtle)', font: '13px var(--font-sans)', color: 'var(--text-body)' }}>
                       <td style={c}><span style={{ display: 'flex', alignItems: 'center', gap: 10 }}><img src={img(p.img)} alt="" width="44" height="44" style={{ borderRadius: 'var(--radius-sm)', objectFit: 'cover', flex: 'none' }} /><span><span style={{ display: 'block', fontWeight: 600, color: 'var(--text-strong)' }}>{p.name}</span><span style={{ font: 'var(--type-caption)', color: 'var(--text-muted)' }}>ID: #{p.id}</span></span></span></td>
