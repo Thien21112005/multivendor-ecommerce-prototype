@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Draws the silk lanterns of the "hoian" storefront theme: a wire strung across, five
    lanterns hanging at different drops, each with ribs, caps and a tassel, swaying out of
-   step. Writes lazadee/assets/hoian-lanterns.svg.
+   step. Writes genie/assets/hoian-lanterns.svg.
 
      node tools/hoian-lanterns.mjs */
 import { writeFileSync } from 'node:fs';
@@ -43,6 +43,6 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" fil
 ${parts.join('\n')}
 </svg>
 `;
-const file = join(dirname(fileURLToPath(import.meta.url)), '..', 'lazadee/assets/hoian-lanterns.svg');
+const file = join(dirname(fileURLToPath(import.meta.url)), '..', 'genie/assets/hoian-lanterns.svg');
 writeFileSync(file, svg);
 console.log('wrote', file);

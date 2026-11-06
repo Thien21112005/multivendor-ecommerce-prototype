@@ -1,7 +1,7 @@
-# Lazadee Platform Prototype — Unified Interactive Marketplace Shell
+# Genie Platform Prototype — Unified Interactive Marketplace Shell
 
 > **Repository:** `multivendor-ecommerce-prototype`  
-> **Platform:** Lazadee Multi-Vendor E-Commerce Platform  
+> **Platform:** Genie Multi-Vendor E-Commerce Platform  
 > **Language Support:** [Tiếng Việt](#tiếng-việt) | [English](#english)
 
 ---
@@ -28,7 +28,7 @@
 
 ## 1. Giới thiệu tổng quan
 
-**Lazadee Platform Prototype** là bộ nguyên mẫu tương tác hoàn chỉnh (High-Fidelity Interactive Prototype) của hệ thống sàn thương mại điện tử đa người bán **Lazadee**. 
+**Genie Platform Prototype** là bộ nguyên mẫu tương tác hoàn chỉnh (High-Fidelity Interactive Prototype) của hệ thống sàn thương mại điện tử đa người bán **Genie**. 
 
 Khác với các bản thiết kế tĩnh, dự án này đóng vai trò như một **Khung khởi chạy hợp nhất (Unified Platform Launcher Shell)**, tích hợp toàn bộ các phân hệ người dùng (Khách hàng, Người bán, Quản trị viên, Xác thực bảo mật) vào một môi trường tương tác trực tiếp theo thời gian thực. Hệ thống cho phép kiểm thử toàn diện các luồng nghiệp vụ phức tạp của sàn TMĐT theo sát đặc tả yêu cầu phần mềm (SRS / PRD).
 
@@ -70,7 +70,7 @@ Shell tích hợp bộ điều khiển tinh chỉnh giao diện thời gian th�
 ### Bảng màu chủ đạo (Accent Color Ramps):
 | Mã màu | Tên màu | Thang sắc độ áp dụng (--orange-50 đến --orange-700) |
 | :--- | :--- | :--- |
-| `#F5511E` | Cam Lazadee (Mặc định) | `#FFF3EE`, `#FFC1A6`, `#FB7440`, `#F5511E`, `#DB3F0E`, `#B53109` |
+| `#F5511E` | Cam Genie (Mặc định) | `#FFF3EE`, `#FFC1A6`, `#FB7440`, `#F5511E`, `#DB3F0E`, `#B53109` |
 | `#2563EB` | Xanh Dương Doanh Nghiệp | `#EAF1FE`, `#B7CEF9`, `#5B8DEF`, `#2563EB`, `#1A4FD0`, `#143FA8` |
 | `#14B86E` | Xanh Lá Tươi Sáng | `#E6F8F0`, `#BCEDD8`, `#4DD08E`, `#14B86E`, `#0E9A5A`, `#0B7E49` |
 | `#6C2BD9` | Tím Cao Cấp | `#F1ECFE`, `#D6C4F7`, `#9460E8`, `#6C2BD9`, `#5A22B5`, `#4A1C95` |
@@ -117,7 +117,7 @@ sequenceDiagram
 
 ### 2. Mã giảm giá xếp chồng 3 tầng + Xu (`FR-PRO-04`)
 - **Nghiệp vụ:** Cho phép áp dụng đồng thời tối đa 3 loại khuyến mãi trong một lượt thanh toán:
-  - **1 Voucher toàn sàn:** Giảm % hoặc tiền mặt tài trợ bởi sàn Lazadee.
+  - **1 Voucher toàn sàn:** Giảm % hoặc tiền mặt tài trợ bởi sàn Genie.
   - **1 Voucher của từng Shop:** Do từng nhà bán tự phát hành và tài trợ.
   - **1 Mã Miễn phí vận chuyển (Freeship Xtra):** Khấu trừ trực tiếp vào tổng cước vận chuyển.
 - **Xử lý:** Thứ tự áp dụng Shop → Sàn → Freeship → Xu (tối đa 50% tiền hàng còn lại). Hệ thống gợi ý bộ mã giảm nhiều nhất và phân bổ giảm giá vào từng dòng sản phẩm để hoàn tiền từng món chính xác.
@@ -156,19 +156,19 @@ sequenceDiagram
 prototype/
 ├── index.html                  # Điểm khởi chạy Prototype Shell (Nạp Babel, CSS & UI Shell)
 ├── README.md                   # Tài liệu kỹ thuật chi tiết của repository
-└── lazadee/
+└── genie/
     ├── shell.jsx               # Khung điều hướng chính, Persona switcher, Quản lý tab & PRD Guide
     ├── tweaks-panel.jsx        # Component tùy chỉnh theme & bo góc thời gian thực
     ├── board.jsx               # Danh mục Artboards phục vụ đồng bộ
     ├── design-canvas.jsx       # Component bổ trợ
     ├── styles.css              # Reset CSS & biến giao diện tổng thể
-    ├── _ds_bundle.js           # Bundle các component Lazadee Design System
+    ├── _ds_bundle.js           # Bundle các component Genie Design System
     ├── assets/
     │   ├── fonts/              # Webfonts cục bộ Be Vietnam Pro & IBM Plex Mono
     │   ├── img/                # Ảnh sản phẩm mẫu & banner
-    │   └── logomark.svg        # Logo Lazadee
+    │   └── logomark.svg        # Logo Genie
     ├── components/
-    │   └── lazadee-components.css # Component Master Styles
+    │   └── genie-components.css # Component Master Styles
     ├── tokens/
     │   ├── base.css            # Base Tokens
     │   ├── colors.css          # Color Swatches
@@ -227,7 +227,7 @@ Các phần chỉ mô phỏng: mã QR không quét được và không có giao 
 
 ## 1. Executive Overview
 
-**Lazadee Platform Prototype** is an enterprise-grade, high-fidelity interactive prototype application representing the **Lazadee Multi-Vendor E-Commerce Platform**.
+**Genie Platform Prototype** is an enterprise-grade, high-fidelity interactive prototype application representing the **Genie Multi-Vendor E-Commerce Platform**.
 
 Unlike static design artifacts, this repository serves as a **Unified Platform Launcher Shell**, orchestrating all 4 key user personas (Buyer, Merchant, Platform Administrator, Authentication Security) in a synchronized, real-time environment. It enables comprehensive verification of mission-critical e-commerce business logic in full accordance with the platform's Software Requirement Specifications (SRS / PRD).
 
@@ -269,7 +269,7 @@ The shell features an integrated live theme customizer (`tweaks-panel.jsx`), dyn
 ### Brand Accent Color Ramps:
 | Color Hex | Palette Name | Applied Swatch Ramp (--orange-50 to --orange-700) |
 | :--- | :--- | :--- |
-| `#F5511E` | Lazadee Orange (Default) | `#FFF3EE`, `#FFC1A6`, `#FB7440`, `#F5511E`, `#DB3F0E`, `#B53109` |
+| `#F5511E` | Genie Orange (Default) | `#FFF3EE`, `#FFC1A6`, `#FB7440`, `#F5511E`, `#DB3F0E`, `#B53109` |
 | `#2563EB` | Enterprise Blue | `#EAF1FE`, `#B7CEF9`, `#5B8DEF`, `#2563EB`, `#1A4FD0`, `#143FA8` |
 | `#14B86E` | Vibrant Green | `#E6F8F0`, `#BCEDD8`, `#4DD08E`, `#14B86E`, `#0E9A5A`, `#0B7E49` |
 | `#6C2BD9` | Royal Purple | `#F1ECFE`, `#D6C4F7`, `#9460E8`, `#6C2BD9`, `#5A22B5`, `#4A1C95` |
@@ -316,7 +316,7 @@ sequenceDiagram
 
 ### 2. 3-Tier Stacked Voucher Engine with Xu (`FR-PRO-04`)
 - **Business Rule:** Enables concurrent application of up to 3 distinct promotional vouchers:
-  - **1 Platform Voucher:** Percentage or fixed discount funded by Lazadee.
+  - **1 Platform Voucher:** Percentage or fixed discount funded by Genie.
   - **1 Shop-Specific Voucher:** Self-funded merchant discount code.
   - **1 Free Shipping Voucher (Freeship Xtra):** Shipping subsidy deduction.
 - **Execution:** The calculation engine proportionally distributes aggregate discounts across individual line items to ensure precise partial refund calculations.
@@ -355,19 +355,19 @@ sequenceDiagram
 prototype/
 ├── index.html                  # Prototype Shell Entrypoint (Babel, CSS & UI Shell)
 ├── README.md                   # Technical Documentation
-└── lazadee/
+└── genie/
     ├── shell.jsx               # Master Shell, Navigation Gating, Persona Switching, PRD Guide
     ├── tweaks-panel.jsx        # Live Theme & Radius Customizer Component
     ├── board.jsx               # Design Board Catalog Component
     ├── design-canvas.jsx       # Canvas Support Component
     ├── styles.css              # Global Reset & Master CSS Variables
-    ├── _ds_bundle.js           # Lazadee Design System Component Bundle
+    ├── _ds_bundle.js           # Genie Design System Component Bundle
     ├── assets/
     │   ├── fonts/              # Local WOFF2 Webfonts (Be Vietnam Pro & IBM Plex Mono)
     │   ├── img/                # Product Images & Banners
-    │   └── logomark.svg        # Lazadee Brand Vector
+    │   └── logomark.svg        # Genie Brand Vector
     ├── components/
-    │   └── lazadee-components.css # Component Master Styles
+    │   └── genie-components.css # Component Master Styles
     ├── tokens/
     │   ├── base.css            # Base Variables
     │   ├── colors.css          # Color Swatches

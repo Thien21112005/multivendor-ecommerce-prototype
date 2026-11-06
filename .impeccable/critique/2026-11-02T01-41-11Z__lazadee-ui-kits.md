@@ -5,7 +5,7 @@ max_score: 40
 na_heuristics: 
 p0_count: 0
 p1_count: 4
-target_identity: "file:D:\\Tu-hoc\\project\\MultivendorEcommercePrototype\\lazadee\\ui_kits"
+target_identity: "file:D:\\Tu-hoc\\project\\MultivendorEcommercePrototype\genie\ui_kits"
 timestamp: 2026-11-02T01-41-11Z
 slug: lazadee-ui-kits
 closed: true

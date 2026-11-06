@@ -102,7 +102,7 @@ Hiểu đúng là: có **2 phương thức đăng nhập** cùng trỏ về **1 
 Nếu bỏ qua bước này, kẻ tấn công có thể:
 
 1. Tạo tài khoản Google (hoặc IdP khác) với email của nạn nhân nhưng **chưa xác minh**.
-2. Đăng nhập vào Lazadee bằng tài khoản đó.
+2. Đăng nhập vào Genie bằng tài khoản đó.
 3. Hệ thống thấy email trùng → link → kẻ tấn công **chiếm luôn tài khoản của nạn nhân**.
 
 Với Google thì `email_verified` gần như luôn là `true`, nhưng vẫn nên check để an toàn và để sau này thêm provider khác không bị lỗ hổng.

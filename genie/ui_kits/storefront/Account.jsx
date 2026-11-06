@@ -1010,7 +1010,7 @@
             <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={n.id} onClick={() => onOpen(n)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 22px', borderTop: '1px solid var(--border-subtle)', background: n.unread ? 'var(--brand-50)' : '#fff', cursor: 'pointer' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = n.unread ? 'var(--brand-100)' : 'var(--gray-50)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = n.unread ? 'var(--brand-50)' : '#fff')}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: n.bg, color: n.tint }}>{n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" alt="" width="24" height="24" /> : <Icon name={n.icon} size={19} />}</div>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', flex: 'none', display: 'grid', placeItems: 'center', background: n.bg, color: n.tint }}>{n.icon === 'genie' ? <img src="../../assets/logomark.svg" alt="" width="24" height="24" /> : <Icon name={n.icon} size={19} />}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ font: (n.unread ? 'var(--weight-bold)' : 'var(--weight-medium)') + ' var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{n.title}</div>
                 <div style={{ font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.45 }}>{n.body}</div>

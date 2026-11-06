@@ -1,7 +1,7 @@
 ---
 version: 1
 slug: "lazadee-ui-kits-storefront-index-html"
-primary_target: "lazadee/ui_kits/storefront/index.html"
+primary_target: "genie/ui_kits/storefront/index.html"
 related_targets: []
 ---
 
@@ -33,6 +33,6 @@ Chủ dự án yêu cầu xem 5 theme chạy thật trên mọi màn hình rồi
 
 Danh sách theo độ cộng hưởng: 1 Tiền polymer (lựa chọn của Impeccable), 2 Tem bưu chính, 3 Giấy điệp Đông Hồ (được giao), 4 Mái bạt Sài Gòn, 5 Đèn lồng chợ đêm, 6 Lụa Vạn Phúc, 7 Đèn thần Genie (nghĩa đen, dồn vào logo). Thách thức: bìa đĩa than jazz (cạnh tranh, được dựng thành theme 5); khung arcade, chợ bóng trăng, lọ dưa muối, buồng tối, cổng WebGL bị loại (tối, khó đọc hoặc nặng).
 
-Theme dựng trong `lazadee/ui_kits/storefront/themes.css` + `themes.js`, chọn bằng `?theme=` hoặc dock của launcher: genie, hoian, dongho, dongson, polymer, buudien, saigon, sleeve, classic (bản cũ để đối chiếu). dongson (Trống đồng Đông Sơn) do chủ dự án chỉ định thêm; mặt trống vẽ bằng `tools/dongson-drum.mjs`. Header và hàng danh mục dính thành một khối `.tr-top`, nền đặc theo `--top-bg` của từng theme khi cuộn. Khi chủ dự án chốt: ghi Direction contract mới cho theme đó, gỡ các theme còn lại, chạy finish review và viết lại DESIGN.md từ bản đã dựng.
+Theme dựng trong `genie/ui_kits/storefront/themes.css` + `themes.js`, chọn bằng `?theme=` hoặc dock của launcher: genie, hoian, dongho, dongson, polymer, buudien, saigon, sleeve, classic (bản cũ để đối chiếu). dongson (Trống đồng Đông Sơn) do chủ dự án chỉ định thêm; mặt trống vẽ bằng `tools/dongson-drum.mjs`. Header và hàng danh mục dính thành một khối `.tr-top`, nền đặc theo `--top-bg` của từng theme khi cuộn. Khi chủ dự án chốt: ghi Direction contract mới cho theme đó, gỡ các theme còn lại, chạy finish review và viết lại DESIGN.md từ bản đã dựng.
 
-genie (Đèn thần) do chủ dự án yêu cầu "chuẩn tên Genie", giữ liquid glass; hình hero là đèn và khói (bỏ đồng xu) `lazadee/assets/brand/genie-lamp.svg` dựng từ `logo/Logo.svg`. Logo đồng xu (`logo/Webicon.svg`) vẽ inline trong Header.jsx, màu theo `--mark-1..3` và `--mark-ink` của từng theme. Tháng 11/2026 chủ dự án cho khách tự chọn theme: nút bảng màu trên thanh header mở danh sách theme, lưu vào localStorage `genie_theme`. hoian (Phố Hội) lấy từ ứng viên số 5 của danh sách (đèn lồng chợ đêm), dịch sang ban ngày cho sáng; đèn lồng vẽ bằng `tools/hoian-lanterns.mjs`.
+genie (Đèn thần) do chủ dự án yêu cầu "chuẩn tên Genie", giữ liquid glass; hình hero là đèn và khói (bỏ đồng xu) `genie/assets/brand/genie-lamp.svg` dựng từ `logo/Logo.svg`. Logo đồng xu (`logo/Webicon.svg`) vẽ inline trong Header.jsx, màu theo `--mark-1..3` và `--mark-ink` của từng theme. Tháng 11/2026 chủ dự án cho khách tự chọn theme: nút bảng màu trên thanh header mở danh sách theme, lưu vào localStorage `genie_theme`. hoian (Phố Hội) lấy từ ứng viên số 5 của danh sách (đèn lồng chợ đêm), dịch sang ban ngày cho sáng; đèn lồng vẽ bằng `tools/hoian-lanterns.mjs`.

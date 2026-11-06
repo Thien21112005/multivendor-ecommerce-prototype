@@ -61,7 +61,7 @@
         "rule": "side-tab",
         "value": "*",
         "files": [
-          "lazadee/dash.css"
+          "genie/dash.css"
         ],
         "createdAt": "2026-11-06T07:20:25.580Z",
         "reason": "line 102 is the 6px rotated chevron between pipeline steps, not a card border; predates this session"
@@ -70,7 +70,7 @@
         "rule": "radial-halo",
         "value": "*",
         "files": [
-          "lazadee/ui_kits/auth/index.html"
+          "genie/ui_kits/auth/index.html"
         ],
         "createdAt": "2026-11-06T07:20:25.809Z",
         "reason": "match comes from the shared themes.css Giấy điệp hero sun (hard-edged, .tr-motif only), which never renders on the sign-in page"

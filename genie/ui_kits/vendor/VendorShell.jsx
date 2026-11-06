@@ -30,7 +30,7 @@
               {items.map((n) => (
                 <div key={n.id} onClick={() => read(n)} style={{ display: 'flex', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border-default)', cursor: 'pointer', background: n.unread ? 'var(--blue-50)' : '#fff' }}>
                   <div style={{ position: 'relative', width: 44, height: 44, flex: 'none', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-sm)', display: 'grid', placeItems: 'center', color: 'var(--text-muted)' }}>
-                    {n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" width="28" height="28" alt="" /> : <Icon name={n.icon} size={20} />}
+                    {n.icon === 'genie' ? <img src="../../assets/logomark.svg" width="28" height="28" alt="" /> : <Icon name={n.icon} size={20} />}
                     {n.unread && <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: 'var(--blue-500)', border: '2px solid #fff' }} />}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>

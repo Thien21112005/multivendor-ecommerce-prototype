@@ -1,15 +1,15 @@
 ---
-target: toàn bộ UI lazadee/ui_kits
+target: toàn bộ UI genie/ui_kits
 total_score: 27
 max_score: 40
 na_heuristics: 
 p0_count: 0
 p1_count: 3
-target_identity: "file:D:\\Tu-hoc\\project\\MultivendorEcommercePrototype\\lazadee\\ui_kits"
+target_identity: "file:D:\\Tu-hoc\\project\\MultivendorEcommercePrototype\genie\ui_kits"
 timestamp: 2026-11-02T10-04-07Z
 slug: lazadee-ui-kits
 ---
-# Critique: lazadee/ui_kits (storefront, vendor, admin)
+# Critique: genie/ui_kits (storefront, vendor, admin)
 Method: dual-agent. Browser overlay skipped (no browser tool).
 Score 27/40. H1 3, H2 3, H3 3, H4 2, H5 3, H6 2, H7 3, H8 2, H9 3, H10 3.
 Specificity: about 60% authored (money promise, rail, money chips, seals, ink prices). About 40% template (glass blur over photos, blue gradient and glow fields, gradient droplet logo, pill everything, hero template, identical tile rows). Blue covers about 45-50% of Home and overlaps Tiki's territory.

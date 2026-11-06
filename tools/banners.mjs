@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 /* Renders the seeded storefront banners from HTML templates with headless Chrome:
    flat colour fields, Be Vietnam Pro type and the product photographs already in
-   lazadee/assets/img. Every line of copy matches the mock data (voucher codes,
+   genie/assets/img. Every line of copy matches the mock data (voucher codes,
    conditions, categories), so nothing on a banner promises what the demo lacks.
 
-     node tools/banners.mjs          writes lazadee/assets/img/banners/*.jpg   */
+     node tools/banners.mjs          writes genie/assets/img/banners/*.jpg   */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const out = join(root, 'lazadee/assets/img/banners');
+const out = join(root, 'genie/assets/img/banners');
 const tmp = join(root, 'tools/.banners-tmp');
 mkdirSync(out, { recursive: true });
 mkdirSync(tmp, { recursive: true });
-const img = (n) => pathToFileURL(join(root, 'lazadee/assets/img', n + '.jpg')).href;
-const fonts = pathToFileURL(join(root, 'lazadee/tokens/fonts.css')).href;
+const img = (n) => pathToFileURL(join(root, 'genie/assets/img', n + '.jpg')).href;
+const fonts = pathToFileURL(join(root, 'genie/tokens/fonts.css')).href;
 
 // Shapes: main and side slots are 3:1, category strips are 6:1.
 const SIZE = { wide: [1500, 500], strip: [1800, 300] };

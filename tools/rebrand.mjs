@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Renames the brand across every UI file. The folder name, window.LazadeeDesignSystem_* and
+/* Renames the brand across every UI file. window.LazadeeDesignSystem_* and
    lz_* storage keys are internal and stay as they are.
 
      node tools/rebrand.mjs Trao "Tên Mới"          rename the current brand
@@ -41,7 +41,7 @@ const rules = [
 if (code) rules.push([/\bTR(?=-\d|-INV|RF\b)/g, code]);
 
 let total = 0;
-for (const file of [join(root, 'index.html'), join(root, 'lazadee/assets/logomark.svg'), ...walk(join(root, 'lazadee'))]) {
+for (const file of [join(root, 'index.html'), join(root, 'genie/assets/logomark.svg'), ...walk(join(root, 'genie'))]) {
   const src = readFileSync(file, 'utf8');
   let out = src, hits = 0;
   for (const [re, val] of rules) out = out.replace(re, (...m) => { hits++; return typeof val === 'string' ? val.replace(/\$(\d)/g, (_, n) => m[n]) : val; });

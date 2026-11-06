@@ -2,7 +2,7 @@
 /* Paints the Đông Sơn drum face (tools/Trống_đồng_Đông_Sơn.svg, black line art) in drum
    gold for the "dongson" storefront theme: drops the Inkscape metadata and the white
    backing disc, fills every shape with one gold, and rounds coordinates to keep it light.
-   Writes lazadee/assets/dongson-drum.svg.
+   Writes genie/assets/dongson-drum.svg.
 
      node tools/dongson-paint.mjs [colour]      default colour #E6A04B */
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -29,6 +29,6 @@ svg = svg
   .replace(/\sd="([^"]*)"/g, (m, d) => ' d="' + d.replace(/-?\d+\.\d+/g, (n) => String(+(+n).toFixed(1))) + '"')
   .replace(/\n\s*/g, ' ');
 
-const out = join(root, 'lazadee/assets/dongson-drum.svg');
+const out = join(root, 'genie/assets/dongson-drum.svg');
 writeFileSync(out, svg.trim() + '\n');
 console.log('wrote', out, Math.round(svg.length / 1024) + ' KB');

@@ -242,7 +242,7 @@
           <div style={{ maxHeight: 360, overflowY: 'auto' }}>
             {items.map((n) => (
               <div role="button" tabIndex={0} onKeyDown={window.LZKey} key={n.id} onClick={() => onItem(n)} style={{ display: 'flex', gap: 11, padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', background: n.unread ? 'var(--brand-50)' : '#fff', cursor: 'pointer' }}>
-                <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: n.icon === 'lazadee' ? 'transparent' : n.bg, color: n.tint, display: 'grid', placeItems: 'center', flex: 'none' }}>{n.icon === 'lazadee' ? <img src="../../assets/logomark.svg" alt="" width="26" height="26" /> : <Icon name={n.icon} size={19} />}</div>
+                <div style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: n.icon === 'genie' ? 'transparent' : n.bg, color: n.tint, display: 'grid', placeItems: 'center', flex: 'none' }}>{n.icon === 'genie' ? <img src="../../assets/logomark.svg" alt="" width="26" height="26" /> : <Icon name={n.icon} size={19} />}</div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ font: 'var(--weight-semibold) var(--text-sm) var(--font-sans)', color: 'var(--text-strong)' }}>{n.title}</div>
                   <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginTop: 1, lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.body}</div>

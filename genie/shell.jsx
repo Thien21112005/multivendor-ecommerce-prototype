@@ -13,16 +13,16 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 /* ---- Surfaces -------------------------------------------------------------- */
 const SURFACES = [
   { id: 'storefront', label: 'Cửa hàng', sub: 'Khách hàng', icon: 'store',
-    src: 'lazadee/ui_kits/storefront/index.html',
+    src: 'genie/ui_kits/storefront/index.html',
     blurb: 'Trang chủ · chi tiết sản phẩm · giỏ đa người bán · thanh toán gộp' },
   { id: 'vendor', label: 'Người bán', sub: 'Seller Center', icon: 'layout-dashboard',
-    src: 'lazadee/ui_kits/vendor/index.html',
+    src: 'genie/ui_kits/vendor/index.html',
     blurb: 'Tổng quan · ví & escrow · KYC · sản phẩm · giao vận · chat' },
   { id: 'admin', label: 'Quản trị', sub: 'Admin Console', icon: 'shield-check',
-    src: 'lazadee/ui_kits/admin/index.html',
+    src: 'genie/ui_kits/admin/index.html',
     blurb: 'Duyệt KYC · phân xử đổi trả · kiểm duyệt · tài chính · RBAC' },
   { id: 'auth', label: 'Đăng nhập', sub: 'OTP & khoá', icon: 'lock',
-    src: 'lazadee/ui_kits/auth/index.html',
+    src: 'genie/ui_kits/auth/index.html',
     blurb: 'Đăng nhập · xác thực OTP 6 số · khoá tài khoản sau 5 lần sai' },
 ];
 
@@ -108,7 +108,7 @@ function App() {
   const [theme, setTheme] = React.useState(() => document.documentElement.getAttribute('data-theme') || (THEMES[0] && THEMES[0].id));
   const [sfScreen, setSfScreen] = React.useState('home');
   const pickTheme = (id) => { setTheme(id); window.GENIE_SET_THEME && window.GENIE_SET_THEME(id); };
-  const openScreen = (sc) => { setSfScreen(sc.id); go('storefront'); const f = frames.current.storefront; if (f) f.src = 'lazadee/ui_kits/storefront/index.html' + sc.q; };
+  const openScreen = (sc) => { setSfScreen(sc.id); go('storefront'); const f = frames.current.storefront; if (f) f.src = 'genie/ui_kits/storefront/index.html' + sc.q; };
   const [full, setFull] = React.useState(!!document.fullscreenElement);
   const frames = React.useRef({});
   const dockBtn = React.useRef(null);
@@ -160,12 +160,12 @@ function App() {
       {/* ---- Demo switcher: an edge tab that opens a floating dock ---- */}
       <button ref={dockBtn} className="sh-handle" aria-expanded={dockOpen} aria-controls="sh-dock"
         aria-label={'Chuyển phân hệ, đang xem ' + active.label} title="Chuyển phân hệ" onClick={() => setDockOpen((o) => !o)}>
-        <img src="lazadee/assets/logomark.svg" width="20" height="20" alt="" />
+        <img src="genie/assets/logomark.svg" width="20" height="20" alt="" />
         <Icon name={dockOpen ? 'chevron-right' : 'chevron-left'} size={14} />
       </button>
       <div id="sh-dock" className="sh-dock" data-open={dockOpen ? 1 : 0} role="dialog" aria-label="Bảng điều khiển bản demo" hidden={!dockOpen}>
         <div className="sh-dock__brand">
-          <img src="lazadee/assets/logomark.svg" width="24" height="24" alt="" />
+          <img src="genie/assets/logomark.svg" width="24" height="24" alt="" />
           <b>Genie</b><span className="sh-dock__tag">Prototype</span>
           <button className="sh-dock__close" onClick={() => setDockOpen(false)} aria-label="Đóng"><Icon name="x" size={16} /></button>
         </div>

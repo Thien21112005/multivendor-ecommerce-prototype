@@ -67,7 +67,7 @@
   const NOTIFICATIONS = [
     { id: 'vn1', title: 'Sản phẩm đã được duyệt', body: '"Tai nghe Bluetooth ANC Pro 5" đã được duyệt và hiển thị trên sàn.', date: '08/06/2026 15:02', unread: true, icon: 'badge-check' },
     { id: 'vn2', title: 'Có đơn hàng mới cần chuẩn bị', body: 'Đơn TR-20260608-000141 vừa được thanh toán. Hãy chuẩn bị hàng trong 24 giờ.', date: '08/06/2026 14:22', unread: true, icon: 'package' },
-    { id: 'vn3', title: 'Genie nâng cấp hệ thống 02:00 – 04:00', body: 'Thông báo toàn sàn: Seller Center có thể gián đoạn trong khung giờ bảo trì. Đơn hàng và ví Escrow không bị ảnh hưởng.', date: '07/06/2026 09:00', unread: true, icon: 'lazadee' },
+    { id: 'vn3', title: 'Genie nâng cấp hệ thống 02:00 – 04:00', body: 'Thông báo toàn sàn: Seller Center có thể gián đoạn trong khung giờ bảo trì. Đơn hàng và ví Escrow không bị ảnh hưởng.', date: '07/06/2026 09:00', unread: true, icon: 'genie' },
     { id: 'vn4', title: 'Sản phẩm bị từ chối', body: '"Camera Mirrorless X-100" thiếu giấy tờ chứng thực. Vui lòng bổ sung và gửi duyệt lại.', date: '05/06/2026 11:40', unread: false, icon: 'triangle-alert' },
   ];
 

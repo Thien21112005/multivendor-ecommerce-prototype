@@ -34,7 +34,7 @@ function KitFrame({ surface, screen, w, h, query }) {
   React.useEffect(() => {
     let cancelled = false;
     const qs = `?screen=${screen}${query ? '&' + query : ''}`;
-    const job = () => { if (!cancelled) setSrc(`lazadee/ui_kits/${surface}/index.html${qs}`); };
+    const job = () => { if (!cancelled) setSrc(`genie/ui_kits/${surface}/index.html${qs}`); };
     LZ_QUEUE.push(job);
     lzPump();
     return () => { cancelled = true; };

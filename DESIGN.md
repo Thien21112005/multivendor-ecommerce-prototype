@@ -508,7 +508,7 @@ Every position in Admin → Banner has a place on the storefront, read from one 
 ### Vendor and Admin
 Kênh người bán and the Admin Console share this palette, type family and name, but not this world. They keep their own dark ink sidebars (Ink Chrome for Vendor, Ink Chrome Deep for Admin), 10px buttons and solid white sheets. Glass, the blue field and pill buttons are scoped to the storefront.
 
-Their overview screens are built from `lazadee/dash.jsx` and `lazadee/dash.css`:
+Their overview screens are built from `genie/dash.jsx` and `genie/dash.css`:
 - **Work queue first.** A dashboard opens with what needs doing: a count, a plain label and a hint, each linking to the screen that resolves it. Waiting work sits on Marigold Wash; an empty queue turns to a quiet outline.
 - **One stat tile.** Label, figure, then a comparison that names its period. No icon chips, no coloured borders. A tile is a button only when it leads somewhere.
 - **One period control.** Every figure it governs moves together. Balances that do not depend on the period say so.
