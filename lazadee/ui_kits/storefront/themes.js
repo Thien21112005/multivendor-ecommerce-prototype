@@ -11,7 +11,7 @@
     { id: 'buudien', name: 'Tem bưu chính', note: 'Vàng bưu điện, mực navy, tem răng cưa và dấu bưu điện', swatch: ['#F5BE16', '#22335C', '#D9472B', '#EDEEE8'] },
     { id: 'saigon', name: 'Mái bạt Sài Gòn', note: 'Biển hiệu kẻ tay: xanh lá, vàng hướng dương, mái bạt sọc', swatch: ['#0F6E45', '#FFD024', '#D52B1E', '#FAF9F4'] },
     { id: 'sleeve', name: 'Bìa đĩa than', note: 'Một mảng tím phẳng, ảnh duotone, chữ in hoa nghiêng', swatch: ['#5B3FD1', '#C8F03C', '#111216', '#FFFFFF'] },
-    { id: 'classic', name: 'Bản hiện tại', note: 'Mực, xanh dương và vàng hoa cúc, để đối chiếu', swatch: ['#1D4ED8', '#FFC02E', '#0B1F4B', '#F7F5F0'] },
+    { id: 'classic', name: 'Mực & hoa cúc', note: 'Bản gốc của Genie: mực navy, xanh dương và vàng hoa cúc', swatch: ['#1D4ED8', '#FFC02E', '#0B1F4B', '#F7F5F0'] },
   ];
   var KEY = 'genie_theme';
   var ids = THEMES.map(function (t) { return t.id; });

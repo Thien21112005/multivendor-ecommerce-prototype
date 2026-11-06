@@ -4,26 +4,7 @@
   const { Icon, IconButton, Badge, Modal, Button } = DS;
   const { CATEGORIES, USER, NOTIFICATIONS } = window.LZ;
   const { Avatar } = DS;
-
-  // The Genie lamp, drawn inline so each theme recolours it: the body takes --logo-body,
-  // the smoke and the lid knob take --logo-accent.
-  function GenieMark({ size = 32 }) {
-    return (
-      <svg className="tr-mark" width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
-        <path className="tr-mark__smoke" d="M57.5 20.5c-4.5-2.5-3.5-7 .5-9.5s4-6.5-.5-9" stroke="var(--logo-accent, #E9B23C)" strokeWidth="4" strokeLinecap="round" />
-        <g fill="var(--logo-body, currentColor)">
-          <path d="M5 33h38c0 8.6-8.5 14.5-19 14.5S5 41.6 5 33Z" />
-          <path d="M40 38.5c6.5-.5 11-4.5 14.5-10.5l2.6-4.4c.9-1.5 3-.8 2.6.9L56.5 34C53.6 41 47.5 45 40.5 45.5Z" />
-          <path d="M13 33a11 8 0 0 1 22 0Z" />
-          <path d="M19 47h10v5H19z" />
-          <rect x="12" y="52" width="24" height="6" rx="3" />
-        </g>
-        <circle cx="24" cy="23" r="3.2" fill="var(--logo-accent, #E9B23C)" />
-        <path d="M6.5 36.5c-6 .5-6 9.5 2.5 9.5" stroke="var(--logo-body, currentColor)" strokeWidth="4" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  window.GenieMark = GenieMark;
+  const ThemePicker = window.GenieThemePicker;
 
   function Header({ cart = [], cartCount = 0, loggedIn = true, onNav, onOpen, onOrders, onNotifications, onOpenNotif, query, onSearch, onCategory, onShop, onRequireLogin, onLogin, onLogout }) {
     const [q, setQ] = React.useState(query || '');
@@ -69,7 +50,7 @@
       <header className="tr-pillwrap">
         <div className="tr-pill tr-glass">
           <button className="tr-logo" onClick={() => onNav('home')} aria-label="Genie, về trang chủ">
-            <GenieMark size={34} />
+            <window.GenieMark size={34} />
             <span>Genie</span>
           </button>
           <div className="tr-search">
@@ -102,6 +83,7 @@
             <button className="tr-textbtn tr-textbtn--wide" onClick={() => onNav('seller')}>Bán hàng</button>
             <span className="tr-textbtn--wide" style={{ display: 'inline-flex' }}><LangSelect /></span>
             <button className="tr-iconbtn tr-textbtn--wide" onClick={() => onNav('page', 'help-center')} aria-label="Hỗ trợ"><Icon name="circle-help" size={22} /></button>
+            <ThemePicker />
             <div style={{ position: 'relative' }} onMouseEnter={() => loggedIn && setNotifOpen(true)} onMouseLeave={() => setNotifOpen(false)}>
               <button className="tr-iconbtn" onClick={() => (loggedIn ? onNotifications() : onRequireLogin())} aria-label={notifCount > 0 ? 'Thông báo, ' + notifCount + ' chưa đọc' : 'Thông báo'}><Icon name="bell" size={22} />{notifCount > 0 && <span className="tr-badge">{notifCount > 99 ? '99+' : notifCount}</span>}</button>
               {notifOpen && <NotifPanel onItem={(n) => { setNotifOpen(false); onOpenNotif(n); }} onSeeAll={() => { setNotifOpen(false); onNotifications(); }} />}

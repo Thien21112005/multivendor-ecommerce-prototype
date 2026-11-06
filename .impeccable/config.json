@@ -1,0 +1,80 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "genie script",
+        "createdAt": "2026-11-06T06:18:45.458Z",
+        "reason": "user confirmed: owner supplied logo/MJ Milestone Script.ttf and asked it be the logo font"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "archivo",
+        "createdAt": "2026-11-06T07:11:50.128Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "alegreya",
+        "createdAt": "2026-11-06T07:11:50.339Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "baloo 2",
+        "createdAt": "2026-11-06T07:11:50.600Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "bai jamjuree",
+        "createdAt": "2026-11-06T07:11:50.870Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "bricolage grotesque",
+        "createdAt": "2026-11-06T07:11:51.241Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "lexend",
+        "createdAt": "2026-11-06T07:11:51.594Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "phudu",
+        "createdAt": "2026-11-06T07:11:51.872Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "saira condensed",
+        "createdAt": "2026-11-06T07:11:52.180Z",
+        "reason": "storefront theme fonts already shipped in themes.css; owner asked to carry every theme onto vendor/admin/auth"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "lazadee/dash.css"
+        ],
+        "createdAt": "2026-11-06T07:20:25.580Z",
+        "reason": "line 102 is the 6px rotated chevron between pipeline steps, not a card border; predates this session"
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "lazadee/ui_kits/auth/index.html"
+        ],
+        "createdAt": "2026-11-06T07:20:25.809Z",
+        "reason": "match comes from the shared themes.css Giấy điệp hero sun (hard-edged, .tr-motif only), which never renders on the sign-in page"
+      }
+    ]
+  }
+}

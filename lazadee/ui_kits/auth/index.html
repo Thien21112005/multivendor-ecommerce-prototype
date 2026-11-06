@@ -6,8 +6,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Genie — Đăng nhập</title>
-<link rel="icon" type="image/svg+xml" href="../../assets/logomark.svg">
+<link rel="icon" type="image/svg+xml" href="../../assets/brand/genie-coin.svg">
 <link rel="stylesheet" href="../../styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Alegreya:wght@700;800&family=Baloo+2:wght@600;700;800&family=Bai+Jamjuree:wght@500;600;700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Lexend:wght@400..800&family=Phudu:wght@500..900&family=Saira+Condensed:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="../storefront/themes.css">
+<script src="../storefront/themes.js"></script>
 <style>
   html,body{margin:0;background:var(--surface-page)}
 </style>
@@ -19,6 +24,8 @@
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="../../i18n.js"></script>
 <script src="../../_ds_bundle.js"></script>
+<script src="../../assets/brand/genie-coin.js"></script>
+<script type="text/babel" src="../../brand.jsx"></script>
 <script type="text/babel">
 const { Icon, Button, Input, Badge, Checkbox } = window.LazadeeDesignSystem_0477b7;
 const backBtn = { display: 'inline-flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--text-muted)', font: 'var(--type-body-sm)', cursor: 'pointer', marginBottom: 20, padding: 0 };
@@ -27,24 +34,22 @@ function Panel({ children, sub }) {
   return (
     <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 480px' }}>
       {/* brand side */}
-      <div style={{ background: 'var(--brand-900)', color: '#fff', padding: '56px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="../../assets/logomark.svg" width="44" height="44" alt="" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.2))' }} />
-          <span style={{ font: '800 28px var(--font-sans)', letterSpacing: '-0.02em' }}>Genie</span>
-        </div>
-        <div>
-          <h1 style={{ font: '800 40px/1.1 var(--font-sans)', letterSpacing: '-0.02em', maxWidth: 420, marginBottom: 16 }}>Nhận hàng rồi, tiền mới đến shop.</h1>
-          <p style={{ font: 'var(--text-lg)/1.5 var(--font-sans)', color: 'rgba(255,255,255,.85)', maxWidth: 380 }}>Mọi shop đều đã xác minh danh tính. Genie giữ tiền của bạn đến khi bạn nhận hàng.</p>
-        </div>
-        <div style={{ display: 'flex', gap: 20, font: 'var(--type-body-sm)', color: 'rgba(255,255,255,.8)' }}>
-          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="shield-check" size={16} /> Giữ tiền đến khi nhận hàng</span>
-          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="truck" size={16} /> Freeship</span>
-          <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><Icon name="undo-2" size={16} /> Đổi trả 7 ngày</span>
+      {/* Small logo on top; the promise and its three guarantees read as one block. */}
+      <div className="gn-auth__brand">
+        <window.GenieLogo size={40} tone="light" />
+        <div className="gn-auth__copy">
+          <h1>Nhận hàng rồi,<br />tiền mới đến shop.</h1>
+          <p>Mọi shop đều đã xác minh danh tính. Genie giữ tiền của bạn đến khi bạn nhận hàng.</p>
+          <ul>
+            <li><Icon name="shield-check" size={20} /><span><b>Giữ tiền đến khi nhận hàng</b>Shop chỉ nhận tiền sau khi bạn xác nhận đã nhận.</span></li>
+            <li><Icon name="undo-2" size={20} /><span><b>Đổi trả trong 7 ngày</b>Hàng lỗi hoặc không đúng mô tả được hoàn tiền.</span></li>
+            <li><Icon name="truck" size={20} /><span><b>Freeship</b>Áp mã freeship ngay ở bước thanh toán.</span></li>
+          </ul>
         </div>
       </div>
       {/* form side */}
       <div style={{ background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 48px', position: 'relative' }}>
-        <div style={{ position: 'absolute', top: 16, right: 16 }}><select aria-label="Ngôn ngữ" defaultValue={window.LZI18n.lang} onChange={(e) => window.LZI18n.set(e.target.value)} data-no-i18n="" style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', font: 'var(--type-caption)', color: 'var(--text-body)', padding: '0 6px' }}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></div>
+        <div style={{ position: 'absolute', top: 12, right: 16, display: 'flex', alignItems: 'center', gap: 6 }}><window.GenieThemePicker className="gn-iconbtn" /><select aria-label="Ngôn ngữ" defaultValue={window.LZI18n.lang} onChange={(e) => window.LZI18n.set(e.target.value)} data-no-i18n="" style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', font: 'var(--type-caption)', color: 'var(--text-body)', padding: '0 6px' }}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></div>
         {children}
       </div>
     </div>

@@ -46,14 +46,8 @@
     const denied = activeNav.perm && !perms.includes(activeNav.perm);
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '236px 1fr', minHeight: '100vh', background: 'var(--surface-page)' }}>
-        <aside style={{ background: 'var(--ink-950)', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '18px 18px 14px' }}>
-            <img src="../../assets/logomark.svg" width="30" height="30" alt="" />
-            <div style={{ lineHeight: 1.05 }}>
-              <div style={{ font: '800 17px var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>Genie</div>
-              <div style={{ font: '600 11px var(--font-sans)', letterSpacing: '.08em', color: 'var(--blue-300)', textTransform: 'uppercase' }}>Admin Console</div>
-            </div>
-          </div>
+        <aside style={{ background: 'var(--side-bg, var(--ink-950))', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh' }}>
+          <div style={{ padding: '16px 18px 14px' }}><window.GenieLogo size={34} tone="light" sub="Admin Console" /></div>
           <div style={{ margin: '0 12px 12px', padding: '8px 12px', background: 'rgba(11, 127, 171,.14)', border: '1px solid rgba(11, 127, 171,.3)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Icon name="shield-check" size={15} style={{ color: 'var(--blue-500)' }} />
             <span style={{ font: '600 11px var(--font-sans)', color: 'rgba(255,255,255,.82)' }}>Quyền: {role}</span>
@@ -87,7 +81,7 @@
 
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <header style={{ height: 64, background: '#fff', borderBottom: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', gap: 16, padding: '0 28px', position: 'sticky', top: 0, zIndex: 50 }}>
-            <h1 style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)' }}>{activeNav.name}</h1>
+            <h1 className="gn-page-title" style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)' }}>{activeNav.name}</h1>
             <Badge variant="outline" style={{ marginLeft: 4 }}>Staff RBAC</Badge>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--surface-sunken)' }} title="Demo: xem sidebar với vai trò khác">
@@ -98,6 +92,7 @@
                 </select>
               </div>
               <select aria-label="Ngôn ngữ" defaultValue={window.LZI18n.lang} onChange={(e) => window.LZI18n.set(e.target.value)} data-no-i18n="" style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', font: 'var(--type-caption)', color: 'var(--text-body)', padding: '0 6px' }}><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
+              <window.GenieThemePicker className="gn-iconbtn" />
               <AdminBell onNav={onNav} />
               <button style={ico} aria-label="Tài khoản" onClick={() => onNav('account')}><Icon name="settings" size={20} /></button>
             </div>

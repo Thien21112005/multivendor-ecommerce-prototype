@@ -36,7 +36,7 @@ Sàn giữ tiền của người mua và chỉ chuyển cho shop sau khi ngườ
 
 ## Brand Commitments
 
-- **Tên chính thức là "Genie"** (chốt tháng 11/2026). Logo là cây đèn thần vẽ bằng khối, khói bốc từ vòi đèn; thân và khói nhận màu theo theme. Mã đơn vẫn giữ tiền tố `TR-` cho đến khi chủ dự án muốn đổi (`node tools/rebrand.mjs Genie Genie --code XX`). Chưa kiểm tra nhãn hiệu.
+- **Tên chính thức là "Genie"** (chốt tháng 11/2026). Logo là đồng xu Genie chữ viết tay MJ Milestone Script (`logo/Webicon.svg`), ba vòng và chữ nhận màu theo theme; đèn và khói trong `logo/Logo.svg` (không lấy đồng xu) là hình hero của theme Đèn thần. Mã đơn vẫn giữ tiền tố `TR-` cho đến khi chủ dự án muốn đổi (`node tools/rebrand.mjs Genie Genie --code XX`). Chưa kiểm tra nhãn hiệu.
 - Không dùng lại tên Lazadee, Xu, Mall và tiền tố `LZD-` trên giao diện. Thư mục và biến nội bộ có thể giữ tên cũ cho đến khi chốt tên chính thức.
 - Màu chủ đạo (đổi tháng 11/2026 theo yêu cầu chủ dự án vì toàn xanh gây mỏi mắt và giống Tiki): mực xanh navy cho chữ và vùng tối nhỏ, xanh dương đậm chỉ cho nút và link, vàng hoa cúc (marigold) làm màu nhấn cho tiền và điểm cần nhìn, nền giấy ấm, xanh da trời chỉ làm ánh sáng nền. Không tô dải lớn bằng xanh dương. Không dùng cam làm màu thương hiệu.
 - Không được trông như Shopee, Lazada hay Tiki.

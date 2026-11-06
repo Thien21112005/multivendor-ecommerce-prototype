@@ -7,6 +7,11 @@
    =========================================================================== */
 
 /* ---- Shared hooks ---------------------------------------------------------- */
+/* The logo's own lettering (logo/MJ Milestone Script.ttf). Only the wordmark uses it. */
+@font-face { font-family: 'Genie Script'; src: url("../../assets/fonts/MJMilestoneScript.ttf") format("truetype"); font-display: swap; }
+/* Coin logo metal: outer ring, middle ring, face and band, then the lettering. The
+   default is the gold of logo/Webicon.svg; each theme recasts it in its own colours. */
+:root, [data-theme="classic"] { --mark-1: #F7D472; --mark-2: #EDC148; --mark-3: #DBA90B; --mark-ink: #FFFFFF; }
 :root { --font-display: var(--font-sans); }
 .tr-hero { position: relative; }
 .tr-hero > :not(.tr-motif) { position: relative; z-index: 1; }
@@ -21,14 +26,75 @@
 [data-theme]:not([data-theme="classic"]) { --sky-50: var(--brand-50); --blue-50: var(--brand-50); }
 .tr-hero mark { background-repeat: no-repeat; background-size: 100% 100%; }
 .tr-logo { color: var(--logo-body, var(--brand-900)); }
-.tr-foot__brand .tr-mark { --logo-body: currentColor; }
+/* The wordmark is the logo's script in every theme, so the name reads the same everywhere. */
+.tr-logo span, .tr-foot__brand { font-family: 'Genie Script', var(--font-display); font-weight: 400 !important; letter-spacing: 0 !important; text-transform: none !important; }
+.tr-logo span { font-size: 34px !important; line-height: 1; padding: 2px 2px 0 0; }
+.tr-foot__brand { font-size: 38px !important; }
+.tr-mark { flex: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .12)); }
+
+/* ---- Theme picker: a palette button in the bar opens a list of looks ------- */
+.tr-theme { position: relative; }
+.tr-theme__scrim { position: fixed; inset: 0; z-index: 900; }
+.tr-theme__pop { position: fixed; top: var(--pop-top, 76px); right: var(--pop-right, 16px); z-index: 905; width: 340px; max-height: min(640px, calc(100dvh - 96px)); display: flex; flex-direction: column;
+  background: #fff; color: var(--text-body); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); box-shadow: 0 18px 40px -14px rgba(11, 31, 75, .3), 0 2px 6px rgba(11, 31, 75, .06); overflow: hidden; transform-origin: top right; }
+.tr-theme__head { display: flex; align-items: baseline; gap: 10px; padding: 14px 16px 10px; }
+.tr-theme__head b { font: var(--weight-bold) var(--text-sm) var(--font-sans); color: var(--text-strong); }
+.tr-theme__head span { margin-left: auto; font: var(--type-caption); color: var(--text-subtle); }
+.tr-theme__list { overflow-y: auto; padding: 0 6px 6px; overscroll-behavior: contain; }
+.tr-theme__opt { width: 100%; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 9px 10px; border: 0; background: transparent; border-radius: var(--radius-md); text-align: left; cursor: pointer; color: inherit; position: relative; }
+.tr-theme__opt:hover { background: var(--gray-50); }
+.tr-theme__opt:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
+.tr-theme__opt[aria-checked="true"] { background: var(--brand-50); box-shadow: inset 0 0 0 1px var(--brand-200); }
+.tr-theme__txt b { display: flex; align-items: center; gap: 6px; }
+.tr-theme__txt b svg { color: var(--brand-600); }
+.tr-theme__coin { display: block; width: 36px; height: 36px; background: none !important; }
+.tr-theme__txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tr-theme__txt b { font: var(--weight-semibold) var(--text-sm) var(--font-sans); color: var(--text-strong); }
+.tr-theme__opt[aria-checked="true"] .tr-theme__txt b { color: var(--brand-700); }
+.tr-theme__txt small { font: var(--type-caption); color: var(--text-muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tr-theme__sw { display: flex; }
+.tr-theme__sw i { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 2px #fff, inset 0 0 0 1px rgba(11, 31, 75, .14); }
+.tr-theme__sw i + i { margin-left: -3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .tr-theme__pop { animation: tr-theme-in .18s var(--ease-out) both; }
+  @keyframes tr-theme-in { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+}
+@media (max-width: 768px) {
+  .tr-theme__scrim { background: rgba(11, 31, 75, .32); }
+  .tr-theme__pop { top: auto; bottom: 0; left: 0; right: 0; width: auto; max-height: 72dvh; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding-bottom: env(safe-area-inset-bottom); transform-origin: bottom center; }
+  .tr-theme__opt { padding: 11px 10px; }
+}
+
+/* ---- Logo lockup for the dashboards and sign-in: coin + script wordmark ------ */
+.gn-logo { display: inline-flex; align-items: center; gap: 9px; color: var(--logo-body, var(--brand-900)); }
+.gn-logo[data-tone="light"] { color: #fff; }
+.gn-logo__txt { display: flex; flex-direction: column; line-height: 1; }
+.gn-logo__word { font: 400 30px/.9 "Genie Script", var(--font-display); padding-right: 2px; }
+.gn-logo__txt small { margin-top: 9px; font: 700 10px/1 var(--font-sans); letter-spacing: .12em; text-transform: uppercase; opacity: .72; }
+
+/* ---- Seller Center, Admin Console and sign-in take the same themes ------------ */
+/* The dark chrome (sidebar, sign-in panel) is the theme's deepest brand shade. */
+[data-theme]:not([data-theme="classic"]) { --side-bg: var(--brand-900); }
+.dash-title, .gn-page-title { font-family: var(--font-display); }
+.gn-iconbtn { width: 40px; height: 40px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-body); cursor: pointer; display: grid; place-items: center; }
+.gn-iconbtn:hover { background: var(--gray-50); }
+.gn-iconbtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* Sign-in brand panel: small logo on top, the promise and its guarantees as one block. */
+.gn-auth__brand { position: relative; display: flex; flex-direction: column; gap: clamp(40px, 9vh, 96px); padding: 56px clamp(40px, 6vw, 96px); background: var(--side-bg, var(--brand-900)); color: #fff; }
+.gn-auth__copy { margin: auto 0; max-width: 520px; }
+.gn-auth__copy h1 { margin: 0 0 18px; font: 800 clamp(36px, 3.6vw, 52px)/1.08 var(--font-display); letter-spacing: -.02em; text-wrap: balance; }
+.gn-auth__copy p { margin: 0; max-width: 42ch; font: 400 18px/1.55 var(--font-sans); color: rgba(255, 255, 255, .8); }
+.gn-auth__copy ul { display: grid; gap: 18px; margin: 40px 0 0; padding: 28px 0 0; list-style: none; border-top: 1px solid rgba(255, 255, 255, .14); }
+.gn-auth__copy li { display: flex; gap: 14px; align-items: flex-start; }
+.gn-auth__copy li svg { flex: none; margin-top: 2px; color: var(--mark-1); }
+.gn-auth__copy li span { display: flex; flex-direction: column; gap: 2px; font: 400 14px/1.45 var(--font-sans); color: rgba(255, 255, 255, .68); }
+.gn-auth__copy li b { font: 600 15px/1.4 var(--font-sans); color: #fff; }
 
 /* ---- Intro: one choreography, each theme swaps the moves ------------------- */
 @keyframes tr-in-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes tr-in-drop { from { opacity: 0; transform: translateY(-22px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes tr-in-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes tr-in-mark { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
-@keyframes tr-smoke { 0%, 100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-2px); opacity: .7; } }
 @media (prefers-reduced-motion: no-preference) {
   .tr-play .tr-pill { animation: var(--in-bar, tr-in-drop) .7s var(--ease-out) both; }
   .tr-play .tr-cat { animation: tr-in-rise .5s var(--ease-out) both; animation-delay: calc(.2s + var(--i, 0) * 45ms); }
@@ -38,7 +104,6 @@
   .tr-play .tr-shelf button { animation: var(--in-shelf, tr-in-rise) .7s var(--ease-out) both; animation-delay: calc(.5s + var(--i, 0) * 70ms); }
   .tr-play .tr-stage .tr-rail { animation: tr-in-rise .8s var(--ease-out) .95s both; }
   .tr-play .tr-motif { animation: var(--in-motif, tr-in-fade) 1.1s var(--ease-out) .1s both; }
-  .tr-logo .tr-mark__smoke { animation: tr-smoke 3.2s ease-in-out infinite; transform-box: fill-box; }
   .tr-cat { transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast), color var(--dur-fast); }
   .tr-cat:hover { transform: translateY(-2px); }
 }
@@ -60,6 +125,7 @@
   --radius-sm: 3px; --radius-md: 5px; --radius-lg: 7px; --radius-xl: 9px; --radius-2xl: 12px;
   --font-display: 'Bricolage Grotesque', var(--font-sans);
   --logo-body: #B5381F; --logo-accent: #E9B23C;
+  --mark-1: #D9674F; --mark-2: #C24A2E; --mark-3: #B5381F; --mark-ink: #FBF0D6;
   --coin: #E9B23C; --coin-ring: #1E1814;
   --in-motif: tr-press;
   --top-bg: #B5381F; --top-line: rgba(30, 24, 20, .35);
@@ -119,6 +185,7 @@
   --radius-lg: 18px; --radius-xl: 24px; --radius-2xl: 32px;
   --font-sans: 'Lexend', 'Be Vietnam Pro', system-ui, sans-serif;
   --logo-body: #1F7356; --logo-accent: #E26A93;
+  --mark-1: #8FD0B4; --mark-2: #4FA584; --mark-3: #1F7356; --mark-ink: #FFFFFF;
   --coin: #E3C15A; --coin-ring: #124F3A;
   --in-motif: tr-unveil;
   --top-bg: rgba(231, 241, 238, .94); --top-line: rgba(31, 115, 86, .16);
@@ -168,6 +235,7 @@
   --radius-sm: 2px; --radius-md: 4px; --radius-lg: 6px; --radius-xl: 6px; --radius-2xl: 8px;
   --font-display: 'Archivo', var(--font-sans);
   --logo-body: #22335C; --logo-accent: #C9341B;
+  --mark-1: #FADB6E; --mark-2: #F7CB3A; --mark-3: #F5BE16; --mark-ink: #22335C;
   --coin: #F5BE16; --coin-ring: #0D1526;
   --in-motif: tr-stamp;
   --top-bg: #F5BE16; --top-line: rgba(13, 21, 38, .3);
@@ -234,6 +302,7 @@
   --logo-body: #0F6E45; --logo-accent: #D52B1E;
   --coin: #FFD024; --coin-ring: #062C1C;
   --in-bar: tr-awning; --in-title: tr-paint;
+  --mark-1: #46A574; --mark-2: #22865A; --mark-3: #0F6E45; --mark-ink: #FFD024;
   --top-bg: #0F6E45; --top-line: rgba(6, 44, 28, .4);
 }
 @keyframes tr-awning { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: none; } }
@@ -291,6 +360,7 @@
   --logo-body: #fff; --logo-accent: #C8F03C;
   --coin: #C8F03C; --coin-ring: #111216;
   --in-title: tr-slant; --in-motif: tr-record;
+  --mark-1: #E0F78E; --mark-2: #D4F466; --mark-3: #C8F03C; --mark-ink: #111216;
   --top-bg: #5B3FD1; --top-line: rgba(17, 18, 22, .35);
 }
 @keyframes tr-slant { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
@@ -363,6 +433,7 @@
   --logo-body: #8E5A17; --logo-accent: #2B6B5E;
   --coin: #E0A93B; --coin-ring: #2E1B05;
   --top-bg: rgba(245, 241, 232, .95); --top-line: rgba(142, 90, 23, .22);
+  --mark-1: #E6BE6E; --mark-2: #C9913F; --mark-3: #8E5A17; --mark-ink: #F5F1E8;
   --in-motif: tr-drum;
   --saw: conic-gradient(from -45deg at 50% 100%, #C98A2B 90deg, transparent 0) 0 0 / 14px 8px repeat-x;
 }
@@ -414,7 +485,8 @@
   --surface-page: #F1F6F5; --paper-50: #F1F6F5;
   --radius-lg: 16px; --radius-xl: 20px; --radius-2xl: 26px;
   --font-display: 'Baloo 2', var(--font-sans);
-  --logo-body: #C99232; --logo-accent: #2BB3B1;
+  --logo-body: #0F6E78; --logo-accent: #2BB3B1;
+  --mark-1: #F7D472; --mark-2: #EDC148; --mark-3: #DBA90B; --mark-ink: #FFFFFF;
   --coin: #E2B04A; --coin-ring: #0E2E33;
   --top-bg: rgba(241, 246, 245, .86); --top-line: rgba(15, 110, 120, .16);
   --in-motif: tr-rub;
@@ -428,7 +500,12 @@
 [data-theme="genie"] .tr-hero h1 { font-weight: 800; letter-spacing: -.015em; line-height: 1.12; }
 [data-theme="genie"] .tr-hero mark { background-image: linear-gradient(transparent 58%, rgba(226, 176, 74, .7) 58% 90%, transparent 90%); }
 [data-theme="genie"] .tr-hero > p { color: #2E5257; }
-[data-theme="genie"] .tr-motif i:nth-child(1) { display: block; right: 40px; top: -256px; width: 300px; height: 390px; background: url("../../assets/genie-lamp.svg") center bottom / contain no-repeat; }
+/* The lamp and its smoke from the owner's art (logo/Logo.svg, coin left out) stand at the
+   right of the hero; the smoke curls up behind the glass bar, as the drawn lamp did. */
+[data-theme="genie"] .tr-motif i:nth-child(1) { display: block; right: 8px; top: -213px; width: 340px; height: 340px; background: url("../../assets/brand/genie-lamp.svg") center bottom / contain no-repeat; }
+@media (min-width: 1200px) {
+  [data-theme="genie"] .tr-motif i:nth-child(1) { right: 24px; top: -228px; width: 370px; height: 370px; }
+}
 [data-theme="genie"] .tr-section__head h2 { font-weight: 800; letter-spacing: 0; }
 [data-theme="genie"] .tr-rail__fill { background: #0F6E78; }
 [data-theme="genie"] .tr-rail__stop[data-done="1"] .tr-rail__dot i { box-shadow: inset 0 0 0 3px #0F6E78; }
@@ -462,6 +539,7 @@
   --logo-body: #2C6E68; --logo-accent: #B8326E;
   --coin: #F2B13E; --coin-ring: #142B29;
   --top-bg: #E8B54A; --top-line: rgba(90, 58, 38, .35);
+  --mark-1: #8CC0B9; --mark-2: #4E9790; --mark-3: #2C6E68; --mark-ink: #F2C25A;
   --in-motif: tr-hang;
 }
 @keyframes tr-hang { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: none; } }
@@ -502,6 +580,6 @@
   [data-theme="buudien"] .tr-motif i:nth-child(2) { right: -150px; top: 40px; }
   [data-theme="dongho"] .tr-motif i:nth-child(2) { display: none; }
   [data-theme="dongson"] .tr-motif i:nth-child(1) { right: -260px; top: -150px; opacity: .45; }
-  [data-theme="genie"] .tr-motif i:nth-child(1) { right: -20px; top: -40px; width: 150px; height: 195px; opacity: .85; }
+  [data-theme="genie"] .tr-motif i:nth-child(1) { display: none; }
   [data-theme="hoian"] .tr-motif i:nth-child(1) { right: -60px; top: -40px; width: 260px; height: 150px; opacity: .9; }
 }

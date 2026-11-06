@@ -91,14 +91,8 @@
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '232px 1fr', minHeight: '100vh', background: 'var(--surface-page)' }}>
         {/* sidebar */}
-        <aside style={{ background: 'var(--ink-900)', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '18px 18px 16px' }}>
-            <img src="../../assets/logomark.svg" width="32" height="32" alt="" />
-            <div style={{ lineHeight: 1.05 }}>
-              <div style={{ font: '800 18px var(--font-sans)', letterSpacing: '-0.02em', color: '#fff' }}>Genie</div>
-              <div style={{ font: '600 11px var(--font-sans)', letterSpacing: '.08em', color: 'var(--brand-300)', textTransform: 'uppercase' }}>Seller Center</div>
-            </div>
-          </div>
+        <aside style={{ background: 'var(--side-bg, var(--ink-900))', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh' }}>
+          <div style={{ padding: '16px 18px 14px' }}><window.GenieLogo size={34} tone="light" sub="Seller Center" /></div>
           {/* shop chip */}
           <div style={{ margin: '0 12px 12px', padding: '10px 12px', background: 'rgba(255,255,255,.06)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 'var(--radius-sm)', background: 'var(--color-primary)', color: '#fff', display: 'grid', placeItems: 'center', font: '800 15px var(--font-sans)', flex: 'none' }}>T</div>
@@ -136,7 +130,7 @@
         {/* main */}
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <header style={{ height: 64, background: '#fff', borderBottom: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', gap: 16, padding: '0 28px', position: 'sticky', top: 0, zIndex: 50 }}>
-            <h1 style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)' }}>{(NAV.find((n) => n.id === active) || {}).name}</h1>
+            <h1 className="gn-page-title" style={{ font: 'var(--weight-bold) var(--text-2xl) var(--font-sans)', color: 'var(--text-strong)' }}>{(NAV.find((n) => n.id === active) || {}).name}</h1>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 4, padding: '4px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--surface-sunken)' }} className="tr-kycdemo" title="Mô phỏng: chuyển trạng thái KYC để xem cổng khoá">
                 <span style={{ font: '600 11px var(--font-sans)', color: 'var(--text-muted)' }}>Mô phỏng KYC</span>
@@ -149,6 +143,7 @@
                 <input placeholder="Tìm đơn, sản phẩm…" style={{ width: 260, height: 40, paddingLeft: 36, border: '1.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--type-body-sm)', outline: 'none' }} />
               </div>
               <select aria-label="Ngôn ngữ" defaultValue={window.LZI18n.lang} onChange={(e) => window.LZI18n.set(e.target.value)} data-no-i18n="" style={{ height: 32, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: '#fff', font: 'var(--type-caption)', color: 'var(--text-body)', padding: '0 6px' }}><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
+              <window.GenieThemePicker className="gn-iconbtn" />
               <NotifBell />
               <button style={ico} aria-label="Trợ giúp" onClick={() => { window.location.href = '../storefront/index.html?screen=page&id=help-center'; }}><Icon name="circle-help" size={20} /></button>
               <div style={{ width: 1, height: 28, background: 'var(--border-default)', margin: '0 4px' }} />
