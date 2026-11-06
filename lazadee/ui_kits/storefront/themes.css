@@ -241,6 +241,8 @@
   --top-bg: #F5BE16; --top-line: rgba(13, 21, 38, .3);
 }
 @keyframes tr-stamp { 0% { opacity: 0; transform: scale(1.7) rotate(-26deg); } 55% { opacity: 1; transform: scale(.94) rotate(-12deg); } 100% { opacity: 1; transform: scale(1) rotate(-12deg); } }
+/* The airmail stripe sits just under the category chips, not behind them. */
+[data-theme="buudien"] .tr-sky { height: var(--sky-h, calc(var(--top-h, 140px) + 8px)); }
 [data-theme="buudien"] .tr-sky {
   background:
     repeating-linear-gradient(-45deg, #C9341B 0 14px, #fff 14px 22px, #22335C 22px 36px, #fff 36px 44px) left bottom / 100% 8px no-repeat,
@@ -300,9 +302,9 @@
   --radius-lg: 12px; --radius-xl: 14px; --radius-2xl: 18px;
   --font-display: 'Phudu', var(--font-sans);
   --logo-body: #0F6E45; --logo-accent: #D52B1E;
+  --mark-1: #46A574; --mark-2: #22865A; --mark-3: #0F6E45; --mark-ink: #FFD024;
   --coin: #FFD024; --coin-ring: #062C1C;
   --in-bar: tr-awning; --in-title: tr-paint;
-  --mark-1: #46A574; --mark-2: #22865A; --mark-3: #0F6E45; --mark-ink: #FFD024;
   --top-bg: #0F6E45; --top-line: rgba(6, 44, 28, .4);
 }
 @keyframes tr-awning { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: none; } }
@@ -358,9 +360,9 @@
   --radius-sm: 0; --radius-md: 2px; --radius-lg: 2px; --radius-xl: 2px; --radius-2xl: 4px;
   --font-display: 'Saira Condensed', var(--font-sans);
   --logo-body: #fff; --logo-accent: #C8F03C;
+  --mark-1: #E0F78E; --mark-2: #D4F466; --mark-3: #C8F03C; --mark-ink: #111216;
   --coin: #C8F03C; --coin-ring: #111216;
   --in-title: tr-slant; --in-motif: tr-record;
-  --mark-1: #E0F78E; --mark-2: #D4F466; --mark-3: #C8F03C; --mark-ink: #111216;
   --top-bg: #5B3FD1; --top-line: rgba(17, 18, 22, .35);
 }
 @keyframes tr-slant { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
@@ -431,9 +433,9 @@
   --radius-lg: 14px; --radius-xl: 16px; --radius-2xl: 22px;
   --font-display: 'Bai Jamjuree', var(--font-sans);
   --logo-body: #8E5A17; --logo-accent: #2B6B5E;
+  --mark-1: #E6BE6E; --mark-2: #C9913F; --mark-3: #8E5A17; --mark-ink: #F5F1E8;
   --coin: #E0A93B; --coin-ring: #2E1B05;
   --top-bg: rgba(245, 241, 232, .95); --top-line: rgba(142, 90, 23, .22);
-  --mark-1: #E6BE6E; --mark-2: #C9913F; --mark-3: #8E5A17; --mark-ink: #F5F1E8;
   --in-motif: tr-drum;
   --saw: conic-gradient(from -45deg at 50% 100%, #C98A2B 90deg, transparent 0) 0 0 / 14px 8px repeat-x;
 }
@@ -537,9 +539,9 @@
   --radius-lg: 10px; --radius-xl: 12px; --radius-2xl: 16px;
   --font-display: 'Alegreya', var(--font-sans);
   --logo-body: #2C6E68; --logo-accent: #B8326E;
+  --mark-1: #8CC0B9; --mark-2: #4E9790; --mark-3: #2C6E68; --mark-ink: #F2C25A;
   --coin: #F2B13E; --coin-ring: #142B29;
   --top-bg: #E8B54A; --top-line: rgba(90, 58, 38, .35);
-  --mark-1: #8CC0B9; --mark-2: #4E9790; --mark-3: #2C6E68; --mark-ink: #F2C25A;
   --in-motif: tr-hang;
 }
 @keyframes tr-hang { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: none; } }

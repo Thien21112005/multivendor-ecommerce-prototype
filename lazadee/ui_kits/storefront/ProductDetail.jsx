@@ -161,7 +161,7 @@
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 24px 60px' }}>
-        <div style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 14, display: 'flex', gap: 6, alignItems: 'center' }}>
+        <div className="tr-crumbs" style={{ font: 'var(--type-caption)', color: 'var(--text-muted)', marginBottom: 14, display: 'flex', gap: 6, alignItems: 'center' }}>
           <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={13} /><span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer' }} onClick={() => onCategory && onCategory(p.cat)}>{p.cat}</span><span className="tr-wide-only" style={{ display: 'contents' }}><Icon name="chevron-right" size={13} /><span style={{ color: 'var(--text-body)' }}>{p.title.slice(0, 30)}…</span></span>
         </div>
 

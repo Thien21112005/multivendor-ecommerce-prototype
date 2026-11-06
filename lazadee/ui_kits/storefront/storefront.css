@@ -48,7 +48,9 @@
 /* Sky at the top melts into the paper ground; the warm light gives the glass
    something to bend. Navy text reads on every part of it. */
 .tr-sky {
-  position: absolute; inset: 0 0 auto 0; height: var(--sky-h, 148px); z-index: 0; pointer-events: none;
+  /* The home page sizes the band to its hero (--sky-h). Every other screen ends it where the
+     header block ends (--top-h), so breadcrumbs and page titles always sit on the page ground. */
+  position: absolute; inset: 0 0 auto 0; height: var(--sky-h, var(--top-h, 148px)); z-index: 0; pointer-events: none;
   background:
     radial-gradient(48% 80% at 94% -6%, rgba(255, 192, 46, .34), transparent 70%),
     radial-gradient(46% 70% at 2% 0%, rgba(116, 200, 243, .42), transparent 72%),
@@ -323,7 +325,7 @@
 }
 @media (max-width: 768px) {
   .tr-glass { -webkit-backdrop-filter: blur(14px) saturate(130%); backdrop-filter: blur(14px) saturate(130%); }
-  .tr-sky { height: var(--sky-h, 178px); }
+  .tr-sky { height: var(--sky-h, var(--top-h, 178px)); }
   .tr-pillwrap { padding: 8px 8px 0; }
   .tr-pill { flex-wrap: wrap; gap: 6px 8px; padding: 6px 8px 8px 12px; border-radius: var(--radius-xl); }
   .tr-logo { margin-right: auto; }
@@ -435,6 +437,9 @@
   .tr-chatdock [style*="height: 496px"] { height: min(496px, calc(100dvh - 190px)) !important; width: calc(100vw - 24px) !important; }
   .tr main button, .tr main [role="button"], .tr-cat { min-height: 44px; }
   .tr main label { min-height: 44px; }
+  /* Breadcrumb links keep the 44px tap height but centre their text on the chevrons. */
+  .tr-crumbs > [role="button"], .tr-crumbs > span > [role="button"] { display: inline-flex; align-items: center; }
+  .tr-camp__crumb > button { display: inline-flex; align-items: center; }
   .tr .lz-check { min-width: 44px; justify-content: center; }
   .tr .lz-check:has(> :nth-child(3)) { justify-content: flex-start; }
   .tr-card__heart { width: 44px; height: 44px; top: 4px; right: 4px; }
@@ -448,7 +453,7 @@
   .tr-lang-full { display: none; }
   .tr-lang-code { display: inline; }
   .tr-root--task .tr-cats { display: none; }
-  .tr-root--task .tr-sky { height: 132px; }
+  .tr-root--task .tr-sky { height: var(--top-h, 132px); }
   main.tr-main:not(.tr-main--home) { padding-top: 6px !important; }
   .tr-gallery { aspect-ratio: 3 / 2 !important; }
   .tr-gallery + div { margin-top: 8px !important; }
@@ -528,7 +533,7 @@
   .tr-logo span { font-size: 20px; }
   .tr-pill .tr-textbtn { padding: 0 4px; }
   .tr-pill .tr-iconbtn { width: 40px; }
-  .tr-sky { height: var(--sky-h, 150px); }
+  .tr-sky { height: var(--sky-h, var(--top-h, 150px)); }
   .tr-line { grid-template-areas: "check img info info" "check img unit unit" "qty qty qty del" "total total total total"; }
   .tr-line__total { text-align: right; white-space: nowrap; }
   .tr-cart-pay__total { font-size: 18px !important; }
@@ -616,3 +621,4 @@
   .tr-shops { grid-template-columns: minmax(0, 1fr); }
   .tr-grid { gap: 10px 8px; }
 }
+

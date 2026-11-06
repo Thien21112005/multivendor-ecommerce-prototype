@@ -64,7 +64,7 @@
 
     return (
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '10px 24px 56px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 14 }}>
+        <div className="tr-crumbs" style={{ display: 'flex', alignItems: 'center', gap: 7, font: 'var(--type-body-sm)', color: 'var(--text-muted)', marginBottom: 14 }}>
           <span role="button" tabIndex={0} onKeyDown={window.LZKey} style={{ cursor: 'pointer', color: 'var(--text-link)' }} onClick={onHome}>Trang chủ</span><Icon name="chevron-right" size={14} /><span style={{ color: 'var(--text-body)', fontWeight: 600 }}>{categoryName}</span>
         </div>
 
