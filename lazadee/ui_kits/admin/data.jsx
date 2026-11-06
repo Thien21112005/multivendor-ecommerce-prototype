@@ -128,7 +128,7 @@
     { id: 'HOME_MIDDLE', label: 'Giữa trang chủ', where: 'Giữa "Gợi ý cho bạn" và Flash Sale: 1 banner chiếm hết, 2 chia đôi, từ 3 thì hai bên thay nhau lướt', preview: '?screen=home#flash-sale' },
     { id: 'CATEGORY_TOP', label: 'Đầu trang danh mục', where: 'Trên đầu trang của danh mục đã chọn', preview: '?screen=category&cat=' },
     { id: 'FLASH_SALE_TOP', label: 'Khu Flash Sale', where: 'Trong khối Flash Sale, trên danh sách sản phẩm; từ 2 banner thì lướt', preview: '?screen=home#flash-sale' },
-    { id: 'POPUP', label: 'Popup', where: 'Hộp nổi khi mở trang chủ, mỗi phiên một lần; chỉ banner có thứ tự nhỏ nhất được hiện', preview: '?screen=home' },
+    { id: 'POPUP', label: 'Popup', where: 'Hộp nổi khi mở trang chủ, mỗi phiên một lần; nhiều banner xếp chồng như bộ bài, số nhỏ nằm trên cùng', preview: '?screen=home' },
   ];
   // The seed lives with the storefront data so both kits read one banner store.
   const BANNERS = window.LZ.banners.all();

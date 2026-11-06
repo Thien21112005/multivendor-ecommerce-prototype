@@ -195,7 +195,7 @@
 .tr-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .tr-duo--solo { grid-template-columns: minmax(0, 1fr); }
 .tr-catban .tr-banner img, .tr-flash__banner .tr-banner img { aspect-ratio: 6 / 1; }
-.tr-popup__card .tr-banner img { aspect-ratio: 3 / 1; }
+.tr-deck .tr-banner img, .tr-deck__peek img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 1; object-fit: cover; }
 /* Campaign page */
 .tr-camp__crumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; font: var(--type-body-sm); color: var(--text-muted); }
 .tr-camp__crumb button { border: 0; background: none; padding: 0; color: var(--text-link); cursor: pointer; font: inherit; }
@@ -217,9 +217,33 @@
 }
 @media (prefers-reduced-motion: reduce) { .tr-carousel__track { transition: none; } }
 .tr-popup { position: fixed; inset: 0; z-index: 4500; display: grid; place-items: center; padding: 16px; background: var(--surface-overlay); }
-.tr-popup__card { position: relative; width: min(720px, 100%); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-xl); }
-.tr-popup__card .tr-banner { border-radius: 0; }
-.tr-popup__close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #fff; color: var(--brand-900); cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-md); }
+/* Popup deck: the front card is the banner; up to three cards behind it show a corner at
+   the top left. A chosen card flies up and lands on top of the old one. */
+.tr-deck { position: relative; width: min(720px, calc(100vw - 72px)); padding-top: 56px; }
+.tr-deck__stack { position: relative; }
+.tr-deck__card { position: absolute; inset: 0; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-xl);
+  z-index: calc(10 - var(--d)); transform: translate(calc(var(--d) * -22px), calc(var(--d) * -16px)) rotate(calc(var(--d) * -2.5deg)) scale(calc(1 - var(--d) * .035));
+  filter: brightness(calc(1 - var(--d) * .14)); transition: transform .5s cubic-bezier(.2, .8, .2, 1), filter .35s; }
+.tr-deck__card[data-depth="0"] { position: relative; }
+.tr-deck__card .tr-banner { border-radius: 0; }
+.tr-deck__peek { display: block; width: 100%; pointer-events: none; }
+/* Arrows: the left one deals the next card from the pile on the left, the right one takes it back. */
+.tr-deck__arrow { position: absolute; top: calc(56px + 50% - 28px); z-index: 20; width: 48px; height: 48px; border: 0; border-radius: 50%; background: #fff; color: var(--brand-900); cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-md); transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast); }
+.tr-deck__arrow:hover { background: var(--gray-100); }
+.tr-deck__arrow:active { transform: scale(.92); }
+.tr-deck__arrow--next { left: -116px; }
+.tr-deck__arrow--back { right: -68px; }
+.tr-deck__card[data-fly="1"] { animation: tr-deal .52s cubic-bezier(.2, .8, .2, 1); }
+@keyframes tr-deal { 0% { transform: translate(-110px, -40px) rotate(-9deg) scale(1.02); } 55% { transform: translate(8px, -6px) rotate(1.2deg) scale(1.01); } 100% { transform: none; } }
+.tr-deck__close { position: absolute; top: 0; right: 0; width: 42px; height: 42px; border: 0; border-radius: 50%; background: #fff; color: var(--brand-900); cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-md); }
+.tr-deck__close:hover { background: var(--gray-100); }
+.tr-deck__nav { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; }
+.tr-deck__nav button { width: 10px; height: 10px; min-height: 0 !important; padding: 0; border: 0; border-radius: 5px; background: rgba(255, 255, 255, .55); cursor: pointer; transition: width var(--dur-base) var(--ease-out), background var(--dur-base); }
+.tr-deck__nav button[aria-current="true"] { width: 26px; background: var(--color-accent); }
+@media (prefers-reduced-motion: reduce) { .tr-deck__card { transition: none; } .tr-deck__card[data-fly="1"] { animation: none; } }
+/* Too narrow to hang the arrows beside the deck: they sit either side of the dots. */
+@media (max-width: 1000px) { .tr-deck__arrow { top: auto; bottom: -10px; width: 44px; height: 44px; } .tr-deck__arrow--next { left: 0; } .tr-deck__arrow--back { right: 0; } .tr-deck__nav { min-height: 44px; margin-top: 10px; } }
+@media (max-width: 768px) { .tr-deck { width: calc(100vw - 48px); } .tr-deck__nav button { width: 14px; height: 14px; border-radius: 7px; } .tr-deck__nav button[aria-current="true"] { width: 30px; } }
 
 /* ---- Flash sale: a warm marigold sheet on the paper, not a blue slab ------- */
 .tr-flash { scroll-margin-top: calc(var(--top-h, 140px) + 12px); }

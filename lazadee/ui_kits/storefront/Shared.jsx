@@ -321,26 +321,69 @@
     return <div className={className + (slots.length === 1 ? ' ' + className + '--solo' : '')}>{slots.map((s, k) => <BannerSlot key={k} items={s} delay={k * SLIDE_MS / 2} />)}</div>;
   }
 
-  // Popup position: once per browser session, closes on Esc, the backdrop or the close button.
+  // Popup position: every live popup banner, dealt as a stack of cards once per browser
+  // session. The front card is the banner; the cards behind show a corner on the left.
+  // The arrow on the left deals the next card from that pile over the front one, the
+  // arrow on the right takes back the last card dealt. The corners are decoration only,
+  // too small to aim at. The close button sits outside the cards so it never covers a
+  // banner's words. Esc, the backdrop or the close button dismiss it.
+  const DECK_SHOWN = 4;
   function BannerPopup() {
-    const b = React.useMemo(() => {
-      try { if (sessionStorage.getItem('lz_popup_seen')) return null; } catch (e) {}
-      return window.LZ.banners.live('POPUP')[0] || null;
+    const items = React.useMemo(() => {
+      try { if (sessionStorage.getItem('lz_popup_seen')) return []; } catch (e) {}
+      return window.LZ.banners.live('POPUP');
     }, []);
-    const [open, setOpen] = React.useState(!!b);
+    const [order, setOrder] = React.useState(() => items.map((_, k) => k));
+    const [open, setOpen] = React.useState(items.length > 0);
+    const [flying, setFlying] = React.useState(null);
     const close = () => { setOpen(false); try { sessionStorage.setItem('lz_popup_seen', '1'); } catch (e) {} };
+    // The stack keeps its cyclic order: dealing the next card sends the front one to the
+    // bottom, taking one back lifts the bottom card to the top, a dot rotates to its card.
+    const bring = (k) => {
+      if (order[0] === k) return;
+      setFlying(k);
+      setOrder(items.map((_, i) => (k + i) % items.length));
+      setTimeout(() => setFlying(null), 520);
+    };
+    const next = () => bring((order[0] + 1) % items.length);
+    const back = () => bring((order[0] - 1 + items.length) % items.length);
     React.useEffect(() => {
       if (!open) return undefined;
-      const k = (e) => { if (e.key === 'Escape') close(); };
-      window.addEventListener('keydown', k);
-      return () => window.removeEventListener('keydown', k);
-    }, [open]);
+      const key = (e) => {
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft' && order.length > 1) next();
+        if (e.key === 'ArrowRight' && order.length > 1) back();
+      };
+      window.addEventListener('keydown', key);
+      return () => window.removeEventListener('keydown', key);
+    }, [open, order]);
     if (!open) return null;
+    const front = items[order[0]];
     return (
       <div className="tr-popup" onClick={close}>
-        <div className="tr-popup__card" role="dialog" aria-modal="true" aria-label={b.title} onClick={(e) => e.stopPropagation()}>
-          <Banner b={b} />
-          <button className="tr-popup__close" onClick={close} aria-label="Đóng" autoFocus><Icon name="x" size={20} /></button>
+        <div className="tr-deck" role="dialog" aria-modal="true" aria-label={front.title + (items.length > 1 ? ', 1 trong ' + items.length + ' banner' : '')} onClick={(e) => e.stopPropagation()}>
+          <button className="tr-deck__close" onClick={close} aria-label="Đóng" autoFocus><Icon name="x" size={20} /></button>
+          <div className="tr-deck__stack">
+            {order.slice(0, DECK_SHOWN).reverse().map((k) => {
+              const depth = order.indexOf(k), b = items[k];
+              return (
+                <div key={b.id} className="tr-deck__card" data-depth={depth} data-fly={flying === k ? 1 : 0} style={{ '--d': depth }}>
+                  {depth === 0
+                    ? <Banner b={b} />
+                    : <div className="tr-deck__peek" aria-hidden="true"><BannerPicture b={b} /></div>}
+                </div>
+              );
+            })}
+          </div>
+          {items.length > 1 && <>
+            <button className="tr-deck__arrow tr-deck__arrow--next" onClick={next} aria-label="Lá tiếp theo"><Icon name="chevron-left" size={24} /></button>
+            <button className="tr-deck__arrow tr-deck__arrow--back" onClick={back} aria-label="Lá trước"><Icon name="chevron-right" size={24} /></button>
+            {/* Dots mirror the pile: the waiting cards sit to the left like the stack, so the
+                lit dot moves the same way as the arrow that was pressed. */}
+            <div className="tr-deck__nav">
+              {items.map((b, k) => ({ b, k })).reverse().map(({ b, k }) => <button key={b.id} aria-label={'Xem banner ' + (k + 1) + ': ' + b.title} aria-current={order[0] === k ? 'true' : undefined} onClick={() => bring(k)} />)}
+            </div>
+          </>}
         </div>
       </div>
     );

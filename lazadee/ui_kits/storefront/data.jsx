@@ -356,8 +356,8 @@
 
   // Banners: one store shared by Admin → Banner and the storefront slots. The seed counts as
   // saved until Admin edits it, so a fresh browser already shows the live banners.
-  // v3: every position seeded (flash, popup, campaign, shop spotlights); older sets are left behind.
-  const BANNER_KEY = 'lz_home_banners_v3';
+  // v4: every position seeded, popups dealt as a stack of three; older sets are left behind.
+  const BANNER_KEY = 'lz_home_banners_v4';
   const BANNER_SEED = [
     { id: 'BN-101', title: 'Nhận hàng rồi, tiền mới đến shop', image: '../../assets/img/banners/home-trust.jpg', imageMobile: '', link: '/?screen=discover', position: 'HOME_TOP_CAROUSEL', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 182400, clicks: 9860 },
     { id: 'BN-105', title: 'Công nghệ chính hãng', image: '../../assets/img/banners/home-tech.jpg', imageMobile: '', link: '/?screen=category&cat=Điện tử', position: 'HOME_TOP_CAROUSEL', category: '', order: 2, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 64100, clicks: 2870 },
@@ -375,7 +375,9 @@
     { id: 'BN-114', title: 'Shop nổi bật: TravelGear', image: '../../assets/img/banners/cat-acc.jpg', imageMobile: '', link: '/?screen=shop&shop=travel', position: 'CATEGORY_TOP', category: 'Phụ kiện', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 15100, clicks: 470 },
     { id: 'BN-116', title: 'Tai nghe ANC Pro 5 chỉ 389.000₫', image: '../../assets/img/banners/flash-anc.jpg', imageMobile: '', link: '/?screen=product&product=p1', position: 'FLASH_SALE_TOP', category: '', order: 1, startsAt: '2026-01-01', endsAt: '2030-12-31', on: true, views: 23600, clicks: 2050 },
     { id: 'BN-104', title: 'Siêu sale 12.12', image: '../../assets/img/banners/camp-1212.jpg', imageMobile: '', link: '/sieu-sale-12-12', position: 'POPUP', category: '', order: 1, startsAt: '2026-11-01', endsAt: '2026-12-12', on: true, views: 31000, clicks: 2480 },
-    { id: 'BN-117', title: 'Tết 2026 giảm sâu', image: '../../assets/img/banner-sale.jpg', imageMobile: '', link: '/?screen=discover', position: 'POPUP', category: '', order: 2, startsAt: '2026-01-01', endsAt: '2026-02-15', on: true, views: 310000, clicks: 12400 },
+    { id: 'BN-118', title: 'Freeship đơn từ 99.000₫', image: '../../assets/img/banners/side-freeship.jpg', imageMobile: '', link: '/?screen=home#flash-sale', position: 'POPUP', category: '', order: 2, startsAt: '2026-11-01', endsAt: '2030-12-31', on: true, views: 18200, clicks: 1310 },
+    { id: 'BN-119', title: 'Mở shop 0₫ trên Genie', image: '../../assets/img/banners/side-seller.jpg', imageMobile: '', link: '/?screen=seller', position: 'POPUP', category: '', order: 3, startsAt: '2026-11-01', endsAt: '2030-12-31', on: true, views: 9400, clicks: 520 },
+    { id: 'BN-117', title: 'Tết 2026 giảm sâu', image: '../../assets/img/banner-sale.jpg', imageMobile: '', link: '/?screen=discover', position: 'POPUP', category: '', order: 4, startsAt: '2026-01-01', endsAt: '2026-02-15', on: true, views: 310000, clicks: 12400 },
   ];
   // Dates are compared as local YYYY-MM-DD strings, the same way on both sides.
   const localDay = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
